@@ -1,0 +1,107 @@
+"""This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
+import typing as t
+
+from pydantic import BaseModel
+
+from dapla_pseudo.models import APIModel
+
+
+class PseudoRule(APIModel):
+    """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
+
+    Each rule defines a glob pattern (see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
+    that identifies one or multiple fields, and a `func` that will be applied to the matching fields.
+
+    Lists of PseudoRules are processed by the dapla-pseudo-service in the order they are defined, and only the first
+    matching rule will be applied (thus: rule ordering is important).
+
+    Attributes:
+        name: A friendly name of the rule. This is optional, but can be handy for debugging
+        pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
+        func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
+    """
+
+    name: t.Optional[str]
+    pattern: str
+    func: str
+
+
+class PseudoKeyset(APIModel):
+    """PseudoKeyset represents a wrapped data encryption key (WDEK)."""
+
+    encrypted_keyset: str
+    keyset_info: dict[str, t.Any]
+    kek_uri: str
+
+    def get_key_id(self) -> str:
+        """ID of the keyset."""
+        return str(self.keyset_info["primaryKeyId"])
+
+
+class PseudoConfig(APIModel):
+    """PseudoConfig is a container for rules and keysets."""
+
+    rules: t.List[PseudoRule]
+    keysets: t.Optional[t.List[PseudoKeyset]]
+
+
+class TargetCompression(APIModel):
+    """TargetCompression denotes if and how results from the API should be compressed and password encrypted."""
+
+    password: str
+
+
+class PseudonymizeFileRequest(APIModel):
+    """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
+
+    pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: str
+    compression: t.Optional[TargetCompression]
+
+
+class DepseudonymizeFileRequest(APIModel):
+    """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
+
+    pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: str
+    compression: t.Optional[TargetCompression]
+
+
+class RepseudonymizeFileRequest(APIModel):
+    """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
+
+    source_pseudo_config: PseudoConfig
+    target_pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: str
+    compression: t.Optional[TargetCompression]
+
+
+class KeyWrapper(BaseModel):
+    """Hold information about a key, such as ID and keyset information."""
+
+    key_id: str = None
+    keyset: PseudoKeyset = None
+
+    def __init__(self, key: t.Union[str, PseudoKeyset], **kwargs):
+        """Determine if a key is either a key reference (aka "common key") or a keyset.
+
+        If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
+
+        :param key: either a key reference (as string) or a PseudoKeyset
+        """
+        super().__init__(**kwargs)
+        if isinstance(key, str):
+            self.key_id = key
+            self.keyset = None
+        elif isinstance(key, PseudoKeyset):
+            self.key_id = key.get_key_id()
+            self.keyset = key
+        else:
+            raise ValueError(f"Invalid key: {key}")
+
+    def keyset_list(self):
+        """Wrap the keyset in a list if it is defined - or return None if it is not."""
+        return None if self.keyset is None else [self.keyset]

@@ -1,0 +1,12 @@
+{
+  "author": "Team Skyinfrastruktur",
+  "copyright_year": "2022",
+  "development_status": "Development Status :: 4 - Beta",
+  "email": "dapla@ssb.no",
+  "friendly_name": "Pseudonymization extensions for Dapla Toolbelt",
+  "github_user": "statisticsnorway",
+  "license": "MIT",
+  "package_name": "dapla_pseudo",
+  "project_name": "dapla-toolbelt-pseudo",
+  "version": "0.0.1"
+}

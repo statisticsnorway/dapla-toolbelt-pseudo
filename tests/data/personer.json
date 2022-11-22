@@ -1,0 +1,23 @@
+[
+  {
+    "fnr": "02099510504",
+    "fornavn": "Donald",
+    "etternavn": "Duck",
+    "kjonn": "M",
+    "fodselsdato": "020995"
+  },
+  {
+    "fnr": "06097048531",
+    "fornavn": "Mikke",
+    "etternavn": "Mus",
+    "kjonn": "M",
+    "fodselsdato": "060970"
+  },
+  {
+    "fnr": "18099908978",
+    "fornavn": "Anton",
+    "etternavn": "Duck",
+    "kjonn": "M",
+    "fodselsdato": "180999"
+  }
+]

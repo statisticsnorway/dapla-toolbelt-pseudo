@@ -1,0 +1,26 @@
+[
+  {
+    "foedselsnummer": "02099510504",
+    "gateadresse": "Andetjernet 4D",
+    "postnummer": "6867",
+    "telefonnummer": "+4791234567",
+    "kan_kontaktes": true,
+    "email": "donald@duck.com"
+  },
+  {
+    "foedselsnummer": "06097048531",
+    "gateadresse": "Musesvingen 862",
+    "postnummer": "2255",
+    "telefonnummer": "98765432",
+    "kan_kontaktes": false,
+    "email": "mikke@mus.net"
+  },
+  {
+    "foedselsnummer": "18099908978",
+    "gateadresse": "Strandstubben 53D",
+    "postnummer": "0629",
+    "telefonnummer": "41234123",
+    "kan_kontaktes": false,
+    "email": "anton@duck.com"
+  }
+]
