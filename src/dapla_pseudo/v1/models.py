@@ -1,4 +1,5 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
+import json
 import typing as t
 
 from pydantic import BaseModel
@@ -94,8 +95,16 @@ class KeyWrapper(BaseModel):
         """
         super().__init__(**kwargs)
         if isinstance(key, str):
-            self.key_id = key
-            self.keyset = None
+            # Either we have a keyset json
+            if key.startswith("{"):
+                pseudo_keyset = PseudoKeyset.parse_obj(json.loads(key))
+                self.key_id = pseudo_keyset.get_key_id()
+                self.keyset = pseudo_keyset
+            # Either or a "key reference" (i.e. an id of a "common" key)
+            else:
+                self.key_id = key
+                self.keyset = None
+        # Or we have an already parsed PseudoKeyset
         elif isinstance(key, PseudoKeyset):
             self.key_id = key.get_key_id()
             self.keyset = key
