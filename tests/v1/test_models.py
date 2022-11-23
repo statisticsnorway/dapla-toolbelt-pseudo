@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import PseudoKeyset
 
@@ -51,11 +49,3 @@ def test_key_wrapper_with_keyset_json() -> None:
     key_wrapper = KeyWrapper(key=json.dumps(custom_keyset_dict))
     assert key_wrapper.key_id == "1234567890"
     assert key_wrapper.keyset == PseudoKeyset.parse_obj(custom_keyset_dict)
-
-
-def test_key_wrapper_with_invalid_key() -> None:
-    with pytest.raises(ValueError):
-        KeyWrapper(1)  # type: ignore
-
-    with pytest.raises(ValueError):
-        KeyWrapper(None)  # type: ignore

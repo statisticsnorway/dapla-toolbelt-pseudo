@@ -108,8 +108,6 @@ class KeyWrapper(BaseModel):
         elif isinstance(key, PseudoKeyset):
             self.key_id = key.get_key_id()
             self.keyset = key
-        else:
-            raise ValueError(f"Invalid key: {key}")
 
     def keyset_list(self) -> t.Union[t.List[PseudoKeyset], None]:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
