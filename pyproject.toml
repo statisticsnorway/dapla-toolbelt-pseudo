@@ -75,7 +75,6 @@ lines_after_imports = 2
 [tool.black]
 line-length = 120
 
-
 [tool.mypy]
 strict = true
 warn_unreachable = true

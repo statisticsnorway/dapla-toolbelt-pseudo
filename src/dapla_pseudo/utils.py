@@ -20,5 +20,5 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.
     try:
         matching_item = next(item[1] for item in multipart_files_tuple if item[0] == obj_name)
         return matching_item[1]
-    except ValueError:
+    except StopIteration:
         return None

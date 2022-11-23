@@ -55,7 +55,7 @@ def test_key_wrapper_with_keyset_json() -> None:
 
 def test_key_wrapper_with_invalid_key() -> None:
     with pytest.raises(ValueError):
-        KeyWrapper(1)
+        KeyWrapper(1)  # type: ignore
 
     with pytest.raises(ValueError):
-        KeyWrapper(None)
+        KeyWrapper(None)  # type: ignore
