@@ -54,13 +54,14 @@ sphinx-click = ">=3.0.2"
 typeguard = ">=2.13.3"
 types-mock = "^4.0.15.2"
 xdoctest = {extras = ["colors"], version = ">=0.15.10"}
+
 [tool.coverage.paths]
-source = ["src/dapla_pseudo", "*/site-packages"]
+source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["src/dapla_pseudo"]
+source = ["dapla_pseudo"]
 
 [tool.coverage.report]
 show_missing = true
