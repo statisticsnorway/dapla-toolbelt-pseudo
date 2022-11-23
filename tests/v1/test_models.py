@@ -1,3 +1,5 @@
+import json
+
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import PseudoKeyset
 
@@ -36,8 +38,14 @@ def test_key_wrapper_with_key_reference() -> None:
     assert key_wrapper.keyset_list() is None
 
 
-def test_key_wrapper_with_keyset() -> None:
+def test_key_wrapper_with_parsed_keyset() -> None:
     keyset = PseudoKeyset.parse_obj(custom_keyset_dict)
     key_wrapper = KeyWrapper(keyset)
     assert key_wrapper.key_id == "1234567890"
     assert key_wrapper.keyset == keyset
+
+
+def test_key_wrapper_with_keyset_json() -> None:
+    key_wrapper = KeyWrapper(key=json.dumps(custom_keyset_dict))
+    assert key_wrapper.key_id == "1234567890"
+    assert key_wrapper.keyset == PseudoKeyset.parse_obj(custom_keyset_dict)

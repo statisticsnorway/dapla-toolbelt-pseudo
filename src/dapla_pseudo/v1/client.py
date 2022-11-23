@@ -1,6 +1,5 @@
 """Module that implements a client abstraction that makes it easy to communicate with the Dapla Pseudo Service REST API."""
 
-import json
 import mimetypes
 import os
 import typing as t
@@ -137,7 +136,7 @@ class PseudoClient:
         response.raise_for_status()
         return response
 
-    def export_dataset(self, request: str) -> requests.Response:
+    def export_dataset(self, request_json: str) -> requests.Response:
         """Export a dataset in GCS to CSV or JSON, and optionally depseudonymize the data.
 
         The dataset will be archived in an encrypted zip file protected by a user provided password.
@@ -155,12 +154,12 @@ class PseudoClient:
         """
         auth_token = self.__auth_token()
         response = requests.post(
-            f"{self.pseudo_service_url}/export",
+            url=f"{self.pseudo_service_url}/export",
             headers={
                 "Authorization": f"Bearer {auth_token}",
                 "Content-Type": "application/json",
             },
-            data=json.dumps(request),
+            data=request_json,
         )
         response.raise_for_status()
         return response

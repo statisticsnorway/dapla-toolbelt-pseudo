@@ -27,7 +27,7 @@ from .models import RepseudonymizeFileRequest
 def pseudonymize(
     file_path: str,
     fields: t.List[str],
-    key: t.Union[str | PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Pseudonymize specified fields of a local file.
@@ -73,7 +73,7 @@ def pseudonymize(
 def depseudonymize(
     file_path: str,
     fields: t.List[str],
-    key: t.Union[str | PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -123,8 +123,8 @@ def depseudonymize(
 def repseudonymize(
     file_path: str,
     fields: t.List[str],
-    source_key: t.Union[str | PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
-    target_key: t.Union[str | PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    source_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    target_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.

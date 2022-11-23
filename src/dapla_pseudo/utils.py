@@ -1,9 +1,8 @@
 """Utilities"""
-from typing import Any
-from typing import Tuple
+import typing as t
 
 
-def find_multipart_obj(obj_name: str, multipart_files_tuple: Tuple[Any]) -> str:
+def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.Any:
     """Find "multipart object" by name.
 
     The requests lib specifies multipart file arguments as file-tuples, such as
@@ -18,5 +17,8 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: Tuple[Any]) -> str:
     then
     find_multipart_obj("filename2", multipart_tuple) -> fileobj
     """
-    request_tuple = next(tuple[1] for tuple in multipart_files_tuple if tuple[0] == obj_name)
-    return str(request_tuple[1])
+    try:
+        matching_item = next(item[1] for item in multipart_files_tuple if item[0] == obj_name)
+        return matching_item[1]
+    except StopIteration:
+        return None

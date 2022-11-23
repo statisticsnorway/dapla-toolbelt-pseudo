@@ -1,4 +1,5 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
+import json
 import typing as t
 
 from pydantic import BaseModel
@@ -30,7 +31,7 @@ class PseudoKeyset(APIModel):
     """PseudoKeyset represents a wrapped data encryption key (WDEK)."""
 
     encrypted_keyset: str
-    keyset_info: dict[str, t.Any]
+    keyset_info: t.Dict[str, t.Any]
     kek_uri: str
 
     def get_key_id(self) -> str:
@@ -82,10 +83,10 @@ class RepseudonymizeFileRequest(APIModel):
 class KeyWrapper(BaseModel):
     """Hold information about a key, such as ID and keyset information."""
 
-    key_id: str = None
-    keyset: PseudoKeyset = None
+    key_id: str = ""
+    keyset: t.Union[PseudoKeyset, None] = None
 
-    def __init__(self, key: t.Union[str, PseudoKeyset], **kwargs):
+    def __init__(self, key: t.Union[str, PseudoKeyset], **kwargs: t.Any):
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
@@ -94,14 +95,20 @@ class KeyWrapper(BaseModel):
         """
         super().__init__(**kwargs)
         if isinstance(key, str):
-            self.key_id = key
-            self.keyset = None
+            # Either we have a keyset json
+            if key.startswith("{"):
+                pseudo_keyset = PseudoKeyset.parse_obj(json.loads(key))
+                self.key_id = pseudo_keyset.get_key_id()
+                self.keyset = pseudo_keyset
+            # Either or a "key reference" (i.e. an id of a "common" key)
+            else:
+                self.key_id = key
+                self.keyset = None
+        # Or we have an already parsed PseudoKeyset
         elif isinstance(key, PseudoKeyset):
             self.key_id = key.get_key_id()
             self.keyset = key
-        else:
-            raise ValueError(f"Invalid key: {key}")
 
-    def keyset_list(self):
+    def keyset_list(self) -> t.Union[t.List[PseudoKeyset], None]:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
