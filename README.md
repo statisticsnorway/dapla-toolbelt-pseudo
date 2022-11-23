@@ -19,22 +19,43 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-## Usage
+Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
 ### Pseudonymize
 
 ```python
 from dapla_pseudo import pseudonymize
 
+# Pseudonymize fields in a local file using the default key:
 pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"])
-```
 
-### Depseudonymize
+# Pseudonymize fields in a local file, explicitly denoting the key to use:
+pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key="ssb-common-key-1")
 
-```python
-from dapla_pseudo import depseudonymize
+# Pseudonymize a local file using a custom key:
+import json
+custom_keyset = json.dumps(    {
+    "encryptedKeyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
+    "keysetInfo": {
+        "primaryKeyId": 1234567890,
+        "keyInfo": [
+            {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
+                "status": "ENABLED",
+                "keyId": 1234567890,
+                "outputPrefixType": "TINK",
+            }
+        ],
+    },
+    "kekUri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1",
+})
+pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key=custom_keyset)
 
-depseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"])
+# Operate on data in a streaming manner:
+import shutil
+with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"], stream=True) as res:
+    with open("./data/personer_deid.json", 'wb') as f:
+        shutil.copyfileobj(res.raw, f)
 ```
 
 ### Repseudonymize
@@ -42,8 +63,23 @@ depseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"])
 ```python
 from dapla_pseudo import repseudonymize
 
+# Repseudonymize fields in a local file, denoting source and target keys to use:
 repseudonymize(file_path="./data/personer_deid.json", fields=["fnr", "fornavn"], source_key="ssb-common-key-1", target_key="ssb-common-key-2")
 ```
+
+### Depseudonymize
+
+```python
+from dapla_pseudo import depseudonymize
+
+# Depseudonymize fields in a local file using the default key:
+depseudonymize(file_path="./data/personer_deid.json", fields=["fnr", "fornavn"])
+
+# Depseudonymize fields in a local file, explicitly denoting the key to use:
+depseudonymize(file_path="./data/personer_deid.json", fields=["fnr", "fornavn"], key="ssb-common-key-1")
+```
+
+_Note that depseudonymization requires elevated access privileges._
 
 ## Requirements
 
@@ -51,7 +87,7 @@ repseudonymize(file_path="./data/personer_deid.json", fields=["fnr", "fornavn"],
 
 ## Installation
 
-You can install _Pseudonymization extensions for Dapla Toolbelt_ via [pip] from [PyPI]:
+You can install _dapla-toolbelt-pseudo_ via [pip] from [PyPI]:
 
 ```console
 $ pip install dapla-toolbelt-pseudo
