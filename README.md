@@ -55,7 +55,11 @@ pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key=cu
 import shutil
 with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"], stream=True) as res:
     with open("./data/personer_deid.json", 'wb') as f:
+        res.raw.decode_content = True
         shutil.copyfileobj(res.raw, f)
+
+# Map certain fields to stabil ID
+pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid=["fnr"])
 ```
 
 ### Repseudonymize
