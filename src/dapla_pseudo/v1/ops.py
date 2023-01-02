@@ -16,6 +16,7 @@ from dapla_pseudo.constants import predefined_keys
 
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
+from .models import Field
 from .models import KeyWrapper
 from .models import PseudoConfig
 from .models import PseudoKeyset
@@ -26,7 +27,8 @@ from .models import RepseudonymizeFileRequest
 
 def pseudonymize(
     file_path: str,
-    fields: t.List[str],
+    fields: t.List[t.Union[str, Field]],
+    sid: t.List[str] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
@@ -56,13 +58,14 @@ def pseudonymize(
 
     :param file_path: path to a local file, e.g. ./path/to/data.json. Supported file formats: csv, json
     :param fields: list of fields that should be pseudonymized
+    :param sid: list of fields that should be mapped to stabil ID and pseudonymized
     :param key: either named reference to a "global" key or a keyset json
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
     content_type = _content_type_of(file_path)
     k = KeyWrapper(key)
-    rules = _rules_of(fields, k.key_id)
+    rules = _rules_of(fields=fields, sid=sid, key=k.key_id)
     req = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()), target_content_type=content_type
     )
@@ -72,7 +75,7 @@ def pseudonymize(
 
 def depseudonymize(
     file_path: str,
-    fields: t.List[str],
+    fields: t.List[t.Union[str, Field]],
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
@@ -111,7 +114,7 @@ def depseudonymize(
     """
     content_type = mimetypes.MimeTypes().guess_type(file_path)[0]
     k = KeyWrapper(key)
-    rules = _rules_of(fields, k.key_id)
+    rules = _rules_of(fields=fields, sid=[], key=k.key_id)
     req = DepseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
         target_content_type=content_type,
@@ -164,8 +167,8 @@ def repseudonymize(
     content_type = _content_type_of(file_path)
     source_key_wrapper = KeyWrapper(source_key)
     target_key_wrapper = KeyWrapper(target_key)
-    source_rules = _rules_of(fields, source_key_wrapper.key_id)
-    target_rules = _rules_of(fields, target_key_wrapper.key_id)
+    source_rules = _rules_of(fields=fields, sid=[], key=source_key_wrapper.key_id)
+    target_rules = _rules_of(fields=fields, sid=[], key=target_key_wrapper.key_id)
     req = RepseudonymizeFileRequest(
         source_pseudo_config=PseudoConfig(rules=source_rules, keysets=source_key_wrapper.keyset_list()),
         target_pseudo_config=PseudoConfig(rules=target_rules, keysets=target_key_wrapper.keyset_list()),
@@ -182,11 +185,36 @@ def _client() -> PseudoClient:
     )
 
 
-def _rules_of(fields: t.List[str], key: str) -> t.List[PseudoRule]:
-    return [
-        PseudoRule(name=f"rule-{i}", pattern=f"**/{field}", func=f"tink-daead({key})")
-        for i, field in enumerate(fields, 1)
-    ]
+def _rules_of(fields: t.List[t.Union[str, Field]], sid: t.List[str], key: str) -> t.List[PseudoRule]:
+    if sid:
+        sid_fields = [Field(pattern=f"**/{field}", mapping="sid") for field in sid]
+    else:
+        sid_fields = []
+
+    return [_rule_of(field, i, key) for i, field in enumerate(sid_fields + fields, 1)]
+
+
+def _rule_of(f: t.Union[str, Field], n: int, k: str) -> PseudoRule:
+    key = "ssb-common-key-1" if k is None else k
+
+    if isinstance(f, Field):
+        field = f
+    elif isinstance(f, str):
+        if f.startswith("{"):
+            field = Field.parse_obj(f)
+        else:
+            field = Field(pattern=f"**/{f}")  # TODO: Check if the **/ prefix is needed
+
+    if field.mapping == "sid":
+        func = f"map-sid({key})"
+    else:
+        func = f"tink-daead({key})"
+
+    return PseudoRule(
+        name=f"rule-{n}",
+        func=func,
+        pattern=field.pattern,
+    )
 
 
 def _content_type_of(file_path: str) -> str:

@@ -27,6 +27,19 @@ class PseudoRule(APIModel):
     func: str
 
 
+class Field(APIModel):
+    """Field represents a targeted piece of data within a dataset or record.
+
+    Attributes:
+        pattern: field name or expression (e.g. a glob)
+        mapping: If defined, denotes a mapping transformation that should be applied before the operation in question,
+            e.g. "sid", meaning the field should be transformed to Stabil ID before being pseudonymized.
+    """
+
+    pattern: str
+    mapping: t.Optional[str] = None
+
+
 class PseudoKeyset(APIModel):
     """PseudoKeyset represents a wrapped data encryption key (WDEK)."""
 
