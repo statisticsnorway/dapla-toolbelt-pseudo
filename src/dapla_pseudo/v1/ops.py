@@ -28,7 +28,7 @@ from .models import RepseudonymizeFileRequest
 def pseudonymize(
     file_path: str,
     fields: t.List[t.Union[str, Field]],
-    sid: t.List[str] = None,
+    sid: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
@@ -65,7 +65,7 @@ def pseudonymize(
     """
     content_type = _content_type_of(file_path)
     k = KeyWrapper(key)
-    rules = _rules_of(fields=fields, sid=sid, key=k.key_id)
+    rules = _rules_of(fields=fields, sid=sid or [], key=k.key_id)
     req = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()), target_content_type=content_type
     )
@@ -125,7 +125,7 @@ def depseudonymize(
 
 def repseudonymize(
     file_path: str,
-    fields: t.List[str],
+    fields: t.List[t.Union[str, Field]],
     source_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
