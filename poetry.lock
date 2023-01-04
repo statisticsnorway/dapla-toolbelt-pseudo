@@ -886,7 +886,7 @@ traitlets = "*"
 
 [[package]]
 name = "jupyterhub"
-version = "3.0.0"
+version = "3.1.0"
 description = "JupyterHub: A multi-user server for Jupyter notebooks"
 category = "main"
 optional = false
@@ -909,6 +909,9 @@ requests = "*"
 SQLAlchemy = ">=1.1"
 tornado = ">=5.1"
 traitlets = ">=4.3.2"
+
+[package.extras]
+test = ["beautifulsoup4[html5lib]", "coverage", "cryptography", "jsonschema", "jupyterlab (>=3)", "mock", "nbclassic", "pytest (>=3.3)", "pytest-asyncio (>=0.17)", "pytest-cov", "requests-mock", "selenium", "virtualenv"]
 
 [[package]]
 name = "livereload"
@@ -2801,8 +2804,8 @@ jupyter-telemetry = [
     {file = "jupyter_telemetry-0.1.0.tar.gz", hash = "sha256:445c613ae3df70d255fe3de202f936bba8b77b4055c43207edf22468ac875314"},
 ]
 jupyterhub = [
-    {file = "jupyterhub-3.0.0-py3-none-any.whl", hash = "sha256:1d0b437033d8fd75d7ab4715ee3853da3069d6f14b4a0b9092f705efd0faa3b4"},
-    {file = "jupyterhub-3.0.0.tar.gz", hash = "sha256:05cdfebd800cf3e55566fb5b61110c5f64fed8ca3c56ef0142290baffbc7fb69"},
+    {file = "jupyterhub-3.1.0-py3-none-any.whl", hash = "sha256:da510020ae3240f7902f9539aea047b1eb5ecc7235e39c5b7251b25c5a5fc2b7"},
+    {file = "jupyterhub-3.1.0.tar.gz", hash = "sha256:eaf8735c32efd05c00aecc860b953f731af559d6e046b621b1802f850475626f"},
 ]
 livereload = [
     {file = "livereload-2.6.3-py2.py3-none-any.whl", hash = "sha256:ad4ac6f53b2d62bb6ce1a5e6e96f1f00976a32348afedcb4b6d68df2a1d346e4"},
