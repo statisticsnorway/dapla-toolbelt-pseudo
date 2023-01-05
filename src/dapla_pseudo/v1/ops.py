@@ -189,11 +189,7 @@ def _client() -> PseudoClient:
 
 
 def _rules_of(fields: t.List[_FieldDecl], sid: t.List[str], key: str) -> t.List[PseudoRule]:
-    if sid:
-        sid_fields = [Field(pattern=f"**/{field}", mapping="sid") for field in sid]
-    else:
-        sid_fields = []
-
+    sid_fields = [Field(pattern=f"**/{field}", mapping="sid") for field in sid]
     return [_rule_of(field, i, key) for i, field in enumerate(sid_fields + fields, 1)]
 
 
@@ -206,8 +202,6 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
         field = Field.parse_obj(f)
     elif isinstance(f, str):
         field = Field(pattern=f"**/{f}")
-    else:
-        raise ValueError(f"Invalid field definition: {f}")
 
     if field.mapping == "sid":
         func = f"map-sid({key})"
