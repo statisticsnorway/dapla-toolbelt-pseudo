@@ -159,7 +159,10 @@ def test_pseudonymize_request_with_sid(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     with mock.patch("requests.post") as patched:
-        pseudonymize(file_path="tests/data/personer.json", fields=[Field(pattern="**/fnr", mapping="sid"), "fornavn"])
+        pseudonymize(
+            file_path="tests/data/personer.json",
+            fields=[Field(pattern="**/fnr", mapping="sid"), {"pattern": "**/fnr2", "mapping": "sid"}, "fornavn"],
+        )
         patched.assert_called_once()
         arg = patched.call_args.kwargs
 
@@ -172,7 +175,8 @@ def test_pseudonymize_request_with_sid(monkeypatch: pytest.MonkeyPatch) -> None:
                 "pseudoConfig": {
                     "rules": [
                         {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fnr2", "func": "map-sid(ssb-common-key-1)"},
+                        {"name": "rule-3", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
                     ]
                 },
                 "targetContentType": "application/json",

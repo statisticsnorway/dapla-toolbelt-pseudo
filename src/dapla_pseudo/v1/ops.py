@@ -25,9 +25,12 @@ from .models import PseudoRule
 from .models import RepseudonymizeFileRequest
 
 
+_FieldDecl = t.Union[str, dict, Field]
+
+
 def pseudonymize(
     file_path: str,
-    fields: t.List[t.Union[str, Field]],
+    fields: t.List[_FieldDecl],
     sid: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
@@ -75,7 +78,7 @@ def pseudonymize(
 
 def depseudonymize(
     file_path: str,
-    fields: t.List[t.Union[str, Field]],
+    fields: t.List[_FieldDecl],
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
@@ -125,7 +128,7 @@ def depseudonymize(
 
 def repseudonymize(
     file_path: str,
-    fields: t.List[t.Union[str, Field]],
+    fields: t.List[_FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
@@ -185,7 +188,7 @@ def _client() -> PseudoClient:
     )
 
 
-def _rules_of(fields: t.List[t.Union[str, Field]], sid: t.List[str], key: str) -> t.List[PseudoRule]:
+def _rules_of(fields: t.List[_FieldDecl], sid: t.List[str], key: str) -> t.List[PseudoRule]:
     if sid:
         sid_fields = [Field(pattern=f"**/{field}", mapping="sid") for field in sid]
     else:
@@ -194,16 +197,17 @@ def _rules_of(fields: t.List[t.Union[str, Field]], sid: t.List[str], key: str) -
     return [_rule_of(field, i, key) for i, field in enumerate(sid_fields + fields, 1)]
 
 
-def _rule_of(f: t.Union[str, Field], n: int, k: str) -> PseudoRule:
+def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
     key = "ssb-common-key-1" if k is None else k
 
     if isinstance(f, Field):
         field = f
+    elif isinstance(f, dict):
+        field = Field.parse_obj(f)
     elif isinstance(f, str):
-        if f.startswith("{"):
-            field = Field.parse_obj(f)
-        else:
-            field = Field(pattern=f"**/{f}")  # TODO: Check if the **/ prefix is needed
+        field = Field(pattern=f"**/{f}")
+    else:
+        raise ValueError(f"Invalid field definition: {f}")
 
     if field.mapping == "sid":
         func = f"map-sid({key})"
