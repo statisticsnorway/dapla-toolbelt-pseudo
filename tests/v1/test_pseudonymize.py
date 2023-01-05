@@ -8,6 +8,7 @@ from dapla_pseudo import pseudonymize
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 from dapla_pseudo.utils import find_multipart_obj
+from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import PseudoKeyset
 
 
@@ -145,6 +146,66 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(monkeypatch: pyte
                             "kekUri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1",
                         }
                     ],
+                },
+                "targetContentType": "application/json",
+            }
+        )
+        actual_request_json = find_multipart_obj("request", arg["files"])
+        assert actual_request_json == expected_request_json
+
+
+def test_pseudonymize_request_with_sid(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+
+    with mock.patch("requests.post") as patched:
+        pseudonymize(
+            file_path="tests/data/personer.json",
+            fields=[Field(pattern="**/fnr", mapping="sid"), {"pattern": "**/fnr2", "mapping": "sid"}, "fornavn"],
+        )
+        patched.assert_called_once()
+        arg = patched.call_args.kwargs
+
+        assert arg["url"] == f"{base_url}/pseudonymize/file"
+        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["stream"] is True
+
+        expected_request_json = json.dumps(
+            {
+                "pseudoConfig": {
+                    "rules": [
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fnr2", "func": "map-sid(ssb-common-key-1)"},
+                        {"name": "rule-3", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                    ]
+                },
+                "targetContentType": "application/json",
+            }
+        )
+        actual_request_json = find_multipart_obj("request", arg["files"])
+        assert actual_request_json == expected_request_json
+
+
+def test_pseudonymize_request_with_sid2(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+
+    with mock.patch("requests.post") as patched:
+        pseudonymize(file_path="tests/data/personer.json", fields=["fornavn"], sid=["fnr"])
+        patched.assert_called_once()
+        arg = patched.call_args.kwargs
+
+        assert arg["url"] == f"{base_url}/pseudonymize/file"
+        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["stream"] is True
+
+        expected_request_json = json.dumps(
+            {
+                "pseudoConfig": {
+                    "rules": [
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                    ]
                 },
                 "targetContentType": "application/json",
             }
