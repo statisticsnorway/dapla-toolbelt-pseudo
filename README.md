@@ -59,7 +59,7 @@ with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"]
         shutil.copyfileobj(res.raw, f)
 
 # Map certain fields to stabil ID
-pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid=["fnr"])
+pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid_fields=["fnr"])
 ```
 
 ### Repseudonymize
@@ -94,7 +94,7 @@ _Note that depseudonymization requires elevated access privileges._
 You can install _dapla-toolbelt-pseudo_ via [pip] from [PyPI]:
 
 ```console
-$ pip install dapla-toolbelt-pseudo
+pip install dapla-toolbelt-pseudo
 ```
 
 ## Contributing
@@ -126,4 +126,3 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 
 [license]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/LICENSE
 [contributor guide]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/CONTRIBUTING.md
-[command-line reference]: https://statisticsnorway.github.io/dapla-toolbelt-pseudo
