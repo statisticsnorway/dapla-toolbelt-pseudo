@@ -191,7 +191,7 @@ def test_pseudonymize_request_with_sid2(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     with mock.patch("requests.post") as patched:
-        pseudonymize(file_path="tests/data/personer.json", fields=["fornavn"], sid=["fnr"])
+        pseudonymize(file_path="tests/data/personer.json", fields=["fornavn"], sid_fields=["fnr"])
         patched.assert_called_once()
         arg = patched.call_args.kwargs
 

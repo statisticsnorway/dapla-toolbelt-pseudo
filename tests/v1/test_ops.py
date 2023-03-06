@@ -6,14 +6,14 @@ from dapla_pseudo.v1.ops import _rules_of
 
 
 def test_generate_rules_from_single_field() -> None:
-    rules = _rules_of(key="some-key", fields=["some-field"], sid=[])
+    rules = _rules_of(key="some-key", fields=["some-field"], sid_fields=[])
     assert PseudoConfig(rules=rules).to_json() == json.dumps(
         {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "tink-daead(some-key)"}]}
     )
 
 
 def test_generate_rules_from_multiple_field() -> None:
-    rules = _rules_of(key="some-key", fields=["some-field", "another-field", "yet-another-field"], sid=[])
+    rules = _rules_of(key="some-key", fields=["some-field", "another-field", "yet-another-field"], sid_fields=[])
     assert PseudoConfig(rules=rules).to_json() == json.dumps(
         {
             "rules": [
@@ -26,7 +26,7 @@ def test_generate_rules_from_multiple_field() -> None:
 
 
 def test_generate_rules_from_hierarchy_field() -> None:
-    rules = _rules_of(key="some-key", fields=["path/to/*-field"], sid=[])
+    rules = _rules_of(key="some-key", fields=["path/to/*-field"], sid_fields=[])
     assert PseudoConfig(rules=rules).to_json() == json.dumps(
         {"rules": [{"name": "rule-1", "pattern": "**/path/to/*-field", "func": "tink-daead(some-key)"}]}
     )
@@ -42,7 +42,7 @@ def test_generate_rules_from_different_field_representations() -> None:
             Field(pattern="class-field"),
             Field(pattern="class-field-sid", mapping="sid"),
         ],
-        sid=[],
+        sid_fields=[],
     )
     assert PseudoConfig(rules=rules).to_json() == json.dumps(
         {
