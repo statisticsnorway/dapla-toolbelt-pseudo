@@ -21,6 +21,10 @@
 
 Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
+## Usage
+
+See the [command-line reference] for details.
+
 ### Pseudonymize
 
 ```python
@@ -126,3 +130,4 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 
 [license]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/LICENSE
 [contributor guide]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/CONTRIBUTING.md
+[command-line reference]: https://statisticsnorway.github.io/dapla-toolbelt-pseudo
