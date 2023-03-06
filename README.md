@@ -21,6 +21,10 @@
 
 Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
+## Usage
+
+See the [command-line reference] for details.
+
 ### Pseudonymize
 
 ```python
@@ -59,7 +63,7 @@ with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"]
         shutil.copyfileobj(res.raw, f)
 
 # Map certain fields to stabil ID
-pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid=["fnr"])
+pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid_fields=["fnr"])
 ```
 
 ### Repseudonymize
@@ -94,7 +98,7 @@ _Note that depseudonymization requires elevated access privileges._
 You can install _dapla-toolbelt-pseudo_ via [pip] from [PyPI]:
 
 ```console
-$ pip install dapla-toolbelt-pseudo
+pip install dapla-toolbelt-pseudo
 ```
 
 ## Contributing
