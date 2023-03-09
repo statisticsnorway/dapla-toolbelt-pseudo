@@ -5,17 +5,19 @@ service API offers many advanced options, like detailed configuration of pseudo 
 hierarchical data structures, many users will be just fine with using one key and just listing the fields (of their
 flat data).
 """
+import io
 import mimetypes
 import os
 import typing as t
 
 import requests
+import pandas as pd
 
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 
 from .client import PseudoClient
-from .models import DepseudonymizeFileRequest
+from .models import DepseudonymizeFileRequest, Mimetypes
 from .models import Field
 from .models import KeyWrapper
 from .models import PseudoConfig
@@ -29,7 +31,7 @@ _FieldDecl = t.Union[str, dict, Field]
 
 
 def pseudonymize(
-    file_path: str,
+    data: t.Union[pd.DataFrame, t.IO, str],
     fields: t.List[_FieldDecl],
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
@@ -66,14 +68,32 @@ def pseudonymize(
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
-    content_type = _content_type_of(file_path)
+    file_handle: t.IO = None
+    match data:
+        case str():
+            # File path
+            content_type = _content_type_of(data)
+        case pd.DataFrame():
+            # Dataframe
+            content_type = Mimetypes.JSON
+            file_handle = io.StringIO()
+            data.to_json(file_handle)
+            file_handle.seek(0)
+        case t.IO():
+            # File handle
+            content_type = _content_type_of(data)
+            file_handle = data
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
-    req = PseudonymizeFileRequest(
+    pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()), target_content_type=content_type
     )
 
-    return _client().pseudonymize_file(req.to_json(), file_path, stream=stream)
+    if file_handle:
+        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
+    else:
+        with open(data, "rb") as file_handle:
+            return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
 
 
 def depseudonymize(

@@ -1,10 +1,16 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
+from enum import Enum
 import json
 import typing as t
 
 from pydantic import BaseModel
 
 from dapla_pseudo.models import APIModel
+
+
+class Mimetypes(str, Enum):
+    JSON = "application/json"
+    CSV = "text/csv"
 
 
 class PseudoRule(APIModel):

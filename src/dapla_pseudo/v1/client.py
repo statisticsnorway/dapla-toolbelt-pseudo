@@ -6,6 +6,9 @@ import typing as t
 
 import requests
 from dapla import AuthClient
+from dapla_pseudo.models import APIModel
+
+from dapla_pseudo.v1.models import Mimetypes, PseudonymizeFileRequest
 
 
 class PseudoClient:
@@ -53,6 +56,18 @@ class PseudoClient:
         :return: pseudonymized data
         """
         return self._process_file("pseudonymize", request_json, file_path, stream)
+
+    def pseudonymize(
+        self, pseudonymize_request: PseudonymizeFileRequest, data: t.IO, stream: bool = False
+    ) -> requests.Response:
+        return self._post_to_pseudo_service(
+            "pseudonymize",
+            pseudonymize_request.to_json(),
+            data,
+            "Placeholder",
+            pseudonymize_request.target_content_type,
+            stream,
+        )
 
     def depseudonymize_file(self, request_json: str, file_path: str, stream: bool = False) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
@@ -130,6 +145,22 @@ class PseudoClient:
             files={
                 ("data", (file_name, open(file_path, "rb"), content_type)),
                 ("request", (None, request_json, "application/json")),
+            },
+            stream=stream,
+        )
+        response.raise_for_status()
+        return response
+
+    def _post_to_pseudo_service(
+        self, operation: str, request: APIModel, data: t.IO, name: str, content_type: Mimetypes, stream: bool = False
+    ) -> requests.Response:
+        auth_token = self.__auth_token()
+        response = requests.post(
+            url=f"{self.pseudo_service_url}/{operation}/file",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            files={
+                ("data", (name, data, content_type)),
+                ("request", (None, request.to_json(), Mimetypes.JSON)),
             },
             stream=stream,
         )

@@ -50,7 +50,7 @@ def test_pseudonymize_with_default_env_values(
 ) -> None:
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
 
-    pseudonymize(file_path=test_data_json_file_path, fields=["fnr", "fornavn"])
+    pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"])
     patched_auth_client.called_once()
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
@@ -83,7 +83,7 @@ def test_pseudonymize_request_with_default_key(
     monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
-    pseudonymize(file_path=test_data_json_file_path, fields=["fnr", "fornavn"])
+    pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"])
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
@@ -116,7 +116,7 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
     monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
-    pseudonymize(file_path=test_data_json_file_path, fields=["fnr", "fornavn"], key=key)
+    pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"], key=key)
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
@@ -148,7 +148,7 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
 
     keyset = custom_keyset
 
-    pseudonymize(file_path=test_data_json_file_path, fields=["fnr", "fornavn"], key=keyset)
+    pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"], key=keyset)
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
@@ -196,7 +196,7 @@ def test_pseudonymize_request_with_sid(
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(
-        file_path=test_data_json_file_path,
+        test_data_json_file_path,
         fields=[Field(pattern="**/fnr", mapping="sid"), {"pattern": "**/fnr2", "mapping": "sid"}, "fornavn"],
     )
     patched_post.assert_called_once()
@@ -229,7 +229,7 @@ def test_pseudonymize_request_using_sid_fields_parameter(
     monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
-    pseudonymize(file_path=test_data_json_file_path, fields=["fornavn"], sid_fields=["fnr"])
+    pseudonymize(test_data_json_file_path, fields=["fornavn"], sid_fields=["fnr"])
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
