@@ -55,6 +55,7 @@ sqlalchemy = ">=2.0.0rc1"
 typeguard = ">=2.13.3"
 types-mock = "^4.0.15.2"
 xdoctest = {extras = ["colors"], version = ">=0.15.10"}
+ipykernel = "^6.21.3"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
