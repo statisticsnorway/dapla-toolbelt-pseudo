@@ -49,14 +49,14 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
             {
                 "sourcePseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                     ]
                 },
                 "targetPseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                     ]
                 },
                 "targetContentType": "application/json",
@@ -88,14 +88,14 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
             {
                 "sourcePseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                     ]
                 },
                 "targetPseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-2)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-2)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-2)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-2)"},
                     ]
                 },
                 "targetContentType": "application/json",
@@ -126,14 +126,14 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
             {
                 "sourcePseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                     ]
                 },
                 "targetPseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(1234567890)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(1234567890)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=1234567890)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=1234567890)"},
                     ],
                     "keysets": [
                         {

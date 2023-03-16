@@ -202,8 +202,8 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
         field = Field.parse_obj(f)
     elif isinstance(f, str):
         field = Field(pattern=f"**/{f}")
-        
-    KEY_ID_PARAMETER = "keyId" 
+
+    KEY_ID_PARAMETER = "keyId"
     if field.mapping == "sid":
         func = f"map-sid({KEY_ID_PARAMETER}={key})"
     else:
