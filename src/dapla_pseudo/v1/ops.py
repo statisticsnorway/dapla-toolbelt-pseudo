@@ -228,10 +228,11 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
     elif isinstance(f, str):
         field = Field(pattern=f"**/{f}")
 
+    KEY_ID_PARAMETER = "keyId"
     if field.mapping == "sid":
-        func = f"map-sid({key})"
+        func = f"map-sid({KEY_ID_PARAMETER}={key})"
     else:
-        func = f"tink-daead({key})"
+        func = f"daead({KEY_ID_PARAMETER}={key})"
 
     return PseudoRule(
         name=f"rule-{n}",
