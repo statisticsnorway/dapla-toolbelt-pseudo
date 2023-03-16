@@ -29,8 +29,8 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
             {
                 "pseudoConfig": {
                     "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "tink-daead(ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "tink-daead(ssb-common-key-1)"},
+                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                     ]
                 },
                 "targetContentType": "application/json",
