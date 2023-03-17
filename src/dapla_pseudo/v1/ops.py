@@ -10,16 +10,17 @@ import mimetypes
 import os
 import typing as t
 
-import requests
 import pandas as pd
+import requests
 
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 
 from .client import PseudoClient
-from .models import DepseudonymizeFileRequest, Mimetypes
+from .models import DepseudonymizeFileRequest
 from .models import Field
 from .models import KeyWrapper
+from .models import Mimetypes
 from .models import PseudoConfig
 from .models import PseudoKeyset
 from .models import PseudonymizeFileRequest
@@ -75,11 +76,11 @@ def pseudonymize(
             content_type = _content_type_of(data)
         case pd.DataFrame():
             # Dataframe
-            
+
             # Ensure fields to be pseudonymized are string type
             for field in set(fields).union(sid_fields or []):
                 data[field] = data[field].apply(str)
-            
+
             content_type = Mimetypes.JSON
             file_handle = io.StringIO()
             data.to_json(file_handle, orient="records")
@@ -148,7 +149,7 @@ def depseudonymize(
         target_content_type=content_type,
     )
 
-    return _client().depseudonymize_file(req.to_json(), file_path, stream=stream)
+    return _client().depseudonymize_file(req, file_path, stream=stream)
 
 
 def repseudonymize(
@@ -203,7 +204,7 @@ def repseudonymize(
         target_content_type=content_type,
     )
 
-    return _client().repseudonymize_file(req.to_json(), file_path, stream=stream)
+    return _client().repseudonymize_file(req, file_path, stream=stream)
 
 
 def _client() -> PseudoClient:
@@ -228,11 +229,11 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
     elif isinstance(f, str):
         field = Field(pattern=f"**/{f}")
 
-    KEY_ID_PARAMETER = "keyId"
+    key_id_parameter = "keyId"
     if field.mapping == "sid":
-        func = f"map-sid({KEY_ID_PARAMETER}={key})"
+        func = f"map-sid({key_id_parameter}={key})"
     else:
-        func = f"daead({KEY_ID_PARAMETER}={key})"
+        func = f"daead({key_id_parameter}={key})"
 
     return PseudoRule(
         name=f"rule-{n}",

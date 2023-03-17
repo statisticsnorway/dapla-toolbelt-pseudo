@@ -6,13 +6,18 @@ import typing as t
 
 import requests
 from dapla import AuthClient
-from dapla_pseudo.models import APIModel
 
-from dapla_pseudo.v1.models import Mimetypes, PseudonymizeFileRequest
+from dapla_pseudo.models import APIModel
+from dapla_pseudo.v1.models import DepseudonymizeFileRequest
+from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
 
 class PseudoClient:
     """Client for interacting with the Dapla Pseudo Service REST API."""
+
+    PSEUDONYMIZE_FILE_ENDPOINT = "pseudonymize/file"
 
     def __init__(
         self,
@@ -28,8 +33,10 @@ class PseudoClient:
     def __auth_token(self) -> str:
         return str(AuthClient.fetch_personal_token()) if self.static_auth_token is None else str(self.static_auth_token)
 
-    def pseudonymize_file(self, request_json: str, file_path: str, stream: bool = False) -> requests.Response:
-        """Pseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
+    def pseudonymize(
+        self, pseudonymize_request: PseudonymizeFileRequest, data: t.IO, stream: bool = False, name: str = None
+    ) -> requests.Response:
+        """Pseudonymize data from a file-like object.
 
         Choose between streaming the result back, or storing it as a file in GCS (by providing a `targetUri`).
 
@@ -50,26 +57,31 @@ class PseudoClient:
 
         See https://dapla-pseudo-service.staging-bip-app.ssb.no/api-docs/redoc#tag/Pseudo-operations/operation/pseudonymizeFile
 
-        :param request_json: the request JSON to send to Dapla Pseudo Service
-        :param file_path: path to a local file that should be pseudonymized
+        :param pseudonymize_request: the request to send to Dapla Pseudo Service
+        :param data: file handle that should be pseudonymized
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
+        :param name: optional name for logging purposes
         :return: pseudonymized data
         """
-        return self._process_file("pseudonymize", request_json, file_path, stream)
+        if name is None:
+            try:
+                name = data.name
+            except AttributeError:
+                # Fallback to default name
+                name = "unknown"
 
-    def pseudonymize(
-        self, pseudonymize_request: PseudonymizeFileRequest, data: t.IO, stream: bool = False
-    ) -> requests.Response:
         return self._post_to_pseudo_service(
-            "pseudonymize",
+            self.PSEUDONYMIZE_FILE_ENDPOINT,
             pseudonymize_request,
             data,
-            "personer.json",
+            f"{name}.json",  # For now, we need to specify the extension
             pseudonymize_request.target_content_type,
             stream,
         )
 
-    def depseudonymize_file(self, request_json: str, file_path: str, stream: bool = False) -> requests.Response:
+    def depseudonymize_file(
+        self, depseudonymize_request: DepseudonymizeFileRequest, file_path: str, stream: bool = False
+    ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
         Notice that only certain whitelisted users can depseudonymize data.
@@ -98,9 +110,11 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: depseudonymized data
         """
-        return self._process_file("depseudonymize", request_json, file_path, stream)
+        return self._process_file("depseudonymize", depseudonymize_request, file_path, stream)
 
-    def repseudonymize_file(self, request_json: str, file_path: str, stream: bool = False) -> requests.Response:
+    def repseudonymize_file(
+        self, repseudonymize_request: RepseudonymizeFileRequest, file_path: str, stream: bool = False
+    ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
         Repseudonymization is done by first applying depseudonuymization and then pseudonymization to fields of the file.
@@ -131,32 +145,23 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: repseudonymized data
         """
-        return self._process_file("repseudonymize", request_json, file_path, stream)
+        return self._process_file("repseudonymize", repseudonymize_request, file_path, stream)
 
     def _process_file(
-        self, operation: str, request_json: str, file_path: str, stream: bool = False
+        self, operation: str, request: APIModel, file_path: str, stream: bool = False
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
         content_type = str(mimetypes.MimeTypes().guess_type(file_path)[0])
-        auth_token = self.__auth_token()
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/{operation}/file",
-            headers={"Authorization": f"Bearer {auth_token}"},
-            files={
-                ("data", (file_name, open(file_path, "rb"), content_type)),
-                ("request", (None, request_json, "application/json")),
-            },
-            stream=stream,
-        )
-        response.raise_for_status()
-        return response
+
+        with open(file_path, "rb") as f:
+            return self._post_to_pseudo_service(f"{operation}/file", request, f, file_name, content_type, stream)
 
     def _post_to_pseudo_service(
-        self, operation: str, request: APIModel, data: t.IO, name: str, content_type: Mimetypes, stream: bool = False
+        self, path: str, request: APIModel, data: t.IO, name: str, content_type: Mimetypes, stream: bool = False
     ) -> requests.Response:
         auth_token = self.__auth_token()
         response = requests.post(
-            url=f"{self.pseudo_service_url}/{operation}/file",
+            url=f"{self.pseudo_service_url}/{path}",
             headers={"Authorization": f"Bearer {auth_token}"},
             files={
                 ("data", (name, data, content_type)),
