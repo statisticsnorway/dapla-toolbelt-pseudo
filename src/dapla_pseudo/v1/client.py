@@ -172,6 +172,7 @@ class PseudoClient:
                 ("request", (None, request.to_json(), Mimetypes.JSON)),
             },
             stream=stream,
+            timeout=30,  # seconds
         )
         response.raise_for_status()
         return response
@@ -200,6 +201,7 @@ class PseudoClient:
                 "Content-Type": "application/json",
             },
             data=request_json,
+            timeout=30,  # seconds
         )
         response.raise_for_status()
         return response
