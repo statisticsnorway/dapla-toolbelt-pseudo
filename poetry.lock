@@ -1261,14 +1261,14 @@ requests = ["requests (>=2.18.0,<3.0.0dev)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.57.0"
+version = "1.58.0"
 description = "Common protobufs used in Google APIs"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "googleapis-common-protos-1.57.0.tar.gz", hash = "sha256:27a849d6205838fb6cc3c1c21cb9800707a661bb21c6ce7fb13e99eb1f8a0c46"},
-    {file = "googleapis_common_protos-1.57.0-py2.py3-none-any.whl", hash = "sha256:a9f4a1d7f6d9809657b7f1316a1aa527f6664891531bcfcc13b6696e685f443c"},
+    {file = "googleapis-common-protos-1.58.0.tar.gz", hash = "sha256:c727251ec025947d545184ba17e3578840fc3a24a0516a020479edab660457df"},
+    {file = "googleapis_common_protos-1.58.0-py2.py3-none-any.whl", hash = "sha256:ca3befcd4580dab6ad49356b46bf165bb68ff4b32389f028f1abd7c10ab9519a"},
 ]
 
 [package.dependencies]
