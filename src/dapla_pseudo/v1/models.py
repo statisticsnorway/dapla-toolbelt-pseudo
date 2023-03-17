@@ -87,7 +87,7 @@ class DepseudonymizeFileRequest(APIModel):
 
     pseudo_config: PseudoConfig
     target_uri: t.Optional[str]
-    target_content_type: str
+    target_content_type: t.Optional[str]
     compression: t.Optional[TargetCompression]
 
 
