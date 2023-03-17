@@ -10,9 +10,13 @@ import mimetypes
 import os
 import typing as t
 
+
+# isort: off
+import pylibmagic  # noqa Must be imported before magic
+
+# isort: on
 import magic
 import pandas as pd
-import pylibmagic  # noqa Must be imported before magic
 import requests
 
 from dapla_pseudo.constants import env
