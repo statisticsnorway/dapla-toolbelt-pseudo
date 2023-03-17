@@ -34,7 +34,11 @@ class PseudoClient:
         return str(AuthClient.fetch_personal_token()) if self.static_auth_token is None else str(self.static_auth_token)
 
     def pseudonymize(
-        self, pseudonymize_request: PseudonymizeFileRequest, data: t.IO, stream: bool = False, name: str = None
+        self,
+        pseudonymize_request: PseudonymizeFileRequest,
+        data: t.BinaryIO,
+        stream: bool = False,
+        name: t.Optional[str] = None,
     ) -> requests.Response:
         """Pseudonymize data from a file-like object.
 
@@ -151,13 +155,13 @@ class PseudoClient:
         self, operation: str, request: APIModel, file_path: str, stream: bool = False
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
-        content_type = str(mimetypes.MimeTypes().guess_type(file_path)[0])
+        content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
             return self._post_to_pseudo_service(f"{operation}/file", request, f, file_name, content_type, stream)
 
     def _post_to_pseudo_service(
-        self, path: str, request: APIModel, data: t.IO, name: str, content_type: Mimetypes, stream: bool = False
+        self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes, stream: bool = False
     ) -> requests.Response:
         auth_token = self.__auth_token()
         response = requests.post(

@@ -37,7 +37,7 @@ REQUESTS_POST = "requests.post"
 
 
 @pytest.fixture
-def test_data_json_file_path():
+def test_data_json_file_path() -> str:
     return "tests/data/personer.json"
 
 

@@ -1,7 +1,7 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
-from enum import Enum
 import json
 import typing as t
+from enum import Enum
 
 from pydantic import BaseModel
 
@@ -9,6 +9,8 @@ from dapla_pseudo.models import APIModel
 
 
 class Mimetypes(str, Enum):
+    """Mimetypes is an enum of supported mimetypes. For use in HTTP requests"""
+
     JSON = "application/json"
     CSV = "text/csv"
 
@@ -76,7 +78,7 @@ class PseudonymizeFileRequest(APIModel):
 
     pseudo_config: PseudoConfig
     target_uri: t.Optional[str]
-    target_content_type: str
+    target_content_type: Mimetypes
     compression: t.Optional[TargetCompression]
 
 

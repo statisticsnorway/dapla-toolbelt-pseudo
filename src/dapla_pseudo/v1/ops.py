@@ -10,7 +10,9 @@ import mimetypes
 import os
 import typing as t
 
+import magic
 import pandas as pd
+import pylibmagic  # noqa Must be imported before magic
 import requests
 
 from dapla_pseudo.constants import env
@@ -29,10 +31,11 @@ from .models import RepseudonymizeFileRequest
 
 
 _FieldDecl = t.Union[str, dict, Field]
+_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, str]
 
 
 def pseudonymize(
-    data: t.Union[pd.DataFrame, t.IO, str],
+    data: _DataDecl,
     fields: t.List[_FieldDecl],
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
@@ -40,10 +43,7 @@ def pseudonymize(
 ) -> requests.Response:
     """Pseudonymize specified fields of a local file.
 
-    Supported file formats: csv and json (both standard and "new line delimited" json)
-
-    You can alternatively send a zip-file containing one or many files of the supported file formats. The pseudo service
-    will unzip and process them sequentially. This can be handy if your file is large and/or split into multiple files.
+    Supported file formats: json
 
     The ``fields`` list specifies what to pseudonymize. This can either be a plain vanilla list of field names (e.g.
     ``["some_field1", "another_field2"]``, or you can apply ninja-style techniques, such as using wildcard characters
@@ -62,32 +62,26 @@ def pseudonymize(
             with open("./data/personer.json", 'wb') as f:
                 shutil.copyfileobj(res.raw, f)
 
-    :param file_path: path to a local file, e.g. ./path/to/data.json. Supported file formats: csv, json
+    :param data: path to file, file handle or dataframe
     :param fields: list of fields that should be pseudonymized
     :param sid_fields: list of fields that should be mapped to stabil ID and pseudonymized
     :param key: either named reference to a "global" key or a keyset json
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
-    file_handle: t.IO = None
+    file_handle = None
     match data:
         case str():
             # File path
-            content_type = _content_type_of(data)
+            content_type = Mimetypes(magic.from_file(data, mime=True))
         case pd.DataFrame():
             # Dataframe
-
-            # Ensure fields to be pseudonymized are string type
-            for field in set(fields).union(sid_fields or []):
-                data[field] = data[field].apply(str)
-
             content_type = Mimetypes.JSON
-            file_handle = io.StringIO()
-            data.to_json(file_handle, orient="records")
-            file_handle.seek(0)
-        case t.IO():
+            file_handle = _dataframe_to_json(data, fields, sid_fields)
+        case t.BinaryIO():
             # File handle
-            content_type = _content_type_of(data)
+            content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
+            data.seek(0)
             file_handle = data
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
@@ -95,10 +89,10 @@ def pseudonymize(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()), target_content_type=content_type
     )
 
-    if file_handle:
+    if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        with open(data, "rb") as file_handle:
+        with open(str(data), "rb") as file_handle:
             return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
 
 
@@ -244,3 +238,18 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
 
 def _content_type_of(file_path: str) -> str:
     return str(mimetypes.MimeTypes().guess_type(file_path)[0])
+
+
+def _dataframe_to_json(
+    data: pd.DataFrame,
+    fields: t.List[_FieldDecl],
+    sid_fields: t.Optional[t.List[str]] = None,
+) -> t.BinaryIO:
+    # Ensure fields to be pseudonymized are string type
+    for field in set(fields).union(sid_fields or []):
+        data[field] = data[field].apply(str)
+
+    file_handle = io.BytesIO()
+    data.to_json(file_handle, orient="records")
+    file_handle.seek(0)
+    return file_handle
