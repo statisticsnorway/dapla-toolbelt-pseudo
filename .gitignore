@@ -10,3 +10,5 @@
 /src/*.egg-info/
 __pycache__/
 .vscode/
+.dccache
+.ipynb_checkpoints/
