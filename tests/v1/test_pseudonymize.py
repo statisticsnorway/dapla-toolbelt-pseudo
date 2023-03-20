@@ -1,4 +1,5 @@
 """Test pseudonymize (v1)"""
+import io
 import json
 from unittest import mock
 
@@ -8,8 +9,8 @@ import pytest
 from dapla_pseudo import pseudonymize
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
-from dapla_pseudo.utils import find_multipart_obj
 from dapla_pseudo.v1.models import Field
+from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoKeyset
 
 
@@ -70,8 +71,9 @@ def test_pseudonymize_dataframe_with_default_env_values(
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
-    assert arg["url"] == "http://dapla-pseudo-service.dapla.svc.cluster.local/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["files"]["data"][0] == "unknown.json"
+    assert isinstance(arg["files"]["data"][1], io.BytesIO)
+    assert arg["files"]["data"][2] == Mimetypes.JSON
 
 
 @mock.patch(REQUESTS_POST)
@@ -100,7 +102,8 @@ def test_pseudonymize_request_with_default_key(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = find_multipart_obj("request", arg["files"])
+
+    actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json
 
 
@@ -133,7 +136,7 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = find_multipart_obj("request", arg["files"])
+    actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json
 
 
@@ -182,7 +185,7 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = find_multipart_obj("request", arg["files"])
+    actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json
 
 
@@ -216,7 +219,7 @@ def test_pseudonymize_request_with_sid(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = find_multipart_obj("request", arg["files"])
+    actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json
 
 
@@ -246,5 +249,5 @@ def test_pseudonymize_request_using_sid_fields_parameter(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = find_multipart_obj("request", arg["files"])
+    actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json

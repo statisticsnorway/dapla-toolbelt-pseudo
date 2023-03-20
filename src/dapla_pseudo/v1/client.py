@@ -74,11 +74,14 @@ class PseudoClient:
                 # Fallback to default name
                 name = "unknown"
 
+        if not name.endswith(".json") and pseudonymize_request.target_content_type is Mimetypes.JSON:
+            name = f"{name}.json"  # Pseudo service expects a file extension
+
         return self._post_to_pseudo_service(
             self.PSEUDONYMIZE_FILE_ENDPOINT,
             pseudonymize_request,
             data,
-            f"{name}.json",  # For now, we need to specify the extension
+            name,
             pseudonymize_request.target_content_type,
             stream,
         )
@@ -168,8 +171,8 @@ class PseudoClient:
             url=f"{self.pseudo_service_url}/{path}",
             headers={"Authorization": f"Bearer {auth_token}"},
             files={
-                ("data", (name, data, content_type)),
-                ("request", (None, request.to_json(), Mimetypes.JSON)),
+                "data": (name, data, content_type),
+                "request": (None, request.to_json(), Mimetypes.JSON),
             },
             stream=stream,
             timeout=30,  # seconds

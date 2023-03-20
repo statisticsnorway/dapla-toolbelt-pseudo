@@ -6,7 +6,6 @@ import pytest
 from dapla_pseudo import repseudonymize
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
-from dapla_pseudo.utils import find_multipart_obj
 from dapla_pseudo.v1.models import PseudoKeyset
 
 
@@ -62,7 +61,7 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = find_multipart_obj("request", arg["files"])
+        actual_request_json = arg["files"]["request"][1]
         assert actual_request_json == expected_request_json
 
 
@@ -101,7 +100,7 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = find_multipart_obj("request", arg["files"])
+        actual_request_json = arg["files"]["request"][1]
         assert actual_request_json == expected_request_json
 
 
@@ -156,5 +155,5 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = find_multipart_obj("request", arg["files"])
+        actual_request_json = arg["files"]["request"][1]
         assert actual_request_json == expected_request_json
