@@ -36,7 +36,7 @@ from .models import RepseudonymizeFileRequest
 
 
 _FieldDecl = t.Union[str, dict, Field]
-_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, str, Path]
+_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, io.BufferedReader, str, Path]
 
 
 def pseudonymize(
@@ -83,7 +83,7 @@ def pseudonymize(
             # Dataframe
             content_type = Mimetypes.JSON
             file_handle = _dataframe_to_json(data, fields, sid_fields)
-        case t.IO():
+        case t.IO() | io.BufferedReader():
             # File handle
             content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
             data.seek(0)
@@ -99,7 +99,7 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        _client()._process_file("pseudonymize", pseudonymize_request, data, stream=stream)
+        return _client()._process_file("pseudonymize", pseudonymize_request, data, stream=stream)
 
 
 def depseudonymize(
