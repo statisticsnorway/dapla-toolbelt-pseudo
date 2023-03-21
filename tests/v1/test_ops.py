@@ -49,9 +49,9 @@ def test_generate_rules_from_different_field_representations() -> None:
             "rules": [
                 {"name": "rule-1", "pattern": "**/string-field", "func": "daead(keyId=some-key)"},
                 {"name": "rule-2", "pattern": "dict-field", "func": "daead(keyId=some-key)"},
-                {"name": "rule-3", "pattern": "dict-field-sid", "func": "map-sid(keyId=some-key)"},
+                {"name": "rule-3", "pattern": "dict-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
                 {"name": "rule-4", "pattern": "class-field", "func": "daead(keyId=some-key)"},
-                {"name": "rule-5", "pattern": "class-field-sid", "func": "map-sid(keyId=some-key)"},
+                {"name": "rule-5", "pattern": "class-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
             ]
         }
     )
