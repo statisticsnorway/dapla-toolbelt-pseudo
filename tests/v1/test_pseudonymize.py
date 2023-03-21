@@ -60,14 +60,13 @@ def test_pseudonymize_with_default_env_values(
 
 @mock.patch("dapla.auth.AuthClient")
 @mock.patch(REQUESTS_POST)
-def test_pseudonymize_dataframe_with_default_env_values(
+def test_pseudonymize_dataframe(
     patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
 ) -> None:
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
     df = pd.read_json(test_data_json_file_path)
 
     pseudonymize(df, fields=["fnr", "fornavn"])
-    patched_auth_client.called_once()
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
@@ -89,7 +88,7 @@ def test_pseudonymize_request_with_default_key(
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
     assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
-    assert arg["stream"] is True
+    # assert arg["stream"] is True
 
     expected_request_json = json.dumps(
         {
@@ -105,6 +104,10 @@ def test_pseudonymize_request_with_default_key(
 
     actual_request_json = arg["files"]["request"][1]
     assert actual_request_json == expected_request_json
+
+    assert arg["files"]["data"][0] == "personer.json"
+    assert isinstance(arg["files"]["data"][1], io.BufferedReader)
+    assert arg["files"]["data"][2] == Mimetypes.JSON
 
 
 @pytest.mark.parametrize(

@@ -9,6 +9,7 @@ import io
 import mimetypes
 import os
 import typing as t
+from pathlib import Path
 
 
 # isort: off
@@ -35,7 +36,7 @@ from .models import RepseudonymizeFileRequest
 
 
 _FieldDecl = t.Union[str, dict, Field]
-_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, str]
+_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, str, Path]
 
 
 def pseudonymize(
@@ -75,18 +76,20 @@ def pseudonymize(
     """
     file_handle = None
     match data:
-        case str():
+        case str() | Path():
             # File path
             content_type = Mimetypes(magic.from_file(data, mime=True))
         case pd.DataFrame():
             # Dataframe
             content_type = Mimetypes.JSON
             file_handle = _dataframe_to_json(data, fields, sid_fields)
-        case t.BinaryIO():
+        case t.IO():
             # File handle
             content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
             data.seek(0)
             file_handle = data
+        case _:
+            raise ValueError(f"Unsupported data type: {type(data)}. Supported types are {_DataDecl}")
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
     pseudonymize_request = PseudonymizeFileRequest(
@@ -96,8 +99,7 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        with open(str(data), "rb") as file_handle:
-            return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
+        _client()._process_file("pseudonymize", pseudonymize_request, data, stream=stream)
 
 
 def depseudonymize(
