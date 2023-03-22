@@ -5,6 +5,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+from typeguard import suppress_type_checks
 
 from dapla_pseudo import pseudonymize
 from dapla_pseudo.constants import env
@@ -99,8 +100,9 @@ def test_pseudonymize_invalid_type(
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
 
     with open(test_data_json_file_path) as data:
-        with pytest.raises(ValueError):
-            pseudonymize(data, fields=["fnr", "fornavn"])
+        with suppress_type_checks():
+            with pytest.raises(ValueError):
+                pseudonymize(data, fields=["fnr", "fornavn"])
 
 
 @mock.patch(REQUESTS_POST)
