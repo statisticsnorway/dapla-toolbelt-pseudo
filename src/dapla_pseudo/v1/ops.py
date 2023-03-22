@@ -23,6 +23,9 @@ import requests
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 
+from ..types import _BinaryFileDecl
+from ..types import _DataDecl
+from ..types import _FieldDecl
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
 from .models import Field
@@ -33,10 +36,6 @@ from .models import PseudoKeyset
 from .models import PseudonymizeFileRequest
 from .models import PseudoRule
 from .models import RepseudonymizeFileRequest
-
-
-_FieldDecl = t.Union[str, dict, Field]
-_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, io.BufferedReader, str, Path]
 
 
 def pseudonymize(
@@ -74,7 +73,7 @@ def pseudonymize(
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
-    file_handle = None
+    file_handle: t.Optional[_BinaryFileDecl] = None
     match data:
         case str() | Path():
             # File path
@@ -83,7 +82,7 @@ def pseudonymize(
             # Dataframe
             content_type = Mimetypes.JSON
             file_handle = _dataframe_to_json(data, fields, sid_fields)
-        case t.IO() | io.BufferedReader():
+        case io.BufferedReader():
             # File handle
             content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
             data.seek(0)
@@ -99,7 +98,7 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        return _client()._process_file("pseudonymize", pseudonymize_request, data, stream=stream)
+        return _client()._process_file("pseudonymize", pseudonymize_request, str(data), stream=stream)
 
 
 def depseudonymize(

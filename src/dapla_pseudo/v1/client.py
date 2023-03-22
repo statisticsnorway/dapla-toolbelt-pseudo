@@ -13,6 +13,9 @@ from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
+from ..types import _BinaryFileDecl
+from ..types import _FileSpecDecl
+
 
 class PseudoClient:
     """Client for interacting with the Dapla Pseudo Service REST API."""
@@ -36,7 +39,7 @@ class PseudoClient:
     def pseudonymize(
         self,
         pseudonymize_request: PseudonymizeFileRequest,
-        data: t.BinaryIO,
+        data: _BinaryFileDecl,
         stream: bool = False,
         name: t.Optional[str] = None,
     ) -> requests.Response:
@@ -173,12 +176,14 @@ class PseudoClient:
         self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes, stream: bool = False
     ) -> requests.Response:
         auth_token = self.__auth_token()
+        data_spec: _FileSpecDecl = (name, data, content_type)
+        request_spec: _FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={"Authorization": f"Bearer {auth_token}"},
             files={
-                "data": (name, data, content_type),
-                "request": (None, request.to_json(), Mimetypes.JSON),
+                "data": data_spec,
+                "request": request_spec,
             },
             stream=stream,
             timeout=30,  # seconds
