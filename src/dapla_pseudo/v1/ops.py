@@ -9,6 +9,7 @@ import io
 import mimetypes
 import os
 import typing as t
+from pathlib import Path
 
 
 # isort: off
@@ -22,6 +23,9 @@ import requests
 from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 
+from ..types import _BinaryFileDecl
+from ..types import _DataDecl
+from ..types import _FieldDecl
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
 from .models import Field
@@ -32,10 +36,6 @@ from .models import PseudoKeyset
 from .models import PseudonymizeFileRequest
 from .models import PseudoRule
 from .models import RepseudonymizeFileRequest
-
-
-_FieldDecl = t.Union[str, dict, Field]
-_DataDecl = t.Union[pd.DataFrame, t.BinaryIO, str]
 
 
 def pseudonymize(
@@ -73,20 +73,22 @@ def pseudonymize(
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
-    file_handle = None
+    file_handle: t.Optional[_BinaryFileDecl] = None
     match data:
-        case str():
+        case str() | Path():
             # File path
             content_type = Mimetypes(magic.from_file(data, mime=True))
         case pd.DataFrame():
             # Dataframe
             content_type = Mimetypes.JSON
             file_handle = _dataframe_to_json(data, fields, sid_fields)
-        case t.BinaryIO():
+        case io.BufferedReader():
             # File handle
             content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
             data.seek(0)
             file_handle = data
+        case _:
+            raise ValueError(f"Unsupported data type: {type(data)}. Supported types are {_DataDecl}")
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
     pseudonymize_request = PseudonymizeFileRequest(
@@ -96,8 +98,7 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        with open(str(data), "rb") as file_handle:
-            return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
+        return _client()._process_file("pseudonymize", pseudonymize_request, str(data), stream=stream)
 
 
 def depseudonymize(

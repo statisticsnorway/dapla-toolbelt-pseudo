@@ -5,7 +5,6 @@ import pytest
 
 from dapla_pseudo import depseudonymize
 from dapla_pseudo.constants import env
-from dapla_pseudo.utils import find_multipart_obj
 
 
 base_url = "https://mocked.dapla-pseudo-service"
@@ -36,5 +35,5 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = find_multipart_obj("request", arg["files"])
+        actual_request_json = arg["files"]["request"][1]
         assert actual_request_json == expected_request_json
