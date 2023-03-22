@@ -16,6 +16,7 @@ class PredefinedKeys(BaseModel, frozen=True):
 
     SSB_COMMON_KEY_1: Final[str] = "ssb-common-key-1"
     SSB_COMMON_KEY_2: Final[str] = "ssb-common-key-2"
+    PAPIS_COMMON_KEY_1: Final[str] = "papis-common-key-1"
 
 
 env = Env()

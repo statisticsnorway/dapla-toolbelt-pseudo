@@ -244,8 +244,8 @@ def test_pseudonymize_request_with_sid(
         {
             "pseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fnr2", "func": "map-sid(keyId=ssb-common-key-1)"},
+                    {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
+                    {"name": "rule-2", "pattern": "**/fnr2", "func": "map-sid(keyId=papis-common-key-1)"},
                     {"name": "rule-3", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                 ]
             },
@@ -275,7 +275,7 @@ def test_pseudonymize_request_using_sid_fields_parameter(
         {
             "pseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=ssb-common-key-1)"},
+                    {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
                     {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
                 ]
             },
