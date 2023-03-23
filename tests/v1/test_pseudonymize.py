@@ -114,10 +114,7 @@ def test_pseudonymize_file_handle(
 
 
 @mock.patch("dapla.auth.AuthClient")
-@mock.patch(REQUESTS_POST)
-def test_pseudonymize_invalid_type(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
-) -> None:
+def test_pseudonymize_invalid_type(patched_auth_client: mock.Mock, test_data_json_file_path: str) -> None:
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
 
     with open(test_data_json_file_path) as data:
