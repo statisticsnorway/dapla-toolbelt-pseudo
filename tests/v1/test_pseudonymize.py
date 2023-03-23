@@ -43,6 +43,11 @@ def test_data_json_file_path() -> str:
     return "tests/data/personer.json"
 
 
+@pytest.fixture
+def test_data_csv_file_path(test_data_json_file_path: str) -> str:
+    return test_data_json_file_path.replace(".json", ".csv")
+
+
 @mock.patch("dapla.auth.AuthClient")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_with_default_env_values(
@@ -74,6 +79,22 @@ def test_pseudonymize_dataframe(
     assert arg["files"]["data"][0] == "unknown.json"
     assert isinstance(arg["files"]["data"][1], io.BytesIO)
     assert arg["files"]["data"][2] == Mimetypes.JSON
+
+
+@mock.patch("dapla.auth.AuthClient")
+@mock.patch(REQUESTS_POST)
+def test_pseudonymize_csv_file(
+    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_csv_file_path: str
+) -> None:
+    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+
+    pseudonymize(test_data_csv_file_path, fields=["fnr", "fornavn"])
+    patched_post.assert_called_once()
+    arg = patched_post.call_args.kwargs
+
+    assert arg["files"]["data"][0] == "personer.csv"
+    assert isinstance(arg["files"]["data"][1], io.BufferedReader)
+    assert arg["files"]["data"][2] == Mimetypes.CSV
 
 
 @mock.patch("dapla.auth.AuthClient")
