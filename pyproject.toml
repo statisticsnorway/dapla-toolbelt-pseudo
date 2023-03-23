@@ -61,6 +61,7 @@ xdoctest = {extras = ["colors"], version = ">=0.15.10"}
 ipykernel = "^6.21.3"
 pandas-stubs = "^1.5.3.230304"
 nbstripout = "^0.6.1"
+ipython = "^8.11.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
