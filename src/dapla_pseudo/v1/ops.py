@@ -40,7 +40,7 @@ from .models import RepseudonymizeFileRequest
 
 def pseudonymize(
     data: _DataDecl,
-    fields: t.List[_FieldDecl],
+    fields: t.Optional[t.List[_FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
@@ -73,6 +73,15 @@ def pseudonymize(
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
+    if not fields and not sid_fields:
+        raise ValueError("At least one of fields and sid_fields must be specified.")
+
+    # Avoid later type errors by making sure we have lists
+    if fields is None:
+        fields = []
+    if sid_fields is None:
+        sid_fields = []
+
     file_handle: t.Optional[_BinaryFileDecl] = None
     match data:
         case str() | Path():

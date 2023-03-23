@@ -288,6 +288,11 @@ def test_pseudonymize_sid_fields_only(
     assert actual_request_json == expected_request_json
 
 
+def test_pseudonymize_no_fields_or_sid_fields_specified(test_data_json_file_path: str) -> None:
+    with pytest.raises(ValueError, match="At least one of fields and sid_fields must be specified."):
+        pseudonymize(test_data_json_file_path)
+
+
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_request_using_sid_fields_parameter(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
