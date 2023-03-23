@@ -257,6 +257,38 @@ def test_pseudonymize_request_with_sid(
 
 
 @mock.patch(REQUESTS_POST)
+def test_pseudonymize_sid_fields_only(
+    patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
+) -> None:
+    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+
+    pseudonymize(
+        test_data_json_file_path,
+        sid_fields=["fnr"],
+    )
+    patched_post.assert_called_once()
+    arg = patched_post.call_args.kwargs
+
+    assert arg["url"] == f"{base_url}/pseudonymize/file"
+    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["stream"] is True
+
+    expected_request_json = json.dumps(
+        {
+            "pseudoConfig": {
+                "rules": [
+                    {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
+                ]
+            },
+            "targetContentType": "application/json",
+        }
+    )
+    actual_request_json = arg["files"]["request"][1]
+    assert actual_request_json == expected_request_json
+
+
+@mock.patch(REQUESTS_POST)
 def test_pseudonymize_request_using_sid_fields_parameter(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
