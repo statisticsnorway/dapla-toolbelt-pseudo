@@ -111,7 +111,10 @@ def pseudonymize(
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
     pseudonymize_request = PseudonymizeFileRequest(
-        pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()), target_content_type=content_type
+        pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
+        target_content_type=content_type,
+        target_uri=None,
+        compression=None,
     )
 
     if file_handle is not None:
@@ -165,6 +168,8 @@ def depseudonymize(
     req = DepseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
         target_content_type=content_type,
+        target_uri=None,
+        compression=None,
     )
 
     return _client().depseudonymize_file(req, file_path, stream=stream)
@@ -220,6 +225,8 @@ def repseudonymize(
         source_pseudo_config=PseudoConfig(rules=source_rules, keysets=source_key_wrapper.keyset_list()),
         target_pseudo_config=PseudoConfig(rules=target_rules, keysets=target_key_wrapper.keyset_list()),
         target_content_type=content_type,
+        target_uri=None,
+        compression=None,
     )
 
     return _client().repseudonymize_file(req, file_path, stream=stream)
