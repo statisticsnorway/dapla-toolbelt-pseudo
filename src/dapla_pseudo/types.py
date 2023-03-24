@@ -11,5 +11,5 @@ from dapla_pseudo.v1.models import Field
 
 _FieldDecl = t.Union[str, dict, Field]
 _BinaryFileDecl = t.Union[t.BinaryIO, io.BufferedReader]
-_DataDecl = t.Union[pd.DataFrame, _BinaryFileDecl, str, Path]
+_DatasetDecl = t.Union[pd.DataFrame, _BinaryFileDecl, str, Path]
 _FileSpecDecl = tuple[t.Optional[str], t.Union[_BinaryFileDecl, str], str]

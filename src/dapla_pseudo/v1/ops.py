@@ -24,7 +24,7 @@ from dapla_pseudo.constants import env
 from dapla_pseudo.constants import predefined_keys
 
 from ..types import _BinaryFileDecl
-from ..types import _DataDecl
+from ..types import _DatasetDecl
 from ..types import _FieldDecl
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
@@ -39,24 +39,34 @@ from .models import RepseudonymizeFileRequest
 
 
 def pseudonymize(
-    data: _DataDecl,
-    fields: t.List[_FieldDecl],
+    dataset: _DatasetDecl,
+    fields: t.Optional[t.List[_FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
-    """Pseudonymize specified fields of a local file.
+    """Pseudonymize specified fields of a dataset.
 
-    Supported file formats: json
+    The dataset may be supplied as:
+        - A local file on disk (string or Path)
+        - A file handle (io.BufferedReader)
+        - A Pandas dataframe
 
-    The ``fields`` list specifies what to pseudonymize. This can either be a plain vanilla list of field names (e.g.
-    ``["some_field1", "another_field2"]``, or you can apply ninja-style techniques, such as using wildcard characters
-    (e.g. *Name) or slashes to target hierarchical fields (e.g. **/path/to/hierarchicalStuff).
+    Supported file formats: json, csv
 
-    Pseudonymize uses the tink-daead crypto function underneath the hood. It requires a key.
+    The ``fields`` and ``sid_fields`` lists specify what to pseudonymize. At least one of these fields must be specified.
+    The list contents can either be plain field names (e.g. ``["some_field1", "another_field2"]``, or you can apply
+    more advanced techniques, such as using wildcard characters (e.g. *Name) or slashes to target hierarchical fields
+    (e.g. **/path/to/hierarchicalStuff).
+
+    For ``fields``, the ``daead`` pseudonymization function is used. It requires a key.
     You can choose to specify one of the predefined ("globally available") keys ("ssb-common-key-1" or
     "ssb-common-key-2") or provide your own custom keyset. If you don't specify a key, the predefined "ssb-common-key-1"
     will be used as default.
+
+    For ``sid_fields``, the ``map-sid`` pseudonymization function is used. This maps a fødselsnummer to a "stabil ID" and
+    subsequently pseudonymizes the stabil ID using an FPE algorithm. Pseudonyms produced by this function are guaranteed to be
+    compatible with those produced by the PAPIS project.
 
     It is possible to operate on the file in a streaming manner, e.g. like so:
 
@@ -73,22 +83,31 @@ def pseudonymize(
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
+    if not fields and not sid_fields:
+        raise ValueError("At least one of fields and sid_fields must be specified.")
+
+    # Avoid later type errors by making sure we have lists
+    if fields is None:
+        fields = []
+    if sid_fields is None:
+        sid_fields = []
+
     file_handle: t.Optional[_BinaryFileDecl] = None
-    match data:
+    match dataset:
         case str() | Path():
             # File path
-            content_type = Mimetypes(magic.from_file(data, mime=True))
+            content_type = Mimetypes(magic.from_file(dataset, mime=True))
         case pd.DataFrame():
             # Dataframe
             content_type = Mimetypes.JSON
-            file_handle = _dataframe_to_json(data, fields, sid_fields)
+            file_handle = _dataframe_to_json(dataset, fields, sid_fields)
         case io.BufferedReader():
             # File handle
-            content_type = Mimetypes(magic.from_buffer(data.read(2048), mime=True))
-            data.seek(0)
-            file_handle = data
+            content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+            dataset.seek(0)
+            file_handle = dataset
         case _:
-            raise ValueError(f"Unsupported data type: {type(data)}. Supported types are {_DataDecl}")
+            raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {_DatasetDecl}")
     k = KeyWrapper(key)
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
     pseudonymize_request = PseudonymizeFileRequest(
@@ -98,7 +117,7 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
     else:
-        return _client()._process_file("pseudonymize", pseudonymize_request, str(data), stream=stream)
+        return _client()._process_file("pseudonymize", pseudonymize_request, str(dataset), stream=stream)
 
 
 def depseudonymize(
