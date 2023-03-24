@@ -7,14 +7,14 @@ from dapla_pseudo.v1.ops import _rules_of
 
 def test_generate_rules_from_single_field() -> None:
     rules = _rules_of(key="some-key", fields=["some-field"], sid_fields=[])
-    assert PseudoConfig(rules=rules).to_json() == json.dumps(
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"}]}
     )
 
 
 def test_generate_rules_from_multiple_field() -> None:
     rules = _rules_of(key="some-key", fields=["some-field", "another-field", "yet-another-field"], sid_fields=[])
-    assert PseudoConfig(rules=rules).to_json() == json.dumps(
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {
             "rules": [
                 {"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
@@ -27,7 +27,7 @@ def test_generate_rules_from_multiple_field() -> None:
 
 def test_generate_rules_from_hierarchy_field() -> None:
     rules = _rules_of(key="some-key", fields=["path/to/*-field"], sid_fields=[])
-    assert PseudoConfig(rules=rules).to_json() == json.dumps(
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {"rules": [{"name": "rule-1", "pattern": "**/path/to/*-field", "func": "daead(keyId=some-key)"}]}
     )
 
@@ -44,7 +44,7 @@ def test_generate_rules_from_different_field_representations() -> None:
         ],
         sid_fields=[],
     )
-    assert PseudoConfig(rules=rules).to_json() == json.dumps(
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {
             "rules": [
                 {"name": "rule-1", "pattern": "**/string-field", "func": "daead(keyId=some-key)"},
