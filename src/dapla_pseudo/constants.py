@@ -19,5 +19,13 @@ class PredefinedKeys(BaseModel):
     PAPIS_COMMON_KEY_1: Final[str] = "papis-common-key-1"
 
 
+class PseudoFunctionTypes(BaseModel):
+    """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
+
+    DAEAD: Final[str] = "daead"
+    MAP_SID: Final[str] = "map-sid"
+
+
 env = Env()
 predefined_keys = PredefinedKeys()
+pseudo_function_types = PseudoFunctionTypes()

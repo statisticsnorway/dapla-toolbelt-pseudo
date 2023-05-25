@@ -1,7 +1,11 @@
 import json
 
+import pandas as pd
+import pytest
+
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import PseudoConfig
+from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.ops import _rules_of
 
 
@@ -55,3 +59,38 @@ def test_generate_rules_from_different_field_representations() -> None:
             ]
         }
     )
+
+
+def test_dataframe_to_json_minimal_call() -> None:
+    _dataframe_to_json(pd.DataFrame())
+
+
+@pytest.mark.parametrize(
+    "input_dict,expected_output,fields,sid_fields",
+    [
+        ({"a": [1, 2, 3]}, [{"a": 1}, {"a": 2}, {"a": 3}], None, None),
+        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], ["a"], None),
+        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], None, ["a"]),
+        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], ["a"], ["a"]),
+        ({"a": ["1", "2", "3"]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], ["a"], None),
+    ],
+)
+def test_dataframe_to_json_type_conversion(
+    input_dict: dict, expected_output: dict, fields: list[str], sid_fields: list[str]
+) -> None:
+    handle = _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
+    assert expected_output == json.load(handle)
+
+
+@pytest.mark.parametrize(
+    "input_dict,expected_output,fields,sid_fields",
+    [
+        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], None, ["b"]),
+        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], ["b"], None),
+    ],
+)
+def test_dataframe_to_json_unknown_field(
+    input_dict: dict, expected_output: dict, fields: list[str], sid_fields: list[str]
+) -> None:
+    with pytest.raises(KeyError):
+        _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
