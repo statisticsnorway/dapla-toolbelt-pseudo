@@ -180,7 +180,10 @@ class PseudoClient:
         request_spec: _FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
-            headers={"Authorization": f"Bearer {auth_token}"},
+            headers={
+                "Authorization": f"Bearer {auth_token}",
+                "Accept-Encoding": "gzip",
+            },
             files={
                 "data": data_spec,
                 "request": request_spec,

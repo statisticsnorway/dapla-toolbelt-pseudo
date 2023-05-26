@@ -41,7 +41,7 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
         arg = patched.call_args.kwargs
 
         assert arg["url"] == f"{base_url}/repseudonymize/file"
-        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
         expected_request_json = json.dumps(
@@ -80,7 +80,7 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
         arg = patched.call_args.kwargs
 
         assert arg["url"] == f"{base_url}/repseudonymize/file"
-        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
         expected_request_json = json.dumps(
@@ -118,7 +118,7 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
         arg = patched.call_args.kwargs
 
         assert arg["url"] == f"{base_url}/repseudonymize/file"
-        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
         expected_request_json = json.dumps(

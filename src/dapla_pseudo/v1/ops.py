@@ -11,6 +11,8 @@ import os
 import typing as t
 from pathlib import Path
 
+import fsspec.spec
+
 
 # isort: off
 import pylibmagic  # noqa Must be imported before magic
@@ -93,6 +95,7 @@ def pseudonymize(
         sid_fields = []
 
     file_handle: t.Optional[_BinaryFileDecl] = None
+    name: t.Optional[str] = None
     match dataset:
         case str() | Path():
             # File path
@@ -106,6 +109,13 @@ def pseudonymize(
             content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
             dataset.seek(0)
             file_handle = dataset
+        case fsspec.spec.AbstractBufferedFile():
+            # This is a file handle to a remote storage system such as GCS.
+            # It provides random access for the underlying file-like data (without downloading the whole thing).
+            content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+            name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
+            dataset.seek(0)
+            file_handle = io.BufferedReader(dataset)
         case _:
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {_DatasetDecl}")
     k = KeyWrapper(key)
@@ -118,7 +128,7 @@ def pseudonymize(
     )
 
     if file_handle is not None:
-        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream)
+        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream, name=name)
     else:
         return _client()._process_file("pseudonymize", pseudonymize_request, str(dataset), stream=stream)
 
