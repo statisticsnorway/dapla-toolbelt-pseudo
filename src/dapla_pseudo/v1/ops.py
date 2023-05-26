@@ -110,7 +110,8 @@ def pseudonymize(
             dataset.seek(0)
             file_handle = dataset
         case fsspec.spec.AbstractBufferedFile():
-            # File handle
+            # This is a file handle to a remote storage system such as GCS.
+            # It provides random access for the underlying file-like data (without downloading the whole thing).
             content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
             name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
             dataset.seek(0)
