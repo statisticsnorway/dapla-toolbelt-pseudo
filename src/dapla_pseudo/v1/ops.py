@@ -10,7 +10,7 @@ import mimetypes
 import os
 import typing as t
 from pathlib import Path
-from fsspec.spec import AbstractBufferedFile
+import fsspec.spec
 
 # isort: off
 import pylibmagic  # noqa Must be imported before magic
@@ -107,13 +107,12 @@ def pseudonymize(
             content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
             dataset.seek(0)
             file_handle = dataset
-        case AbstractBufferedFile():
+        case fsspec.spec.AbstractBufferedFile():
             # File handle
             content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
             name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
             dataset.seek(0)
             file_handle = io.BufferedReader(dataset)
-
         case _:
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {_DatasetDecl}")
     k = KeyWrapper(key)
