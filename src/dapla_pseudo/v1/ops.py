@@ -110,7 +110,7 @@ def pseudonymize(
         case AbstractBufferedFile():
             # File handle
             content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
-            name = dataset.path.split('/')[-1] if hasattr(dataset, "path") else None
+            name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
             dataset.seek(0)
             file_handle = io.BufferedReader(dataset)
 

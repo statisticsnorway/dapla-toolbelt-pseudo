@@ -5,8 +5,8 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from typeguard import suppress_type_checks
 from dapla.gcs import GCSFileSystem
+from typeguard import suppress_type_checks
 
 from dapla_pseudo import pseudonymize
 from dapla_pseudo.constants import env
@@ -117,7 +117,7 @@ def test_pseudonymize_file_handle(
 @mock.patch("dapla.auth.AuthClient")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_fsspec_file(
-        patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
 ) -> None:
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
     fs = GCSFileSystem()
