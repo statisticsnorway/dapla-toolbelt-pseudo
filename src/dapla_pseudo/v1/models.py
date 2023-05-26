@@ -2,6 +2,7 @@
 import json
 import typing as t
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -143,7 +144,8 @@ class PseudoFunction(BaseModel):
 
     function_type: str
     key: str
+    extra_kwargs: Optional[list[str]] = None
 
     def __str__(self) -> str:
-        """Function representation as expected by pseudo service."""
-        return f"{self.function_type}(keyId={self.key})"
+        """Create the function representation as expected by pseudo service."""
+        return f"{self.function_type}({', '.join([f'keyId={self.key}'] + (self.extra_kwargs or []))})"

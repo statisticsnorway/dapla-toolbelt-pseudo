@@ -1,6 +1,5 @@
 """This module defines constants that is referenced throughout the codebase."""
 from enum import Enum
-from typing import Final
 
 
 class Env(str, Enum):
@@ -21,5 +20,6 @@ class PredefinedKeys(str, Enum):
 class PseudoFunctionTypes(str, Enum):
     """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
 
-    DAEAD: Final[str] = "daead"
-    MAP_SID: Final[str] = "map-sid"
+    DAEAD = "daead"
+    MAP_SID = "map-sid"
+    FF31 = "ff31"

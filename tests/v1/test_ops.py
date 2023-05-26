@@ -1,4 +1,6 @@
 import json
+from typing import Any
+from typing import Sequence
 
 import pandas as pd
 import pytest
@@ -76,21 +78,21 @@ def test_dataframe_to_json_minimal_call() -> None:
     ],
 )
 def test_dataframe_to_json_type_conversion(
-    input_dict: dict, expected_output: dict, fields: list[str], sid_fields: list[str]
+    input_dict: dict[str, Any], expected_output: dict[str, Any], fields: Sequence[str], sid_fields: Sequence[str]
 ) -> None:
     handle = _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
     assert expected_output == json.load(handle)
 
 
 @pytest.mark.parametrize(
-    "input_dict,expected_output,fields,sid_fields",
+    "input_dict,fields,sid_fields",
     [
-        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], None, ["b"]),
-        ({"a": [1, 2, 3]}, [{"a": "1"}, {"a": "2"}, {"a": "3"}], ["b"], None),
+        ({"a": [1, 2, 3]}, None, ["b"]),
+        ({"a": [1, 2, 3]}, ["b"], None),
     ],
 )
 def test_dataframe_to_json_unknown_field(
-    input_dict: dict, expected_output: dict, fields: list[str], sid_fields: list[str]
+    input_dict: dict[str, Any], fields: Sequence[str], sid_fields: Sequence[str]
 ) -> None:
     with pytest.raises(KeyError):
         _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
