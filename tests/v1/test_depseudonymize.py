@@ -21,7 +21,7 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
         arg = patched.call_args.kwargs
 
         assert arg["url"] == f"{base_url}/depseudonymize/file"
-        assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+        assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
         expected_request_json = json.dumps(

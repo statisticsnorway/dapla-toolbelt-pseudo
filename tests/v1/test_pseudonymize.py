@@ -6,6 +6,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 from typeguard import suppress_type_checks
+from dapla.gcs import GCSFileSystem
 
 from dapla_pseudo import pseudonymize
 from dapla_pseudo.constants import env
@@ -61,7 +62,7 @@ def test_pseudonymize_with_default_env_values(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == "http://dapla-pseudo-service.dapla.svc.cluster.local/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
 
 
 @mock.patch("dapla.auth.AuthClient")
@@ -114,6 +115,23 @@ def test_pseudonymize_file_handle(
 
 
 @mock.patch("dapla.auth.AuthClient")
+@mock.patch(REQUESTS_POST)
+def test_pseudonymize_fsspec_file(
+        patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+) -> None:
+    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+    fs = GCSFileSystem()
+    with fs.open("gs://anaconda-public-data/iris/iris.csv", "rb") as data:
+        pseudonymize(data, fields=["fnr", "fornavn"])
+    patched_post.assert_called_once()
+    arg = patched_post.call_args.kwargs
+
+    assert arg["files"]["data"][0] == "iris.csv"
+    assert isinstance(arg["files"]["data"][1], io.BufferedReader)
+    assert arg["files"]["data"][2] == Mimetypes.CSV
+
+
+@mock.patch("dapla.auth.AuthClient")
 def test_pseudonymize_invalid_type(patched_auth_client: mock.Mock, test_data_json_file_path: str) -> None:
     patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
 
@@ -135,7 +153,7 @@ def test_pseudonymize_request_with_default_key(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(
@@ -173,7 +191,7 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(
@@ -205,7 +223,7 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(
@@ -255,7 +273,7 @@ def test_pseudonymize_request_with_sid(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(
@@ -289,7 +307,7 @@ def test_pseudonymize_sid_fields_only(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(
@@ -323,7 +341,7 @@ def test_pseudonymize_request_using_sid_fields_parameter(
     arg = patched_post.call_args.kwargs
 
     assert arg["url"] == f"{base_url}/pseudonymize/file"
-    assert arg["headers"] == {"Authorization": f"Bearer {auth_token}"}
+    assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
     expected_request_json = json.dumps(

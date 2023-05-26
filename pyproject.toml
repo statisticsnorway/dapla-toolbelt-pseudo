@@ -27,6 +27,7 @@ python-magic = "^0.4.27"
 pylibmagic = "^0.2.2"
 cryptography = "39.0.1"
 dapla-toolbelt = "^1.7.0"
+fsspec = "^2023.5.0"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
