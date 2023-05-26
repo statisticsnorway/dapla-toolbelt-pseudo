@@ -10,7 +10,9 @@ import mimetypes
 import os
 import typing as t
 from pathlib import Path
+
 import fsspec.spec
+
 
 # isort: off
 import pylibmagic  # noqa Must be imported before magic

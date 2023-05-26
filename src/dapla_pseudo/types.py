@@ -9,6 +9,7 @@ import pandas as pd
 
 from dapla_pseudo.v1.models import Field
 
+
 _FieldDecl = t.Union[str, dict, Field]
 _BinaryFileDecl = t.Union[t.BinaryIO, io.BufferedReader, fsspec.spec.AbstractBufferedFile]
 _DatasetDecl = t.Union[pd.DataFrame, _BinaryFileDecl, str, Path]
