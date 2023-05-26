@@ -5,8 +5,8 @@ from dataclasses import dataclass
 import pandas as pd
 import requests
 
-from dapla_pseudo.constants import predefined_keys
-from dapla_pseudo.constants import pseudo_function_types
+from dapla_pseudo.constants import PredefinedKeys
+from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import Mimetypes
@@ -51,7 +51,7 @@ class Dataset:
             self._dataframe: pd.DataFrame = dataframe
             self._field: Field = field
             self._pseudo_func: PseudoFunction = PseudoFunction(
-                function_type=pseudo_function_types.DAEAD, key=predefined_keys.SSB_COMMON_KEY_1
+                function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1
             )
 
         def map_to_sid(self) -> "Dataset._Pseudonymizer":
@@ -62,7 +62,7 @@ class Dataset:
             and subsequently pseudonymize the sid using Format Preserving Encryption.
             """
             self._pseudo_func = PseudoFunction(
-                function_type=pseudo_function_types.MAP_SID, key=predefined_keys.PAPIS_COMMON_KEY_1
+                function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1
             )
             return self
 

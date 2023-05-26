@@ -4,8 +4,8 @@ from unittest import mock
 import pytest
 
 from dapla_pseudo import repseudonymize
-from dapla_pseudo.constants import env
-from dapla_pseudo.constants import predefined_keys
+from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.v1.models import PseudoKeyset
 
 
@@ -32,8 +32,8 @@ custom_keyset = PseudoKeyset.parse_obj(
 
 
 def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     with mock.patch("requests.post") as patched:
         repseudonymize(file_path="tests/data/personer.json", fields=["fnr", "fornavn"])
@@ -66,15 +66,15 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
 
 
 def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     with mock.patch("requests.post") as patched:
         repseudonymize(
             file_path="tests/data/personer.json",
             fields=["fnr", "fornavn"],
-            source_key=predefined_keys.SSB_COMMON_KEY_1,
-            target_key=predefined_keys.SSB_COMMON_KEY_2,
+            source_key=PredefinedKeys.SSB_COMMON_KEY_1,
+            target_key=PredefinedKeys.SSB_COMMON_KEY_2,
         )
         patched.assert_called_once()
         arg = patched.call_args.kwargs
@@ -105,8 +105,8 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
 
 
 def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     with mock.patch("requests.post") as patched:
         repseudonymize(

@@ -8,8 +8,8 @@ import pytest
 from typeguard import suppress_type_checks
 
 from dapla_pseudo import pseudonymize
-from dapla_pseudo.constants import env
-from dapla_pseudo.constants import predefined_keys
+from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoKeyset
@@ -127,8 +127,8 @@ def test_pseudonymize_invalid_type(patched_auth_client: mock.Mock, test_data_jso
 def test_pseudonymize_request_with_default_key(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"])
     patched_post.assert_called_once()
@@ -158,15 +158,13 @@ def test_pseudonymize_request_with_default_key(
     assert arg["files"]["data"][2] == Mimetypes.JSON
 
 
-@pytest.mark.parametrize(
-    "key", [predefined_keys.SSB_COMMON_KEY_1, predefined_keys.SSB_COMMON_KEY_2, "some-unknown-key"]
-)
+@pytest.mark.parametrize("key", [PredefinedKeys.SSB_COMMON_KEY_1, PredefinedKeys.SSB_COMMON_KEY_2, "some-unknown-key"])
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_request_with_explicitly_specified_common_key(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str, key: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"], key=key)
     patched_post.assert_called_once()
@@ -195,8 +193,8 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
 def test_pseudonymize_request_with_explicitly_specified_keyset(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     keyset = custom_keyset
 
@@ -244,8 +242,8 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
 def test_pseudonymize_request_with_sid(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(
         test_data_json_file_path,
@@ -278,8 +276,8 @@ def test_pseudonymize_request_with_sid(
 def test_pseudonymize_sid_fields_only(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(
         test_data_json_file_path,
@@ -315,8 +313,8 @@ def test_pseudonymize_no_fields_or_sid_fields_specified(test_data_json_file_path
 def test_pseudonymize_request_using_sid_fields_parameter(
     patched_post: mock.Mock, monkeypatch: pytest.MonkeyPatch, test_data_json_file_path: str
 ) -> None:
-    monkeypatch.setenv(env.PSEUDO_SERVICE_URL, base_url)
-    monkeypatch.setenv(env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
+    monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(test_data_json_file_path, fields=["fornavn"], sid_fields=["fnr"])
     patched_post.assert_called_once()
