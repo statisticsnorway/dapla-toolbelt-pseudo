@@ -22,11 +22,10 @@ import importlib
 __version__ = importlib.metadata.version("dapla_toolbelt_pseudo")
 
 from .v1 import PseudoClient
+from .v1 import PseudoData
 from .v1 import depseudonymize
 from .v1 import pseudonymize
 from .v1 import repseudonymize
-
-from .v1 import PseudoData
 
 
 __all__ = [
