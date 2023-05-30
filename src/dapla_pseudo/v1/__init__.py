@@ -5,5 +5,13 @@ from dapla_pseudo.v1.ops import depseudonymize
 from dapla_pseudo.v1.ops import pseudonymize
 from dapla_pseudo.v1.ops import repseudonymize
 
+from dapla_pseudo.v1.builder import PseudoData
 
-__all__ = ["PseudoClient", "pseudonymize", "depseudonymize", "repseudonymize"]
+
+__all__ = [
+    "PseudoClient",
+    "pseudonymize",
+    "depseudonymize",
+    "repseudonymize",
+    "PseudoData",
+]

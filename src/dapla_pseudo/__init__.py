@@ -26,5 +26,13 @@ from .v1 import depseudonymize
 from .v1 import pseudonymize
 from .v1 import repseudonymize
 
+from .v1 import PseudoData
 
-__all__ = ["PseudoClient", "pseudonymize", "depseudonymize", "repseudonymize"]
+
+__all__ = [
+    "PseudoClient",
+    "pseudonymize",
+    "depseudonymize",
+    "repseudonymize",
+    "PseudoData",
+]
