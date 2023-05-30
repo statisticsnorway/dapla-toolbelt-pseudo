@@ -14,12 +14,12 @@ from dapla_pseudo.v1 import pseudonymize
 (which would always resolve to the v1 implementation)
 """
 
-import importlib
+from importlib.metadata import version
 
 
 # Avoid having to define the version multiple places.
 # Ref: https://github.com/python-poetry/poetry/issues/144#issuecomment-1488038660
-__version__ = importlib.metadata.version("dapla_toolbelt_pseudo")
+__version__ = version("dapla_toolbelt_pseudo")
 
 from .v1 import PseudoClient
 from .v1 import depseudonymize
