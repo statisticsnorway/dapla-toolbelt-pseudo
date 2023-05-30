@@ -27,7 +27,7 @@ class PseudonymizationResult:
 
 
 class PseudoData:
-    """Starting point for pseudonymizing a single field.
+    """Starting point for pseudonymization of datasets.
 
     This class should not be instantiated, only the static methods should be used.
     """
@@ -36,11 +36,6 @@ class PseudoData:
     def from_pandas(dataframe: pd.DataFrame) -> "_FieldSelector":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         return PseudoData._FieldSelector(dataframe)
-
-    @staticmethod
-    def from_bucket(bucket_uri: str) -> "_FieldSelector":
-        """Initialize a pseudonymization request from a csv or json file in a bucket."""
-        raise NotImplementedError()
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""

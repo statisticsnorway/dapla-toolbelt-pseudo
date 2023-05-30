@@ -25,7 +25,7 @@ def df() -> pd.DataFrame:
 @patch(f"{PKG}._client")
 def test_builder_pandas_pseudonymize_minimal_call(patched_client: Mock, df: pd.DataFrame) -> None:
     patched_client.pseudonymize.return_value = requests.Response()
-    PseudoData.from_pandas(df).on_field("fornavn").apply_default_encryption()
+    PseudoData.from_pandas(df).on_field("fornavn").apply_default_encryption().pseudonymize()
 
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:
@@ -66,7 +66,3 @@ def test_builder_pseudo_function_selector_custom(df: pd.DataFrame) -> None:
 def test_builder_pandas_pseudo_func_multiple_fields(df: pd.DataFrame) -> None:
     fields = ["snr", "snr_mor", "snr_far"]
     assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [Field(pattern=f"**/{f}") for f in fields]
-
-
-def test_builder_bucket() -> None:
-    PseudoData.from_bucket("gs://my-bucket/my-data.csv")

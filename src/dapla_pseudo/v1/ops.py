@@ -272,8 +272,8 @@ def _content_type_of(file_path: str) -> str:
 
 def _dataframe_to_json(
     data: pd.DataFrame,
-    fields: t.Optional[t.List[_FieldDecl]] = None,
-    sid_fields: t.Optional[t.List[str]] = None,
+    fields: t.Optional[t.Sequence[_FieldDecl]] = None,
+    sid_fields: t.Optional[t.Sequence[str]] = None,
 ) -> t.BinaryIO:
     # Ensure fields to be pseudonymized are string type
     for field in set(fields or []).union(sid_fields or []):
