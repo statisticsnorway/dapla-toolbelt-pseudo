@@ -50,13 +50,11 @@ class PseudoData:
             self._dataframe = dataframe
 
         def on_field(self, field: str) -> "PseudoData._PseudoFunctionSelector":
-            """Specify the field to be pseudonymized"""
-            # Extract/specify field
+            """Specify a single field to be pseudonymized."""
             return PseudoData._PseudoFunctionSelector(self._dataframe, [Field(pattern=f"**/{field}")])
 
         def on_fields(self, *fields: str) -> "PseudoData._PseudoFunctionSelector":
-            """Specify the field to be pseudonymized"""
-            # Extract/specify field
+            """Specify multiple fields to be pseudonymized."""
             return PseudoData._PseudoFunctionSelector(self._dataframe, [Field(pattern=f"**/{f}") for f in fields])
 
     class _PseudoFunctionSelector:
@@ -73,7 +71,7 @@ class PseudoData:
             """Pseudonymize using the 'map-sid' pseudo function.
 
             This should only be used for Norwegian personal numbers for which we wish
-            to first map the personal number to an SSB "Stable identifier" (sid)
+            to first map the personal number to an SSB "Stable identifier" (aka snr, sid)
             and subsequently pseudonymize the sid using Format Preserving Encryption.
             """
             pseudo_func = PseudoFunction(
