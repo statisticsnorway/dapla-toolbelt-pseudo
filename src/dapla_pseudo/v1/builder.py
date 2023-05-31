@@ -45,11 +45,11 @@ class PseudoData:
             """Initialize the class."""
             self._dataframe = dataframe
 
-        def on_field(self, field: str) -> "PseudoData._PseudoFunctionSelector":
+        def on_field(self, field: str) -> "PseudoData._Pseudonymizer":
             """Specify a single field to be pseudonymized."""
             return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{field}")])
 
-        def on_fields(self, *fields: str) -> "PseudoData._PseudoFunctionSelector":
+        def on_fields(self, *fields: str) -> "PseudoData._Pseudonymizer":
             """Specify multiple fields to be pseudonymized."""
             return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{f}") for f in fields])
 
@@ -66,7 +66,7 @@ class PseudoData:
             return self
 
         def pseudonymize(
-            self, preserve_formatting: bool = False, with_custom_function: PseudoFunction = None
+            self, preserve_formatting: bool = False, with_custom_function: Optional[PseudoFunction] = None
         ) -> "PseudonymizationResult":
             # If _pseudo_func has been defined upstream, then use that.
             if self._pseudo_func is None:
@@ -90,7 +90,9 @@ class PseudoData:
             return _do_pseudonymization(dataframe=self._dataframe, fields=self._fields, pseudo_func=self._pseudo_func)
 
 
-def _do_pseudonymization(dataframe: pd.DataFrame, fields: list[Field], pseudo_func: PseudoFunction):
+def _do_pseudonymization(
+    dataframe: pd.DataFrame, fields: list[Field], pseudo_func: PseudoFunction
+) -> "PseudonymizationResult":
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(
             rules=[
