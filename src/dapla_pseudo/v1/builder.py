@@ -5,6 +5,7 @@ from typing import Optional
 
 import pandas as pd
 import requests
+from typing_extensions import Self
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
@@ -46,80 +47,67 @@ class PseudoData:
 
         def on_field(self, field: str) -> "PseudoData._PseudoFunctionSelector":
             """Specify a single field to be pseudonymized."""
-            return PseudoData._PseudoFunctionSelector(self._dataframe, [Field(pattern=f"**/{field}")])
+            return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{field}")])
 
         def on_fields(self, *fields: str) -> "PseudoData._PseudoFunctionSelector":
             """Specify multiple fields to be pseudonymized."""
-            return PseudoData._PseudoFunctionSelector(self._dataframe, [Field(pattern=f"**/{f}") for f in fields])
+            return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{f}") for f in fields])
 
-    class _PseudoFunctionSelector:
+    class _Pseudonymizer:
         def __init__(self, dataframe: pd.DataFrame, fields: list[Field]) -> None:
             self._dataframe: pd.DataFrame = dataframe
             self._fields: list[Field] = fields
+            self._pseudo_func: Optional[PseudoFunction] = None
 
-        def apply_default_encryption(self) -> "PseudoData._Pseudonymizer":
-            """Pseudonymize using the 'daead' pseudo function."""
-            pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1)
-            return PseudoData._Pseudonymizer(self._dataframe, self._fields, pseudo_func)
-
-        def map_to_stable_id_then_apply_fpe(self) -> "PseudoData._Pseudonymizer":
-            """Pseudonymize using the 'map-sid' pseudo function.
-
-            This should only be used for Norwegian personal numbers for which we wish
-            to first map the personal number to an SSB "Stable identifier" (aka snr, sid)
-            and subsequently pseudonymize the sid using Format Preserving Encryption.
-            """
-            pseudo_func = PseudoFunction(
+        def map_to_stable_id(self) -> Self:
+            self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1
             )
-            return PseudoData._Pseudonymizer(self._dataframe, self._fields, pseudo_func)
+            return self
 
-        def apply_fpe(self) -> "PseudoData._Pseudonymizer":
-            """Pseudonymize using the 'ff31' pseudo function.
+        def pseudonymize(
+            self, preserve_formatting: bool = False, with_custom_function: PseudoFunction = None
+        ) -> "PseudonymizationResult":
+            # If _pseudo_func has been defined upstream, then use that.
+            if self._pseudo_func is None:
+                # If the user has explicitly defined their own function, then use that.
+                if with_custom_function is not None:
+                    self._pseudo_func = with_custom_function
 
-            This should be used for Stable IDs (snr) which must be compatible with pseudonyms created on-prem.
-            """
-            pseudo_func = PseudoFunction(
-                function_type=PseudoFunctionTypes.FF31,
-                key=PredefinedKeys.PAPIS_COMMON_KEY_1,
-                extra_kwargs=["strategy=SKIP"],
-            )
-            return PseudoData._Pseudonymizer(self._dataframe, self._fields, pseudo_func)
+                # Use Format Preserving Encryption with the PAPIS compatible key (non-default case).
+                elif preserve_formatting:
+                    self._pseudo_func = PseudoFunction(
+                        function_type=PseudoFunctionTypes.FF31,
+                        key=PredefinedKeys.PAPIS_COMMON_KEY_1,
+                        extra_kwargs=["strategy=SKIP"],
+                    )
+                # Use DAEAD with the SSB common key as a sane default.
+                else:
+                    self._pseudo_func = PseudoFunction(
+                        function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1
+                    )
 
-        def apply_custom_pseudo_function(
-            self,
-            function_type: str | PseudoFunctionTypes,
-            key: str | PredefinedKeys,
-            extra_kwargs: Optional[list[str]] = None,
-        ) -> "PseudoData._Pseudonymizer":
-            """Pseudonymize using the specified pseudo function."""
-            pseudo_func = PseudoFunction(function_type=function_type, key=key, extra_kwargs=extra_kwargs)
-            return PseudoData._Pseudonymizer(self._dataframe, self._fields, pseudo_func)
+            return _do_pseudonymization(dataframe=self._dataframe, fields=self._fields, pseudo_func=self._pseudo_func)
 
-    class _Pseudonymizer:
-        def __init__(self, dataframe: pd.DataFrame, fields: list[Field], pseudo_func: PseudoFunction) -> None:
-            self._dataframe: pd.DataFrame = dataframe
-            self._fields: list[Field] = fields
-            self._pseudo_func: PseudoFunction = pseudo_func
 
-        def pseudonymize(self) -> "PseudonymizationResult":
-            pseudonymize_request = PseudonymizeFileRequest(
-                pseudo_config=PseudoConfig(
-                    rules=[
-                        PseudoRule(
-                            name=f"{f.pattern.split('/')[-1]}-{self._pseudo_func}",
-                            pattern=f.pattern,
-                            func=str(self._pseudo_func),
-                        )
-                        for f in self._fields
-                    ],
-                    keysets=KeyWrapper(self._pseudo_func.key).keyset_list(),
-                ),
-                target_content_type=Mimetypes.JSON,
-                target_uri=None,
-                compression=None,
-            )
-            response: requests.Response = _client().pseudonymize(
-                pseudonymize_request, _dataframe_to_json(self._dataframe), stream=True
-            )
-            return PseudonymizationResult(dataframe=pd.json_normalize(response.json()))
+def _do_pseudonymization(dataframe: pd.DataFrame, fields: list[Field], pseudo_func: PseudoFunction):
+    pseudonymize_request = PseudonymizeFileRequest(
+        pseudo_config=PseudoConfig(
+            rules=[
+                PseudoRule(
+                    name=f"{f.pattern.split('/')[-1]}-{pseudo_func}",
+                    pattern=f.pattern,
+                    func=str(pseudo_func),
+                )
+                for f in fields
+            ],
+            keysets=KeyWrapper(pseudo_func.key).keyset_list(),
+        ),
+        target_content_type=Mimetypes.JSON,
+        target_uri=None,
+        compression=None,
+    )
+    response: requests.Response = _client().pseudonymize(
+        pseudonymize_request, _dataframe_to_json(dataframe), stream=True
+    )
+    return PseudonymizationResult(dataframe=pd.json_normalize(response.json()))
