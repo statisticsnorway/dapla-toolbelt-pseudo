@@ -1,9 +1,9 @@
-"""This module defines constants that is referenced throughout the codebase."""
+"""This module defines constants that are referenced throughout the codebase."""
 from enum import Enum
 
 
 class Env(str, Enum):
-    """Environment variables."""
+    """Environment variable keys."""
 
     PSEUDO_SERVICE_URL = "PSEUDO_SERVICE_URL"
     PSEUDO_SERVICE_AUTH_TOKEN = "PSEUDO_SERVICE_AUTH_TOKEN"  # noqa S105
@@ -26,7 +26,7 @@ class PredefinedKeys(str, Enum):
 
 
 class PseudoFunctionTypes(str, Enum):
-    """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
+    """Names of well known pseudo functions."""
 
     DAEAD = "daead"
     MAP_SID = "map-sid"
