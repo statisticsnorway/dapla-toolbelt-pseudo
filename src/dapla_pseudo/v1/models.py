@@ -2,6 +2,7 @@
 import json
 import typing as t
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -133,3 +134,18 @@ class KeyWrapper(BaseModel):
     def keyset_list(self) -> t.Union[t.List[PseudoKeyset], None]:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
+
+
+class PseudoFunction(BaseModel):
+    """Formal representation of a pseudo function.
+
+    Use to build up the string representation expected by pseudo service
+    """
+
+    function_type: str
+    key: str
+    extra_kwargs: Optional[list[str]] = None
+
+    def __str__(self) -> str:
+        """Create the function representation as expected by pseudo service."""
+        return f"{self.function_type}({', '.join([f'keyId={self.key}'] + (self.extra_kwargs or []))})"

@@ -22,8 +22,8 @@ import magic
 import pandas as pd
 import requests
 
-from dapla_pseudo.constants import env
-from dapla_pseudo.constants import predefined_keys
+from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import PredefinedKeys
 
 from ..types import _BinaryFileDecl
 from ..types import _DatasetDecl
@@ -44,7 +44,7 @@ def pseudonymize(
     dataset: _DatasetDecl,
     fields: t.Optional[t.List[_FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
-    key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Pseudonymize specified fields of a dataset.
@@ -136,7 +136,7 @@ def pseudonymize(
 def depseudonymize(
     file_path: str,
     fields: t.List[_FieldDecl],
-    key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -188,8 +188,8 @@ def depseudonymize(
 def repseudonymize(
     file_path: str,
     fields: t.List[_FieldDecl],
-    source_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
-    target_key: t.Union[str, PseudoKeyset] = predefined_keys.SSB_COMMON_KEY_1,
+    source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
+    target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.
@@ -244,8 +244,8 @@ def repseudonymize(
 
 def _client() -> PseudoClient:
     return PseudoClient(
-        pseudo_service_url=os.getenv(env.PSEUDO_SERVICE_URL),
-        auth_token=os.getenv(env.PSEUDO_SERVICE_AUTH_TOKEN),
+        pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
+        auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
     )
 
 
@@ -255,7 +255,7 @@ def _rules_of(fields: t.List[_FieldDecl], sid_fields: t.List[str], key: str) -> 
 
 
 def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
-    key = predefined_keys.SSB_COMMON_KEY_1 if k is None else k
+    key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
 
     if isinstance(f, Field):
         field = f
@@ -265,7 +265,7 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
         field = Field(pattern=f"**/{f}")
 
     if field.mapping == "sid":
-        func = f"map-sid(keyId={predefined_keys.PAPIS_COMMON_KEY_1})"
+        func = f"map-sid(keyId={PredefinedKeys.PAPIS_COMMON_KEY_1})"
     else:
         func = f"daead(keyId={key})"
 
@@ -282,11 +282,11 @@ def _content_type_of(file_path: str) -> str:
 
 def _dataframe_to_json(
     data: pd.DataFrame,
-    fields: t.List[_FieldDecl],
-    sid_fields: t.Optional[t.List[str]] = None,
+    fields: t.Optional[t.Sequence[_FieldDecl]] = None,
+    sid_fields: t.Optional[t.Sequence[str]] = None,
 ) -> t.BinaryIO:
     # Ensure fields to be pseudonymized are string type
-    for field in set(fields).union(sid_fields or []):
+    for field in set(fields or []).union(sid_fields or []):
         data[field] = data[field].apply(str)
 
     file_handle = io.BytesIO()
