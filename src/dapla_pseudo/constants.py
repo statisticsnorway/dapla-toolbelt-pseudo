@@ -32,7 +32,7 @@ class PredefinedKeys(str, Enum):
     SSB_COMMON_KEY_2 = ("ssb-common-key-2", PseudoFunctionTypes.DAEAD)
     PAPIS_COMMON_KEY_1 = ("papis-common-key-1", PseudoFunctionTypes.FF31)
 
-    def __new__(cls, *args, **kwds):     # type: ignore
+    def __new__(cls, *args, **kwds):  # type: ignore
         obj = str.__new__(cls)
         obj._value_ = args[0]
         return obj
@@ -42,7 +42,7 @@ class PredefinedKeys(str, Enum):
         self.pseudo_func_type = pseudo_func_type
 
     def __repr__(self) -> str:
-        return f'<{type(self).__name__}.{self.name}: ({self.value!r}, {self.pseudo_func_type!r})>'
+        return f"<{type(self).__name__}.{self.name}: ({self.value!r}, {self.pseudo_func_type!r})>"
 
     def __str__(self) -> str:
         """Use value for string representation."""
