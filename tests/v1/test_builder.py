@@ -125,7 +125,5 @@ def test_builder_from_file_empty_file(mock_path_suffix: Mock, file_format: str, 
 
 @pytest.mark.parametrize("file_format", ["json", "csv", "xml", "parquet"])
 def test_builder_from_file(file_format: str) -> None:
-    data = {"apples": [3, 2, 0, 1], "oranges": [0, 3, 7, 2]}
-    pd.DataFrame(data, index=["June", "Robert", "Lily", "David"])
-
+    # Test reading all supported file extensions
     PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format}")
