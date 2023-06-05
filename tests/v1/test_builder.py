@@ -12,9 +12,11 @@ from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.builder import PseudoData
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
 PKG = "dapla_pseudo.v1.builder"
+TEST_FILE_PATH = "tests/v1/test_files"
 
 
 @pytest.fixture()
@@ -89,3 +91,41 @@ def test_builder_pseudo_function_selector_custom(patch_do_pseudonymization: Magi
 def test_builder_field_selector_multiple_fields(df: pd.DataFrame) -> None:
     fields = ["snr", "snr_mor", "snr_far"]
     assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [Field(pattern=f"**/{f}") for f in fields]
+
+
+def test_builder_from_file_not_a_file() -> None:
+    path = f"{TEST_FILE_PATH}/not/a/file.json"
+    with pytest.raises(FileNotFoundError):
+        PseudoData.from_file(path)
+
+
+def test_builder_from_file_no_file_extension() -> None:
+    path = f"{TEST_FILE_PATH}/empty_file"
+    with pytest.raises(NoFileExtensionError):
+        PseudoData.from_file(path)
+
+
+@pytest.mark.parametrize(
+    "file_format,expected_error",
+    [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ArrowInvalid")],
+)
+@patch("pathlib.Path.suffix")
+def test_builder_from_file_empty_file(mock_path_suffix: Mock, file_format: str, expected_error: str) -> None:
+    mock_path_suffix.__getitem__.return_value = file_format
+
+    path = f"{TEST_FILE_PATH}/empty_file"
+
+    with pytest.raises(Exception) as e:
+        PseudoData.from_file(path)
+
+    # Check that the appropriate errors for the given filetype are raised.
+    assert e.typename == expected_error
+    mock_path_suffix.__getitem__.assert_called_once()
+
+
+@pytest.mark.parametrize("file_format", ["json", "csv", "xml", "parquet"])
+def test_builder_from_file(file_format: str) -> None:
+    data = {"apples": [3, 2, 0, 1], "oranges": [0, 3, 7, 2]}
+    pd.DataFrame(data, index=["June", "Robert", "Lily", "David"])
+
+    PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format}")
