@@ -33,7 +33,7 @@ class PredefinedKeys(str, Enum):
     PAPIS_COMMON_KEY_1 = ("papis-common-key-1", PseudoFunctionTypes.FF31)
 
     def __new__(cls, *args, **kwds):     # type: ignore
-        obj = object.__new__(cls)
+        obj = str.__new__(cls)
         obj._value_ = args[0]
         return obj
 
