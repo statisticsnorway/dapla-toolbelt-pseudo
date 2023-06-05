@@ -21,7 +21,7 @@ def test_generate_rules_from_single_field_daead() -> None:
 def test_generate_rules_from_single_field_fpe() -> None:
     rules = _rules_of(key="papis-common-key-1", fields=["some-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
-        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "ff31(keyId=some-key)"}]}
+        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "ff31(keyId=papis-common-key-1)"}]}
     )
 
 
