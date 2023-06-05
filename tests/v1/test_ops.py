@@ -11,36 +11,41 @@ from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.ops import _rules_of
 
 
-def test_generate_rules_from_single_field() -> None:
-    rules = _rules_of(key="some-key", fields=["some-field"], sid_fields=[])
+def test_generate_rules_from_single_field_daead() -> None:
+    rules = _rules_of(key="ssb-common-key-1", fields=["some-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
-        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"}]}
+        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=ssb-common-key-1)"}]}
     )
 
+def test_generate_rules_from_single_field_fpe() -> None:
+    rules = _rules_of(key="papis-common-key-1", fields=["some-field"], sid_fields=[])
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
+        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "ff31(keyId=papis-common-key-1)"}]}
+    )
 
 def test_generate_rules_from_multiple_field() -> None:
-    rules = _rules_of(key="some-key", fields=["some-field", "another-field", "yet-another-field"], sid_fields=[])
+    rules = _rules_of(key="ssb-common-key-1", fields=["some-field", "another-field", "yet-another-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {
             "rules": [
-                {"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
-                {"name": "rule-2", "pattern": "**/another-field", "func": "daead(keyId=some-key)"},
-                {"name": "rule-3", "pattern": "**/yet-another-field", "func": "daead(keyId=some-key)"},
+                {"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=ssb-common-key-1)"},
+                {"name": "rule-2", "pattern": "**/another-field", "func": "daead(keyId=ssb-common-key-1)"},
+                {"name": "rule-3", "pattern": "**/yet-another-field", "func": "daead(keyId=ssb-common-key-1)"},
             ]
         }
     )
 
 
 def test_generate_rules_from_hierarchy_field() -> None:
-    rules = _rules_of(key="some-key", fields=["path/to/*-field"], sid_fields=[])
+    rules = _rules_of(key="ssb-common-key-1", fields=["path/to/*-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
-        {"rules": [{"name": "rule-1", "pattern": "**/path/to/*-field", "func": "daead(keyId=some-key)"}]}
+        {"rules": [{"name": "rule-1", "pattern": "**/path/to/*-field", "func": "daead(keyId=ssb-common-key-1)"}]}
     )
 
 
 def test_generate_rules_from_different_field_representations() -> None:
     rules = _rules_of(
-        key="some-key",
+        key="ssb-common-key-1",
         fields=[
             "string-field",
             {"pattern": "dict-field"},
@@ -53,10 +58,10 @@ def test_generate_rules_from_different_field_representations() -> None:
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {
             "rules": [
-                {"name": "rule-1", "pattern": "**/string-field", "func": "daead(keyId=some-key)"},
-                {"name": "rule-2", "pattern": "dict-field", "func": "daead(keyId=some-key)"},
+                {"name": "rule-1", "pattern": "**/string-field", "func": "daead(keyId=ssb-common-key-1)"},
+                {"name": "rule-2", "pattern": "dict-field", "func": "daead(keyId=ssb-common-key-1)"},
                 {"name": "rule-3", "pattern": "dict-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
-                {"name": "rule-4", "pattern": "class-field", "func": "daead(keyId=some-key)"},
+                {"name": "rule-4", "pattern": "class-field", "func": "daead(keyId=ssb-common-key-1)"},
                 {"name": "rule-5", "pattern": "class-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
             ]
         }
