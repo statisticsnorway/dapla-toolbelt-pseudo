@@ -16,8 +16,8 @@ class SupportedFileFormat(Enum):
 
 
 class NoFileExtensionError(Exception):
-    """This error is raised when a file has no file extension."""
+    """Exception raised when a file has no file extension."""
 
     def __init__(self, message: str) -> None:
-        """Passes the exception to superclass."""
+        """Initialize the NoFileExtensionError."""
         super().__init__(message)
