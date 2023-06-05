@@ -28,13 +28,15 @@ class PseudoFunctionTypes(str, Enum):
 class PredefinedKeys(str, Enum):
     """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
 
-    SSB_COMMON_KEY_1 = ("ssb-common-key-1", PseudoFunctionTypes.DAEAD)
-    SSB_COMMON_KEY_2 = ("ssb-common-key-2", PseudoFunctionTypes.DAEAD)
-    PAPIS_COMMON_KEY_1 = ("papis-common-key-1", PseudoFunctionTypes.FF31)
+    SSB_COMMON_KEY_1 = "ssb-common-key-1", PseudoFunctionTypes.DAEAD
+    SSB_COMMON_KEY_2 = "ssb-common-key-2", PseudoFunctionTypes.DAEAD
+    PAPIS_COMMON_KEY_1 = "papis-common-key-1", PseudoFunctionTypes.FF31
 
-    def __init__(self, name: str, pseudo_func_type: PseudoFunctionTypes):
-        self.name = name
-        self.pseudo_func_type = pseudo_func_type
+    def __new__(cls, value: str, pseudo_func_type: PseudoFunctionTypes):
+        member = str.__new__(cls, value)
+        member._value_ = value
+        member.pseudo_func_type = pseudo_func_type
+        return member
 
     def __str__(self) -> str:
         """Use value for string representation."""
