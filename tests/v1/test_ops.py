@@ -11,10 +11,17 @@ from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.ops import _rules_of
 
 
-def test_generate_rules_from_single_field() -> None:
+def test_generate_rules_from_single_field_daead() -> None:
     rules = _rules_of(key="some-key", fields=["some-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
         {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"}]}
+    )
+
+
+def test_generate_rules_from_single_field_fpe() -> None:
+    rules = _rules_of(key="papis-common-key-1", fields=["some-field"], sid_fields=[])
+    assert PseudoConfig(rules=rules, keysets=None).to_json() == json.dumps(
+        {"rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "ff31(keyId=some-key)"}]}
     )
 
 
