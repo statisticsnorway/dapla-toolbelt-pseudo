@@ -28,18 +28,22 @@ class PseudoFunctionTypes(str, Enum):
 class PredefinedKeys(str, Enum):
     """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
 
-    SSB_COMMON_KEY_1 = "ssb-common-key-1", PseudoFunctionTypes.DAEAD
-    SSB_COMMON_KEY_2 = "ssb-common-key-2", PseudoFunctionTypes.DAEAD
-    PAPIS_COMMON_KEY_1 = "papis-common-key-1", PseudoFunctionTypes.FF31
+    SSB_COMMON_KEY_1 = ("ssb-common-key-1", PseudoFunctionTypes.DAEAD)
+    SSB_COMMON_KEY_2 = ("ssb-common-key-2", PseudoFunctionTypes.DAEAD)
+    PAPIS_COMMON_KEY_1 = ("papis-common-key-1", PseudoFunctionTypes.FF31)
 
-    def __new__(cls, value: str, pseudo_func_type: PseudoFunctionTypes):
-        member = str.__new__(cls, value)
-        member._value_ = value
-        member.pseudo_func_type = pseudo_func_type
-        return member
+    def __new__(cls, *args, **kwds):     # type: ignore
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    # ignore the first param since it's already set by __new__
+    def __init__(self, _: str, pseudo_func_type: PseudoFunctionTypes = PseudoFunctionTypes.DAEAD):
+        self.pseudo_func_type = pseudo_func_type
+
+    def __repr__(self) -> str:
+        return f'<{type(self).__name__}.{self.name}: ({self.value!r}, {self.pseudo_func_type!r})>'
 
     def __str__(self) -> str:
         """Use value for string representation."""
         return str(self.value)
-
-
