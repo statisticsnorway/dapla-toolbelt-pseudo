@@ -266,6 +266,8 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
 
     if field.mapping == "sid":
         func = f"map-sid(keyId={PredefinedKeys.PAPIS_COMMON_KEY_1})"
+    elif key == "papis-common-key-1":
+        func = f"ff31(keyId={key})"
     else:
         func = f"daead(keyId={key})"
 
