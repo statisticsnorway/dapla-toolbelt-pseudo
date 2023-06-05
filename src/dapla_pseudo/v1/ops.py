@@ -255,7 +255,7 @@ def _rules_of(fields: t.List[_FieldDecl], sid_fields: t.List[str], key: str) -> 
 
 
 def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
-    key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
+    key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else PredefinedKeys(k)
 
     if isinstance(f, Field):
         field = f
@@ -267,7 +267,7 @@ def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
     if field.mapping == "sid":
         func = f"map-sid(keyId={PredefinedKeys.PAPIS_COMMON_KEY_1})"
     else:
-        func = f"daead(keyId={key})"
+        func = f"{key.pseudo_func_type}(keyId={key})"
 
     return PseudoRule(
         name=f"rule-{n}",

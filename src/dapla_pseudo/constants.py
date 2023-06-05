@@ -13,18 +13,6 @@ class Env(str, Enum):
         return str(self.value)
 
 
-class PredefinedKeys(str, Enum):
-    """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
-
-    SSB_COMMON_KEY_1 = "ssb-common-key-1"
-    SSB_COMMON_KEY_2 = "ssb-common-key-2"
-    PAPIS_COMMON_KEY_1 = "papis-common-key-1"
-
-    def __str__(self) -> str:
-        """Use value for string representation."""
-        return str(self.value)
-
-
 class PseudoFunctionTypes(str, Enum):
     """Names of well known pseudo functions."""
 
@@ -35,3 +23,21 @@ class PseudoFunctionTypes(str, Enum):
     def __str__(self) -> str:
         """Use value for string representation."""
         return str(self.value)
+
+
+class PredefinedKeys(str, Enum):
+    """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
+
+    SSB_COMMON_KEY_1 = ("ssb-common-key-1", PseudoFunctionTypes.DAEAD)
+    SSB_COMMON_KEY_2 = ("ssb-common-key-2", PseudoFunctionTypes.DAEAD)
+    PAPIS_COMMON_KEY_1 = ("papis-common-key-1", PseudoFunctionTypes.FF31)
+
+    def __init__(self, name: str, pseudo_func_type: PseudoFunctionTypes):
+        self.name = name
+        self.pseudo_func_type = pseudo_func_type
+
+    def __str__(self) -> str:
+        """Use value for string representation."""
+        return str(self.value)
+
+
