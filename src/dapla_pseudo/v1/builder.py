@@ -43,11 +43,37 @@ class PseudoData:
 
     @staticmethod
     def from_file(file_path_str: str, **kwargs: Any) -> "_FieldSelector":
-        """Initialize a pseudonymization request from a pandas dataframe read from file."""
+        """Initialize a pseudonymization request from a pandas dataframe read from file.
+
+        Args:
+            file_path_str (str): The path to the file to be read.
+            kwargs (dict): Additional keyword arguments to be passed to the file reader.
+
+        Raises:
+            FileNotFoundError: If no file is found at the specified local path.
+            NoFileExtensionError: If the file has no extension.
+
+        Returns:
+            _FieldSelector: An instance of the _FieldSelector class.
+
+        Examples:
+            # Read from bucket
+            from dapla import AuthClient
+            from dapla_pseudo import PseudoData
+            bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
+            storage_options = {"token": AuthClient.fetch_google_credentials()}
+            field_selector = PseudoData.from_file(bucket_path, storage_options=storage_options)
+
+            # Read from local filesystem
+            from dapla_pseudo import PseudoData
+
+            local_path = "some_file.csv"
+            field_selector = PseudoData.from_file(local_path)
+        """
         file_path = Path(file_path_str)
 
-        if not file_path.is_file():
-            raise FileNotFoundError(f"No file found at path: {file_path}")
+        if not file_path.is_file() and "storage_options" not in kwargs:
+            raise FileNotFoundError(f"No local file found in path: {file_path}")
 
         file_extension = file_path.suffix[1:]
 
@@ -57,7 +83,7 @@ class PseudoData:
         file_format = SupportedFileFormat(file_extension)
 
         pandas_function = getattr(pd, file_format.get_pandas_function_name())
-        return PseudoData._FieldSelector(pandas_function(file_path, **kwargs))
+        return PseudoData._FieldSelector(pandas_function(file_path_str, **kwargs))
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""
