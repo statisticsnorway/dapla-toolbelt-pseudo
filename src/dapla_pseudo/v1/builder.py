@@ -1,6 +1,7 @@
 """Builder for submitting a pseudonymization request."""
-
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 from typing import Optional
 
 import pandas as pd
@@ -18,6 +19,8 @@ from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import PseudoRule
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.ops import _dataframe_to_json
+from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 
 
 @dataclass
@@ -37,6 +40,24 @@ class PseudoData:
     def from_pandas(dataframe: pd.DataFrame) -> "_FieldSelector":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         return PseudoData._FieldSelector(dataframe)
+
+    @staticmethod
+    def from_file(file_path_str: str, **kwargs: Any) -> "_FieldSelector":
+        """Initialize a pseudonymization request from a pandas dataframe read from file."""
+        file_path = Path(file_path_str)
+
+        if not file_path.is_file():
+            raise FileNotFoundError(f"No file found at path: {file_path}")
+
+        file_extension = file_path.suffix[1:]
+
+        if file_extension == "":
+            raise NoFileExtensionError(f"The file {file_path_str!r} has no file extension.")
+
+        file_format = SupportedFileFormat(file_extension)
+
+        pandas_function = getattr(pd, file_format.get_pandas_function_name())
+        return PseudoData._FieldSelector(pandas_function(file_path, **kwargs))
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""
