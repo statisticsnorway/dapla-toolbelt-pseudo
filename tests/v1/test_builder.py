@@ -105,6 +105,18 @@ def test_builder_from_file_no_file_extension() -> None:
         PseudoData.from_file(path)
 
 
+@patch(f"{PKG}.pd.read_csv")
+def test_builder_from_file_with_storage_options(pandas_form_csv: Mock) -> None:
+    # This should not raise a FileNotFoundError
+    # since the file is not on the local filesystem
+    try:
+        file_path = "path/to/your/file.csv"
+        storage_options = {"token": "fake_token"}
+        PseudoData.from_file(file_path, storage_options=storage_options)
+    except FileNotFoundError:
+        pytest.fail("FileNotFoundError should not be raised when storage_options is supplied.")
+
+
 @pytest.mark.parametrize(
     "file_format,expected_error",
     [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ArrowInvalid")],
