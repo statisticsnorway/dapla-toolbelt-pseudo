@@ -1,10 +1,11 @@
 """Builder for submitting a pseudonymization request."""
-from dataclasses import dataclass
+import typing as t
 from pathlib import Path
 from typing import Any
 from typing import Optional
 
 import pandas as pd
+import polars as pl
 import requests
 from typing_extensions import Self
 
@@ -15,6 +16,7 @@ from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoConfig
 from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import PseudoRule
 from dapla_pseudo.v1.ops import _client
@@ -23,11 +25,20 @@ from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 
 
-@dataclass
 class PseudonymizationResult:
     """Holder for data and metadata returned from pseudo-service"""
 
-    dataframe: pd.DataFrame
+    def __init__(self, df: pl.DataFrame) -> None:
+        """Initialise a PseudonymizationResult."""
+        self._df = df
+
+    def to_polars(self) -> pl.DataFrame:
+        """Pseudonymized Data as a Polars Dataframe."""
+        return self._df
+
+    def to_pandas(self) -> pd.DataFrame:
+        """Pseudonymized Data as a Pandas Dataframe."""
+        return self._df.to_pandas()
 
 
 class PseudoData:
@@ -94,16 +105,16 @@ class PseudoData:
 
         def on_field(self, field: str) -> "PseudoData._Pseudonymizer":
             """Specify a single field to be pseudonymized."""
-            return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{field}")])
+            return PseudoData._Pseudonymizer(self._dataframe, [field])
 
         def on_fields(self, *fields: str) -> "PseudoData._Pseudonymizer":
             """Specify multiple fields to be pseudonymized."""
-            return PseudoData._Pseudonymizer(self._dataframe, [Field(pattern=f"**/{f}") for f in fields])
+            return PseudoData._Pseudonymizer(self._dataframe, list(fields))
 
     class _Pseudonymizer:
-        def __init__(self, dataframe: pd.DataFrame, fields: list[Field]) -> None:
-            self._dataframe: pd.DataFrame = dataframe
-            self._fields: list[Field] = fields
+        def __init__(self, dataframe: pd.DataFrame, fields: list[str]) -> None:
+            self._dataframe: pl.DataFrame = pl.from_pandas(dataframe)
+            self._fields: list[str] = fields
             self._pseudo_func: Optional[PseudoFunction] = None
 
         def map_to_stable_id(self) -> Self:
@@ -134,10 +145,37 @@ class PseudoData:
                         function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1
                     )
 
-            return _do_pseudonymization(dataframe=self._dataframe, fields=self._fields, pseudo_func=self._pseudo_func)
+            self._dataframe = self._dataframe.with_columns(
+                [
+                    # Pseudonymize each specified column
+                    pl.col(field).map(
+                        lambda s, field_name=field: _do_pseudonymize_field(
+                            path="pseudonymize/field",
+                            field_name=field_name,
+                            values=s.to_list(),
+                            pseudo_func=self._pseudo_func,
+                        )
+                    )
+                    for field in self._fields
+                ]
+            )
+            return PseudonymizationResult(df=self._dataframe)
 
 
-def _do_pseudonymization(
+def _do_pseudonymize_field(
+    path: str,
+    field_name: str,
+    values: list[str],
+    pseudo_func: PseudoFunction,
+    keyset: t.Optional[PseudoKeyset] = None,
+) -> pl.Series:
+    response: requests.Response = _client()._post_to_field_endpoint(
+        path, field_name, values, pseudo_func, keyset, stream=True
+    )
+    return pl.Series(response.json()[0]["values"])
+
+
+def _do_pseudonymize_file(
     dataframe: pd.DataFrame, fields: list[Field], pseudo_func: PseudoFunction
 ) -> "PseudonymizationResult":
     pseudonymize_request = PseudonymizeFileRequest(
@@ -156,7 +194,7 @@ def _do_pseudonymization(
         target_uri=None,
         compression=None,
     )
-    response: requests.Response = _client().pseudonymize(
+    response: requests.Response = _client().pseudonymize_file(
         pseudonymize_request, _dataframe_to_json(dataframe), stream=True
     )
-    return PseudonymizationResult(dataframe=pd.json_normalize(response.json()))
+    return PseudonymizationResult(pandas_dataframe=pd.json_normalize(response.json()))

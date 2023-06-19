@@ -128,7 +128,7 @@ def pseudonymize(
     )
 
     if file_handle is not None:
-        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream, name=name)
+        return _client().pseudonymize_file(pseudonymize_request, file_handle, stream=stream, name=name)
     else:
         return _client()._process_file("pseudonymize", pseudonymize_request, str(dataset), stream=stream)
 

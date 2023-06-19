@@ -10,6 +10,8 @@ from dapla import AuthClient
 from dapla_pseudo.models import APIModel
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
@@ -36,7 +38,7 @@ class PseudoClient:
     def __auth_token(self) -> str:
         return str(AuthClient.fetch_personal_token()) if self.static_auth_token is None else str(self.static_auth_token)
 
-    def pseudonymize(
+    def pseudonymize_file(
         self,
         pseudonymize_request: PseudonymizeFileRequest,
         data: _BinaryFileDecl,
@@ -70,7 +72,7 @@ class PseudoClient:
         :param name: optional name for logging purposes
         :return: pseudonymized data
         """
-        return self._post_to_pseudo_service(
+        return self._post_to_file_endpoint(
             self.PSEUDONYMIZE_FILE_ENDPOINT,
             pseudonymize_request,
             data,
@@ -170,9 +172,9 @@ class PseudoClient:
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
-            return self._post_to_pseudo_service(f"{operation}/file", request, f, file_name, content_type, stream)
+            return self._post_to_file_endpoint(f"{operation}/file", request, f, file_name, content_type, stream)
 
-    def _post_to_pseudo_service(
+    def _post_to_file_endpoint(
         self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes, stream: bool = False
     ) -> requests.Response:
         auth_token = self.__auth_token()
@@ -188,6 +190,28 @@ class PseudoClient:
                 "data": data_spec,
                 "request": request_spec,
             },
+            stream=stream,
+            timeout=30,  # seconds
+        )
+        response.raise_for_status()
+        return response
+
+    def _post_to_field_endpoint(
+        self,
+        path: str,
+        field_name: str,
+        values: list[str],
+        pseudo_func: PseudoFunction,
+        keyset: t.Optional[PseudoKeyset] = None,
+        stream: bool = False,
+    ) -> requests.Response:
+        request = {"name": field_name, "values": values, "pseudoFunc": str(pseudo_func)}
+        if keyset:
+            request["keyset"] = keyset
+        response = requests.post(
+            url=f"{self.pseudo_service_url}/{path}",
+            headers={"Authorization": f"Bearer {self.__auth_token()}", "Content-Type": str(Mimetypes.JSON)},
+            json=request,
             stream=stream,
             timeout=30,  # seconds
         )
