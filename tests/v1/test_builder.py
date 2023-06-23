@@ -1,17 +1,18 @@
 import json
+import typing as t
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import pandas as pd
+import polars as pl
 import pytest
-import requests
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.builder import PseudoData
-from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
@@ -25,72 +26,149 @@ def df() -> pd.DataFrame:
         return pd.json_normalize(json.load(test_data))
 
 
-@patch(f"{PKG}._client")
-def test_builder_pandas_pseudonymize_minimal_call(patched_client: Mock, df: pd.DataFrame) -> None:
-    patched_client.pseudonymize.return_value = requests.Response()
-    PseudoData.from_pandas(df).on_field("fornavn").pseudonymize()
+@patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
+def test_builder_pandas_pseudonymize_minimal_call(patched_post_to_field_endpoint: Mock, df: pd.DataFrame) -> None:
+    json_response = {
+        "values": ["f1", "f2", "f3"],
+        "fieldName": "fornavn",
+        "pseudoRules": {"rules": [{"name": "fornavn", "pattern": "**", "func": "daead(keyId=ssb-common-key-1)"}]},
+    }
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = json_response
+
+    patched_post_to_field_endpoint.return_value = mock_response
+
+    dataframe = PseudoData.from_pandas(df).on_field("fornavn").pseudonymize().to_pandas()
+
+    assert dataframe["fornavn"].tolist() != df["fornavn"].tolist()
+    assert dataframe["fornavn"].tolist() == json_response["values"]
 
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:
-    PseudoData.from_pandas(df).on_field("fornavn")._fields = [Field(pattern="**/fornavn")]
+    PseudoData.from_pandas(df).on_field("fornavn")._fields = ["fornavn"]
 
 
 def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:
     PseudoData.from_pandas(df).on_fields("fornavn", "fnr")._fields = [
-        Field(pattern="**/fornavn"),
-        Field(pattern="**/fnr"),
+        "fornavn",
+        "fnr",
     ]
 
 
-@patch(f"{PKG}._do_pseudonymization")
-def test_builder_pseudo_function_selector_default(patch_do_pseudonymization: MagicMock, df: pd.DataFrame) -> None:
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_default(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
     PseudoData.from_pandas(df).on_field("fornavn").pseudonymize()
-    patch_do_pseudonymization.assert_called_once_with(
-        dataframe=df,
-        fields=[Field(pattern="**/fornavn")],
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        field_name="fornavn",
+        values=df["fornavn"].tolist(),
         pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1),
+        metadata_map={},
+        keyset=None,
     )
 
 
-@patch(f"{PKG}._do_pseudonymization")
-def test_builder_pseudo_function_selector_map_to_sid(patch_do_pseudonymization: MagicMock, df: pd.DataFrame) -> None:
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_map_to_sid(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
     PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id().pseudonymize()
-    patch_do_pseudonymization.assert_called_once_with(
-        dataframe=df,
-        fields=[Field(pattern="**/fnr")],
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
         pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1),
+        metadata_map={},
+        keyset=None,
     )
 
 
-@patch(f"{PKG}._do_pseudonymization")
-def test_builder_pseudo_function_selector_fpe(patch_do_pseudonymization: MagicMock, df: pd.DataFrame) -> None:
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_fpe(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
     PseudoData.from_pandas(df).on_field("fnr").pseudonymize(preserve_formatting=True)
-    patch_do_pseudonymization.assert_called_once_with(
-        dataframe=df,
-        fields=[Field(pattern="**/fnr")],
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             key=PredefinedKeys.PAPIS_COMMON_KEY_1,
             extra_kwargs=["strategy=SKIP"],
         ),
+        metadata_map={},
+        keyset=None,
     )
 
 
-@patch(f"{PKG}._do_pseudonymization")
-def test_builder_pseudo_function_selector_custom(patch_do_pseudonymization: MagicMock, df: pd.DataFrame) -> None:
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_custom(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
     pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, key=PredefinedKeys.SSB_COMMON_KEY_2)
     PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func)
 
-    patch_do_pseudonymization.assert_called_once_with(
-        dataframe=df,
-        fields=[Field(pattern="**/fnr")],
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
         pseudo_func=pseudo_func,
+        metadata_map={},
+        keyset=None,
     )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_keyset_selector_custom(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
+
+    kek_uri = "gcp-kms://fake/pseudo-service-fake"
+    encrypted_keyset = "fake_keyset"
+    keyset_info = {
+        "primaryKeyId": 123,
+        "keyInfo": [
+            {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.fake",
+                "status": "ENABLED",
+                "keyId": 123,
+                "outputPrefixType": "TINK",
+            }
+        ],
+    }
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key="1403797237")
+    keyset = PseudoKeyset(kek_uri=kek_uri, encrypted_keyset=encrypted_keyset, keyset_info=keyset_info)
+
+    PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func, with_custom_keyset=keyset)
+
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
+        pseudo_func=pseudo_func,
+        metadata_map={},
+        keyset=keyset,
+    )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_pseudonymize_field_dataframe_setup(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    def side_effect(**kwargs: t.Any) -> pl.Series:
+        name = kwargs["field_name"]
+        return pl.Series([f"{name}1", f"{name}2", f"{name}3"])
+
+    patch_do_pseudonymize_field.side_effect = side_effect
+
+    fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
+    dataframe = PseudoData.from_pandas(df).on_fields(*fields_to_pseudonymize).pseudonymize().to_pandas()
+
+    for field in fields_to_pseudonymize:
+        assert dataframe[field].to_list() == side_effect(field_name=field).to_list()
 
 
 def test_builder_field_selector_multiple_fields(df: pd.DataFrame) -> None:
     fields = ["snr", "snr_mor", "snr_far"]
-    assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [Field(pattern=f"**/{f}") for f in fields]
+    assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [f"{f}" for f in fields]
 
 
 def test_builder_from_file_not_a_file() -> None:
