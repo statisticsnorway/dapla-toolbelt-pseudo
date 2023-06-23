@@ -201,13 +201,17 @@ class PseudoClient:
         path: str,
         field_name: str,
         values: list[str],
-        pseudo_func: PseudoFunction,
+        pseudo_func: t.Optional[PseudoFunction],
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request = {"name": field_name, "values": values, "pseudoFunc": str(pseudo_func)}
+        request: t.Dict[str, t.Collection[str]] = {"name": field_name, "values": values, "pseudoFunc": str(pseudo_func)}
         if keyset:
-            request["keyset"] = keyset
+            request["keyset"] = {
+                "kekUri": keyset.kek_uri,
+                "encryptedKeyset": keyset.encrypted_keyset,
+                "keysetInfo": keyset.keyset_info,
+            }
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={"Authorization": f"Bearer {self.__auth_token()}", "Content-Type": str(Mimetypes.JSON)},
