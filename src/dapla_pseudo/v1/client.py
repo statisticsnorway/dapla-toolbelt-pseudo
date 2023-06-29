@@ -180,14 +180,14 @@ class PseudoClient:
             )
 
     def _post_to_pseudo_service(
-            self,
-            path: str,
-            request: APIModel,
-            data: t.BinaryIO,
-            name: str,
-            content_type: Mimetypes,
-            timeout: int,
-            stream: bool = False,
+        self,
+        path: str,
+        request: APIModel,
+        data: t.BinaryIO,
+        name: str,
+        content_type: Mimetypes,
+        timeout: int,
+        stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
         data_spec: _FileSpecDecl = (name, data, content_type)
