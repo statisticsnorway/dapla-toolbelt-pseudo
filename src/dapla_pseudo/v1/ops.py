@@ -45,6 +45,7 @@ def pseudonymize(
     fields: t.Optional[t.List[_FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
+    timeout: t.Optional[int] = None,
     stream: bool = True,
 ) -> requests.Response:
     """Pseudonymize specified fields of a dataset.
@@ -82,6 +83,8 @@ def pseudonymize(
     :param fields: list of fields that should be pseudonymized
     :param sid_fields: list of fields that should be mapped to stabil ID and pseudonymized
     :param key: either named reference to a "global" key or a keyset json
+    :param timeout: connection and read timeout, see
+        https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: pseudonymized data
     """
@@ -128,15 +131,18 @@ def pseudonymize(
     )
 
     if file_handle is not None:
-        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream, name=name)
+        return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream, name=name, timeout=timeout)
     else:
-        return _client()._process_file("pseudonymize", pseudonymize_request, str(dataset), stream=stream)
+        return _client()._process_file(
+            "pseudonymize", pseudonymize_request, str(dataset), stream=stream, timeout=timeout
+        )
 
 
 def depseudonymize(
     file_path: str,
     fields: t.List[_FieldDecl],
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
+    timeout: t.Optional[int] = None,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -169,6 +175,8 @@ def depseudonymize(
     :param file_path: path to a local file, e.g. ./path/to/data-deid.json. Supported file formats: csv, json
     :param fields: list of fields that should be depseudonymized
     :param key: either named reference to a "global" key or a keyset json
+    :param timeout: connection and read timeout, see
+        https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: depseudonymized data
     """
@@ -182,7 +190,7 @@ def depseudonymize(
         compression=None,
     )
 
-    return _client().depseudonymize_file(req, file_path, stream=stream)
+    return _client().depseudonymize_file(req, file_path, stream=stream, timeout=timeout)
 
 
 def repseudonymize(
@@ -190,6 +198,7 @@ def repseudonymize(
     fields: t.List[_FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
+    timeout: t.Optional[int] = None,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.
@@ -223,6 +232,8 @@ def repseudonymize(
     :param fields: list of fields that should be pseudonymized
     :param source_key: either named reference to a "global" key or a keyset json - used for depseudonymization
     :param target_key: either named reference to a "global" key or a keyset json - used for pseudonymization
+    :param timeout: connection and read timeout, see
+        https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
     :param stream: true if the results should be chunked into pieces (use for large data)
     :return: repseudonymized data
     """
@@ -239,7 +250,7 @@ def repseudonymize(
         compression=None,
     )
 
-    return _client().repseudonymize_file(req, file_path, stream=stream)
+    return _client().repseudonymize_file(req, file_path, stream=stream, timeout=timeout)
 
 
 def _client() -> PseudoClient:

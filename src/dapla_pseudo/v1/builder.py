@@ -157,6 +157,6 @@ def _do_pseudonymization(
         compression=None,
     )
     response: requests.Response = _client().pseudonymize(
-        pseudonymize_request, _dataframe_to_json(dataframe), stream=True
+        pseudonymize_request, _dataframe_to_json(dataframe), timeout=None, stream=True
     )
     return PseudonymizationResult(dataframe=pd.json_normalize(response.json()))
