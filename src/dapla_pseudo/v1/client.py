@@ -104,7 +104,7 @@ class PseudoClient:
         depseudonymize_request: DepseudonymizeFileRequest,
         file_path: str,
         timeout: t.Optional[int],
-        stream: bool = False
+        stream: bool = False,
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -143,7 +143,7 @@ class PseudoClient:
         repseudonymize_request: RepseudonymizeFileRequest,
         file_path: str,
         timeout: t.Optional[int],
-        stream: bool = False
+        stream: bool = False,
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
