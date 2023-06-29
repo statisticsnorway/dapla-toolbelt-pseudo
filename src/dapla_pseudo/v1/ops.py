@@ -132,8 +132,9 @@ def pseudonymize(
     if file_handle is not None:
         return _client().pseudonymize(pseudonymize_request, file_handle, stream=stream, name=name, timeout=timeout)
     else:
-        return _client()._process_file("pseudonymize", pseudonymize_request, str(dataset), stream=stream,
-                                       timeout=timeout)
+        return _client()._process_file(
+            "pseudonymize", pseudonymize_request, str(dataset), stream=stream, timeout=timeout
+        )
 
 
 def depseudonymize(

@@ -72,9 +72,15 @@ class PseudoClient:
         :param name: optional name for logging purposes
         :return: pseudonymized data
         """
-        return self._post_to_pseudo_service(self.PSEUDONYMIZE_FILE_ENDPOINT, pseudonymize_request, data,
-                                            self._extract_name(data, pseudonymize_request.target_content_type, name),
-                                            pseudonymize_request.target_content_type, timeout, stream)
+        return self._post_to_pseudo_service(
+            self.PSEUDONYMIZE_FILE_ENDPOINT,
+            pseudonymize_request,
+            data,
+            self._extract_name(data, pseudonymize_request.target_content_type, name),
+            pseudonymize_request.target_content_type,
+            timeout,
+            stream,
+        )
 
     def _extract_name(self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]) -> str:
         if name is None:
@@ -169,13 +175,19 @@ class PseudoClient:
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
-            return self._post_to_pseudo_service(f"{operation}/file", request, f, file_name, content_type, timeout,
-                                                stream)
+            return self._post_to_pseudo_service(
+                f"{operation}/file", request, f, file_name, content_type, timeout, stream
+            )
 
     def _post_to_pseudo_service(
-        self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes, timeout: int,
-            stream: bool = False
-
+            self,
+            path: str,
+            request: APIModel,
+            data: t.BinaryIO,
+            name: str,
+            content_type: Mimetypes,
+            timeout: int,
+            stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
         data_spec: _FileSpecDecl = (name, data, content_type)
