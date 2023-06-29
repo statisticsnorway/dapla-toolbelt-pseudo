@@ -67,7 +67,7 @@ class PseudoClient:
 
         :param pseudonymize_request: the request to send to Dapla Pseudo Service
         :param data: file handle that should be pseudonymized
-        :param timeout: connection and read, see https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
+        :param timeout: connection and read timeout, see https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :param name: optional name for logging purposes
         :return: pseudonymized data
