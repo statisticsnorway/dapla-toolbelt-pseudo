@@ -45,7 +45,7 @@ def pseudonymize(
     fields: t.Optional[t.List[_FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: int = None,
+    timeout: int = 30,
     stream: bool = True,
 ) -> requests.Response:
     """Pseudonymize specified fields of a dataset.
@@ -141,7 +141,7 @@ def depseudonymize(
     file_path: str,
     fields: t.List[_FieldDecl],
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: int = None,
+    timeout: int = 30,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -196,7 +196,7 @@ def repseudonymize(
     fields: t.List[_FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: int = None,
+    timeout: int = 30,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.
