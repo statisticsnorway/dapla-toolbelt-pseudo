@@ -100,7 +100,11 @@ class PseudoClient:
         return name
 
     def depseudonymize_file(
-        self, depseudonymize_request: DepseudonymizeFileRequest, file_path: str, timeout: t.Optional[int], stream: bool = False
+        self,
+        depseudonymize_request: DepseudonymizeFileRequest,
+        file_path: str,
+        timeout: t.Optional[int],
+        stream: bool = False
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -135,7 +139,11 @@ class PseudoClient:
         return self._process_file("depseudonymize", depseudonymize_request, file_path, timeout, stream)
 
     def repseudonymize_file(
-        self, repseudonymize_request: RepseudonymizeFileRequest, file_path: str, timeout: t.Optional[int], stream: bool = False
+        self,
+        repseudonymize_request: RepseudonymizeFileRequest,
+        file_path: str,
+        timeout: t.Optional[int],
+        stream: bool = False
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
