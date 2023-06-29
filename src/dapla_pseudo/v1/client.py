@@ -40,7 +40,7 @@ class PseudoClient:
         self,
         pseudonymize_request: PseudonymizeFileRequest,
         data: _BinaryFileDecl,
-        timeout: int,
+        timeout: t.Optional[int],
         stream: bool = False,
         name: t.Optional[str] = None,
     ) -> requests.Response:
@@ -100,7 +100,7 @@ class PseudoClient:
         return name
 
     def depseudonymize_file(
-        self, depseudonymize_request: DepseudonymizeFileRequest, file_path: str, timeout: int, stream: bool = False
+        self, depseudonymize_request: DepseudonymizeFileRequest, file_path: str, timeout: t.Optional[int], stream: bool = False
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -135,7 +135,7 @@ class PseudoClient:
         return self._process_file("depseudonymize", depseudonymize_request, file_path, timeout, stream)
 
     def repseudonymize_file(
-        self, repseudonymize_request: RepseudonymizeFileRequest, file_path: str, timeout: int, stream: bool = False
+        self, repseudonymize_request: RepseudonymizeFileRequest, file_path: str, timeout: t.Optional[int], stream: bool = False
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -172,7 +172,7 @@ class PseudoClient:
         return self._process_file("repseudonymize", repseudonymize_request, file_path, timeout, stream)
 
     def _process_file(
-        self, operation: str, request: APIModel, file_path: str, timeout: int, stream: bool = False
+        self, operation: str, request: APIModel, file_path: str, timeout: t.Optional[int], stream: bool = False
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
@@ -189,7 +189,7 @@ class PseudoClient:
         data: t.BinaryIO,
         name: str,
         content_type: Mimetypes,
-        timeout: int,
+        timeout: t.Optional[int],
         stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
