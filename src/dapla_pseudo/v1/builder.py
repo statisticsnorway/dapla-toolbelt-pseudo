@@ -247,6 +247,7 @@ def _do_pseudonymize_field(
     """
     response: requests.Response = _client()._post_to_field_endpoint(
         path, field_name, values, pseudo_func, keyset, stream=True
+
     )
     metadata_map[field_name] = response.headers.get("metadata")
 
