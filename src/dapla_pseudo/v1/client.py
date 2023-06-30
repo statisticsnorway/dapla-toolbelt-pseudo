@@ -42,7 +42,6 @@ class PseudoClient:
         self,
         pseudonymize_request: PseudonymizeFileRequest,
         data: _BinaryFileDecl,
-        timeout: t.Optional[int],
         stream: bool = False,
         name: t.Optional[str] = None,
     ) -> requests.Response:
@@ -69,8 +68,6 @@ class PseudoClient:
 
         :param pseudonymize_request: the request to send to Dapla Pseudo Service
         :param data: file handle that should be pseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :param name: optional name for logging purposes
         :return: pseudonymized data
@@ -81,7 +78,6 @@ class PseudoClient:
             data,
             self._extract_name(data, pseudonymize_request.target_content_type, name),
             pseudonymize_request.target_content_type,
-            timeout,
             stream,
         )
 
@@ -102,11 +98,7 @@ class PseudoClient:
         return name
 
     def depseudonymize_file(
-        self,
-        depseudonymize_request: DepseudonymizeFileRequest,
-        file_path: str,
-        timeout: t.Optional[int],
-        stream: bool = False,
+        self, depseudonymize_request: DepseudonymizeFileRequest, file_path: str, stream: bool = False
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -133,19 +125,13 @@ class PseudoClient:
 
         :param request_json: the request JSON to send to Dapla Pseudo Service
         :param file_path: path to a local file that should be depseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: depseudonymized data
         """
-        return self._process_file("depseudonymize", depseudonymize_request, file_path, timeout, stream)
+        return self._process_file("depseudonymize", depseudonymize_request, file_path, stream)
 
     def repseudonymize_file(
-        self,
-        repseudonymize_request: RepseudonymizeFileRequest,
-        file_path: str,
-        timeout: t.Optional[int],
-        stream: bool = False,
+        self, repseudonymize_request: RepseudonymizeFileRequest, file_path: str, stream: bool = False
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -174,25 +160,22 @@ class PseudoClient:
 
         :param request_json: the request JSON to send to Dapla Pseudo Service
         :param file_path: path to a local file that should be depseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: repseudonymized data
         """
-        return self._process_file("repseudonymize", repseudonymize_request, file_path, timeout, stream)
+        return self._process_file("repseudonymize", repseudonymize_request, file_path, stream)
 
     def _process_file(
-        self, operation: str, request: APIModel, file_path: str, timeout: t.Optional[int], stream: bool = False
+        self, operation: str, request: APIModel, file_path: str, stream: bool = False
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
-
             return self._post_to_file_endpoint(f"{operation}/file", request, f, file_name, content_type, stream)
 
     def _post_to_file_endpoint(
-        self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes,timeout: t.Optional[int], stream: bool = False
+        self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes, stream: bool = False
     ) -> requests.Response:
         auth_token = self.__auth_token()
         data_spec: _FileSpecDecl = (name, data, content_type)
@@ -208,7 +191,7 @@ class PseudoClient:
                 "request": request_spec,
             },
             stream=stream,
-            timeout=timeout,
+            timeout=30,  # seconds
         )
         response.raise_for_status()
         return response
