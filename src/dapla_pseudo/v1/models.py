@@ -149,10 +149,3 @@ class PseudoFunction(BaseModel):
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
         return f"{self.function_type}({', '.join([f'keyId={self.key}'] + (self.extra_kwargs or []))})"
-
-
-class PseudoMetadata(BaseModel):
-    """Stores pseudo metadata about a field received from Pseudo service field pseudonymization."""
-
-    field_name: str
-    pseudo_config: PseudoConfig
