@@ -189,7 +189,7 @@ class PseudoClient:
 
         with open(file_path, "rb") as f:
 
-            return self._post_to_file_endpoint(f"{operation}/file", request, f, file_name, content_type, stream)
+            return self._post_to_file_endpoint(f"{operation}/file", request, f, file_name, content_type,timeout, stream)
 
     def _post_to_file_endpoint(
         self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes,timeout: t.Optional[int], stream: bool = False
