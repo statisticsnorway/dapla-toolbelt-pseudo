@@ -23,10 +23,10 @@ from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 class PseudonymizationResult:
     """Holder for data and metadata returned from pseudo-service"""
 
-    def __init__(self, df: pl.DataFrame, metadata: Optional[t.Dict[str, str]]) -> None:
+    def __init__(self, df: pl.DataFrame, metadata: Optional[t.Dict[str, str]] = None) -> None:
         """Initialise a PseudonymizationResult."""
         self._df = df
-        self._metadata = metadata
+        self._metadata = metadata if metadata is not None else {}
 
     def to_polars(self) -> pl.DataFrame:
         """Pseudonymized Data as a Polars Dataframe."""
@@ -40,8 +40,9 @@ class PseudonymizationResult:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
-            dict[str, str]: A dictionary containing the pseudonymization metadata,
+            Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
             where the keys are field names and the values are corresponding pseudo field metadata.
+            If no metadata is set, returns an empty dictionary.
         """
         return self._metadata
 
@@ -163,7 +164,7 @@ class PseudoData:
 
             return self._pseudomize_field()
 
-        def _pseudomize_field(self):
+        def _pseudomize_field(self) -> "PseudonymizationResult":
             """Pseudonymizes the specified fields in the dataframe using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
@@ -247,9 +248,8 @@ def _do_pseudonymize_field(
     """
     response: requests.Response = _client()._post_to_field_endpoint(
         path, field_name, values, pseudo_func, keyset, stream=True
-
     )
-    metadata_map[field_name] = response.headers.get("metadata")
+    metadata_map[field_name] = str(response.headers.get("metadata") or "")
 
     # The response content is buffered serverside and after decoding, we are left with a List[List[str]].
     # We need the entire list to create a polars Series.

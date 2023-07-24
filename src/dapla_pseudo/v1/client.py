@@ -188,11 +188,19 @@ class PseudoClient:
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
-
-            return self._post_to_file_endpoint(f"{operation}/file", request, f, file_name, content_type,timeout, stream)
+            return self._post_to_file_endpoint(
+                f"{operation}/file", request, f, file_name, content_type, timeout, stream
+            )
 
     def _post_to_file_endpoint(
-        self, path: str, request: APIModel, data: t.BinaryIO, name: str, content_type: Mimetypes,timeout: t.Optional[int], stream: bool = False
+        self,
+        path: str,
+        request: APIModel,
+        data: t.BinaryIO,
+        name: str,
+        content_type: Mimetypes,
+        timeout: t.Optional[int],
+        stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
         data_spec: _FileSpecDecl = (name, data, content_type)

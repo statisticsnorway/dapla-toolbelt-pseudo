@@ -32,22 +32,27 @@ def mock_return_do_pseudonymize_field(patch_do_pseudonymize_field: Mock) -> None
 
 @patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
 def test_builder_pandas_pseudonymize_minimal_call(patched_post_to_field_endpoint: Mock, df: pd.DataFrame) -> None:
-    json_response = {
-        "values": ["f1", "f2", "f3"],
-        "fieldName": "fornavn",
-        "pseudoRules": {"rules": [{"name": "fornavn", "pattern": "**", "func": "daead(keyId=ssb-common-key-1)"}]},
-    }
+    field_name = "fornavn"
 
+    # Mock the response of _post_to_field_endpoint
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = json_response
-
+    mock_response.content = b'[["f1","f2","f3"]]'
+    mock_response.headers = {
+        "metadata": '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
+    }
     patched_post_to_field_endpoint.return_value = mock_response
 
-    dataframe = PseudoData.from_pandas(df).on_field("fornavn").pseudonymize().to_pandas()
+    pseudo_result = PseudoData.from_pandas(df).on_field(field_name).pseudonymize()
+    pseudo_dataframe = pseudo_result.to_pandas()
+    pseudo_metadata = pseudo_result.get_metadata()
 
-    assert dataframe["fornavn"].tolist() != df["fornavn"].tolist()
-    assert dataframe["fornavn"].tolist() == json_response["values"]
+    # Check that the pseudonymized df has new values
+    assert pseudo_dataframe[field_name].tolist() == ["f1", "f2", "f3"]
+    assert (
+        pseudo_metadata[field_name]
+        == '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
+    )
 
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:
