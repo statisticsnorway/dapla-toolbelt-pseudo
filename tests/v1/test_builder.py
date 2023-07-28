@@ -11,6 +11,7 @@ import pytest
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.builder import PseudoData
+from dapla_pseudo.v1.builder import _do_pseudonymize_field
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
@@ -26,22 +27,28 @@ def df() -> pd.DataFrame:
         return pd.json_normalize(json.load(test_data))
 
 
-def mock_return_do_pseudonymize_field(patch_do_pseudonymize_field: Mock) -> None:
-    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
-
-
-@patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
-def test_builder_pandas_pseudonymize_minimal_call(patched_post_to_field_endpoint: Mock, df: pd.DataFrame) -> None:
-    field_name = "fornavn"
-
-    # Mock the response of _post_to_field_endpoint
+@pytest.fixture()
+def single_field_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.content = b'[["f1","f2","f3"]]'
     mock_response.headers = {
         "metadata": '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
     }
-    patched_post_to_field_endpoint.return_value = mock_response
+    return mock_response
+
+
+def mock_return_do_pseudonymize_field(patch_do_pseudonymize_field: Mock) -> None:
+    patch_do_pseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
+
+
+@patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
+def test_builder_pandas_pseudonymize_minimal_call(
+    patched_post_to_field_endpoint: Mock, df: pd.DataFrame, single_field_response: MagicMock
+) -> None:
+    field_name = "fornavn"
+
+    patched_post_to_field_endpoint.return_value = single_field_response
 
     pseudo_result = PseudoData.from_pandas(df).on_field(field_name).pseudonymize()
     pseudo_dataframe = pseudo_result.to_pandas()
@@ -53,6 +60,18 @@ def test_builder_pandas_pseudonymize_minimal_call(patched_post_to_field_endpoint
         pseudo_metadata[field_name]
         == '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
     )
+
+
+@patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
+def test_single_field_do_pseudonymize_field(
+    patched_post_to_field_endpoint: Mock, single_field_response: MagicMock
+) -> None:
+    patched_post_to_field_endpoint.return_value = single_field_response
+
+    pseudo_func = PseudoFunction(function_type="fake-func-type", key="fake-key")
+    metadata: t.Dict[str, str] = dict()
+    series: pl.Series = _do_pseudonymize_field("fake.endpoint", "fornavn", ["x1", "x2", "x3"], pseudo_func, metadata)
+    assert series.to_list() == ["f1", "f2", "f3"]
 
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:

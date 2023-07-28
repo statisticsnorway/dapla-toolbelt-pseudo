@@ -162,9 +162,9 @@ class PseudoData:
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
 
-            return self._pseudomize_field()
+            return self._pseudonymize_field()
 
-        def _pseudomize_field(self) -> "PseudonymizationResult":
+        def _pseudonymize_field(self) -> "PseudonymizationResult":
             """Pseudonymizes the specified fields in the dataframe using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
@@ -174,42 +174,34 @@ class PseudoData:
                 PseudonymizationResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
             """
 
-            def _pseudonymize_field_runner(field_name: str) -> tuple[str, t.Callable[[pl.Series], pl.Series]]:
-                """Helper function that executes the pseudonymization for a single field.
+            def pseudonymize_field_runner(field_name: str, series: pl.Series) -> tuple[str, pl.Series]:
+                """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
-                    field_name (str): The name of the field to be pseudonymized.
+                    series (pl.Series): The pandas Series containing the values to be pseudonymized.
+                    field_name (str):  The name of the field.
 
                 Returns:
-                    tuple[str, t.Callable[[pl.Series], pl.Series]]: A tuple containing the field_name and a callable function
+                    tuple[str,pl.Series]: A tuple containing the field_name and a callable function
                         that performs the pseudonymization on a pandas Series.
                 """
-
-                def pseudonymize_values(series: pl.Series) -> pl.Series:
-                    """Function that performs the pseudonymization on a pandas Series.
-
-                    Args:
-                        series (pl.Series): The pandas Series containing the values to be pseudonymized.
-
-                    Returns:
-                        pl.Series: The pseudonymized pandas Series.
-                    """
-                    return _do_pseudonymize_field(
+                return (
+                    field_name,
+                    _do_pseudonymize_field(
                         path="pseudonymize/field",
                         field_name=field_name,
                         values=series.to_list(),
                         pseudo_func=self._pseudo_func,
                         metadata_map=self._metadata,
                         keyset=self._pseudo_keyset,
-                    )
-
-                return field_name, pseudonymize_values
+                    ),
+                )
 
             # Execute the pseudonymization API calls in parallel
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                pseudonymized_field: t.Dict[str, t.Callable[[pl.Series], pl.Series]] = {}
-                futures: t.List[concurrent.futures.Future[t.Tuple[str, t.Callable[[pl.Series], pl.Series]]]] = [
-                    executor.submit(_pseudonymize_field_runner, field) for field in self._fields
+                pseudonymized_field: t.Dict[str, pl.Series] = {}
+                futures = [
+                    executor.submit(pseudonymize_field_runner, field, self._dataframe[field]) for field in self._fields
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
                 for future in concurrent.futures.as_completed(futures):
@@ -217,10 +209,8 @@ class PseudoData:
                     # Each future result contains the field_name (0) and the pseudonymize_values (1)
                     pseudonymized_field[result[0]] = result[1]
 
-            # Add the pseudonymized values to the dataframe
-            self._dataframe = self._dataframe.with_columns(
-                [pl.col(field).map(pseudonymized_field[field]) for field in self._fields]
-            )
+                pseudonymized_df = pl.DataFrame(pseudonymized_field)
+                self._dataframe = self._dataframe.update(pseudonymized_df)
 
             return PseudonymizationResult(df=self._dataframe, metadata=self._metadata)
 
@@ -233,7 +223,7 @@ def _do_pseudonymize_field(
     metadata_map: t.Dict[str, str],
     keyset: Optional[PseudoKeyset] = None,
 ) -> pl.Series:
-    """Makes pseudonymization API calls for a list of values for a specific field.
+    """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
 
     Args:
         path (str): The path to the pseudonymization endpoint.
@@ -251,9 +241,9 @@ def _do_pseudonymize_field(
     )
     metadata_map[field_name] = str(response.headers.get("metadata") or "")
 
-    # The response content is buffered serverside and after decoding, we are left with a List[List[str]].
-    # We need the entire list to create a polars Series.
-    # To achieve this, we combine the values from the sublists into a single list of strings.
+    # The response content is received as a buffered byte stream from the server.
+    # We decode the content using UTF-8, which gives us a List[List[str]] structure.
+    # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
     nested_list = json.loads(response.content.decode("utf-8"))
     combined_list = []
     for sublist in nested_list:
