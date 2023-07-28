@@ -182,8 +182,7 @@ class PseudoData:
                     field_name (str):  The name of the field.
 
                 Returns:
-                    tuple[str,pl.Series]: A tuple containing the field_name and a callable function
-                        that performs the pseudonymization on a pandas Series.
+                    tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
                 return (
                     field_name,
