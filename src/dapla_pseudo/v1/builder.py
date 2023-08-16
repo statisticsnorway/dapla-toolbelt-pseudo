@@ -112,10 +112,11 @@ class PseudoData:
 
         def __init__(self, dataframe: pd.DataFrame | pl.DataFrame):
             """Initialize the class."""
+            self._dataframe: pl.DataFrame
             if isinstance(dataframe, pd.DataFrame):
-                self._dataframe: pl.DataFrame = pl.from_pandas(dataframe)
+                self._dataframe = pl.from_pandas(dataframe)
             else:
-                self._dataframe: pl.DataFrame = dataframe
+                self._dataframe = dataframe
 
         def on_field(self, field: str) -> "PseudoData._Pseudonymizer":
             """Specify a single field to be pseudonymized."""
