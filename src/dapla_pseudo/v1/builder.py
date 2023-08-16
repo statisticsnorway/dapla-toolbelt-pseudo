@@ -59,6 +59,11 @@ class PseudoData:
         return PseudoData._FieldSelector(dataframe)
 
     @staticmethod
+    def from_polars(dataframe: pl.DataFrame) -> "_FieldSelector":
+        """Initialize a pseudonymization request from a polars DataFrame."""
+        return PseudoData._FieldSelector(dataframe)
+
+    @staticmethod
     def from_file(file_path_str: str, **kwargs: Any) -> "_FieldSelector":
         """Initialize a pseudonymization request from a pandas dataframe read from file.
 
@@ -105,9 +110,12 @@ class PseudoData:
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""
 
-        def __init__(self, dataframe: pd.DataFrame):
+        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame):
             """Initialize the class."""
-            self._dataframe = dataframe
+            if isinstance(dataframe, pd.DataFrame):
+                self._dataframe: pl.DataFrame = pl.from_pandas(dataframe)
+            else:
+                self._dataframe: pl.DataFrame = dataframe
 
         def on_field(self, field: str) -> "PseudoData._Pseudonymizer":
             """Specify a single field to be pseudonymized."""
@@ -120,10 +128,10 @@ class PseudoData:
     class _Pseudonymizer:
         def __init__(
             self,
-            dataframe: pd.DataFrame,
+            dataframe: pl.DataFrame,
             fields: list[str],
         ) -> None:
-            self._dataframe: pl.DataFrame = pl.from_pandas(dataframe)
+            self._dataframe: pl.DataFrame = dataframe
             self._fields: list[str] = fields
             self._pseudo_func: Optional[PseudoFunction] = None
             self._metadata: t.Dict[str, str] = {}

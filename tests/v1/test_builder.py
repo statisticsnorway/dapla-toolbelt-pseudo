@@ -245,3 +245,15 @@ def test_builder_from_file_empty_file(mock_path_suffix: Mock, file_format: str, 
 def test_builder_from_file(file_format: str) -> None:
     # Test reading all supported file extensions
     PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format}")
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_to_polars_from_polars_chaining(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    def side_effect(**kwargs: t.Any) -> pl.Series:
+        name = kwargs["field_name"]
+        return pl.Series([f"{name}1", f"{name}2", f"{name}3"])
+
+    patch_do_pseudonymize_field.side_effect = side_effect
+    fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
+    result: pl.DataFrame = PseudoData.from_pandas(df).on_fields(*fields_to_pseudonymize).pseudonymize().to_polars()
+    assert PseudoData.from_polars(result).on_field("fnr").map_to_stable_id().pseudonymize().to_polars() is not None
