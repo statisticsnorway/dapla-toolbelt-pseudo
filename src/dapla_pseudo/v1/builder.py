@@ -37,12 +37,12 @@ class PseudoData:
     """
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "_FieldSelector":
+    def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._FieldSelector":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         return PseudoData._FieldSelector(dataframe)
 
     @staticmethod
-    def from_file(file_path_str: str, **kwargs: Any) -> "_FieldSelector":
+    def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._FieldSelector":
         """Initialize a pseudonymization request from a pandas dataframe read from file.
 
         Args:
