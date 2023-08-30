@@ -8,35 +8,31 @@ readme = "README.md"
 homepage = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
 repository = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
 documentation = "https://statisticsnorway.github.io/dapla-toolbelt-pseudo"
-classifiers = [
-    "Development Status :: 4 - Beta",
-]
-packages = [
-    { include = "dapla_pseudo", from="src"},
-]
+classifiers = ["Development Status :: 4 - Beta"]
+packages = [{ include = "dapla_pseudo", from = "src" }]
 
 [tool.poetry.urls]
 Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
-pydantic = "^1.10.2"
-pyhumps = "^3.8.0"
-types-requests = "^2.28.11"
-python-magic = "^0.4.27"
-pylibmagic = "^0.2.2"
+pydantic = "<2"
+pyhumps = ">=3.8.0"
+types-requests = ">=2.28.11"
+python-magic = ">=0.4.27"
+pylibmagic = ">=0.2.2"
 cryptography = ">41.0.0"
-dapla-toolbelt = "^1.7.0"
-fsspec = "^2023.5.0"
-polars = "^0.18.2"
+dapla-toolbelt = ">=1.7.0"
+fsspec = ">=2023.5.0"
+polars = ">=0.18.2"
 pygments = ">2.15.0"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
 black = ">=21.10b0"
-coverage = {extras = ["toml"], version = ">=6.2"}
+coverage = { extras = ["toml"], version = ">=6.2" }
 darglint = ">=1.8.1"
-devtools = "^0.9.0"
+devtools = ">=0.9.0"
 flake8 = ">=4.0.1"
 flake8-bandit = ">=2.1.2"
 flake8-bugbear = ">=21.9.2"
@@ -44,28 +40,30 @@ flake8-docstrings = ">=1.6.0"
 flake8-rst-docstrings = ">=0.2.5"
 furo = ">=2021.11.12"
 isort = ">=5.10.1"
-mock = "^4.0.3"
+mock = ">=4.0.3"
 mypy = ">=1.1.1"
-myst-parser = {version = ">=0.16.1"}
+myst-parser = { version = ">=0.16.1" }
 pep8-naming = ">=0.12.1"
 pre-commit = ">=2.16.0"
 pre-commit-hooks = ">=4.1.0"
 pytest = ">=6.2.5"
 pyupgrade = ">=2.29.1"
-responses = "^0.22.0"
+responses = ">=0.22.0"
 safety = ">=1.10.3"
 sphinx = ">=4.3.2"
 sphinx-autobuild = ">=2021.3.14"
 sphinx-click = ">=3.0.2"
 sqlalchemy = ">=2.0.0rc1"
 typeguard = ">=2.13.3"
-types-mock = "^4.0.15.2"
-xdoctest = {extras = ["colors"], version = ">=0.15.10"}
-ipykernel = "^6.21.3"
-pandas-stubs = "^1.5.3.230304"
-nbstripout = "^0.6.1"
-ipython = "^8.11.0"
-jupyterlab = "^4.0.0"
+types-mock = ">=4.0.15.2"
+xdoctest = { extras = ["colors"], version = ">=0.15.10" }
+ipykernel = ">=6.21.3"
+pandas-stubs = ">=1.5.3.230304"
+nbstripout = ">=0.6.1"
+ipython = ">=8.11.0"
+jupyterlab = ">=4.0.0"
+nox = ">=2023.4.22"
+nox-poetry = ">=1.0.3"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
@@ -98,9 +96,7 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
-module = [
-    'dapla'
-]
+module = ['dapla']
 
 
 [build-system]
