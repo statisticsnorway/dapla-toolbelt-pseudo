@@ -28,7 +28,7 @@ polars = ">=0.18.2"
 pygments = ">2.15.0"
 
 [tool.poetry.group.dev.dependencies]
-Pygments = ">=2.10.0"
+pygments = ">=2.10.0"
 black = ">=21.10b0"
 coverage = { extras = ["toml"], version = ">=6.2" }
 darglint = ">=1.8.1"
