@@ -66,6 +66,59 @@ with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"]
 pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid_fields=["fnr"])
 ```
 
+#### Builder pattern pseudonymization examples
+
+```python
+# Import necessary modules
+from dapla_pseudo import PseudoData
+from dapla import AuthClient
+import pandas as pd
+
+
+file_path="data/personer.json"
+
+options = {
+    # Specify data types of columns in the dataset
+    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"}
+}
+
+# Example: Single field default encryption (DAEAD)
+df = pd.read_json(file_path,**options) # Create DataFrame from file
+
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field("fornavn")                           # Select the field to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Multiple fields default encryption (DAEAD)
+result_df = (
+    PseudoData.from_file(file_path, **options)     # Read the DataFrame from file
+    .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Single field sid mapping (FPE)
+options = {
+    # Specify data types of columns in the dataset
+    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"},
+    # Specify storage options for Google Cloud Storage (GCS)
+    "storage_options" : {"token": AuthClient.fetch_google_token()}
+}
+
+gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"
+
+result_df = (
+    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS
+    .on_field("fnr")                               # Select multiple fields to pseudonymize
+    .map_to_stable_id()                            # Map the selected field to stable id
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+```
+
 ### Repseudonymize
 
 ```python
