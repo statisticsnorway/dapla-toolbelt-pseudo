@@ -85,15 +85,15 @@ options = {
 df = pd.read_json(file_path,**options) # Create DataFrame from file
 
 result_df = (
-    PseudoData.from_pandas(df)                    # Read the DataFrame from file
-    .on_field("fornavn")                          # Select the field to pseudonymize
-    .pseudonymize()                               # Apply pseudonymization to the selected field
-    .to_polars()                                  # Get the result as a polars dataframe
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field("fornavn")                           # Select the field to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
 )
 
 # Example: Multiple fields default encryption (DAEAD)
 result_df = (
-    PseudoData.from_file(file_path, **options) # Read the DataFrame from file
+    PseudoData.from_file(file_path, **options)     # Read the DataFrame from file
     .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
     .pseudonymize()                                # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
