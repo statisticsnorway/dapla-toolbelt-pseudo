@@ -67,6 +67,7 @@ pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid_fields=["
 ```
 
 #### Builder pattern pseudonymization examples
+
 ```python
 # Import necessary modules
 from dapla_pseudo import PseudoData
@@ -110,13 +111,14 @@ options = {
 gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"
 
 result_df = (
-    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS  
+    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS
     .on_field("fnr")                               # Select multiple fields to pseudonymize
     .map_to_stable_id()                            # Map the selected field to stable id
     .pseudonymize()                                # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
 ```
+
 ### Repseudonymize
 
 ```python
