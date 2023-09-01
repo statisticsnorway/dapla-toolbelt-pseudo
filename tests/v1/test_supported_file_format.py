@@ -11,7 +11,7 @@ PKG = "dapla_pseudo.v1.supported_file_format"
 def test_get_pandas_function_name(file_format: str) -> None:
     # Checks that a pandas function exists for all supported file formats.
     supported_file_format = SupportedFileFormat(file_format)
-    assert getattr(pd, supported_file_format.get_pandas_function_name())
+    assert getattr(pd, supported_file_format.get_function_name())
 
 
 def test_get_pandas_function_name_unsupported_format() -> None:

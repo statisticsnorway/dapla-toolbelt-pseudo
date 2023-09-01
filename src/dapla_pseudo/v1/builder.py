@@ -104,8 +104,7 @@ class PseudoData:
 
         file_format = SupportedFileFormat(file_extension)
 
-        pandas_function = getattr(pd, file_format.get_pandas_function_name())
-        return PseudoData._FieldSelector(pandas_function(file_path_str, **kwargs))
+        return PseudoData._FieldSelector(file_format.read_to_df(file_path_str, **kwargs))
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""
