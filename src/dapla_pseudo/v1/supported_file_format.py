@@ -22,11 +22,12 @@ class SupportedFileFormat(Enum):
 
     def read_to_df(self, file_path: str, **kwargs: Dict[str, Any]) -> Union[pl.DataFrame, pd.DataFrame]:
         """Reads a file with a supported file format to a Dataframe."""
-        polars_supported_formats = [self.CSV, self.PARQUET]
+        polars_supported_formats = [self.PARQUET.value]
         function_name = self.get_function_name()
 
         if self.value in polars_supported_formats:
             reader_function = getattr(pl, function_name)
+
         else:
             reader_function = getattr(pd, function_name)
 

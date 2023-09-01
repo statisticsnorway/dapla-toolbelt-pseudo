@@ -225,7 +225,7 @@ def test_builder_from_file_with_storage_options(pandas_form_csv: Mock) -> None:
 
 @pytest.mark.parametrize(
     "file_format,expected_error",
-    [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ArrowInvalid")],
+    [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ArrowErrorException")],
 )
 @patch("pathlib.Path.suffix")
 def test_builder_from_file_empty_file(mock_path_suffix: Mock, file_format: str, expected_error: str) -> None:
