@@ -22,7 +22,7 @@ class SupportedFileFormat(Enum):
 
     def read_to_df(self, file_path: str, **kwargs: Dict[str, Any]) -> Union[pl.DataFrame, pd.DataFrame]:
         """Reads a file with a supported file format to a Dataframe."""
-        polars_supported_formats = [self.PARQUET.value]
+        polars_supported_formats = [SupportedFileFormat.PARQUET.value]
         function_name = self.get_function_name()
 
         if self.value in polars_supported_formats:
