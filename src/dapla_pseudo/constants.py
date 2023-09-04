@@ -1,7 +1,6 @@
 """This module defines constants that are referenced throughout the codebase."""
 from enum import Enum
 
-
 class Env(str, Enum):
     """Environment variable keys."""
 
@@ -35,3 +34,10 @@ class PseudoFunctionTypes(str, Enum):
     def __str__(self) -> str:
         """Use value for string representation."""
         return str(self.value)
+
+class UnknownCharacterStrategy(str, Enum):
+    """UnknownCharacterStrategy defines how encryption/decryption should handle non-alphabet characters."""
+    FAIL   = "fail"
+    SKIP   = "skip"
+    DELETE = "delete"
+    REDACT = "redact"
