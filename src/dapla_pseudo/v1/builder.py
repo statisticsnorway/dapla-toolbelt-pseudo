@@ -11,9 +11,11 @@ import polars as pl
 import requests
 from typing_extensions import Self
 
-from dapla_pseudo.constants import PredefinedKeys, UnknownCharacterStrategy
+from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.v1.models import PseudoFunction, PseudoFunctionKeywordArgs
+from dapla_pseudo.constants import UnknownCharacterStrategy
+from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoFunctionKeywordArgs
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
@@ -140,7 +142,8 @@ class PseudoData:
 
         def map_to_stable_id(self) -> Self:
             self._pseudo_func = PseudoFunction(
-                function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1
+                function_type=PseudoFunctionTypes.MAP_SID,
+                kwargs=PseudoFunctionKeywordArgs(key_id=PredefinedKeys.PAPIS_COMMON_KEY_1),
             )
             return self
 
@@ -149,11 +152,10 @@ class PseudoData:
             preserve_formatting: bool = False,
             with_custom_function: Optional[PseudoFunction] = None,
             with_custom_keyset: Optional[PseudoKeyset] = None,
-            version_timestamp: Optional[int] = None
+            version_timestamp: Optional[str] = None,
         ) -> "PseudonymizationResult":
             # If _pseudo_func has been defined upstream, then use that.
             if self._pseudo_func is None:
-                
                 # If the user has explicitly defined their own function, then use that.
                 if with_custom_function is not None:
                     self._pseudo_func = with_custom_function
@@ -163,18 +165,17 @@ class PseudoData:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.FF31,
                         kwargs=PseudoFunctionKeywordArgs(
-                            key_id=PredefinedKeys.PAPIS_COMMON_KEY_1,
-                            strategy=UnknownCharacterStrategy.SKIP),
-                            version_timestamp=version_timestamp
+                            key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, strategy=UnknownCharacterStrategy.SKIP
+                        ),
+                        version_timestamp=version_timestamp,
                     )
                 # Use DAEAD with the SSB common key as a sane default.
                 else:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.DAEAD,
                         kwargs=PseudoFunctionKeywordArgs(
-                            key_id=PredefinedKeys.SSB_COMMON_KEY_1,
-                            version_timestamp=version_timestamp
-                        )
+                            key_id=PredefinedKeys.SSB_COMMON_KEY_1, version_timestamp=version_timestamp
+                        ),
                     )
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset

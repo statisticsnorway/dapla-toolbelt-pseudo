@@ -2,13 +2,15 @@
 import json
 import typing as t
 from enum import Enum
-from typing import Optional
-from humps import camelize
 
+from humps import camelize
 from pydantic import BaseModel
 
+from dapla_pseudo.constants import PredefinedKeys
+from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.models import APIModel
-from dapla_pseudo.constants import PseudoFunctionTypes, UnknownCharacterStrategy, PredefinedKeys
+
 
 class Mimetypes(str, Enum):
     """Mimetypes is an enum of supported mimetypes. For use in HTTP requests"""
@@ -136,22 +138,28 @@ class KeyWrapper(BaseModel):
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
 
+
 class PseudoFunctionKeywordArgs(BaseModel):
-    """Representation of the possible keyword arguments """
+    """Representation of the possible keyword arguments"""
+
     key_id: PredefinedKeys
     strategy: t.Optional[UnknownCharacterStrategy] = None
     version_timestamp: t.Optional[int] = None
-        
+
     class Config:
         """Pydantic Config."""
+
         alias_generator = camelize
         allow_population_by_field_name = True
+
 
 class PseudoFunction(BaseModel):
     """Formal representation of a pseudo function.
 
     Use to build up the string representation expected by pseudo service.
-    Syntax: <function_type>(<kwarg_1>=x, <kwarg_2>=y)
+
+    Syntax: "<function_type>(<kwarg_1>=x, <kwarg_2>=y)"
+
     where <kwarg_1>, <kwarg_2>, etc. represents the keywords defined in PseudoFunctionKeywordArgs
     """
 
@@ -160,7 +168,6 @@ class PseudoFunction(BaseModel):
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
-        
         # Format the k,v pairs in PseudoFunctionKeywordArgs
-        kwargs_fmt = ",".join(f"{k}={v}" for k, v in self.kwargs.dict(by_alias=True).items())
+        kwargs_fmt = ",".join(f"{k}={v}" for k, v in self.kwargs.dict(by_alias=True).items() if v is not None)
         return f"{self.function_type}({kwargs_fmt})"
