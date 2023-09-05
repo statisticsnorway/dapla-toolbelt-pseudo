@@ -144,7 +144,7 @@ class PseudoFunctionKeywordArgs(BaseModel):
 
     key_id: PredefinedKeys
     strategy: t.Optional[UnknownCharacterStrategy] = None
-    version_timestamp: t.Optional[int] = None
+    version_timestamp: t.Optional[str] = None
 
     class Config:
         """Pydantic Config."""
