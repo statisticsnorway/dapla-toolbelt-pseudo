@@ -140,10 +140,12 @@ class PseudoData:
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
-        def map_to_stable_id(self) -> Self:
+        def map_to_stable_id(self, version_timestamp: Optional[str] = None) -> Self:
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=PseudoFunctionKeywordArgs(key_id=PredefinedKeys.PAPIS_COMMON_KEY_1),
+                kwargs=PseudoFunctionKeywordArgs(
+                    key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, version_timestamp=version_timestamp
+                ),
             )
             return self
 
@@ -152,7 +154,6 @@ class PseudoData:
             preserve_formatting: bool = False,
             with_custom_function: Optional[PseudoFunction] = None,
             with_custom_keyset: Optional[PseudoKeyset] = None,
-            version_timestamp: Optional[str] = None,
         ) -> "PseudonymizationResult":
             # If _pseudo_func has been defined upstream, then use that.
             if self._pseudo_func is None:
@@ -167,15 +168,12 @@ class PseudoData:
                         kwargs=PseudoFunctionKeywordArgs(
                             key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, strategy=UnknownCharacterStrategy.SKIP
                         ),
-                        version_timestamp=version_timestamp,
                     )
                 # Use DAEAD with the SSB common key as a sane default.
                 else:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.DAEAD,
-                        kwargs=PseudoFunctionKeywordArgs(
-                            key_id=PredefinedKeys.SSB_COMMON_KEY_1, version_timestamp=version_timestamp
-                        ),
+                        kwargs=PseudoFunctionKeywordArgs(key_id=PredefinedKeys.SSB_COMMON_KEY_1),
                     )
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
