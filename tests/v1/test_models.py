@@ -42,7 +42,7 @@ def test_key_wrapper_with_key_reference() -> None:
 
 
 def test_key_wrapper_with_parsed_keyset() -> None:
-    keyset = PseudoKeyset.parse_obj(custom_keyset_dict)
+    keyset = PseudoKeyset.model_validate(custom_keyset_dict)
     key_wrapper = KeyWrapper(key=keyset)
     assert key_wrapper.key_id == "1234567890"
     assert key_wrapper.keyset == keyset

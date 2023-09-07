@@ -293,7 +293,7 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[PseudoFun
         case Field():
             field = f
         case dict():
-            field = Field.parse_obj(f)
+            field = Field.model_validate(f)
         case str():
             field = Field(pattern=f"**/{f}")
 

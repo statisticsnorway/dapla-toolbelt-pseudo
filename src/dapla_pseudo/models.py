@@ -19,4 +19,4 @@ class APIModel(BaseModel):
 
     def to_json(self) -> str:
         """Convert the model to JSON using camelCase aliases and only including assigned values."""
-        return self.json(exclude_unset=True, exclude_none=True, by_alias=True)
+        return self.model_dump_json(exclude_unset=True, exclude_none=True, by_alias=True)

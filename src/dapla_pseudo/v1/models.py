@@ -5,6 +5,8 @@ from enum import Enum
 
 from humps import camelize
 from pydantic import BaseModel
+from pydantic import ConfigDict
+from pydantic import field_serializer
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
@@ -92,13 +94,9 @@ class PseudoFunctionKeywordArgs(BaseModel):
     version_timestamp: t.Optional[str] = None  # Only used for 'map-sid'
 
     def __str__(self) -> str:
-        return ",".join(f"{k}={v}" for k, v in self.dict(by_alias=True).items() if v is not None)
+        return ",".join(f"{k}={v}" for k, v in self.model_dump(by_alias=True).items() if v is not None)
 
-    class Config:
-        """Pydantic Config."""
-
-        alias_generator = camelize
-        allow_population_by_field_name = True
+    model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
 
 class PseudoFunction(BaseModel):
@@ -151,6 +149,10 @@ class PseudoRule(APIModel):
     name: t.Optional[str]
     pattern: str
     func: PseudoFunction | PseudoFunctionRedact
+
+    @field_serializer("func")
+    def serialize_dt(self, func: PseudoFunction | PseudoFunctionRedact, _info):
+        return str(func)
 
 
 class PseudoConfig(APIModel):

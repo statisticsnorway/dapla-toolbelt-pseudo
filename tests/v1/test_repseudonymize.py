@@ -12,7 +12,7 @@ from dapla_pseudo.v1.models import PseudoKeyset
 base_url = "https://mocked.dapla-pseudo-service"
 auth_token = "some-auth-token"
 
-custom_keyset = PseudoKeyset.parse_obj(
+custom_keyset = PseudoKeyset.model_validate(
     {
         "encryptedKeyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
         "keysetInfo": {
