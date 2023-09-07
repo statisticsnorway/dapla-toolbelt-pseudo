@@ -19,26 +19,6 @@ class Mimetypes(str, Enum):
     CSV = "text/csv"
 
 
-class PseudoRule(APIModel):
-    """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
-
-    Each rule defines a glob pattern (see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
-    that identifies one or multiple fields, and a `func` that will be applied to the matching fields.
-
-    Lists of PseudoRules are processed by the dapla-pseudo-service in the order they are defined, and only the first
-    matching rule will be applied (thus: rule ordering is important).
-
-    Attributes:
-        name: A friendly name of the rule. This is optional, but can be handy for debugging
-        pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
-        func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
-    """
-
-    name: t.Optional[str]
-    pattern: str
-    func: str
-
-
 class Field(APIModel):
     """Field represents a targeted piece of data within a dataset or record.
 
@@ -64,45 +44,10 @@ class PseudoKeyset(APIModel):
         return str(self.keyset_info["primaryKeyId"])
 
 
-class PseudoConfig(APIModel):
-    """PseudoConfig is a container for rules and keysets."""
-
-    rules: t.List[PseudoRule]
-    keysets: t.Optional[t.List[PseudoKeyset]]
-
-
 class TargetCompression(APIModel):
     """TargetCompression denotes if and how results from the API should be compressed and password encrypted."""
 
     password: str
-
-
-class PseudonymizeFileRequest(APIModel):
-    """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
-
-    pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
-    target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression]
-
-
-class DepseudonymizeFileRequest(APIModel):
-    """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
-
-    pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
-    target_content_type: t.Optional[str]
-    compression: t.Optional[TargetCompression]
-
-
-class RepseudonymizeFileRequest(APIModel):
-    """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
-
-    source_pseudo_config: PseudoConfig
-    target_pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
-    target_content_type: str
-    compression: t.Optional[TargetCompression]
 
 
 class KeyWrapper(BaseModel):
@@ -143,8 +88,11 @@ class PseudoFunctionKeywordArgs(BaseModel):
     """Representation of the possible keyword arguments"""
 
     key_id: PredefinedKeys
-    strategy: t.Optional[UnknownCharacterStrategy] = None
-    version_timestamp: t.Optional[str] = None
+    strategy: t.Optional[UnknownCharacterStrategy] = None  # Only used for FF31
+    version_timestamp: t.Optional[str] = None  # Only used for 'map-sid'
+
+    def __str__(self) -> str:
+        return ",".join(f"{k}={v}" for k, v in self.dict(by_alias=True).items() if v is not None)
 
     class Config:
         """Pydantic Config."""
@@ -168,6 +116,110 @@ class PseudoFunction(BaseModel):
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
-        # Format the k,v pairs in PseudoFunctionKeywordArgs
-        kwargs_fmt = ",".join(f"{k}={v}" for k, v in self.kwargs.dict(by_alias=True).items() if v is not None)
-        return f"{self.function_type}({kwargs_fmt})"
+        return f"{self.function_type}({self.kwargs})"
+
+
+class PseudoFunctionRedact(BaseModel):
+    """Representation of the 'redact' function.
+
+    This function has sufficiently different representation than PseudoFunction such that it warrants its own model.
+
+    Syntax: "redact(<replacement_string>)"
+    """
+
+    replacement_string: str
+
+    def __str__(self) -> str:
+        return f"redact({self.replacement_string})"
+
+
+class PseudoRule(APIModel):
+    """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
+
+    Each rule defines a glob pattern (see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
+    that identifies one or multiple fields, and a `func` that will be applied to the matching fields.
+
+    Lists of PseudoRules are processed by the dapla-pseudo-service in the order they are defined, and only the first
+    matching rule will be applied (thus: rule ordering is important).
+
+    Attributes:
+        name: A friendly name of the rule. This is optional, but can be handy for debugging
+        pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
+        func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
+    """
+
+    name: t.Optional[str]
+    pattern: str
+    func: PseudoFunction | PseudoFunctionRedact
+
+
+class PseudoConfig(APIModel):
+    """PseudoConfig is a container for rules and keysets."""
+
+    rules: t.List[PseudoRule]
+    keysets: t.Optional[t.List[PseudoKeyset]]
+
+
+class PseudonymizeFileRequest(APIModel):
+    """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
+
+    pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: Mimetypes
+    compression: t.Optional[TargetCompression]
+
+
+class DepseudonymizeFileRequest(APIModel):
+    """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
+
+    pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: t.Optional[str]
+    compression: t.Optional[TargetCompression]
+
+
+class RepseudonymizeFileRequest(APIModel):
+    """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
+
+    source_pseudo_config: PseudoConfig
+    target_pseudo_config: PseudoConfig
+    target_uri: t.Optional[str]
+    target_content_type: str
+    compression: t.Optional[TargetCompression]
+
+
+"""
+from dapla_pseudo.types import FieldDecl
+
+class Field(APIModel):
+    '''Field represents a targeted piece of data within a dataset or record.
+
+    Attributes:
+        pattern: field name or expression (e.g. a glob)
+        mapping: If defined, denotes a mapping transformation that should be applied before the operation in question,
+            e.g. "sid", meaning the field should be transformed to Stabil ID before being pseudonymized.
+    '''
+
+    pattern: str
+    func: PseudoFunction | PseudoFunctionRedact
+
+    def __init__(self, pattern: str, key: str, type=PseudoFunctionTypes):
+        self.pattern = pattern
+        match
+        if field.mapping == "sid":
+            func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=sid_func_kwargs)
+        elif key == "papis-common-key-1":
+            func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=PseudoFunctionKeywordArgs(key_id=key))
+        else:
+            func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=PseudoFunctionKeywordArgs(key_id=key))
+
+    @staticmethod
+    def map_to_field(field_decl: FieldDecl, pattern: str, key) -> t.Self:
+        match field_decl:
+            case Field():
+                return Field(pattern=pattern, key=key)
+            case dict():
+                return Field.parse_obj(field_decl)
+            case str():
+                return Field(pattern=f"**/{field_decl}", key=key)
+"""

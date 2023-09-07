@@ -11,12 +11,13 @@ from dapla_pseudo.models import APIModel
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoFunctionRedact
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
-from ..types import _BinaryFileDecl
-from ..types import _FileSpecDecl
+from ..types import BinaryFileDecl
+from ..types import FileSpecDecl
 
 
 class PseudoClient:
@@ -41,7 +42,7 @@ class PseudoClient:
     def pseudonymize_file(
         self,
         pseudonymize_request: PseudonymizeFileRequest,
-        data: _BinaryFileDecl,
+        data: BinaryFileDecl,
         timeout: t.Optional[int],
         stream: bool = False,
         name: t.Optional[str] = None,
@@ -203,8 +204,8 @@ class PseudoClient:
         stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
-        data_spec: _FileSpecDecl = (name, data, content_type)
-        request_spec: _FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
+        data_spec: FileSpecDecl = (name, data, content_type)
+        request_spec: FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
@@ -226,7 +227,7 @@ class PseudoClient:
         path: str,
         field_name: str,
         values: list[str],
-        pseudo_func: t.Optional[PseudoFunction],
+        pseudo_func: t.Optional[PseudoFunction | PseudoFunctionRedact],
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:

@@ -16,6 +16,7 @@ from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoFunctionKeywordArgs
+from dapla_pseudo.v1.models import PseudoFunctionRedact
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
@@ -136,7 +137,7 @@ class PseudoData:
         ) -> None:
             self._dataframe: pl.DataFrame = dataframe
             self._fields: list[str] = fields
-            self._pseudo_func: Optional[PseudoFunction] = None
+            self._pseudo_func: Optional[PseudoFunction | PseudoFunctionRedact] = None
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
@@ -234,7 +235,7 @@ def _do_pseudonymize_field(
     path: str,
     field_name: str,
     values: list[str],
-    pseudo_func: Optional[PseudoFunction],
+    pseudo_func: Optional[PseudoFunction | PseudoFunctionRedact],
     metadata_map: t.Dict[str, str],
     keyset: Optional[PseudoKeyset] = None,
 ) -> pl.Series:
