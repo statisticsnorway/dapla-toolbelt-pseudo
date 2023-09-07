@@ -146,7 +146,7 @@ class PseudoRule(APIModel):
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
     """
 
-    name: t.Optional[str]
+    name: t.Optional[str] = None
     pattern: str
     func: PseudoFunction | PseudoFunctionRedact
 
@@ -159,25 +159,25 @@ class PseudoConfig(APIModel):
     """PseudoConfig is a container for rules and keysets."""
 
     rules: t.List[PseudoRule]
-    keysets: t.Optional[t.List[PseudoKeyset]]
+    keysets: t.Optional[t.List[PseudoKeyset]] = None
 
 
 class PseudonymizeFileRequest(APIModel):
     """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
+    target_uri: t.Optional[str] = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression]
+    compression: t.Optional[TargetCompression] = None
 
 
 class DepseudonymizeFileRequest(APIModel):
     """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
-    target_content_type: t.Optional[str]
-    compression: t.Optional[TargetCompression]
+    target_uri: t.Optional[str] = None
+    target_content_type: t.Optional[str] = None
+    compression: t.Optional[TargetCompression] = None
 
 
 class RepseudonymizeFileRequest(APIModel):
@@ -185,9 +185,9 @@ class RepseudonymizeFileRequest(APIModel):
 
     source_pseudo_config: PseudoConfig
     target_pseudo_config: PseudoConfig
-    target_uri: t.Optional[str]
+    target_uri: t.Optional[str] = None
     target_content_type: str
-    compression: t.Optional[TargetCompression]
+    compression: t.Optional[TargetCompression] = None
 
 
 """

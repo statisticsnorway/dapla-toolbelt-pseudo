@@ -1,6 +1,7 @@
 """The models module contains base classes used by other models."""
 from humps import camelize
 from pydantic import BaseModel
+from pydantic import ConfigDict
 
 
 class APIModel(BaseModel):
@@ -11,11 +12,7 @@ class APIModel(BaseModel):
     model to JSON.
     """
 
-    class Config:
-        """Pydantic Config."""
-
-        alias_generator = camelize
-        allow_population_by_field_name = True
+    model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
     def to_json(self) -> str:
         """Convert the model to JSON using camelCase aliases and only including assigned values."""
