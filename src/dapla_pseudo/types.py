@@ -10,7 +10,7 @@ import pandas as pd
 from dapla_pseudo.v1.models import Field
 
 
-_FieldDecl = t.Union[str, dict, Field]
-_BinaryFileDecl = t.Union[t.BinaryIO, io.BufferedReader, fsspec.spec.AbstractBufferedFile]
-_DatasetDecl = t.Union[pd.DataFrame, _BinaryFileDecl, str, Path]
-_FileSpecDecl = tuple[t.Optional[str], t.Union[_BinaryFileDecl, str], str]
+FieldDecl = t.Union[str, dict, Field]
+BinaryFileDecl = t.Union[t.BinaryIO, io.BufferedReader, fsspec.spec.AbstractBufferedFile]
+DatasetDecl = t.Union[pd.DataFrame, BinaryFileDecl, str, Path]
+FileSpecDecl = tuple[t.Optional[str], t.Union[BinaryFileDecl, str], str]
