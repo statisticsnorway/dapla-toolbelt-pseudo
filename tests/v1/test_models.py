@@ -2,10 +2,10 @@ import json
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import FF31KeywordArgs
 
 
 custom_keyset_dict = {
