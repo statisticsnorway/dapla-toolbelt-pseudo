@@ -289,7 +289,7 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKey
             field = Field(pattern=f"**/{f}")
 
     if field.mapping == "sid":
-        if sid_kwargs := sid_func_kwargs is not None:
+        if (sid_kwargs := sid_func_kwargs) is not None:
             sid_kwargs = MapSidKeywordArgs()
 
         func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=sid_kwargs)
