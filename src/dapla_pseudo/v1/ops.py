@@ -271,13 +271,13 @@ def _rules_of(
     fields: t.List[FieldDecl],
     sid_fields: t.List[str],
     key: str,
-    sid_func_kwargs: t.Optional[MapSidKeywordArgs],
+    sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None,
 ) -> t.List[PseudoRule]:
     enriched_sid_fields: t.List[Field] = [Field(pattern=f"**/{field}", mapping="sid") for field in sid_fields]
     return [_rule_of(field, i, key, sid_func_kwargs) for i, field in enumerate(enriched_sid_fields + fields, 1)]
 
 
-def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs]) -> PseudoRule:
+def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None) -> PseudoRule:
     key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
 
     match f:
@@ -289,7 +289,10 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKey
             field = Field(pattern=f"**/{f}")
 
     if field.mapping == "sid":
-        func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=sid_func_kwargs)
+        if sid_kwargs := sid_func_kwargs is not None:
+            sid_kwargs = MapSidKeywordArgs()
+
+        func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=sid_kwargs)
     elif key == "papis-common-key-1":
         func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=PseudoFunctionKeywordArgs(key_id=key))
     else:

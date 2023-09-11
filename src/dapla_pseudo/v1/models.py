@@ -6,6 +6,7 @@ from enum import Enum
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
+from pydantic import FieldSerializationInfo
 from pydantic import field_serializer
 
 from dapla_pseudo.constants import PredefinedKeys
@@ -154,7 +155,7 @@ class PseudoRule(APIModel):
     func: PseudoFunction
 
     @field_serializer("func")  # Need to define serializer explicitly to coerce to string before serializing
-    def serialize_func(self, func: PseudoFunction, _info):
+    def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
         return str(func)
 
 
