@@ -1,7 +1,7 @@
 import json
 
-from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import PseudoFunction
@@ -57,7 +57,7 @@ def test_key_wrapper_with_keyset_json() -> None:
 
 def test_pseudo_function() -> None:
     assert "daead(keyId=ssb-common-key-1)" == str(
-        PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1, kwargs={})
+        PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
     )
 
 
@@ -65,7 +65,6 @@ def test_pseudo_function_with_extra_kwargs() -> None:
     assert "ff31(keyId=ssb-common-key-1,strategy=skip)" == str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
-            key=PredefinedKeys.PAPIS_COMMON_KEY_1,
             kwargs=FF31KeywordArgs(),
         )
     )
