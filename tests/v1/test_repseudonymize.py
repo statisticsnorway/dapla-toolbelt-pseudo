@@ -61,7 +61,7 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = arg["files"]["request"][1]
+        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
         assert actual_request_json == expected_request_json
 
 
@@ -100,7 +100,7 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = arg["files"]["request"][1]
+        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
         assert actual_request_json == expected_request_json
 
 
@@ -155,5 +155,5 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = arg["files"]["request"][1]
+        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
         assert actual_request_json == expected_request_json

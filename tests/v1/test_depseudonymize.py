@@ -35,5 +35,6 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
                 "targetContentType": "application/json",
             }
         )
-        actual_request_json = arg["files"]["request"][1]
+
+        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
         assert actual_request_json == expected_request_json

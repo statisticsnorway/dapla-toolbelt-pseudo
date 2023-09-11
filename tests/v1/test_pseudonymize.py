@@ -168,7 +168,7 @@ def test_pseudonymize_request_with_default_key(
         }
     )
 
-    actual_request_json = arg["files"]["request"][1]
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
 
     assert arg["files"]["data"][0] == "personer.json"
@@ -203,7 +203,7 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = arg["files"]["request"][1]
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
 
 
@@ -252,7 +252,8 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = arg["files"]["request"][1]
+
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
 
 
@@ -286,7 +287,7 @@ def test_pseudonymize_request_with_sid(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = arg["files"]["request"][1]
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
 
 
@@ -318,7 +319,7 @@ def test_pseudonymize_sid_fields_only(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = arg["files"]["request"][1]
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
 
 
@@ -353,5 +354,5 @@ def test_pseudonymize_request_using_sid_fields_parameter(
             "targetContentType": "application/json",
         }
     )
-    actual_request_json = arg["files"]["request"][1]
+    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
     assert actual_request_json == expected_request_json
