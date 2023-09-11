@@ -44,8 +44,7 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
         assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
-        expected_request_json = json.dumps(
-            {
+        expected_request_dict = {
                 "sourcePseudoConfig": {
                     "rules": [
                         {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
@@ -60,9 +59,9 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
                 },
                 "targetContentType": "application/json",
             }
-        )
-        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-        assert actual_request_json == expected_request_json
+        
+        actual_request_dict = json.loads(arg["files"]["request"][1])
+        assert actual_request_dict == expected_request_dict
 
 
 def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -83,8 +82,7 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
         assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
-        expected_request_json = json.dumps(
-            {
+        expected_request_dict = {
                 "sourcePseudoConfig": {
                     "rules": [
                         {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
@@ -99,9 +97,9 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
                 },
                 "targetContentType": "application/json",
             }
-        )
-        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-        assert actual_request_json == expected_request_json
+        
+        actual_request_dict = json.loads(arg["files"]["request"][1])
+        assert actual_request_dict == expected_request_dict
 
 
 def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -121,8 +119,7 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
         assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
-        expected_request_json = json.dumps(
-            {
+        expected_request_dict = {
                 "sourcePseudoConfig": {
                     "rules": [
                         {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
@@ -154,6 +151,6 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
                 },
                 "targetContentType": "application/json",
             }
-        )
-        actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-        assert actual_request_json == expected_request_json
+
+        actual_request_dict = json.loads(arg["files"]["request"][1])
+        assert actual_request_dict == expected_request_dict

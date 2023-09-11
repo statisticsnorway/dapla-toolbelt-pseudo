@@ -156,8 +156,7 @@ def test_pseudonymize_request_with_default_key(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_json = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
@@ -166,9 +165,9 @@ def test_pseudonymize_request_with_default_key(
             },
             "targetContentType": "application/json",
         }
-    )
+    
 
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
+    actual_request_json = json.loads(arg["files"]["request"][1])
     assert actual_request_json == expected_request_json
 
     assert arg["files"]["data"][0] == "personer.json"
@@ -192,8 +191,7 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": f"daead(keyId={key})"},
@@ -202,9 +200,9 @@ def test_pseudonymize_request_with_explicitly_specified_common_key(
             },
             "targetContentType": "application/json",
         }
-    )
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-    assert actual_request_json == expected_request_json
+
+    actual_request_dict = json.loads(arg["files"]["request"][1])
+    assert actual_request_dict == expected_request_dict
 
 
 @mock.patch(REQUESTS_POST)
@@ -224,8 +222,7 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=1234567890)"},
@@ -251,10 +248,10 @@ def test_pseudonymize_request_with_explicitly_specified_keyset(
             },
             "targetContentType": "application/json",
         }
-    )
+    
 
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-    assert actual_request_json == expected_request_json
+    actual_request_dict = json.loads(arg["files"]["request"][1])
+    assert actual_request_dict == expected_request_dict
 
 
 @mock.patch(REQUESTS_POST)
@@ -275,8 +272,7 @@ def test_pseudonymize_request_with_sid(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
@@ -286,9 +282,9 @@ def test_pseudonymize_request_with_sid(
             },
             "targetContentType": "application/json",
         }
-    )
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-    assert actual_request_json == expected_request_json
+    
+    actual_request_dict = json.loads(arg["files"]["request"][1])
+    assert actual_request_dict == expected_request_dict
 
 
 @mock.patch(REQUESTS_POST)
@@ -309,8 +305,7 @@ def test_pseudonymize_sid_fields_only(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
@@ -318,9 +313,9 @@ def test_pseudonymize_sid_fields_only(
             },
             "targetContentType": "application/json",
         }
-    )
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-    assert actual_request_json == expected_request_json
+
+    actual_request_dict = json.loads(arg["files"]["request"][1])
+    assert actual_request_dict == expected_request_dict
 
 
 def test_pseudonymize_no_fields_or_sid_fields_specified(test_data_json_file_path: str) -> None:
@@ -343,8 +338,7 @@ def test_pseudonymize_request_using_sid_fields_parameter(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
     assert arg["stream"] is True
 
-    expected_request_json = json.dumps(
-        {
+    expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
                     {"name": "rule-1", "pattern": "**/fnr", "func": "map-sid(keyId=papis-common-key-1)"},
@@ -353,6 +347,6 @@ def test_pseudonymize_request_using_sid_fields_parameter(
             },
             "targetContentType": "application/json",
         }
-    )
-    actual_request_json = json.dumps(json.loads(arg["files"]["request"][1]))
-    assert actual_request_json == expected_request_json
+    
+    actual_request_dict = json.loads(arg["files"]["request"][1])
+    assert actual_request_dict == expected_request_dict
