@@ -89,14 +89,31 @@ class KeyWrapper(BaseModel):
 class PseudoFunctionKeywordArgs(BaseModel):
     """Representation of the possible keyword arguments"""
 
-    key_id: PredefinedKeys
-    strategy: t.Optional[UnknownCharacterStrategy] = None  # Only used for FF31
-    version_timestamp: t.Optional[str] = None  # Only used for 'map-sid'
-
     def __str__(self) -> str:
         return ",".join(f"{k}={v}" for k, v in self.model_dump(by_alias=True).items() if v is not None)
 
     model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
+
+
+class MapSidKeywordArgs(PseudoFunctionKeywordArgs):
+    key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
+    version_timestamp: t.Optional[str] = None
+
+
+class DaeadKeywordArgs(PseudoFunctionKeywordArgs):
+    key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
+
+
+class FF31KeywordArgs(PseudoFunctionKeywordArgs):
+    key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
+    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
+
+
+class RedactArgs(PseudoFunctionKeywordArgs):
+    replacement_string: str
+
+    def __str__(self) -> str:  # Overloading parent class
+        return self.replacement_string
 
 
 class PseudoFunction(BaseModel):
@@ -110,25 +127,11 @@ class PseudoFunction(BaseModel):
     """
 
     function_type: PseudoFunctionTypes
-    kwargs: PseudoFunctionKeywordArgs
+    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
         return f"{self.function_type}({self.kwargs})"
-
-
-class PseudoFunctionRedact(BaseModel):
-    """Representation of the 'redact' function.
-
-    This function has sufficiently different representation than PseudoFunction such that it warrants its own model.
-
-    Syntax: "redact(<replacement_string>)"
-    """
-
-    replacement_string: str
-
-    def __str__(self) -> str:
-        return f"redact({self.replacement_string})"
 
 
 class PseudoRule(APIModel):
@@ -148,10 +151,10 @@ class PseudoRule(APIModel):
 
     name: t.Optional[str] = None
     pattern: str
-    func: PseudoFunction | PseudoFunctionRedact
+    func: PseudoFunction
 
-    @field_serializer("func")
-    def serialize_dt(self, func: PseudoFunction | PseudoFunctionRedact, _info):
+    @field_serializer("func")  # Need to define serializer explicitly to coerce to string before serializing
+    def serialize_func(self, func: PseudoFunction, _info):
         return str(func)
 
 

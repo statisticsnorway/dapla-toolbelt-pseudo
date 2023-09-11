@@ -11,12 +11,11 @@ import polars as pl
 import requests
 from typing_extensions import Self
 
-from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.constants import UnknownCharacterStrategy
+from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoFunctionKeywordArgs
-from dapla_pseudo.v1.models import PseudoFunctionRedact
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
@@ -137,16 +136,14 @@ class PseudoData:
         ) -> None:
             self._dataframe: pl.DataFrame = dataframe
             self._fields: list[str] = fields
-            self._pseudo_func: Optional[PseudoFunction | PseudoFunctionRedact] = None
+            self._pseudo_func: Optional[PseudoFunction] = None
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
         def map_to_stable_id(self, version_timestamp: Optional[str] = None) -> Self:
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=PseudoFunctionKeywordArgs(
-                    key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, version_timestamp=version_timestamp
-                ),
+                kwargs=MapSidKeywordArgs(version_timestamp=version_timestamp),
             )
             return self
 
@@ -166,15 +163,13 @@ class PseudoData:
                 elif preserve_formatting:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.FF31,
-                        kwargs=PseudoFunctionKeywordArgs(
-                            key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, strategy=UnknownCharacterStrategy.SKIP
-                        ),
+                        kwargs=FF31KeywordArgs(),
                     )
                 # Use DAEAD with the SSB common key as a sane default.
                 else:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.DAEAD,
-                        kwargs=PseudoFunctionKeywordArgs(key_id=PredefinedKeys.SSB_COMMON_KEY_1),
+                        kwargs=PseudoFunctionKeywordArgs(),
                     )
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
@@ -235,7 +230,7 @@ def _do_pseudonymize_field(
     path: str,
     field_name: str,
     values: list[str],
-    pseudo_func: Optional[PseudoFunction | PseudoFunctionRedact],
+    pseudo_func: Optional[PseudoFunction],
     metadata_map: t.Dict[str, str],
     keyset: Optional[PseudoKeyset] = None,
 ) -> pl.Series:

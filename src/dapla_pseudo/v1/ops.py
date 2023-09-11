@@ -33,6 +33,7 @@ from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
 from .models import Field
 from .models import KeyWrapper
+from .models import MapSidKeywordArgs
 from .models import Mimetypes
 from .models import PseudoConfig
 from .models import PseudoFunction
@@ -127,7 +128,7 @@ def pseudonymize(
         case _:
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
     k = KeyWrapper(key)
-    sid_func_kwargs = _param_to_sid_func_kwargs(version_timestamp) if sid_fields else None
+    sid_func_kwargs = MapSidKeywordArgs(version_timestamp=version_timestamp) if sid_fields else None
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
@@ -266,27 +267,17 @@ def _client() -> PseudoClient:
     )
 
 
-def _param_to_sid_func_kwargs(version_timestamp: t.Optional[str]) -> PseudoFunctionKeywordArgs:
-    """Map the pseudo/respeudo params for SID-mapping to a concrete class.
-
-    As of September 2023, this function is overengineered as there is only one parameter, however
-    hopefully this structure will be useful in the future.
-    """
-
-    return PseudoFunctionKeywordArgs(key_id=PredefinedKeys.PAPIS_COMMON_KEY_1, version_timestamp=version_timestamp)
-
-
 def _rules_of(
     fields: t.List[FieldDecl],
     sid_fields: t.List[str],
     key: str,
-    sid_func_kwargs: t.Optional[PseudoFunctionKeywordArgs],
+    sid_func_kwargs: t.Optional[MapSidKeywordArgs],
 ) -> t.List[PseudoRule]:
     enriched_sid_fields: t.List[Field] = [Field(pattern=f"**/{field}", mapping="sid") for field in sid_fields]
     return [_rule_of(field, i, key, sid_func_kwargs) for i, field in enumerate(enriched_sid_fields + fields, 1)]
 
 
-def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[PseudoFunctionKeywordArgs]) -> PseudoRule:
+def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs]) -> PseudoRule:
     key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
 
     match f:

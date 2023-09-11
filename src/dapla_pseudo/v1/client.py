@@ -11,7 +11,6 @@ from dapla_pseudo.models import APIModel
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoFunctionRedact
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import RepseudonymizeFileRequest
@@ -227,7 +226,7 @@ class PseudoClient:
         path: str,
         field_name: str,
         values: list[str],
-        pseudo_func: t.Optional[PseudoFunction | PseudoFunctionRedact],
+        pseudo_func: t.Optional[PseudoFunction],
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:

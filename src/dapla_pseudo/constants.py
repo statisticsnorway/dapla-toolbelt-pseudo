@@ -31,6 +31,7 @@ class PseudoFunctionTypes(str, Enum):
     DAEAD = "daead"
     MAP_SID = "map-sid"
     FF31 = "ff31"
+    REDACT = "redact"
 
     def __str__(self) -> str:
         """Use value for string representation."""
