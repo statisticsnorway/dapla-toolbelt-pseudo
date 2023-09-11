@@ -129,6 +129,8 @@ class PseudoData:
             return PseudoData._Pseudonymizer(self._dataframe, list(fields))
 
     class _Pseudonymizer:
+        """Assemble the pseudonymization request."""
+
         def __init__(
             self,
             dataframe: pl.DataFrame,

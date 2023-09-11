@@ -87,33 +87,46 @@ class KeyWrapper(BaseModel):
         return None if self.keyset is None else [self.keyset]
 
 
-class PseudoFunctionKeywordArgs(BaseModel):
+class PseudoFunctionArgs(BaseModel):
     """Representation of the possible keyword arguments"""
 
     def __str__(self) -> str:
+        """As a default, represent the fields of the subclasses as kwargs on the format 'k=v'."""
         return ",".join(f"{k}={v}" for k, v in self.model_dump(by_alias=True).items() if v is not None)
 
     model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
 
-class MapSidKeywordArgs(PseudoFunctionKeywordArgs):
+class MapSidKeywordArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'map-sid' function."""
+
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     version_timestamp: t.Optional[str] = None
 
 
-class DaeadKeywordArgs(PseudoFunctionKeywordArgs):
+class DaeadKeywordArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'daead' function."""
+
     key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
 
 
-class FF31KeywordArgs(PseudoFunctionKeywordArgs):
+class FF31KeywordArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'FF31' function."""
+
     key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
     strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
 
 
-class RedactArgs(PseudoFunctionKeywordArgs):
+class RedactArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'redact' function."""
+
     replacement_string: str
 
-    def __str__(self) -> str:  # Overloading parent class
+    def __str__(self) -> str:
+        """Overload the parent class. The redact function is expected as an arg, not kwarg.
+
+        I.e. 'redact(<replacement_string>)
+        """
         return self.replacement_string
 
 
@@ -124,7 +137,7 @@ class PseudoFunction(BaseModel):
 
     Syntax: "<function_type>(<kwarg_1>=x, <kwarg_2>=y)"
 
-    where <kwarg_1>, <kwarg_2>, etc. represents the keywords defined in PseudoFunctionKeywordArgs
+    where <kwarg_1>, <kwarg_2>, etc. represents the keywords defined in PseudoFunctionArgs
     """
 
     function_type: PseudoFunctionTypes
@@ -154,8 +167,9 @@ class PseudoRule(APIModel):
     pattern: str
     func: PseudoFunction
 
-    @field_serializer("func")  # Need to define serializer explicitly to coerce to string before serializing
+    @field_serializer("func")
     def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
+        """Explicit serialization of the 'func' field to coerce to string before serializing."""
         return str(func)
 
 
