@@ -12,10 +12,10 @@ import requests
 from typing_extensions import Self
 
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoFunctionKeywordArgs
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
@@ -169,7 +169,7 @@ class PseudoData:
                 else:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.DAEAD,
-                        kwargs=PseudoFunctionKeywordArgs(),
+                        kwargs=DaeadKeywordArgs(),
                     )
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset

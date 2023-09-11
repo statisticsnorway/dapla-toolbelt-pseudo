@@ -31,13 +31,13 @@ from ..types import DatasetDecl
 from ..types import FieldDecl
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
+from .models import FF31KeywordArgs
 from .models import Field
 from .models import KeyWrapper
 from .models import MapSidKeywordArgs
 from .models import Mimetypes
 from .models import PseudoConfig
 from .models import PseudoFunction
-from .models import PseudoFunctionKeywordArgs
 from .models import PseudoKeyset
 from .models import PseudonymizeFileRequest
 from .models import PseudoRule
@@ -289,14 +289,14 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKey
             field = Field(pattern=f"**/{f}")
 
     if field.mapping == "sid":
-        if (sid_kwargs := sid_func_kwargs) is not None:
-            sid_kwargs = MapSidKeywordArgs()
-
-        func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=sid_kwargs)
+        func = PseudoFunction(
+            function_type=PseudoFunctionTypes.MAP_SID,
+            kwargs=sid_func_kwargs if sid_func_kwargs else MapSidKeywordArgs(),
+        )
     elif key == "papis-common-key-1":
-        func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=PseudoFunctionKeywordArgs(key_id=key))
+        func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
     else:
-        func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=PseudoFunctionKeywordArgs(key_id=key))
+        func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
 
     return PseudoRule(
         name=f"rule-{n}",
