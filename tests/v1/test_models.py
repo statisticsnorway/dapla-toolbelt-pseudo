@@ -6,6 +6,7 @@ from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import RedactArgs
 
 
 custom_keyset_dict = {
@@ -58,6 +59,12 @@ def test_key_wrapper_with_keyset_json() -> None:
 def test_pseudo_function() -> None:
     assert "daead(keyId=ssb-common-key-1)" == str(
         PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
+    )
+
+
+def test_redact_function() -> None:
+    assert "redact(test)" == str(
+        PseudoFunction(function_type=PseudoFunctionTypes.REDACT, kwargs=RedactArgs(replacement_string="test"))
     )
 
 
