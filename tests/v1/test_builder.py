@@ -16,6 +16,7 @@ from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import RedactArgs
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
@@ -154,6 +155,22 @@ def test_builder_pseudo_function_selector_fpe(patch_do_pseudonymize_field: Magic
 def test_builder_pseudo_function_selector_custom(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
     pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs())
+    PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func)
+
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
+        pseudo_func=pseudo_func,
+        metadata_map={},
+        keyset=None,
+    )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_redact(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.REDACT, kwargs=RedactArgs(replacement_string="test"))
     PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func)
 
     patch_do_pseudonymize_field.assert_called_once_with(
