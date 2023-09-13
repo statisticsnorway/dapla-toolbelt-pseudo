@@ -211,8 +211,8 @@ def test_builder_from_file_no_file_extension() -> None:
         PseudoData.from_file(path)
 
 
-@patch(f"{PKG}.pd.read_csv")
-def test_builder_from_file_with_storage_options(pandas_form_csv: Mock) -> None:
+@patch(f"{PKG}.read_to_df")
+def test_builder_from_file_with_storage_options(_mock_read_to_df: Mock) -> None:
     # This should not raise a FileNotFoundError
     # since the file is not on the local filesystem
     try:

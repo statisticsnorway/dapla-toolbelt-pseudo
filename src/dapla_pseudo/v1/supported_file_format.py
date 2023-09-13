@@ -16,22 +16,21 @@ class SupportedFileFormat(Enum):
     XML = "xml"
     PARQUET = "parquet"
 
-    def get_function_name(self) -> str:
-        """Returns the reader function name for the file format."""
-        return f"read_{self.value}"
 
-    def read_to_df(self, file_path: str, **kwargs: Dict[str, Any]) -> Union[pl.DataFrame, pd.DataFrame]:
-        """Reads a file with a supported file format to a Dataframe."""
-        polars_supported_formats = [SupportedFileFormat.PARQUET.value]
-        function_name = self.get_function_name()
+FORMAT_TO_READER_FUNCTION = {
+    SupportedFileFormat.CSV: pd.read_csv,
+    SupportedFileFormat.JSON: pd.read_json,
+    SupportedFileFormat.XML: pd.read_xml,
+    SupportedFileFormat.PARQUET: pl.read_parquet,
+}
 
-        if self.value in polars_supported_formats:
-            reader_function = getattr(pl, function_name)
 
-        else:
-            reader_function = getattr(pd, function_name)
-
-        return reader_function(file_path, **kwargs)
+def read_to_df(
+    supported_format: SupportedFileFormat, file_path: str, **kwargs: Dict[str, Any]
+) -> Union[pl.DataFrame, pd.DataFrame]:
+    """Reads a file with a supported file format to a Dataframe."""
+    reader_function = FORMAT_TO_READER_FUNCTION[supported_format]
+    return reader_function(file_path, **kwargs)
 
 
 class NoFileExtensionError(Exception):
