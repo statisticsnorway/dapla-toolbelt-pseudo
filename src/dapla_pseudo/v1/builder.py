@@ -18,6 +18,7 @@ from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
+from dapla_pseudo.v1.supported_file_format import read_to_df
 
 
 class PseudonymizationResult:
@@ -104,8 +105,7 @@ class PseudoData:
 
         file_format = SupportedFileFormat(file_extension)
 
-        pandas_function = getattr(pd, file_format.get_pandas_function_name())
-        return PseudoData._FieldSelector(pandas_function(file_path_str, **kwargs))
+        return PseudoData._FieldSelector(read_to_df(file_format, file_path_str, **kwargs))
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""

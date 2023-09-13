@@ -1,5 +1,11 @@
 """Classes used to support reading of dataframes from file."""
 from enum import Enum
+from typing import Any
+from typing import Dict
+from typing import Union
+
+import pandas as pd
+import polars as pl
 
 
 class SupportedFileFormat(Enum):
@@ -10,9 +16,21 @@ class SupportedFileFormat(Enum):
     XML = "xml"
     PARQUET = "parquet"
 
-    def get_pandas_function_name(self) -> str:
-        """Return the pandas function name for the file format."""
-        return f"read_{self.value}"
+
+FORMAT_TO_READER_FUNCTION = {
+    SupportedFileFormat.CSV: pd.read_csv,
+    SupportedFileFormat.JSON: pd.read_json,
+    SupportedFileFormat.XML: pd.read_xml,
+    SupportedFileFormat.PARQUET: pl.read_parquet,
+}
+
+
+def read_to_df(
+    supported_format: SupportedFileFormat, file_path: str, **kwargs: Dict[str, Any]
+) -> Union[pl.DataFrame, pd.DataFrame]:
+    """Reads a file with a supported file format to a Dataframe."""
+    reader_function = FORMAT_TO_READER_FUNCTION[supported_format]
+    return reader_function(file_path, **kwargs)
 
 
 class NoFileExtensionError(Exception):
