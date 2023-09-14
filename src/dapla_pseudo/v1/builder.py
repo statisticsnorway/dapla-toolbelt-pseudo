@@ -28,7 +28,7 @@ class PseudonymizationResult:
     def __init__(self, df: pl.DataFrame, metadata: Optional[t.Dict[str, str]] = None) -> None:
         """Initialise a PseudonymizationResult."""
         self._df = df
-        self._metadata = metadata if metadata is not None else {}
+        self._metadata = metadata if metadata else {}
 
     def to_polars(self) -> pl.DataFrame:
         """Pseudonymized Data as a Polars Dataframe."""
@@ -38,7 +38,8 @@ class PseudonymizationResult:
         """Pseudonymized Data as a Pandas Dataframe."""
         return self._df.to_pandas()
 
-    def get_metadata(self) -> dict[str, str]:
+    @property
+    def metadata(self) -> dict[str, str]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
@@ -179,10 +180,10 @@ class PseudoData:
             return self._pseudonymize_field()
 
         def _pseudonymize_field(self) -> "PseudonymizationResult":
-            """Pseudonymizes the specified fields in the dataframe using the provided pseudonymization function.
+            """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
-            the pseudonymized fields replace the original fields in the dataframe stored in `self._dataframe`.
+            the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
 
             Returns:
                 PseudonymizationResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.

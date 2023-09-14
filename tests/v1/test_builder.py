@@ -55,7 +55,7 @@ def test_builder_pandas_pseudonymize_minimal_call(
 
     pseudo_result = PseudoData.from_pandas(df).on_field(field_name).pseudonymize()
     pseudo_dataframe = pseudo_result.to_pandas()
-    pseudo_metadata = pseudo_result.get_metadata()
+    pseudo_metadata = pseudo_result.metadata
 
     # Check that the pseudonymized df has new values
     assert pseudo_dataframe[field_name].tolist() == ["f1", "f2", "f3"]
