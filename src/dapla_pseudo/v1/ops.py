@@ -87,7 +87,7 @@ def pseudonymize(
     :param data: path to file, file handle or dataframe
     :param fields: list of fields that should be pseudonymized
     :param sid_fields: list of fields that should be mapped to stabil ID and pseudonymized
-    :param version_timestamp: Timestamp representing which version of the SID-mapping to use
+    :param version_timestamp: Timestamp representing which version of the SID-mapping to use. Format: g<YYYY>m<MM>d<DD>
     :param key: either named reference to a "global" key or a keyset json
     :param timeout: connection and read timeout, see
         https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
