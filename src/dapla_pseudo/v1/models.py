@@ -98,7 +98,16 @@ class PseudoFunctionArgs(BaseModel):
 
 
 class MapSidKeywordArgs(PseudoFunctionArgs):
-    """Representation of kwargs for the 'map-sid' function."""
+    """
+    Attributes:
+        key_id (PredefinedKeys | str): The key to be used for pseudonomization
+        version_timestamp (str): The timestamp for the version of the SID catalogue.
+            If not specified, will choose the latest version.
+
+            The format is:
+            g<YYYY>m<MM>d<DD>
+            where the bracketed parts represent year, month and day respectively
+    """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     version_timestamp: t.Optional[str] = None
