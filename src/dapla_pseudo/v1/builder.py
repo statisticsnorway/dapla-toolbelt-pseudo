@@ -153,6 +153,9 @@ class PseudoData:
                     The format is:
                     g<YYYY>m<MM>d<DD>
                     where the bracketed parts represent year, month and day respectively
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
             """
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
