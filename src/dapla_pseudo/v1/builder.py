@@ -144,6 +144,16 @@ class PseudoData:
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
         def map_to_stable_id(self, version_timestamp: Optional[str] = None) -> Self:
+            """Map selected fields to to stable ID.
+
+            Args:
+                version_timestamp (Optional[str], optional): The timestamp for the version of the SID catalogue.
+                    If not specified, will choose the latest version.
+
+                    The format is:
+                    g<YYYY>m<MM>d<DD>
+                    where the bracketed parts represent year, month and day respectively
+            """
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
                 kwargs=MapSidKeywordArgs(version_timestamp=version_timestamp),
