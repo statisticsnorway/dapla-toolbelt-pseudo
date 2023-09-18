@@ -8,12 +8,15 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.builder import PseudoData
 from dapla_pseudo.v1.builder import _do_pseudonymize_field
+from dapla_pseudo.v1.models import DaeadKeywordArgs
+from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import RedactArgs
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
@@ -52,7 +55,7 @@ def test_builder_pandas_pseudonymize_minimal_call(
 
     pseudo_result = PseudoData.from_pandas(df).on_field(field_name).pseudonymize()
     pseudo_dataframe = pseudo_result.to_pandas()
-    pseudo_metadata = pseudo_result.get_metadata()
+    pseudo_metadata = pseudo_result.metadata
 
     # Check that the pseudonymized df has new values
     assert pseudo_dataframe[field_name].tolist() == ["f1", "f2", "f3"]
@@ -68,7 +71,7 @@ def test_single_field_do_pseudonymize_field(
 ) -> None:
     patched_post_to_field_endpoint.return_value = single_field_response
 
-    pseudo_func = PseudoFunction(function_type="fake-func-type", key="fake-key")
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=MapSidKeywordArgs(key_id="fake-key"))
     metadata: t.Dict[str, str] = dict()
     series: pl.Series = _do_pseudonymize_field("fake.endpoint", "fornavn", ["x1", "x2", "x3"], pseudo_func, metadata)
     assert series.to_list() == ["f1", "f2", "f3"]
@@ -93,7 +96,7 @@ def test_builder_pseudo_function_selector_default(patch_do_pseudonymize_field: M
         path="pseudonymize/field",
         field_name="fornavn",
         values=df["fornavn"].tolist(),
-        pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1),
+        pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()),
         metadata_map={},
         keyset=None,
     )
@@ -107,7 +110,28 @@ def test_builder_pseudo_function_selector_map_to_sid(patch_do_pseudonymize_field
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
         field_name="fnr",
-        pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1),
+        pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.MAP_SID, kwargs=MapSidKeywordArgs()),
+        metadata_map={},
+        keyset=None,
+    )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_with_version_timestamp(
+    patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
+) -> None:
+    mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
+    PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id(
+        version_timestamp="2023_04_25-12_35_40_649511"
+    ).pseudonymize()
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
+        pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.MAP_SID,
+            kwargs=MapSidKeywordArgs(version_timestamp="2023_04_25-12_35_40_649511"),
+        ),
         metadata_map={},
         keyset=None,
     )
@@ -121,11 +145,7 @@ def test_builder_pseudo_function_selector_fpe(patch_do_pseudonymize_field: Magic
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
         field_name="fnr",
-        pseudo_func=PseudoFunction(
-            function_type=PseudoFunctionTypes.FF31,
-            key=PredefinedKeys.PAPIS_COMMON_KEY_1,
-            extra_kwargs=["strategy=SKIP"],
-        ),
+        pseudo_func=PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()),
         metadata_map={},
         keyset=None,
     )
@@ -134,7 +154,23 @@ def test_builder_pseudo_function_selector_fpe(patch_do_pseudonymize_field: Magic
 @patch(f"{PKG}._do_pseudonymize_field")
 def test_builder_pseudo_function_selector_custom(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, key=PredefinedKeys.SSB_COMMON_KEY_2)
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs())
+    PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func)
+
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
+        pseudo_func=pseudo_func,
+        metadata_map={},
+        keyset=None,
+    )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_selector_redact(patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame) -> None:
+    mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.REDACT, kwargs=RedactArgs(replacement_string="test"))
     PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func)
 
     patch_do_pseudonymize_field.assert_called_once_with(
@@ -164,7 +200,7 @@ def test_builder_pseudo_keyset_selector_custom(patch_do_pseudonymize_field: Magi
             }
         ],
     }
-    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, key="1403797237")
+    pseudo_func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs(key_id="1403797237"))
     keyset = PseudoKeyset(kek_uri=kek_uri, encrypted_keyset=encrypted_keyset, keyset_info=keyset_info)
 
     PseudoData.from_pandas(df).on_field("fnr").pseudonymize(with_custom_function=pseudo_func, with_custom_keyset=keyset)

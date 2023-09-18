@@ -24,16 +24,20 @@ import requests
 
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
+from dapla_pseudo.constants import PseudoFunctionTypes
 
-from ..types import _BinaryFileDecl
-from ..types import _DatasetDecl
-from ..types import _FieldDecl
+from ..types import BinaryFileDecl
+from ..types import DatasetDecl
+from ..types import FieldDecl
 from .client import PseudoClient
 from .models import DepseudonymizeFileRequest
+from .models import FF31KeywordArgs
 from .models import Field
 from .models import KeyWrapper
+from .models import MapSidKeywordArgs
 from .models import Mimetypes
 from .models import PseudoConfig
+from .models import PseudoFunction
 from .models import PseudoKeyset
 from .models import PseudonymizeFileRequest
 from .models import PseudoRule
@@ -41,9 +45,10 @@ from .models import RepseudonymizeFileRequest
 
 
 def pseudonymize(
-    dataset: _DatasetDecl,
-    fields: t.Optional[t.List[_FieldDecl]] = None,
+    dataset: DatasetDecl,
+    fields: t.Optional[t.List[FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
+    version_timestamp: t.Optional[str] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     timeout: t.Optional[int] = None,
     stream: bool = True,
@@ -82,6 +87,7 @@ def pseudonymize(
     :param data: path to file, file handle or dataframe
     :param fields: list of fields that should be pseudonymized
     :param sid_fields: list of fields that should be mapped to stabil ID and pseudonymized
+    :param version_timestamp: Timestamp representing which version of the SID-mapping to use. Format: g<YYYY>m<MM>d<DD>
     :param key: either named reference to a "global" key or a keyset json
     :param timeout: connection and read timeout, see
         https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
@@ -97,7 +103,7 @@ def pseudonymize(
     if sid_fields is None:
         sid_fields = []
 
-    file_handle: t.Optional[_BinaryFileDecl] = None
+    file_handle: t.Optional[BinaryFileDecl] = None
     name: t.Optional[str] = None
     match dataset:
         case str() | Path():
@@ -120,9 +126,10 @@ def pseudonymize(
             dataset.seek(0)
             file_handle = io.BufferedReader(dataset)
         case _:
-            raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {_DatasetDecl}")
+            raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
     k = KeyWrapper(key)
-    rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id)
+    sid_func_kwargs = MapSidKeywordArgs(version_timestamp=version_timestamp) if sid_fields else None
+    rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
         target_content_type=content_type,
@@ -140,7 +147,7 @@ def pseudonymize(
 
 def depseudonymize(
     file_path: str,
-    fields: t.List[_FieldDecl],
+    fields: t.List[FieldDecl],
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     timeout: t.Optional[int] = None,
     stream: bool = True,
@@ -195,7 +202,7 @@ def depseudonymize(
 
 def repseudonymize(
     file_path: str,
-    fields: t.List[_FieldDecl],
+    fields: t.List[FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     timeout: t.Optional[int] = None,
@@ -260,27 +267,36 @@ def _client() -> PseudoClient:
     )
 
 
-def _rules_of(fields: t.List[_FieldDecl], sid_fields: t.List[str], key: str) -> t.List[PseudoRule]:
+def _rules_of(
+    fields: t.List[FieldDecl],
+    sid_fields: t.List[str],
+    key: str,
+    sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None,
+) -> t.List[PseudoRule]:
     enriched_sid_fields: t.List[Field] = [Field(pattern=f"**/{field}", mapping="sid") for field in sid_fields]
-    return [_rule_of(field, i, key) for i, field in enumerate(enriched_sid_fields + fields, 1)]
+    return [_rule_of(field, i, key, sid_func_kwargs) for i, field in enumerate(enriched_sid_fields + fields, 1)]
 
 
-def _rule_of(f: _FieldDecl, n: int, k: str) -> PseudoRule:
+def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None) -> PseudoRule:
     key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
 
-    if isinstance(f, Field):
-        field = f
-    elif isinstance(f, dict):
-        field = Field.parse_obj(f)
-    elif isinstance(f, str):
-        field = Field(pattern=f"**/{f}")
+    match f:
+        case Field():
+            field = f
+        case dict():
+            field = Field.model_validate(f)
+        case str():
+            field = Field(pattern=f"**/{f}")
 
     if field.mapping == "sid":
-        func = f"map-sid(keyId={PredefinedKeys.PAPIS_COMMON_KEY_1})"
+        func = PseudoFunction(
+            function_type=PseudoFunctionTypes.MAP_SID,
+            kwargs=sid_func_kwargs if sid_func_kwargs else MapSidKeywordArgs(),
+        )
     elif key == "papis-common-key-1":
-        func = f"ff31(keyId={key})"
+        func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
     else:
-        func = f"daead(keyId={key})"
+        func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
 
     return PseudoRule(
         name=f"rule-{n}",
@@ -295,7 +311,7 @@ def _content_type_of(file_path: str) -> str:
 
 def _dataframe_to_json(
     data: pd.DataFrame,
-    fields: t.Optional[t.Sequence[_FieldDecl]] = None,
+    fields: t.Optional[t.Sequence[FieldDecl]] = None,
     sid_fields: t.Optional[t.Sequence[str]] = None,
 ) -> t.BinaryIO:
     # Ensure fields to be pseudonymized are string type

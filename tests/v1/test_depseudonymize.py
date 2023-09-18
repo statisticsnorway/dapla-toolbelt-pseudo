@@ -24,16 +24,15 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
         assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
         assert arg["stream"] is True
 
-        expected_request_json = json.dumps(
-            {
-                "pseudoConfig": {
-                    "rules": [
-                        {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                        {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
-                    ]
-                },
-                "targetContentType": "application/json",
-            }
-        )
-        actual_request_json = arg["files"]["request"][1]
-        assert actual_request_json == expected_request_json
+        expected_request_dict = {
+            "pseudoConfig": {
+                "rules": [
+                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
+                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                ]
+            },
+            "targetContentType": "application/json",
+        }
+
+        actual_request_dict = json.loads(arg["files"]["request"][1])
+        assert actual_request_dict == expected_request_dict

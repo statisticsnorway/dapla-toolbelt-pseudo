@@ -11,8 +11,10 @@ import polars as pl
 import requests
 from typing_extensions import Self
 
-from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.v1.models import DaeadKeywordArgs
+from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.ops import _client
@@ -27,7 +29,7 @@ class PseudonymizationResult:
     def __init__(self, df: pl.DataFrame, metadata: Optional[t.Dict[str, str]] = None) -> None:
         """Initialise a PseudonymizationResult."""
         self._df = df
-        self._metadata = metadata if metadata is not None else {}
+        self._metadata = metadata if metadata else {}
 
     def to_polars(self) -> pl.DataFrame:
         """Pseudonymized Data as a Polars Dataframe."""
@@ -37,7 +39,8 @@ class PseudonymizationResult:
         """Pseudonymized Data as a Pandas Dataframe."""
         return self._df.to_pandas()
 
-    def get_metadata(self) -> dict[str, str]:
+    @property
+    def metadata(self) -> dict[str, str]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
@@ -127,6 +130,8 @@ class PseudoData:
             return PseudoData._Pseudonymizer(self._dataframe, list(fields))
 
     class _Pseudonymizer:
+        """Assemble the pseudonymization request."""
+
         def __init__(
             self,
             dataframe: pl.DataFrame,
@@ -138,9 +143,23 @@ class PseudoData:
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
-        def map_to_stable_id(self) -> Self:
+        def map_to_stable_id(self, version_timestamp: Optional[str] = None) -> Self:
+            """Map selected fields to to stable ID.
+
+            Args:
+                version_timestamp (Optional[str], optional): The timestamp for the version of the SID catalogue.
+                    If not specified, will choose the latest version.
+
+                    The format is:
+                    g<YYYY>m<MM>d<DD>
+                    where the bracketed parts represent year, month and day respectively
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
+            """
             self._pseudo_func = PseudoFunction(
-                function_type=PseudoFunctionTypes.MAP_SID, key=PredefinedKeys.PAPIS_COMMON_KEY_1
+                function_type=PseudoFunctionTypes.MAP_SID,
+                kwargs=MapSidKeywordArgs(version_timestamp=version_timestamp),
             )
             return self
 
@@ -160,13 +179,13 @@ class PseudoData:
                 elif preserve_formatting:
                     self._pseudo_func = PseudoFunction(
                         function_type=PseudoFunctionTypes.FF31,
-                        key=PredefinedKeys.PAPIS_COMMON_KEY_1,
-                        extra_kwargs=["strategy=SKIP"],
+                        kwargs=FF31KeywordArgs(),
                     )
                 # Use DAEAD with the SSB common key as a sane default.
                 else:
                     self._pseudo_func = PseudoFunction(
-                        function_type=PseudoFunctionTypes.DAEAD, key=PredefinedKeys.SSB_COMMON_KEY_1
+                        function_type=PseudoFunctionTypes.DAEAD,
+                        kwargs=DaeadKeywordArgs(),
                     )
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
@@ -174,10 +193,10 @@ class PseudoData:
             return self._pseudonymize_field()
 
         def _pseudonymize_field(self) -> "PseudonymizationResult":
-            """Pseudonymizes the specified fields in the dataframe using the provided pseudonymization function.
+            """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
-            the pseudonymized fields replace the original fields in the dataframe stored in `self._dataframe`.
+            the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
 
             Returns:
                 PseudonymizationResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
