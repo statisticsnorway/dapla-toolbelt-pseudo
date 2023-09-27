@@ -62,8 +62,6 @@ pandas-stubs = ">=1.5.3.230304"
 nbstripout = ">=0.6.1"
 ipython = ">=8.11.0"
 jupyterlab = ">=4.0.0"
-nox = ">=2023.4.22"
-nox-poetry = ">=1.0.3"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-typer = ">=0.0.3"
