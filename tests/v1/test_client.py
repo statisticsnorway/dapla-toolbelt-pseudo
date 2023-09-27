@@ -67,7 +67,7 @@ def test_successful_post_to_field_endpoint(mock_post: Mock, test_client: PseudoC
 @patch("requests.post")
 def test__post_to_field_endpoint_failure(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
-    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("Mocked HTTP error")
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("Mocked HTTP error", requests.Response())
     mock_post.return_value = mock_response
 
     with pytest.raises(requests.exceptions.HTTPError):
