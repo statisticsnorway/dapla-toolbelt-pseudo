@@ -16,8 +16,7 @@ Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-pydantic = "<=2.3.0" # Freeze Pydantic version - upper bound should be removed when issue is fixed
-                     # Ref: https://github.com/pydantic/pydantic/issues/7611
+pydantic = ">=2.0"
 pyhumps = ">=3.8.0"
 types-requests = ">=2.28.11"
 python-magic = ">=0.4.27"
