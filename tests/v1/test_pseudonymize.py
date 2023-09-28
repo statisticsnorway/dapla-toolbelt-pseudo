@@ -260,7 +260,7 @@ def test_pseudonymize_request_with_sid(
     monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
     pseudonymize(
-        test_data_json_file_path,
+        pd.read_json(test_data_json_file_path),
         fields=[Field(pattern="**/fnr", mapping="sid"), {"pattern": "**/fnr2", "mapping": "sid"}, "fornavn"],
     )
     patched_post.assert_called_once()
