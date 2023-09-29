@@ -315,8 +315,9 @@ def _dataframe_to_json(
     sid_fields: t.Optional[t.Sequence[str]] = None,
 ) -> t.BinaryIO:
     # Ensure fields to be pseudonymized are string type
-    for field in set(fields or []).union(sid_fields or []):
-        data[field] = data[field].apply(str)
+    for field in tuple(fields or []) + tuple(sid_fields or []):
+        if isinstance(field, str):
+            data[field] = data[field].apply(str)
 
     file_handle = io.BytesIO()
     data.to_json(file_handle, orient="records")
