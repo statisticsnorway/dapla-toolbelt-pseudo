@@ -15,7 +15,7 @@ packages = [{ include = "dapla_pseudo", from = "src" }]
 Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <=3.12"
+python = ">=3.10, <3.12" # This needs to be pinned in sync with SciPy.
 pydantic = ">=2.0"
 pyhumps = ">=3.8.0"
 types-requests = ">=2.28.11"
