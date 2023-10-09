@@ -105,7 +105,7 @@ options = {
     # Specify data types of columns in the dataset
     "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"},
     # Specify storage options for Google Cloud Storage (GCS)
-    "storage_options" : {"token": AuthClient.fetch_google_token()}
+    "storage_options" : {"token": AuthClient.fetch_google_credentials()}
 }
 
 gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"

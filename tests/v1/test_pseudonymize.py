@@ -49,15 +49,14 @@ def test_data_csv_file_path(test_data_json_file_path: str) -> str:
     return test_data_json_file_path.replace(".json", ".csv")
 
 
-@mock.patch("dapla.auth.AuthClient")
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_with_default_env_values(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+    patched_post: mock.Mock, patched_fetch_google_credentials: mock.Mock, test_data_json_file_path: str
 ) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
-
+    patched_fetch_google_credentials.return_value = auth_token
     pseudonymize(test_data_json_file_path, fields=["fnr", "fornavn"])
-    patched_auth_client.called_once()
+    patched_fetch_google_credentials.called_once()
     patched_post.assert_called_once()
     arg = patched_post.call_args.kwargs
 
@@ -65,12 +64,12 @@ def test_pseudonymize_with_default_env_values(
     assert arg["headers"]["Authorization"] == f"Bearer {auth_token}"
 
 
-@mock.patch("dapla.auth.AuthClient")
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_dataframe(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+    patched_post: mock.Mock, patched_fetch_google_credentials: mock.Mock, test_data_json_file_path: str
 ) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+    patched_fetch_google_credentials.return_value = {"access_token": auth_token}
     df = pd.read_json(test_data_json_file_path)
 
     pseudonymize(df, fields=["fnr", "fornavn"])
@@ -82,12 +81,12 @@ def test_pseudonymize_dataframe(
     assert arg["files"]["data"][2] == Mimetypes.JSON
 
 
-@mock.patch("dapla.auth.AuthClient")
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_csv_file(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_csv_file_path: str
+    patched_post: mock.Mock, patched_fetch_google_credentials: mock.Mock, test_data_csv_file_path: str
 ) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+    patched_fetch_google_credentials.return_value = {"access_token": auth_token}
 
     pseudonymize(test_data_csv_file_path, fields=["fnr", "fornavn"])
     patched_post.assert_called_once()
@@ -98,12 +97,12 @@ def test_pseudonymize_csv_file(
     assert arg["files"]["data"][2] == Mimetypes.CSV
 
 
-@mock.patch("dapla.auth.AuthClient")
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_file_handle(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+    patched_post: mock.Mock, patched_fetch_google_credentials: mock.Mock, test_data_json_file_path: str
 ) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+    patched_fetch_google_credentials.return_value = {"access_token": auth_token}
     with open(test_data_json_file_path, "rb") as data:
         pseudonymize(data, fields=["fnr", "fornavn"])
     patched_post.assert_called_once()
@@ -114,12 +113,12 @@ def test_pseudonymize_file_handle(
     assert arg["files"]["data"][2] == Mimetypes.JSON
 
 
-@mock.patch("dapla.auth.AuthClient")
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
 @mock.patch(REQUESTS_POST)
 def test_pseudonymize_fsspec_file(
-    patched_post: mock.Mock, patched_auth_client: mock.Mock, test_data_json_file_path: str
+    patched_post: mock.Mock, patched_fetch_google_credentials: mock.Mock, test_data_json_file_path: str
 ) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+    patched_fetch_google_credentials.return_value = {"access_token": auth_token}
     fs = GCSFileSystem()
     with fs.open("gs://anaconda-public-data/iris/iris.csv", "rb") as data:
         pseudonymize(data, fields=["fnr", "fornavn"])
@@ -131,9 +130,9 @@ def test_pseudonymize_fsspec_file(
     assert arg["files"]["data"][2] == Mimetypes.CSV
 
 
-@mock.patch("dapla.auth.AuthClient")
-def test_pseudonymize_invalid_type(patched_auth_client: mock.Mock, test_data_json_file_path: str) -> None:
-    patched_auth_client.fetch_local_user.return_value = {"access_token": auth_token}
+@mock.patch("dapla.auth.AuthClient.fetch_google_credentials")
+def test_pseudonymize_invalid_type(patched_fetch_google_credentials: mock.Mock, test_data_json_file_path: str) -> None:
+    patched_fetch_google_credentials.return_value = {"access_token": auth_token}
 
     with open(test_data_json_file_path) as data:
         with suppress_type_checks():

@@ -36,7 +36,11 @@ class PseudoClient:
         self.static_auth_token = auth_token
 
     def __auth_token(self) -> str:
-        return str(AuthClient.fetch_personal_token()) if self.static_auth_token is None else str(self.static_auth_token)
+        return (
+            str(AuthClient.fetch_google_credentials())
+            if self.static_auth_token is None
+            else str(self.static_auth_token)
+        )
 
     def pseudonymize_file(
         self,
