@@ -9,6 +9,7 @@ import io
 import mimetypes
 import os
 import typing as t
+from datetime import date
 from pathlib import Path
 
 import fsspec.spec
@@ -25,30 +26,30 @@ import requests
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
-
-from ..types import BinaryFileDecl
-from ..types import DatasetDecl
-from ..types import FieldDecl
-from .client import PseudoClient
-from .models import DepseudonymizeFileRequest
-from .models import FF31KeywordArgs
-from .models import Field
-from .models import KeyWrapper
-from .models import MapSidKeywordArgs
-from .models import Mimetypes
-from .models import PseudoConfig
-from .models import PseudoFunction
-from .models import PseudoKeyset
-from .models import PseudonymizeFileRequest
-from .models import PseudoRule
-from .models import RepseudonymizeFileRequest
+from dapla_pseudo.types import BinaryFileDecl
+from dapla_pseudo.types import DatasetDecl
+from dapla_pseudo.types import FieldDecl
+from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.v1.client import PseudoClient
+from dapla_pseudo.v1.models import DepseudonymizeFileRequest
+from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import Field
+from dapla_pseudo.v1.models import KeyWrapper
+from dapla_pseudo.v1.models import MapSidKeywordArgs
+from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudoConfig
+from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models import PseudoRule
+from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
 
 def pseudonymize(
     dataset: DatasetDecl,
     fields: t.Optional[t.List[FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
-    version_timestamp: t.Optional[str] = None,
+    version_timestamp: t.Optional[str | date] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     timeout: t.Optional[int] = None,
     stream: bool = True,
@@ -128,7 +129,7 @@ def pseudonymize(
         case _:
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
     k = KeyWrapper(key)
-    sid_func_kwargs = MapSidKeywordArgs(version_timestamp=version_timestamp) if sid_fields else None
+    sid_func_kwargs = MapSidKeywordArgs(version_timestamp=convert_to_date(version_timestamp)) if sid_fields else None
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),

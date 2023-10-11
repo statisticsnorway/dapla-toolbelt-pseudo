@@ -2,6 +2,7 @@
 import concurrent
 import json
 import typing as t
+from datetime import date
 from pathlib import Path
 from typing import Any
 from typing import Optional
@@ -12,6 +13,7 @@ import requests
 from typing_extensions import Self
 
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
@@ -143,7 +145,7 @@ class PseudoData:
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
-        def map_to_stable_id(self, version_timestamp: Optional[str] = None) -> Self:
+        def map_to_stable_id(self, version_timestamp: Optional[str | date] = None) -> Self:
             """Map selected fields to to stable ID.
 
             Args:
@@ -159,7 +161,7 @@ class PseudoData:
             """
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=MapSidKeywordArgs(version_timestamp=version_timestamp),
+                kwargs=MapSidKeywordArgs(version_timestamp=convert_to_date(version_timestamp)),
             )
             return self
 

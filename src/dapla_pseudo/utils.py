@@ -1,5 +1,6 @@
 """Utilities"""
 import typing as t
+from datetime import date
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.Any:
@@ -22,3 +23,13 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.
         return matching_item[1]
     except StopIteration:
         return None
+
+
+def convert_to_date(sid_version_date: t.Optional[date | str]) -> t.Optional[date]:
+    """Converts the SID version date to the 'date' type."""
+    if isinstance(sid_version_date, str):
+        try:
+            return date.fromisoformat(sid_version_date)
+        except ValueError:
+            raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)")
+    return sid_version_date
