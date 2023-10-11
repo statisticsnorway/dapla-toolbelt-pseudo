@@ -30,6 +30,6 @@ def convert_to_date(sid_version_date: t.Optional[date | str]) -> t.Optional[date
     if isinstance(sid_version_date, str):
         try:
             return date.fromisoformat(sid_version_date)
-        except ValueError:
-            raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)")
+        except ValueError as exc:
+            raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)") from exc
     return sid_version_date
