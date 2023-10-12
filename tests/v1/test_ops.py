@@ -125,7 +125,7 @@ def test_generate_rules_from_fields_with_version() -> None:
             {
                 "name": "rule-1",
                 "pattern": "**/sid-field",
-                "func": "map-sid(keyId=some-key,versionTimestamp=2023-05-21)",
+                "func": "map-sid(keyId=some-key,snapshotDate=2023-05-21)",
             },
             {"name": "rule-2", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
             {"name": "rule-3", "pattern": "**/another-field", "func": "daead(keyId=some-key)"},
