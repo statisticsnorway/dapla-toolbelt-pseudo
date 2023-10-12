@@ -145,23 +145,19 @@ class PseudoData:
             self._metadata: t.Dict[str, str] = {}
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
-        def map_to_stable_id(self, version_timestamp: Optional[str | date] = None) -> Self:
+        def map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> Self:
             """Map selected fields to to stable ID.
 
             Args:
-                version_timestamp (Optional[str], optional): The timestamp for the version of the SID catalogue.
-                    If not specified, will choose the latest version.
-
-                    The format is:
-                    g<YYYY>m<MM>d<DD>
-                    where the bracketed parts represent year, month and day respectively
+                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                    Latest if unspecified. Format: YYYY-MM-DD
 
             Returns:
                 Self: The object configured to be mapped to stable ID
             """
             self._pseudo_func = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=MapSidKeywordArgs(version_timestamp=convert_to_date(version_timestamp)),
+                kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
             )
             return self
 

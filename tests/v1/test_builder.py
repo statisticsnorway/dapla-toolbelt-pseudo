@@ -119,12 +119,12 @@ def test_builder_pseudo_function_selector_map_to_sid(patch_do_pseudonymize_field
 
 
 @patch(f"{PKG}._do_pseudonymize_field")
-def test_builder_pseudo_function_with_version_timestamp_string(
+def test_builder_pseudo_function_with_sid_snapshot_date_string(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
     PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id(
-        version_timestamp=convert_to_date("2023-05-21")
+        sid_snapshot_date=convert_to_date("2023-05-21")
     ).pseudonymize()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -132,7 +132,7 @@ def test_builder_pseudo_function_with_version_timestamp_string(
         field_name="fnr",
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID,
-            kwargs=MapSidKeywordArgs(version_timestamp=convert_to_date("2023-05-21")),
+            kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
         ),
         metadata_map={},
         keyset=None,
@@ -140,12 +140,12 @@ def test_builder_pseudo_function_with_version_timestamp_string(
 
 
 @patch(f"{PKG}._do_pseudonymize_field")
-def test_builder_pseudo_function_with_version_timestamp_date(
+def test_builder_pseudo_function_with_sid_snapshot_date_date(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
     PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id(
-        version_timestamp=date.fromisoformat("2023-05-21")
+        sid_snapshot_date=date.fromisoformat("2023-05-21")
     ).pseudonymize()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -153,7 +153,7 @@ def test_builder_pseudo_function_with_version_timestamp_date(
         field_name="fnr",
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID,
-            kwargs=MapSidKeywordArgs(version_timestamp=date.fromisoformat("2023-05-21")),
+            kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
         ),
         metadata_map={},
         keyset=None,

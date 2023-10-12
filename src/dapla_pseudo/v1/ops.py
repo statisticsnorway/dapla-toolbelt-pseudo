@@ -49,7 +49,7 @@ def pseudonymize(
     dataset: DatasetDecl,
     fields: t.Optional[t.List[FieldDecl]] = None,
     sid_fields: t.Optional[t.List[str]] = None,
-    version_timestamp: t.Optional[str | date] = None,
+    sid_snapshot_date: t.Optional[str | date] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     timeout: t.Optional[int] = None,
     stream: bool = True,
@@ -85,10 +85,10 @@ def pseudonymize(
             with open("./data/personer.json", 'wb') as f:
                 shutil.copyfileobj(res.raw, f)
 
-    :param data: path to file, file handle or dataframe
+    :param dataset: path to file, file handle or dataframe
     :param fields: list of fields that should be pseudonymized
     :param sid_fields: list of fields that should be mapped to stabil ID and pseudonymized
-    :param version_timestamp: Timestamp representing which version of the SID-mapping to use. Format: g\<YYYY>m\<MM>d\<DD>
+    :param sid_snapshot_date: Date representing SID-catalogue version to use. Latest if unspecified. Format: YYYY-MM-DD
     :param key: either named reference to a "global" key or a keyset json
     :param timeout: connection and read timeout, see
         https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
@@ -129,7 +129,7 @@ def pseudonymize(
         case _:
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
     k = KeyWrapper(key)
-    sid_func_kwargs = MapSidKeywordArgs(version_timestamp=convert_to_date(version_timestamp)) if sid_fields else None
+    sid_func_kwargs = MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)) if sid_fields else None
     rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),

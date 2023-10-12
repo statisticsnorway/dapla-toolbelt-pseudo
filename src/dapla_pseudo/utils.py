@@ -25,11 +25,11 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.
         return None
 
 
-def convert_to_date(sid_version_date: t.Optional[date | str]) -> t.Optional[date]:
+def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[date]:
     """Converts the SID version date to the 'date' type."""
-    if isinstance(sid_version_date, str):
+    if isinstance(sid_snapshot_date, str):
         try:
-            return date.fromisoformat(sid_version_date)
+            return date.fromisoformat(sid_snapshot_date)
         except ValueError as exc:
             raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)") from exc
-    return sid_version_date
+    return sid_snapshot_date

@@ -56,7 +56,7 @@ def test_generate_rules_from_single_field_sid_with_version_string() -> None:
         key="papis-common-key-1",
         fields=[],
         sid_fields=["some-field"],
-        sid_func_kwargs=MapSidKeywordArgs(version_timestamp=convert_to_date("2023-05-21")),
+        sid_func_kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
     )
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
@@ -67,7 +67,7 @@ def test_generate_rules_from_single_field_sid_with_version_string() -> None:
                 "func": str(
                     PseudoFunction(
                         function_type=PseudoFunctionTypes.MAP_SID,
-                        kwargs=MapSidKeywordArgs(version_timestamp=convert_to_date("2023-05-21")),
+                        kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
                     )
                 ),
             }
@@ -80,7 +80,7 @@ def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> No
         key="papis-common-key-1",
         fields=[],
         sid_fields=["some-field"],
-        sid_func_kwargs=MapSidKeywordArgs(version_timestamp=date.fromisoformat("2023-05-21")),
+        sid_func_kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
     )
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
@@ -91,7 +91,7 @@ def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> No
                 "func": str(
                     PseudoFunction(
                         function_type=PseudoFunctionTypes.MAP_SID,
-                        kwargs=MapSidKeywordArgs(version_timestamp=date.fromisoformat("2023-05-21")),
+                        kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
                     )
                 ),
             }
@@ -112,7 +112,7 @@ def test_generate_rules_from_multiple_field() -> None:
 
 
 def test_generate_rules_from_fields_with_version() -> None:
-    sid_func_kwargs = MapSidKeywordArgs(key_id="some-key", version_timestamp=date.fromisoformat("2023-05-21"))
+    sid_func_kwargs = MapSidKeywordArgs(key_id="some-key", snapshot_date=date.fromisoformat("2023-05-21"))
     rules = _rules_of(
         key="some-key",
         fields=["some-field", "another-field"],
