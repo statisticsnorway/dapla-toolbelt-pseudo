@@ -1,5 +1,6 @@
 import json
 import typing as t
+from datetime import date
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -9,6 +10,7 @@ import polars as pl
 import pytest
 
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder import PseudoData
 from dapla_pseudo.v1.builder import _do_pseudonymize_field
 from dapla_pseudo.v1.models import DaeadKeywordArgs
@@ -117,12 +119,12 @@ def test_builder_pseudo_function_selector_map_to_sid(patch_do_pseudonymize_field
 
 
 @patch(f"{PKG}._do_pseudonymize_field")
-def test_builder_pseudo_function_with_version_timestamp(
+def test_builder_pseudo_function_with_sid_snapshot_date_string(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
     PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id(
-        version_timestamp="2023_04_25-12_35_40_649511"
+        sid_snapshot_date=convert_to_date("2023-05-21")
     ).pseudonymize()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -130,7 +132,28 @@ def test_builder_pseudo_function_with_version_timestamp(
         field_name="fnr",
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID,
-            kwargs=MapSidKeywordArgs(version_timestamp="2023_04_25-12_35_40_649511"),
+            kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
+        ),
+        metadata_map={},
+        keyset=None,
+    )
+
+
+@patch(f"{PKG}._do_pseudonymize_field")
+def test_builder_pseudo_function_with_sid_snapshot_date_date(
+    patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
+) -> None:
+    mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
+    PseudoData.from_pandas(df).on_field("fnr").map_to_stable_id(
+        sid_snapshot_date=date.fromisoformat("2023-05-21")
+    ).pseudonymize()
+    patch_do_pseudonymize_field.assert_called_once_with(
+        path="pseudonymize/field",
+        values=df["fnr"].tolist(),
+        field_name="fnr",
+        pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.MAP_SID,
+            kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
         ),
         metadata_map={},
         keyset=None,

@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from typing import Any
 from typing import Sequence
 
@@ -6,6 +7,7 @@ import pandas as pd
 import pytest
 
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import MapSidKeywordArgs
@@ -49,12 +51,12 @@ def test_generate_rules_from_single_field_sid() -> None:
     }
 
 
-def test_generate_rules_from_single_field_sid_with_version() -> None:
+def test_generate_rules_from_single_field_sid_with_version_string() -> None:
     rules = _rules_of(
         key="papis-common-key-1",
         fields=[],
         sid_fields=["some-field"],
-        sid_func_kwargs=MapSidKeywordArgs(version_timestamp="3033_04_21-11_11_02_142211"),
+        sid_func_kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
     )
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
@@ -65,7 +67,31 @@ def test_generate_rules_from_single_field_sid_with_version() -> None:
                 "func": str(
                     PseudoFunction(
                         function_type=PseudoFunctionTypes.MAP_SID,
-                        kwargs=MapSidKeywordArgs(version_timestamp="3033_04_21-11_11_02_142211"),
+                        kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
+                    )
+                ),
+            }
+        ],
+    }
+
+
+def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> None:
+    rules = _rules_of(
+        key="papis-common-key-1",
+        fields=[],
+        sid_fields=["some-field"],
+        sid_func_kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
+    )
+    assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
+        "keysets": None,
+        "rules": [
+            {
+                "name": "rule-1",
+                "pattern": "**/some-field",
+                "func": str(
+                    PseudoFunction(
+                        function_type=PseudoFunctionTypes.MAP_SID,
+                        kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
                     )
                 ),
             }
@@ -86,7 +112,7 @@ def test_generate_rules_from_multiple_field() -> None:
 
 
 def test_generate_rules_from_fields_with_version() -> None:
-    sid_func_kwargs = MapSidKeywordArgs(key_id="some-key", version_timestamp="3033_04_21-11_11_02_142211")
+    sid_func_kwargs = MapSidKeywordArgs(key_id="some-key", snapshot_date=date.fromisoformat("2023-05-21"))
     rules = _rules_of(
         key="some-key",
         fields=["some-field", "another-field"],
@@ -99,7 +125,7 @@ def test_generate_rules_from_fields_with_version() -> None:
             {
                 "name": "rule-1",
                 "pattern": "**/sid-field",
-                "func": "map-sid(keyId=some-key,versionTimestamp=3033_04_21-11_11_02_142211)",
+                "func": "map-sid(keyId=some-key,snapshotDate=2023-05-21)",
             },
             {"name": "rule-2", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
             {"name": "rule-3", "pattern": "**/another-field", "func": "daead(keyId=some-key)"},

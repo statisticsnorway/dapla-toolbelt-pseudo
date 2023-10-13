@@ -1,6 +1,7 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
 import json
 import typing as t
+from datetime import date
 from enum import Enum
 
 from humps import camelize
@@ -102,7 +103,7 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
 
     Attributes:
         key_id (PredefinedKeys | str): The key to be used for pseudonomization
-        version_timestamp (str): The timestamp for the version of the SID catalogue.
+        snapshot_date (date): The timestamp for the version of the SID catalogue.
             If not specified, will choose the latest version.
 
             The format is:
@@ -111,7 +112,7 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
-    version_timestamp: t.Optional[str] = None
+    snapshot_date: t.Optional[date] = None
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
