@@ -19,38 +19,11 @@ from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.builder_models import DataFrameResult
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 from dapla_pseudo.v1.supported_file_format import read_to_df
-
-
-class PseudonymizationResult:
-    """Holder for data and metadata returned from pseudo-service"""
-
-    def __init__(self, df: pl.DataFrame, metadata: Optional[t.Dict[str, str]] = None) -> None:
-        """Initialise a PseudonymizationResult."""
-        self._df = df
-        self._metadata = metadata if metadata else {}
-
-    def to_polars(self) -> pl.DataFrame:
-        """Pseudonymized Data as a Polars Dataframe."""
-        return self._df
-
-    def to_pandas(self) -> pd.DataFrame:
-        """Pseudonymized Data as a Pandas Dataframe."""
-        return self._df.to_pandas()
-
-    @property
-    def metadata(self) -> dict[str, str]:
-        """Returns the pseudonymization metadata as a dictionary.
-
-        Returns:
-            Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
-            where the keys are field names and the values are corresponding pseudo field metadata.
-            If no metadata is set, returns an empty dictionary.
-        """
-        return self._metadata
 
 
 class PseudoData:
@@ -146,7 +119,7 @@ class PseudoData:
             self._pseudo_keyset: Optional[PseudoKeyset] = None
 
         def map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> Self:
-            """Map selected fields to to stable ID.
+            """Map selected fields to stable ID.
 
             Args:
                 sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
@@ -166,7 +139,7 @@ class PseudoData:
             preserve_formatting: bool = False,
             with_custom_function: Optional[PseudoFunction] = None,
             with_custom_keyset: Optional[PseudoKeyset] = None,
-        ) -> "PseudonymizationResult":
+        ) -> "DataFrameResult":
             # If _pseudo_func has been defined upstream, then use that.
             if self._pseudo_func is None:
                 # If the user has explicitly defined their own function, then use that.
@@ -190,14 +163,14 @@ class PseudoData:
 
             return self._pseudonymize_field()
 
-        def _pseudonymize_field(self) -> "PseudonymizationResult":
+        def _pseudonymize_field(self) -> "DataFrameResult":
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
             the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
 
             Returns:
-                PseudonymizationResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
+                DataFrameResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
             """
 
             def pseudonymize_field_runner(field_name: str, series: pl.Series) -> tuple[str, pl.Series]:
@@ -237,7 +210,7 @@ class PseudoData:
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
                 self._dataframe = self._dataframe.update(pseudonymized_df)
 
-            return PseudonymizationResult(df=self._dataframe, metadata=self._metadata)
+            return DataFrameResult(df=self._dataframe, metadata=self._metadata)
 
 
 def _do_pseudonymize_field(

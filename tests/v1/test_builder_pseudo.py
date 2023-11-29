@@ -11,8 +11,8 @@ import pytest
 
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.builder import PseudoData
-from dapla_pseudo.v1.builder import _do_pseudonymize_field
+from dapla_pseudo.v1.builder_pseudo import PseudoData
+from dapla_pseudo.v1.builder_pseudo import _do_pseudonymize_field
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs

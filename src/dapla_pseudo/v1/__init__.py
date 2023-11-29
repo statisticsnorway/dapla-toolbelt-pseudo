@@ -1,6 +1,7 @@
 """Pseudo Service version 1 implementation."""
 
-from dapla_pseudo.v1.builder import PseudoData
+from dapla_pseudo.v1.builder_pseudo import PseudoData
+from dapla_pseudo.v1.builder_stable_id import Validator
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.ops import depseudonymize
@@ -14,5 +15,6 @@ __all__ = [
     "depseudonymize",
     "repseudonymize",
     "PseudoData",
+    "Validator",
     "Field",
 ]
