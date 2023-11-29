@@ -7,6 +7,7 @@ import pandas as pd
 import polars as pl
 import pytest
 
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_validation import Validator
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
@@ -66,7 +67,11 @@ def test_validate_with_empty_response(
 
     patched_post_to_sid_endpoint.return_value = sid_lookup_empty_response
 
-    validation_result = Validator.from_pandas(df).on_field(field_name).validate_map_to_stable_id()
+    validation_result = (
+        Validator.from_pandas(df)
+        .on_field(field_name)
+        .validate_map_to_stable_id(sid_snapshot_date=convert_to_date("2023-08-31"))
+    )
     validation_df = validation_result.to_pandas()
     validation_metadata = validation_result.metadata
 
