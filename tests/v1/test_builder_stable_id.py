@@ -9,13 +9,13 @@ import pytest
 from dapla_pseudo.v1.builder_stable_id import Validator
 
 
-PKG = "dapla_pseudo.v1.builder_pseudo"
+PKG = "dapla_pseudo.v1.builder_stable_id"
 TEST_FILE_PATH = "tests/v1/test_files"
 
 
 @pytest.fixture()
 def df() -> pd.DataFrame:
-    with open("tests/data/personer.json") as test_data:
+    with open("../../tests/data/personer.json") as test_data:
         return pd.json_normalize(json.load(test_data))
 
 
