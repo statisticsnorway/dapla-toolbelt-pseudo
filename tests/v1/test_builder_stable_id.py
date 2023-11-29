@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pandas as pd
+import polars as pl
 import pytest
 
 from dapla_pseudo.v1.builder_validation import Validator
@@ -89,4 +90,4 @@ def test_builder_from_file_no_file_extension() -> None:
 
 
 def test_builder_from_polars(df: pd.DataFrame) -> None:
-    Validator.from_polars(df.to_polars())
+    Validator.from_polars(pl.from_pandas(df))
