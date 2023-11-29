@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 
 from dapla_pseudo.v1.builder_validation import Validator
+from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
 PKG = "dapla_pseudo.v1.builder_validation"
@@ -73,3 +74,19 @@ def test_validate_with_empty_response(
     )
     assert validation_df[field_name].tolist() == []
     assert validation_metadata == {"datasetExtractionSnapshotTime": "2023-08-31"}
+
+
+def test_builder_from_file_not_a_file() -> None:
+    path = f"{TEST_FILE_PATH}/not/a/file.json"
+    with pytest.raises(FileNotFoundError):
+        Validator.from_file(path)
+
+
+def test_builder_from_file_no_file_extension() -> None:
+    path = f"{TEST_FILE_PATH}/empty_file"
+    with pytest.raises(NoFileExtensionError):
+        Validator.from_file(path)
+
+
+def test_builder_from_polars(df: pd.DataFrame) -> None:
+    Validator.from_polars(df.to_polars())
