@@ -15,7 +15,7 @@ TEST_FILE_PATH = "tests/v1/test_files"
 
 @pytest.fixture()
 def df() -> pd.DataFrame:
-    with open("../../tests/data/personer.json") as test_data:
+    with open("tests/data/personer.json") as test_data:
         return pd.json_normalize(json.load(test_data))
 
 
