@@ -1,3 +1,4 @@
+"""Common API models for builder packages."""
 import typing as t
 from typing import Optional
 

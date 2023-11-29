@@ -9,7 +9,7 @@ import pytest
 from dapla_pseudo.v1.builder_stable_id import Validator
 
 
-PKG = "dapla_pseudo.v1.builder"
+PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
 
 

@@ -1,3 +1,4 @@
+"""Builder for submitting a validation request."""
 import json
 from datetime import date
 from pathlib import Path
