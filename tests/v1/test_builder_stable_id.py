@@ -94,5 +94,17 @@ def test_builder_from_file_no_file_extension() -> None:
         Validator.from_file(path)
 
 
+@patch(f"{PKG}.read_to_df")
+def test_builder_from_file_with_storage_options(_mock_read_to_df: Mock) -> None:
+    # This should not raise a FileNotFoundError
+    # since the file is not on the local filesystem
+    try:
+        file_path = "path/to/your/file.csv"
+        storage_options = {"token": "fake_token"}
+        Validator.from_file(file_path, storage_options=storage_options)
+    except FileNotFoundError:
+        pytest.fail("FileNotFoundError should not be raised when storage_options is supplied.")
+
+
 def test_builder_from_polars(df: pd.DataFrame) -> None:
     Validator.from_polars(pl.from_pandas(df))
