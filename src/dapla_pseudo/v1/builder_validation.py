@@ -3,7 +3,8 @@ import json
 from datetime import date
 from pathlib import Path
 from typing import Any
-from typing import Optional, Sequence
+from typing import Optional
+from typing import Sequence
 
 import pandas as pd
 import polars as pl
@@ -118,7 +119,7 @@ class Validator:
             # We decode the content using UTF-8, which gives us a List[Dict[str]] structure.
             result_json = json.loads(response.content.decode("utf-8"))[0]
             result: Sequence[str] = []
-            metadata: dict[str] = {}
+            metadata: dict[str, str] = {}
             if "missing" in result_json:
                 result = result_json["missing"]
             if "datasetExtractionSnapshotTime" in result_json:
