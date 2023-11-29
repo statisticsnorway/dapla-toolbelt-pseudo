@@ -256,7 +256,7 @@ class PseudoClient:
         request: t.Dict[str, t.Collection[str]] = {"fnrList": values}
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
-            headers={"Authorization": f"Bearer {self.__auth_token()}", "Content-Type": str(Mimetypes.JSON)},
+            headers={"Authorization": f"Bearer {self.__auth_token()}"},
             json=request,
             stream=stream,
             timeout=30,  # seconds

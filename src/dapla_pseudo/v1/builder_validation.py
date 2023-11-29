@@ -3,7 +3,7 @@ import json
 from datetime import date
 from pathlib import Path
 from typing import Any
-from typing import Optional
+from typing import Optional, Sequence
 
 import pandas as pd
 import polars as pl
@@ -116,9 +116,13 @@ class Validator:
             )
             # The response content is received as a buffered byte stream from the server.
             # We decode the content using UTF-8, which gives us a List[Dict[str]] structure.
-            lookup_result = json.loads(response.content.decode("utf-8"))
-            metadata = {}
-            result_df = pl.DataFrame(pl.Series(self._field, lookup_result[0]["missing"]))
-            if "datasetExtractionSnapshotTime" in lookup_result[0]:
-                metadata = {"datasetExtractionSnapshotTime": lookup_result[0]["datasetExtractionSnapshotTime"]}
+            result_json = json.loads(response.content.decode("utf-8"))[0]
+            result: Sequence[str] = []
+            metadata: dict[str] = {}
+            if "missing" in result_json:
+                result = result_json["missing"]
+            if "datasetExtractionSnapshotTime" in result_json:
+                metadata = {"datasetExtractionSnapshotTime": result_json["datasetExtractionSnapshotTime"]}
+
+            result_df = pl.DataFrame(pl.Series(self._field, result))
             return DataFrameResult(df=result_df, metadata=metadata)
