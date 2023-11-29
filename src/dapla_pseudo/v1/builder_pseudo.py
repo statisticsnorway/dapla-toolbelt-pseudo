@@ -14,12 +14,12 @@ from typing_extensions import Self
 
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.v1.builder_models import DataFrameResult
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.builder_models import DataFrameResult
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat

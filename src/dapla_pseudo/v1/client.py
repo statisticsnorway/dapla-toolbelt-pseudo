@@ -248,10 +248,10 @@ class PseudoClient:
         return response
 
     def _post_to_sid_endpoint(
-            self,
-            path: str,
-            values: list[str],
-            stream: bool = False,
+        self,
+        path: str,
+        values: list[str],
+        stream: bool = False,
     ) -> requests.Response:
         request: t.Dict[str, t.Collection[str]] = {"fnrList": values}
         response = requests.post(

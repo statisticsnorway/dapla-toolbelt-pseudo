@@ -93,9 +93,9 @@ class Validator:
         """Assemble the validation request."""
 
         def __init__(
-                self,
-                dataframe: pl.DataFrame,
-                field: str,
+            self,
+            dataframe: pl.DataFrame,
+            field: str,
         ) -> None:
             self._dataframe: pl.DataFrame = dataframe
             self._field: str = field
@@ -119,8 +119,5 @@ class Validator:
             metadata = {}
             result_df = pl.DataFrame(pl.Series(self._field, lookup_result[0]["missing"]))
             if "datasetExtractionSnapshotTime" in lookup_result[0]:
-                metadata = {
-                    "datasetExtractionSnapshotTime": lookup_result[0]["datasetExtractionSnapshotTime"]
-                }
+                metadata = {"datasetExtractionSnapshotTime": lookup_result[0]["datasetExtractionSnapshotTime"]}
             return DataFrameResult(df=result_df, metadata=metadata)
-
