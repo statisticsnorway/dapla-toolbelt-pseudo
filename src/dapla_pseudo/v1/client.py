@@ -258,7 +258,7 @@ class PseudoClient:
         request: t.Dict[str, t.Collection[str]] = {"fnrList": values}
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
-            params=("snapshot", str(sid_snapshot_date)) if sid_snapshot_date else None,
+            params={"snapshot": str(sid_snapshot_date)} if sid_snapshot_date else None,
             # Do not set content-type, as this will cause the json to serialize incorrectly
             headers={"Authorization": f"Bearer {self.__auth_token()}"},
             json=request,
