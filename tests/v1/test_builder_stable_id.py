@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -53,7 +54,7 @@ def test_validate_with_full_response(
     validation_metadata = validation_result.metadata
 
     patched_post_to_sid_endpoint.assert_called_once_with(
-        "sid/lookup/batch", ["11854898347", "01839899544", "16910599481"], stream=True
+        "sid/lookup/batch", ["11854898347", "01839899544", "16910599481"], None, stream=True
     )
     assert validation_df[field_name].tolist() == ["20859374701", "01234567890"]
     assert validation_metadata == {"datasetExtractionSnapshotTime": "2023-08-31"}
@@ -76,7 +77,7 @@ def test_validate_with_empty_response(
     validation_metadata = validation_result.metadata
 
     patched_post_to_sid_endpoint.assert_called_once_with(
-        "sid/lookup/batch", ["11854898347", "01839899544", "16910599481"], stream=True
+        "sid/lookup/batch", ["11854898347", "01839899544", "16910599481"], date(2023, 8, 31), stream=True
     )
     assert validation_df[field_name].tolist() == []
     assert validation_metadata == {"datasetExtractionSnapshotTime": "2023-08-31"}

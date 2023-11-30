@@ -34,6 +34,4 @@ class DataFrameResult:
         return self._metadata
 
     def __str__(self):
-        return ("DataFrameResult wrapping a Dataframe with the following metadata: {}"
-                .format(self._metadata))
-
+        return f"DataFrameResult wrapping a Dataframe with the following metadata: {self._metadata}"

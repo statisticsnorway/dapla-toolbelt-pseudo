@@ -3,9 +3,9 @@
 import mimetypes
 import os
 import typing as t
+from datetime import date
 
 import requests
-from datetime import date
 from dapla import AuthClient
 
 from dapla_pseudo.models import APIModel
