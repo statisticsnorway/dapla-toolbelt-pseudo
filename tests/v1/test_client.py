@@ -114,3 +114,26 @@ def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: Pseud
         stream=False,
         timeout=30,
     )
+
+
+@patch("requests.post")
+def test_successful_post_to_sid_endpoint(mock_post: Mock, test_client: PseudoClient) -> None:
+    mocked_response = Mock(spec=requests.Response)
+    mocked_response.status_code = 200
+    mocked_response.raise_for_status.return_value = None
+
+    mock_post.return_value = mocked_response
+    response = test_client._post_to_sid_endpoint(
+        path="test_path",
+        values=["value1", "value2"],
+    )
+
+    expected_json = {"fnrList": ["value1", "value2"]}
+    assert response == mocked_response
+    mock_post.assert_called_once_with(
+        url="https://mocked.dapla-pseudo-service/test_path",
+        headers={"Authorization": "Bearer some-auth-token"},
+        json=expected_json,
+        stream=False,
+        timeout=30,
+    )

@@ -247,6 +247,24 @@ class PseudoClient:
         response.raise_for_status()
         return response
 
+    def _post_to_sid_endpoint(
+        self,
+        path: str,
+        values: list[str],
+        stream: bool = False,
+    ) -> requests.Response:
+        request: t.Dict[str, t.Collection[str]] = {"fnrList": values}
+        response = requests.post(
+            url=f"{self.pseudo_service_url}/{path}",
+            # Do not set content-type, as this will cause the json to serialize incorrectly
+            headers={"Authorization": f"Bearer {self.__auth_token()}"},
+            json=request,
+            stream=stream,
+            timeout=30,  # seconds
+        )
+        response.raise_for_status()
+        return response
+
     def export_dataset(self, request_json: str) -> requests.Response:
         """Export a dataset in GCS to CSV or JSON, and optionally depseudonymize the data.
 

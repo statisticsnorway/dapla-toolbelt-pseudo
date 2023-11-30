@@ -11,8 +11,8 @@ import pytest
 
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.builder import PseudoData
-from dapla_pseudo.v1.builder import _do_pseudonymize_field
+from dapla_pseudo.v1.builder_pseudo import PseudoData
+from dapla_pseudo.v1.builder_pseudo import _do_pseudonymize_field
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
@@ -22,7 +22,7 @@ from dapla_pseudo.v1.models import RedactArgs
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 
 
-PKG = "dapla_pseudo.v1.builder"
+PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
 
 
@@ -284,7 +284,7 @@ def test_builder_from_file_with_storage_options(_mock_read_to_df: Mock) -> None:
 
 @pytest.mark.parametrize(
     "file_format,expected_error",
-    [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ArrowErrorException")],
+    [("json", "ValueError"), ("csv", "EmptyDataError"), ("xml", "XMLSyntaxError"), ("parquet", "ComputeError")],
 )
 @patch("pathlib.Path.suffix")
 def test_builder_from_file_empty_file(mock_path_suffix: Mock, file_format: str, expected_error: str) -> None:
