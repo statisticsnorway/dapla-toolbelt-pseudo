@@ -5,6 +5,7 @@ import os
 import typing as t
 
 import requests
+from datetime import date
 from dapla import AuthClient
 
 from dapla_pseudo.models import APIModel
@@ -251,11 +252,13 @@ class PseudoClient:
         self,
         path: str,
         values: list[str],
+        sid_snapshot_date: t.Optional[str | date] = None,
         stream: bool = False,
     ) -> requests.Response:
         request: t.Dict[str, t.Collection[str]] = {"fnrList": values}
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
+            params={"snapshot": sid_snapshot_date} if sid_snapshot_date else None,
             # Do not set content-type, as this will cause the json to serialize incorrectly
             headers={"Authorization": f"Bearer {self.__auth_token()}"},
             json=request,
