@@ -21,11 +21,145 @@
 
 Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
-## Usage
+## Requirements
 
-See the [command-line reference] for details.
+- [Dapla Toolbelt](https://github.com/statisticsnorway/dapla-toolbelt)
+
+## Installation
+
+You can install _dapla-toolbelt-pseudo_ via [pip] from [PyPI]:
+
+```console
+python -m pip install dapla-toolbelt-pseudo
+```
+
+## Basic usage
 
 ### Pseudonymize
+
+```python
+from dapla_pseudo import PseudoData
+import pandas as pd
+
+file_path="data/personer.json"
+
+df = pd.read_json(file_path) # Create DataFrame from file
+
+# Example: Single field default encryption (DAEAD)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field("fornavn")                           # Select the field to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Multiple fields default encryption (DAEAD)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Single field sid mapping and pseudonymization (FPE)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field("fnr")                               # Select the field to pseudonymize
+    .map_to_stable_id()                            # Map the selected field to stable id
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+```
+The default encryption algorithm is DAEAD (Deterministic Authenticated Encryption with Associated Data). However, if the 
+field is a valid Norwegian personal identification number (fnr, dnr), the recommended way to pseudonymize is to use
+the function `map_to_stable_id()` to convert the identification number to a stable ID (SID) prior to pseudonymization.
+In that case, the pseudonymization algorithm is FPE (Format Preserving Encryption).
+
+### Validate SID mapping 
+
+```python
+from dapla_pseudo import Validator
+import pandas as pd
+
+file_path="data/personer.json"
+
+df = pd.read_json(file_path)
+
+result = (
+    Validator.from_pandas(df)                   # Specify what dataframe to use
+    .on_field("fnr")                            # Select the field to validate
+    .validate_map_to_stable_id()                # Validate that all the field values can be mapped to a SID
+)
+# The resulting dataframe contains the field values that didn't have a corresponding SID
+result.to_pandas()
+```
+
+A `sid_snapshot_date` can also be specified to validate that the field values can be mapped to a SID at a specific date:
+
+```python
+from dapla_pseudo import Validator
+from dapla_pseudo.utils import convert_to_date
+import pandas as pd
+
+file_path="data/personer.json"
+
+df = pd.read_json(file_path)
+
+result = (
+    Validator.from_pandas(df)
+    .on_field("fnr")
+    .validate_map_to_stable_id(
+        sid_snapshot_date=convert_to_date("2023-08-29")
+    )
+)
+result.to_pandas()
+```
+
+## Advanced usage
+
+### Pseudonymize
+
+#### Read from file systems
+
+```python
+from dapla_pseudo import PseudoData
+from dapla import AuthClient
+
+
+file_path="data/personer.json"
+
+options = {
+    # Specify data types of columns in the dataset
+    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"}
+}
+
+# Example: Read dataframe from file
+result_df = (
+    PseudoData.from_file(file_path, **options)     # Read the DataFrame from file
+    .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Read dataframe from GCS bucket
+options = {
+    # Specify data types of columns in the dataset
+    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"},
+    # Specify storage options for Google Cloud Storage (GCS)
+    "storage_options" : {"token": AuthClient.fetch_google_credentials()}
+}
+
+gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"
+
+result_df = (
+    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS
+    .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+```
+
+#### Pseudoyminize using a custom keyset
 
 ```python
 from dapla_pseudo import pseudonymize
@@ -66,59 +200,6 @@ with pseudonymize("./data/personer.json", fields=["fnr", "fornavn", "etternavn"]
 pseudonymize(file_path="./data/personer.json", fields=["fornavn"], sid_fields=["fnr"])
 ```
 
-#### Builder pattern pseudonymization examples
-
-```python
-# Import necessary modules
-from dapla_pseudo import PseudoData
-from dapla import AuthClient
-import pandas as pd
-
-
-file_path="data/personer.json"
-
-options = {
-    # Specify data types of columns in the dataset
-    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"}
-}
-
-# Example: Single field default encryption (DAEAD)
-df = pd.read_json(file_path,**options) # Create DataFrame from file
-
-result_df = (
-    PseudoData.from_pandas(df)                     # Specify what dataframe to use
-    .on_field("fornavn")                           # Select the field to pseudonymize
-    .pseudonymize()                                # Apply pseudonymization to the selected field
-    .to_polars()                                   # Get the result as a polars dataframe
-)
-
-# Example: Multiple fields default encryption (DAEAD)
-result_df = (
-    PseudoData.from_file(file_path, **options)     # Read the DataFrame from file
-    .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
-    .pseudonymize()                                # Apply pseudonymization to the selected fields
-    .to_polars()                                   # Get the result as a polars dataframe
-)
-
-# Example: Single field sid mapping (FPE)
-options = {
-    # Specify data types of columns in the dataset
-    "dtype" : { "fnr": "string","fornavn": "string","etternavn": "string","kjonn": "category","fodselsdato": "string"},
-    # Specify storage options for Google Cloud Storage (GCS)
-    "storage_options" : {"token": AuthClient.fetch_google_credentials()}
-}
-
-gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"
-
-result_df = (
-    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS
-    .on_field("fnr")                               # Select multiple fields to pseudonymize
-    .map_to_stable_id()                            # Map the selected field to stable id
-    .pseudonymize()                                # Apply pseudonymization to the selected fields
-    .to_polars()                                   # Get the result as a polars dataframe
-)
-```
-
 ### Repseudonymize
 
 ```python
@@ -141,18 +222,6 @@ depseudonymize(file_path="./data/personer_deid.json", fields=["fnr", "fornavn"],
 ```
 
 _Note that depseudonymization requires elevated access privileges._
-
-## Requirements
-
-- [Dapla Toolbelt](https://github.com/statisticsnorway/dapla-toolbelt)
-
-## Installation
-
-You can install _dapla-toolbelt-pseudo_ via [pip] from [PyPI]:
-
-```console
-pip install dapla-toolbelt-pseudo
-```
 
 ## Contributing
 
