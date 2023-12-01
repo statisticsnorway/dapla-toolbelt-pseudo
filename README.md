@@ -112,6 +112,9 @@ result = (
         sid_snapshot_date=convert_to_date("2023-08-29")
     )
 )
+# Show metadata about the validation (e.g. which version of the SID catalog was used)
+result.metadata
+# Show the field values that didn't have a corresponding SID
 result.to_pandas()
 ```
 
