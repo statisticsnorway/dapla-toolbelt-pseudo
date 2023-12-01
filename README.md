@@ -176,7 +176,7 @@ pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key="s
 
 # Pseudonymize a local file using a custom key:
 import json
-custom_keyset = json.dumps(    {
+custom_keyset = json.dumps({
     "encryptedKeyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
     "keysetInfo": {
         "primaryKeyId": 1234567890,
