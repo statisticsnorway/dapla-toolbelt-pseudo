@@ -70,12 +70,13 @@ result_df = (
     .to_polars()                                   # Get the result as a polars dataframe
 )
 ```
-The default encryption algorithm is DAEAD (Deterministic Authenticated Encryption with Associated Data). However, if the 
+
+The default encryption algorithm is DAEAD (Deterministic Authenticated Encryption with Associated Data). However, if the
 field is a valid Norwegian personal identification number (fnr, dnr), the recommended way to pseudonymize is to use
 the function `map_to_stable_id()` to convert the identification number to a stable ID (SID) prior to pseudonymization.
 In that case, the pseudonymization algorithm is FPE (Format Preserving Encryption).
 
-### Validate SID mapping 
+### Validate SID mapping
 
 ```python
 from dapla_pseudo import Validator
