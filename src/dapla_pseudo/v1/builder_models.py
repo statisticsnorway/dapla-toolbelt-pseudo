@@ -32,7 +32,3 @@ class DataFrameResult:
             If no metadata is set, returns an empty dictionary.
         """
         return self._metadata
-
-    def __str__(self) -> str:
-        """Show the metadata of the DataFrameResult."""
-        return f"DataFrameResult wrapping a Dataframe with the following metadata: {self._metadata}"
