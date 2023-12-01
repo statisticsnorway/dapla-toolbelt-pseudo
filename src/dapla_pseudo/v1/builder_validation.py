@@ -113,7 +113,7 @@ class Validator:
                 DataFrameResult: Containing a result dataframe with associated metadata.
             """
             response: requests.Response = _client()._post_to_sid_endpoint(
-                "sid/lookup/batch", self._dataframe[self._field].to_list(), stream=True
+                "sid/lookup/batch", self._dataframe[self._field].to_list(), sid_snapshot_date, stream=True
             )
             # The response content is received as a buffered byte stream from the server.
             # We decode the content using UTF-8, which gives us a List[Dict[str]] structure.

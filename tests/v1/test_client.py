@@ -132,6 +132,7 @@ def test_successful_post_to_sid_endpoint(mock_post: Mock, test_client: PseudoCli
     assert response == mocked_response
     mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",
+        params=None,
         headers={"Authorization": "Bearer some-auth-token"},
         json=expected_json,
         stream=False,
