@@ -1,26 +1,48 @@
 """Builder for submitting a pseudonymization request."""
 import concurrent
+import io
 import json
+import os
 import typing as t
 from datetime import date
 from pathlib import Path
 from typing import Any
 from typing import Optional
 
+import fsspec
+
+
+# isort: off
+import pylibmagic  # noqa Must be imported before magic
+
+# isort: on
+import magic
 import pandas as pd
 import polars as pl
 import requests
+from requests import Response
 from typing_extensions import Self
 
+from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.types import BinaryFileDecl
+from dapla_pseudo.types import DatasetDecl
+from dapla_pseudo.types import FieldDecl
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_models import DataFrameResult
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import Field
+from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import MapSidKeywordArgs
+from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudoConfig
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models import PseudoRule
 from dapla_pseudo.v1.ops import _client
+from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 from dapla_pseudo.v1.supported_file_format import read_to_df
@@ -84,6 +106,83 @@ class PseudoData:
         file_format = SupportedFileFormat(file_extension)
 
         return PseudoData._FieldSelector(read_to_df(file_format, file_path_str, **kwargs))
+
+    @staticmethod
+    def from_file_hierarchical(dataset: DatasetDecl, **kwargs):
+        file_handle: t.Optional[BinaryFileDecl] = None
+        name: t.Optional[str] = None
+        match dataset:
+            case str() | Path():
+                # File path
+                content_type = Mimetypes(magic.from_file(dataset, mime=True))
+                name = os.path.basename(dataset).split("/")[-1]
+                file_handle = open(dataset, "rb")
+            case io.BufferedReader():
+                # File handle
+                content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+                dataset.seek(0)
+                file_handle = dataset
+            case pd.DataFrame():
+                # TODO: Refer to other function
+                pass
+            case fsspec.spec.AbstractBufferedFile():
+                # This is a file handle to a remote storage system such as GCS.
+                # It provides random access for the underlying file-like data (without downloading the whole thing).
+                content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+                name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
+                dataset.seek(0)
+                file_handle = io.BufferedReader(dataset)
+            case _:
+                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
+
+        return PseudoData._PseudonymizerHierarchical(file_handle, content_type, name, **kwargs)
+
+    class _PseudonymizerHierarchical:
+        def __init__(self, file_handle: io.BufferedReader, content_type: Mimetypes, name: str, **kwargs):
+            self._file_handle = file_handle
+            self._content_type = content_type
+            self._name = name
+            self._kwargs = kwargs
+            self._rules: list[FieldDecl] = []
+            self._key: KeyWrapper
+
+        def on_fields(
+            self, *fields: FieldDecl, key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1
+        ) -> Self:
+            self._key = KeyWrapper(key)
+            for i, field in zip(range(0, len(fields)), fields):
+                if KeyWrapper(key).key_id == PredefinedKeys.PAPIS_COMMON_KEY_1:
+                    func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
+                else:
+                    func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
+                print(field)
+                rule = create_rule(field, func, i)
+                self._rules.append(rule)
+
+            return self
+
+        def on_sid_fields(self, *sid_fields: FieldDecl, sid_snapshot_date: Optional[str | date] = None) -> Self:
+            for i, field in enumerate(list(sid_fields), start=1):
+                func = PseudoFunction(
+                    function_type=PseudoFunctionTypes.MAP_SID,
+                    kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
+                )
+
+                rule = create_rule(field, func, i)
+                self._rules.append(rule)
+            return self
+
+        def pseudonymize(self, timeout: t.Optional[int] = None, stream: bool = True) -> Response:
+            pseudonymize_request = PseudonymizeFileRequest(
+                pseudo_config=PseudoConfig(rules=self._rules, keysets=self._key.keyset_list()),
+                target_content_type=self._content_type,
+                target_uri=None,
+                compression=None,
+            )
+
+            return _client().pseudonymize_file(
+                pseudonymize_request, self._file_handle, stream=stream, name=self._name, timeout=timeout
+            )
 
     class _FieldSelector:
         """Select one or multiple fields to be pseudonymized."""
@@ -248,3 +347,21 @@ def _do_pseudonymize_field(
         combined_list.extend(sublist)
 
     return pl.Series(combined_list)
+
+
+def create_rule(f: FieldDecl, func: PseudoFunction, n: int) -> PseudoRule:
+    match f:
+        case Field():
+            field = f
+        case dict():
+            field = Field.model_validate(f)
+        case str():
+            field = Field(pattern=f"**/{f}")
+        case _:
+            raise ValueError(f"Unsupported field type: {type(f)}")
+
+    return PseudoRule(
+        name=f"rule-{n}",
+        func=func,
+        pattern=field.pattern,
+    )
