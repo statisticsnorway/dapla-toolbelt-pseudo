@@ -64,12 +64,15 @@ def test_pseudo_function() -> None:
 
 def test_redact_function() -> None:
     assert "redact(test)" == str(
-        PseudoFunction(function_type=PseudoFunctionTypes.REDACT, kwargs=RedactArgs(replacement_string="test"))
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactArgs(replacement_string="test"),
+        )
     )
 
 
 def test_pseudo_function_with_extra_kwargs() -> None:
-    assert "ff31(keyId=ssb-common-key-1,strategy=skip)" == str(
+    assert "ff31(keyId=papis-common-key-1,strategy=skip)" == str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),

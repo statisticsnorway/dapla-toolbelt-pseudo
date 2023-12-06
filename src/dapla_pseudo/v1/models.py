@@ -124,7 +124,7 @@ class DaeadKeywordArgs(PseudoFunctionArgs):
 class FF31KeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'FF31' function."""
 
-    key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
+    key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
 
 
