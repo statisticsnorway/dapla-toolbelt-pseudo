@@ -29,7 +29,10 @@ custom_keyset_dict = {
 def test_parse_pseudo_keyset() -> None:
     keyset = PseudoKeyset.parse_obj(custom_keyset_dict)
     assert keyset.keyset_info["primaryKeyId"] == 1234567890
-    assert keyset.encrypted_keyset == "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM="
+    assert (
+        keyset.encrypted_keyset
+        == "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM="
+    )
     assert (
         keyset.kek_uri
         == "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
@@ -58,18 +61,23 @@ def test_key_wrapper_with_keyset_json() -> None:
 
 def test_pseudo_function() -> None:
     assert "daead(keyId=ssb-common-key-1)" == str(
-        PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        )
     )
 
 
 def test_redact_function() -> None:
     assert "redact(test)" == str(
-        PseudoFunction(function_type=PseudoFunctionTypes.REDACT, kwargs=RedactArgs(replacement_string="test"))
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactArgs(replacement_string="test"),
+        )
     )
 
 
 def test_pseudo_function_with_extra_kwargs() -> None:
-    assert "ff31(keyId=ssb-common-key-1,strategy=skip)" == str(
+    assert "ff31(keyId=papis-common-key-1,strategy=skip)" == str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),
