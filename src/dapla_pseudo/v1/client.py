@@ -7,6 +7,7 @@ from datetime import date
 
 import requests
 from dapla import AuthClient
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
 
 from dapla_pseudo.models import APIModel
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
@@ -183,7 +184,12 @@ class PseudoClient:
         return self._process_file("repseudonymize", repseudonymize_request, file_path, timeout, stream)
 
     def _process_file(
-        self, operation: str, request: APIModel, file_path: str, timeout: t.Optional[int], stream: bool = False
+        self,
+        operation: str,
+        request: t.Union[PseudonymizeFileRequest, DepseudonymizeFileRequest, RepseudonymizeFileRequest],
+        file_path: str,
+        timeout: t.Optional[int],
+        stream: bool = False,
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
@@ -196,11 +202,11 @@ class PseudoClient:
     def _post_to_file_endpoint(
         self,
         path: str,
-        request: APIModel,
+        request: t.Union[PseudonymizeFileRequest, DepseudonymizeFileRequest, RepseudonymizeFileRequest],
         data: t.BinaryIO,
         name: str,
         content_type: Mimetypes,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         auth_token = self.__auth_token()
@@ -228,6 +234,7 @@ class PseudoClient:
         field_name: str,
         values: list[str],
         pseudo_func: t.Optional[PseudoFunction],
+        timeout: int,
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
@@ -243,7 +250,7 @@ class PseudoClient:
             headers={"Authorization": f"Bearer {self.__auth_token()}", "Content-Type": str(Mimetypes.JSON)},
             json=request,
             stream=stream,
-            timeout=30,  # seconds
+            timeout=timeout,
         )
         response.raise_for_status()
         return response
@@ -263,7 +270,7 @@ class PseudoClient:
             headers={"Authorization": f"Bearer {self.__auth_token()}"},
             json=request,
             stream=stream,
-            timeout=30,  # seconds
+            timeout=TIMEOUT_DEFAULT,  # seconds
         )
         response.raise_for_status()
         return response

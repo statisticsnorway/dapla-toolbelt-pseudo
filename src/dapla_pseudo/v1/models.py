@@ -21,6 +21,7 @@ class Mimetypes(str, Enum):
 
     JSON = "application/json"
     CSV = "text/csv"
+    XML = "application/xml"
 
 
 class Field(APIModel):
@@ -180,7 +181,7 @@ class PseudoRule(APIModel):
 
     @field_serializer("func")
     def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
-        """Explicit serialization of the 'func' field to coerce to string before serializing."""
+        """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
 
 

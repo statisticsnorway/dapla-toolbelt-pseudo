@@ -25,7 +25,8 @@ from typing_extensions import Self
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.types import BinaryFileDecl
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.types import BinaryFileDecl, HierarchDatasetDecl
 from dapla_pseudo.types import DatasetDecl
 from dapla_pseudo.types import FieldDecl
 from dapla_pseudo.utils import convert_to_date
@@ -54,15 +55,20 @@ class PseudoData:
     This class should not be instantiated, only the static methods should be used.
     """
 
+    dataset: t.Union[io.BufferedReader, pl.DataFrame]
+
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._FieldSelector":
         """Initialize a pseudonymization request from a pandas DataFrame."""
-        return PseudoData._FieldSelector(dataframe)
+        dataset: pl.DataFrame = pl.from_pandas(dataframe)
+        PseudoData.dataset = dataset
+        return PseudoData._Pseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "PseudoData._FieldSelector":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        return PseudoData._FieldSelector(dataframe)
+        PseudoData.dataset = dataframe
+        return PseudoData._Pseudonymizer()
 
     @staticmethod
     def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._FieldSelector":
@@ -104,163 +110,78 @@ class PseudoData:
             raise NoFileExtensionError(f"The file {file_path_str!r} has no file extension.")
 
         file_format = SupportedFileFormat(file_extension)
-
-        return PseudoData._FieldSelector(read_to_df(file_format, file_path_str, **kwargs))
+        PseudoData.dataset = read_to_df(file_format, file_path_str, **kwargs)
+        return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file_hierarchical(dataset: DatasetDecl, **kwargs):
+    def from_file_hierarch(dataset: HierarchDatasetDecl) -> "PseudoData._PseudonymizerHierarchical":
         file_handle: t.Optional[BinaryFileDecl] = None
-        name: t.Optional[str] = None
         match dataset:
             case str() | Path():
                 # File path
-                content_type = Mimetypes(magic.from_file(dataset, mime=True))
-                name = os.path.basename(dataset).split("/")[-1]
                 file_handle = open(dataset, "rb")
             case io.BufferedReader():
                 # File handle
-                content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
                 dataset.seek(0)
                 file_handle = dataset
-            case pd.DataFrame():
-                # TODO: Refer to other function
-                pass
             case fsspec.spec.AbstractBufferedFile():
                 # This is a file handle to a remote storage system such as GCS.
                 # It provides random access for the underlying file-like data (without downloading the whole thing).
-                content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
-                name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
                 dataset.seek(0)
                 file_handle = io.BufferedReader(dataset)
             case _:
-                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
+                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {HierarchDatasetDecl}")
 
-        return PseudoData._PseudonymizerHierarchical(file_handle, content_type, name, **kwargs)
+        PseudoData.dataset = file_handle
 
-    class _PseudonymizerHierarchical:
-        def __init__(self, file_handle: io.BufferedReader, content_type: Mimetypes, name: str, **kwargs):
-            self._file_handle = file_handle
-            self._content_type = content_type
-            self._name = name
-            self._kwargs = kwargs
-            self._rules: list[FieldDecl] = []
-            self._key: KeyWrapper
+    class _Pseudonymizer:
+        """Select one or multiple fields to be pseudonymized."""
 
-        def on_fields(
-            self, *fields: FieldDecl, key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1
-        ) -> Self:
-            self._key = KeyWrapper(key)
-            for i, field in zip(range(0, len(fields)), fields):
-                if KeyWrapper(key).key_id == PredefinedKeys.PAPIS_COMMON_KEY_1:
-                    func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
-                else:
-                    func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
-                print(field)
-                rule = create_rule(field, func, i)
-                self._rules.append(rule)
+        def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
+            """Initialize the class."""
+            self._rules = rules
+            self._pseudo_keyset: Optional[PseudoKeyset] = None
+            self._metadata: t.Dict[str, str] = {}
+            self._timeout: int = TIMEOUT_DEFAULT
 
-            return self
+        def on_fields(self, *fields: str) -> "PseudoData._Pseudonymizer":
+            """Specify multiple fields to be pseudonymized."""
+            return PseudoData._PseudoFuncSelector(list(fields))
 
-        def on_sid_fields(self, *sid_fields: FieldDecl, sid_snapshot_date: Optional[str | date] = None) -> Self:
-            for i, field in enumerate(list(sid_fields), start=1):
-                func = PseudoFunction(
-                    function_type=PseudoFunctionTypes.MAP_SID,
-                    kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
-                )
+        def pseudonymize(
+            self, with_custom_keyset: Optional[PseudoKeyset] = None, timeout: int = TIMEOUT_DEFAULT
+        ) -> DataFrameResult | Response:
+            """Pseudonymize the entire dataset."""
+            if PseudoData.dataset is None:
+                raise ValueError("No dataset has been provided.")
+            if self._rules is None:
+                raise ValueError("No fields have been provided. Use the 'on_fields' method.")
 
-                rule = create_rule(field, func, i)
-                self._rules.append(rule)
-            return self
+            if with_custom_keyset is not None:
+                self._pseudo_keyset = with_custom_keyset
 
-        def pseudonymize(self, timeout: t.Optional[int] = None, stream: bool = True) -> Response:
+            self._timeout = timeout
+
+            match PseudoData.dataset:  # Differentiate between hierarchical and tabular datasets
+                case io.BufferedReader():
+                    return self._pseudonymize_file()
+                case pl.DataFrame():
+                    return self._pseudonymize_field()
+
+        def _pseudonymize_file(self) -> Response:
+            """Pseudonymize the entire file."""
+            content_type = Mimetypes(magic.from_buffer(PseudoData.dataset.read(2048), mime=True))
+
             pseudonymize_request = PseudonymizeFileRequest(
-                pseudo_config=PseudoConfig(rules=self._rules, keysets=self._key.keyset_list()),
-                target_content_type=self._content_type,
+                pseudo_config=PseudoConfig(rules=self._rules, keysets=self._pseudo_keyset),
+                target_content_type=content_type,
                 target_uri=None,
                 compression=None,
             )
 
             return _client().pseudonymize_file(
-                pseudonymize_request, self._file_handle, stream=stream, name=self._name, timeout=timeout
+                pseudonymize_request, PseudoData.dataset, stream=True, name=None, timeout=self._timeout
             )
-
-    class _FieldSelector:
-        """Select one or multiple fields to be pseudonymized."""
-
-        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame):
-            """Initialize the class."""
-            self._dataframe: pl.DataFrame
-            if isinstance(dataframe, pd.DataFrame):
-                self._dataframe = pl.from_pandas(dataframe)
-            else:
-                self._dataframe = dataframe
-
-        def on_field(self, field: str) -> "PseudoData._Pseudonymizer":
-            """Specify a single field to be pseudonymized."""
-            return PseudoData._Pseudonymizer(self._dataframe, [field])
-
-        def on_fields(self, *fields: str) -> "PseudoData._Pseudonymizer":
-            """Specify multiple fields to be pseudonymized."""
-            return PseudoData._Pseudonymizer(self._dataframe, list(fields))
-
-    class _Pseudonymizer:
-        """Assemble the pseudonymization request."""
-
-        def __init__(
-            self,
-            dataframe: pl.DataFrame,
-            fields: list[str],
-        ) -> None:
-            self._dataframe: pl.DataFrame = dataframe
-            self._fields: list[str] = fields
-            self._pseudo_func: Optional[PseudoFunction] = None
-            self._metadata: t.Dict[str, str] = {}
-            self._pseudo_keyset: Optional[PseudoKeyset] = None
-
-        def map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> Self:
-            """Map selected fields to stable ID.
-
-            Args:
-                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
-                    Latest if unspecified. Format: YYYY-MM-DD
-
-            Returns:
-                Self: The object configured to be mapped to stable ID
-            """
-            self._pseudo_func = PseudoFunction(
-                function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
-            )
-            return self
-
-        def pseudonymize(
-            self,
-            preserve_formatting: bool = False,
-            with_custom_function: Optional[PseudoFunction] = None,
-            with_custom_keyset: Optional[PseudoKeyset] = None,
-        ) -> "DataFrameResult":
-            # If _pseudo_func has been defined upstream, then use that.
-            if self._pseudo_func is None:
-                # If the user has explicitly defined their own function, then use that.
-                if with_custom_function is not None:
-                    self._pseudo_func = with_custom_function
-
-                # Use Format Preserving Encryption with the PAPIS compatible key (non-default case).
-                elif preserve_formatting:
-                    self._pseudo_func = PseudoFunction(
-                        function_type=PseudoFunctionTypes.FF31,
-                        kwargs=FF31KeywordArgs(),
-                    )
-                # Use DAEAD with the SSB common key as a sane default.
-                else:
-                    self._pseudo_func = PseudoFunction(
-                        function_type=PseudoFunctionTypes.DAEAD,
-                        kwargs=DaeadKeywordArgs(),
-                    )
-            if with_custom_keyset is not None:
-                self._pseudo_keyset = with_custom_keyset
-
-            return self._pseudonymize_field()
 
         def _pseudonymize_field(self) -> "DataFrameResult":
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
@@ -272,7 +193,9 @@ class PseudoData:
                 DataFrameResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
             """
 
-            def pseudonymize_field_runner(field_name: str, series: pl.Series) -> tuple[str, pl.Series]:
+            def pseudonymize_field_runner(
+                field_name: str, series: pl.Series, pseudo_func: PseudoFunction
+            ) -> tuple[str, pl.Series]:
                 """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
@@ -288,7 +211,7 @@ class PseudoData:
                         path="pseudonymize/field",
                         field_name=field_name,
                         values=series.to_list(),
-                        pseudo_func=self._pseudo_func,
+                        pseudo_func=pseudo_func,
                         metadata_map=self._metadata,
                         keyset=self._pseudo_keyset,
                     ),
@@ -298,7 +221,8 @@ class PseudoData:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 pseudonymized_field: t.Dict[str, pl.Series] = {}
                 futures = [
-                    executor.submit(pseudonymize_field_runner, field, self._dataframe[field]) for field in self._fields
+                    executor.submit(pseudonymize_field_runner, rule.pattern, self._dataframe[rule.pattern], rule.func)
+                    for rule in self._rules
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
                 for future in concurrent.futures.as_completed(futures):
@@ -311,6 +235,42 @@ class PseudoData:
 
             return DataFrameResult(df=self._dataframe, metadata=self._metadata)
 
+    class _PseudoFuncSelector:
+        def __init__(self, fields: list[str], rules: Optional[list[PseudoRule]] = None) -> None:
+            self._fields = fields
+            self._existing_rules = [] if rules is None else rules
+
+        def with_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> "PseudoData._Pseudonymizer":
+            """Map selected fields to stable ID.
+
+            Args:
+                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                    Latest if unspecified. Format: YYYY-MM-DD
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
+            """
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.MAP_SID,
+                kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
+            )
+            return self._rule_constructor(function)
+
+        def with_default_encryption(self) -> "PseudoData.Pseudonymizer":
+            function = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
+            return self._rule_constructor(function)
+
+        def with_papis_compatible_encryption(self) -> "PseudoData.Pseudonymizer":
+            function = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs())
+            return self._rule_constructor(function)
+
+        def with_custom_function(self, function: PseudoFunction) -> "PseudoData.Pseudonymizer":
+            return self._rule_constructor(self, function)
+
+        def _rule_constructor(self, func: PseudoFunction) -> "PseudoData.Pseudonymizer":
+            rules = [PseudoRule(name=None, func=func, pattern=field) for field in self._fields]
+            return PseudoData._Pseudonymizer(self._existing_rules.extend(rules))
+
 
 def _do_pseudonymize_field(
     path: str,
@@ -319,6 +279,7 @@ def _do_pseudonymize_field(
     pseudo_func: Optional[PseudoFunction],
     metadata_map: t.Dict[str, str],
     keyset: Optional[PseudoKeyset] = None,
+    timeout: Optional[int] = None,
 ) -> pl.Series:
     """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
 
@@ -347,21 +308,3 @@ def _do_pseudonymize_field(
         combined_list.extend(sublist)
 
     return pl.Series(combined_list)
-
-
-def create_rule(f: FieldDecl, func: PseudoFunction, n: int) -> PseudoRule:
-    match f:
-        case Field():
-            field = f
-        case dict():
-            field = Field.model_validate(f)
-        case str():
-            field = Field(pattern=f"**/{f}")
-        case _:
-            raise ValueError(f"Unsupported field type: {type(f)}")
-
-    return PseudoRule(
-        name=f"rule-{n}",
-        func=func,
-        pattern=field.pattern,
-    )
