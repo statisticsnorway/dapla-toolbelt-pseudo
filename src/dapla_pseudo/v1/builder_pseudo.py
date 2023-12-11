@@ -120,6 +120,7 @@ class PseudoData:
             case str() | Path():
                 # File path
                 file_handle = open(dataset, "rb")
+                file_handle.seek(0)
             case io.BufferedReader():
                 # File handle
                 dataset.seek(0)
@@ -140,14 +141,14 @@ class PseudoData:
 
         def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
             """Initialize the class."""
-            self._rules = rules
+            self._rules: list[PseudoRule] = rules
             self._pseudo_keyset: Optional[PseudoKeyset] = None
             self._metadata: t.Dict[str, str] = {}
             self._timeout: int = TIMEOUT_DEFAULT
 
         def on_fields(self, *fields: str) -> "PseudoData._Pseudonymizer":
             """Specify multiple fields to be pseudonymized."""
-            return PseudoData._PseudoFuncSelector(list(fields))
+            return PseudoData._PseudoFuncSelector(list(fields), self._rules)
 
         def pseudonymize(
             self, with_custom_keyset: Optional[PseudoKeyset] = None, timeout: int = TIMEOUT_DEFAULT
@@ -162,7 +163,6 @@ class PseudoData:
                 self._pseudo_keyset = with_custom_keyset
 
             self._timeout = timeout
-
             match PseudoData.dataset:  # Differentiate between hierarchical and tabular datasets
                 case io.BufferedReader():
                     return self._pseudonymize_file()
@@ -176,9 +176,11 @@ class PseudoData:
         def _pseudonymize_file(self) -> Response:
             """Pseudonymize the entire file."""
             content_type = Mimetypes(magic.from_buffer(PseudoData.dataset.read(2048), mime=True))
-
+            PseudoData.dataset.seek(
+                0
+            )  # Reset the file pointer to the beginning of the file after reading from magic bytes
             pseudonymize_request = PseudonymizeFileRequest(
-                pseudo_config=PseudoConfig(rules=self._rules, keysets=self._pseudo_keyset),
+                pseudo_config=PseudoConfig(rules=self._rules, keysets=KeyWrapper(self._pseudo_keyset).keyset_list()),
                 target_content_type=content_type,
                 target_uri=None,
                 compression=None,
@@ -222,11 +224,12 @@ class PseudoData:
                     ),
                 )
 
+            dataframe: pd.DataFrame = PseudoData.dataset
             # Execute the pseudonymization API calls in parallel
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 pseudonymized_field: t.Dict[str, pl.Series] = {}
                 futures = [
-                    executor.submit(pseudonymize_field_runner, rule.pattern, self._dataframe[rule.pattern], rule.func)
+                    executor.submit(pseudonymize_field_runner, rule.pattern, dataframe[rule.pattern], rule.func)
                     for rule in self._rules
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
@@ -236,9 +239,9 @@ class PseudoData:
                     pseudonymized_field[result[0]] = result[1]
 
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
-                self._dataframe = self._dataframe.update(pseudonymized_df)
+                dataframe = dataframe.update(pseudonymized_df)
 
-            return DataFrameResult(df=self._dataframe, metadata=self._metadata)
+            return DataFrameResult(df=dataframe, metadata=self._metadata)
 
     class _PseudoFuncSelector:
         def __init__(self, fields: list[str], rules: Optional[list[PseudoRule]] = None) -> None:

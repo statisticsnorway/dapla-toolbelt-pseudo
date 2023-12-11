@@ -209,13 +209,12 @@ class PseudoClient:
         timeout: int,
         stream: bool = False,
     ) -> requests.Response:
-        auth_token = self.__auth_token()
         data_spec: FileSpecDecl = (name, data, content_type)
         request_spec: FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
-                "Authorization": f"Bearer {auth_token}",
+                "Authorization": f"Bearer {self.__auth_token()}",
                 "Accept-Encoding": "gzip",
             },
             files={
