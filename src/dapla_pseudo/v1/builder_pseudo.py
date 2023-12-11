@@ -58,20 +58,20 @@ class PseudoData:
     dataset: t.Union[io.BufferedReader, pl.DataFrame]
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._Pseudonymizer()":
+    def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         PseudoData.dataset = dataset
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "PseudoData._Pseudonymizer()":
+    def from_polars(dataframe: pl.DataFrame) -> "PseudoData._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
         PseudoData.dataset = dataframe
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._Pseudonymizer()":
+    def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas dataframe read from file.
 
         Args:
@@ -114,7 +114,7 @@ class PseudoData:
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file_hierarch(dataset: HierarchDatasetDecl) -> "PseudoData._Pseudonymizer()":
+    def from_file_hierarch(dataset: HierarchDatasetDecl) -> "PseudoData._Pseudonymizer":
         file_handle: t.Optional[BinaryFileDecl] = None
         match dataset:
             case str() | Path():
@@ -168,6 +168,10 @@ class PseudoData:
                     return self._pseudonymize_file()
                 case pl.DataFrame():
                     return self._pseudonymize_field()
+                case _:
+                    raise ValueError(
+                        f"Unsupported data type: {type(PseudoData.dataset)}. Should only be DataFrame or BufferedReader."
+                    )
 
         def _pseudonymize_file(self) -> Response:
             """Pseudonymize the entire file."""
@@ -270,7 +274,7 @@ class PseudoData:
 
         def _rule_constructor(self, func: PseudoFunction) -> "PseudoData.Pseudonymizer":
             rules = [PseudoRule(name=None, func=func, pattern=field) for field in self._fields]
-            return PseudoData._Pseudonymizer(self._existing_rules.extend(rules))
+            return PseudoData._Pseudonymizer(self._existing_rules + rules)
 
 
 def _do_pseudonymize_field(
