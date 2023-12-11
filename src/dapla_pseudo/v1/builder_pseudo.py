@@ -58,20 +58,20 @@ class PseudoData:
     dataset: t.Union[io.BufferedReader, pl.DataFrame]
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._FieldSelector":
+    def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._Pseudonymizer()":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         PseudoData.dataset = dataset
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "PseudoData._FieldSelector":
+    def from_polars(dataframe: pl.DataFrame) -> "PseudoData._Pseudonymizer()":
         """Initialize a pseudonymization request from a polars DataFrame."""
         PseudoData.dataset = dataframe
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._FieldSelector":
+    def from_file(file_path_str: str, **kwargs: Any) -> "PseudoData._Pseudonymizer()":
         """Initialize a pseudonymization request from a pandas dataframe read from file.
 
         Args:
@@ -114,7 +114,7 @@ class PseudoData:
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file_hierarch(dataset: HierarchDatasetDecl) -> "PseudoData._PseudonymizerHierarchical":
+    def from_file_hierarch(dataset: HierarchDatasetDecl) -> "PseudoData._Pseudonymizer()":
         file_handle: t.Optional[BinaryFileDecl] = None
         match dataset:
             case str() | Path():
@@ -133,6 +133,7 @@ class PseudoData:
                 raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {HierarchDatasetDecl}")
 
         PseudoData.dataset = file_handle
+        return PseudoData._Pseudonymizer()
 
     class _Pseudonymizer:
         """Select one or multiple fields to be pseudonymized."""
