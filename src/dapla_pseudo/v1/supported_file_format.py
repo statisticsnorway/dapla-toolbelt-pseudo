@@ -17,6 +17,12 @@ class SupportedFileFormat(Enum):
     PARQUET = "parquet"
 
 
+FORMAT_TO_MIMETYPE_FUNCTION = {
+    SupportedFileFormat.CSV: "text/csv",
+    SupportedFileFormat.JSON: "application/json",
+    SupportedFileFormat.XML: "application/xml",
+}
+
 FORMAT_TO_READER_FUNCTION = {
     SupportedFileFormat.CSV: pd.read_csv,
     SupportedFileFormat.JSON: pd.read_json,

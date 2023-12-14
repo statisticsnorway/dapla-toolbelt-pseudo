@@ -23,7 +23,7 @@ import magic
 import pandas as pd
 import requests
 
-from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import TIMEOUT_DEFAULT, Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import BinaryFileDecl
@@ -51,7 +51,7 @@ def pseudonymize(
     sid_fields: t.Optional[t.List[str]] = None,
     sid_snapshot_date: t.Optional[str | date] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     r"""Pseudonymize specified fields of a dataset.
@@ -150,7 +150,7 @@ def depseudonymize(
     file_path: str,
     fields: t.List[FieldDecl],
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -206,7 +206,7 @@ def repseudonymize(
     fields: t.List[FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.

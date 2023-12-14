@@ -44,7 +44,7 @@ class PseudoClient:
         self,
         pseudonymize_request: PseudonymizeFileRequest,
         data: BinaryFileDecl,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
         name: t.Optional[str] = None,
     ) -> requests.Response:
@@ -107,7 +107,7 @@ class PseudoClient:
         self,
         depseudonymize_request: DepseudonymizeFileRequest,
         file_path: str,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
@@ -146,7 +146,7 @@ class PseudoClient:
         self,
         repseudonymize_request: RepseudonymizeFileRequest,
         file_path: str,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
@@ -188,7 +188,7 @@ class PseudoClient:
         operation: str,
         request: t.Union[PseudonymizeFileRequest, DepseudonymizeFileRequest, RepseudonymizeFileRequest],
         file_path: str,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
