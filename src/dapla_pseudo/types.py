@@ -11,8 +11,8 @@ import polars as pl
 from dapla_pseudo.v1.models import Field
 
 
-FieldDecl = t.Union[str, dict[str, str], Field]
+FieldDecl = str | dict[str, str] | Field
 BinaryFileDecl = t.Union[t.BinaryIO, io.BufferedReader, fsspec.spec.AbstractBufferedFile]
-DatasetDecl = t.Union[pd.DataFrame, BinaryFileDecl, str, Path]
-HierarchDatasetDecl = t.Union[BinaryFileDecl, str, Path]
-FileSpecDecl = tuple[t.Optional[str], t.Union[BinaryFileDecl, str], str]
+DatasetDecl = pd.DataFrame | BinaryFileDecl | str | Path
+HierarchDatasetDecl = BinaryFileDecl | str | Path
+FileSpecDecl = tuple[t.Optional[str], BinaryFileDecl | str, str]

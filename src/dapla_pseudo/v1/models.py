@@ -61,7 +61,7 @@ class KeyWrapper(BaseModel):
     key_id: str = ""
     keyset: t.Optional[PseudoKeyset] = None
 
-    def __init__(self, key: t.Optional[t.Union[str, PseudoKeyset]], **kwargs: t.Any):
+    def __init__(self, key: t.Optional[str | PseudoKeyset], **kwargs: t.Any):
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.

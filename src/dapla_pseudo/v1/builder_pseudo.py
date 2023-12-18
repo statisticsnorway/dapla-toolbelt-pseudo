@@ -29,8 +29,8 @@ from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.types import BinaryFileDecl, HierarchDatasetDecl
 from dapla_pseudo.types import DatasetDecl
 from dapla_pseudo.types import FieldDecl
-from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.builder_models import DataFrameResult, FileResult
+from dapla_pseudo.utils import convert_to_date, get_file_format
+from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import Field
@@ -46,7 +46,6 @@ from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION, NoFileExtensionError
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
-from dapla_pseudo.v1.supported_file_format import read_to_df
 
 
 class PseudoData:
@@ -55,7 +54,7 @@ class PseudoData:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: t.Union[io.BufferedReader, pl.DataFrame]
+    dataset: io.BufferedReader | pl.DataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._Pseudonymizer":
@@ -117,6 +116,9 @@ class PseudoData:
             case _:
                 raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {HierarchDatasetDecl}")
 
+        if os.fstat(file_handle.fileno()).st_size == 0:  # Check if file is empty
+            raise ValueError("File is empty.")
+
         PseudoData.dataset = file_handle
         return PseudoData._Pseudonymizer()
 
@@ -136,7 +138,7 @@ class PseudoData:
 
         def pseudonymize(
             self, with_custom_keyset: Optional[PseudoKeyset] = None, timeout: int = TIMEOUT_DEFAULT
-        ) -> DataFrameResult | FileResult:
+        ) -> Result:
             """Pseudonymize the entire dataset."""
             if PseudoData.dataset is None:
                 raise ValueError("No dataset has been provided.")
@@ -158,18 +160,11 @@ class PseudoData:
                         f"Unsupported data type: {type(PseudoData.dataset)}. Should only be DataFrame or BufferedReader."
                     )
 
-        def _pseudonymize_file(self) -> FileResult:
+        def _pseudonymize_file(self) -> Result:
             """Pseudonymize the entire file."""
             # Need to type-cast explicitly. We know that PseudoData.dataset is a BufferedReader if we reach this method.
             file_handle = t.cast(io.BufferedReader, PseudoData.dataset)
-
-            try:
-                file_path = Path(file_handle.name)
-                file_extension = file_path.suffix[1:]
-                file_format = SupportedFileFormat(file_extension)
-            except ValueError:
-                raise NoFileExtensionError(f"File '{file_path}' has no file extension.")
-
+            file_format = get_file_format(file_handle.name)
             try:  # Test whether the file extension is supported
                 content_type = Mimetypes(FORMAT_TO_MIMETYPE_FUNCTION[file_format])
             except KeyError:  # Fall back on reading the file format from the magic bytes
@@ -191,9 +186,9 @@ class PseudoData:
             response: Response = _client().pseudonymize_file(
                 pseudonymize_request, file_handle, stream=True, name=None, timeout=self._timeout
             )
-            return FileResult(response, self._metadata, streamed=True)
+            return Result(PseudoFileResponse(response, content_type, streamed=True), self._metadata)
 
-        def _pseudonymize_field(self) -> "DataFrameResult":
+        def _pseudonymize_field(self) -> Result:
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
@@ -245,7 +240,7 @@ class PseudoData:
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
                 dataframe = dataframe.update(pseudonymized_df)
 
-            return DataFrameResult(df=dataframe, metadata=self._metadata)
+            return Result(pseudo_response=dataframe, metadata=self._metadata)
 
     class _PseudoFuncSelector:
         def __init__(self, fields: list[str], rules: Optional[list[PseudoRule]] = None) -> None:
@@ -280,7 +275,9 @@ class PseudoData:
             return self._rule_constructor(function)
 
         def _rule_constructor(self, func: PseudoFunction) -> "PseudoData._Pseudonymizer":
-            rules = [PseudoRule(name=None, func=func, pattern=f"**/{field}") for field in self._fields]
+            # If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.
+            rule_prefix = "**/" if type(PseudoData.dataset) == io.BufferedReader else ""
+            rules = [PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}") for field in self._fields]
             return PseudoData._Pseudonymizer(self._existing_rules + rules)
 
 

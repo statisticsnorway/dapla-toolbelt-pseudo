@@ -1,6 +1,9 @@
 """Utilities"""
+from pathlib import Path
 import typing as t
 from datetime import date
+
+from dapla_pseudo.v1.supported_file_format import NoFileExtensionError, SupportedFileFormat
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.Any:
@@ -33,3 +36,14 @@ def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[dat
         except ValueError as exc:
             raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)") from exc
     return sid_snapshot_date
+
+
+def get_file_format(file_path: str | Path) -> SupportedFileFormat:
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+
+    file_extension = file_path.suffix
+    if not file_extension:
+        raise NoFileExtensionError(f"File path '{file_path}' has no file extension.")
+    file_format = SupportedFileFormat(file_extension.replace(".", ""))
+    return file_format

@@ -9,12 +9,12 @@ from typing import Sequence
 import pandas as pd
 import polars as pl
 import requests
+from dapla_pseudo.utils import get_file_format
 
-from dapla_pseudo.v1.builder_models import DataFrameResult
+from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.ops import _client
-from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import NoFileExtensionError, read_to_polars_df
 from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
-from dapla_pseudo.v1.supported_file_format import read_to_df
 
 
 class Validator:
@@ -67,14 +67,9 @@ class Validator:
         if not file_path.is_file() and "storage_options" not in kwargs:
             raise FileNotFoundError(f"No local file found in path: {file_path}")
 
-        file_extension = file_path.suffix[1:]
+        file_format = get_file_format(file_path)
 
-        if file_extension == "":
-            raise NoFileExtensionError(f"The file {file_path_str!r} has no file extension.")
-
-        file_format = SupportedFileFormat(file_extension)
-
-        return Validator._FieldSelector(read_to_df(file_format, file_path_str, **kwargs))
+        return Validator._FieldSelector(read_to_polars_df(file_format, file_path, **kwargs))
 
     class _FieldSelector:
         """Select a field to be validated."""
@@ -102,7 +97,7 @@ class Validator:
             self._dataframe: pl.DataFrame = dataframe
             self._field: str = field
 
-        def validate_map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> "DataFrameResult":
+        def validate_map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> Result:
             """Checks if all the selected fields can be mapped to a stable ID.
 
             Args:
@@ -126,4 +121,4 @@ class Validator:
                 metadata = {"datasetExtractionSnapshotTime": result_json["datasetExtractionSnapshotTime"]}
 
             result_df = pl.DataFrame(pl.Series(self._field, result))
-            return DataFrameResult(df=result_df, metadata=metadata)
+            return Result(pseudo_response=result_df, metadata=metadata)
