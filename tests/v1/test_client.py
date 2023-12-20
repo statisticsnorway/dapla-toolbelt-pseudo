@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from dapla_pseudo import PseudoClient
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.v1.models import PseudoKeyset
 
 
@@ -58,6 +59,7 @@ def test_successful_post_to_field_endpoint(mock_post: Mock, test_client: PseudoC
         field_name="test_field",
         values=["value1", "value2"],
         pseudo_func=None,
+        timeout=TIMEOUT_DEFAULT,
     )
 
     assert response == mocked_response
@@ -78,6 +80,7 @@ def test__post_to_field_endpoint_failure(mock_post: Mock, test_client: PseudoCli
             field_name="test_field",
             values=["value1", "value2"],
             pseudo_func=None,
+            timeout=TIMEOUT_DEFAULT,
         )
     mock_post.assert_called_once()
     mock_response.raise_for_status.assert_called_once()
@@ -94,6 +97,7 @@ def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: Pseud
         field_name="test_field",
         values=["value1", "value2"],
         pseudo_func=None,
+        timeout=TIMEOUT_DEFAULT,
         keyset=keyset,
     )
     expected_json = {

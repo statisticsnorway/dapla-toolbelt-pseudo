@@ -13,8 +13,8 @@ from dapla_pseudo.utils import get_file_format
 
 from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.ops import _client
-from dapla_pseudo.v1.supported_file_format import NoFileExtensionError, read_to_polars_df
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
+from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import SupportedFileFormat, read_to_polars_df
 
 
 class Validator:

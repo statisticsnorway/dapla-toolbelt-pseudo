@@ -3,7 +3,8 @@ from pathlib import Path
 import typing as t
 from datetime import date
 
-from dapla_pseudo.v1.supported_file_format import NoFileExtensionError, SupportedFileFormat
+from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.Any:

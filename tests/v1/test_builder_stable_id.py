@@ -10,8 +10,7 @@ import pytest
 
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_validation import Validator
-from dapla_pseudo.v1.supported_file_format import NoFileExtensionError
-
+from dapla_pseudo.exceptions import NoFileExtensionError
 
 PKG = "dapla_pseudo.v1.builder_validation"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -95,8 +94,8 @@ def test_builder_from_file_no_file_extension() -> None:
         Validator.from_file(path)
 
 
-@patch(f"{PKG}.read_to_df")
-def test_builder_from_file_with_storage_options(_mock_read_to_df: Mock) -> None:
+@patch(f"{PKG}.read_to_polars_df")
+def test_builder_from_file_with_storage_options(_mock_read_to_pandas_df: Mock) -> None:
     # This should not raise a FileNotFoundError
     # since the file is not on the local filesystem
     try:

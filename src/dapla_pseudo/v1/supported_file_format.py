@@ -10,6 +10,8 @@ from typing import Union
 import pandas as pd
 import polars as pl
 
+from dapla_pseudo.exceptions import ExtensionNotValidError
+
 
 class SupportedFileFormat(Enum):
     """Enums classes containing supported file extensions for dapla_pseudo builder."""
@@ -29,7 +31,6 @@ class SupportedFileFormat(Enum):
 FORMAT_TO_MIMETYPE_FUNCTION = {
     SupportedFileFormat.CSV: "text/csv",
     SupportedFileFormat.JSON: "application/json",
-    SupportedFileFormat.XML: "application/xml",
 }
 
 FORMAT_TO_POLARS_READER_FUNCTION: Dict[SupportedFileFormat, Callable[..., pl.DataFrame]] = {
@@ -87,19 +88,3 @@ def write_from_df(supported_format: SupportedFileFormat, file_path: Path | str, 
     """Writes a file with a supported file format to a Dataframe."""
     writer_function = FORMAT_TO_WRITER_FUNCTION[supported_format]
     return writer_function(file_path, **kwargs)
-
-
-class NoFileExtensionError(Exception):
-    """Exception raised when a file has no file extension."""
-
-    def __init__(self, message: str) -> None:
-        """Initialize the NoFileExtensionError."""
-        super().__init__(message)
-
-
-class ExtensionNotValidError(Exception):
-    """Exception raised when a file extension is invalid."""
-
-    def __init__(self, message: str) -> None:
-        """Initialize the ExtensionNotValidError."""
-        super().__init__(message)

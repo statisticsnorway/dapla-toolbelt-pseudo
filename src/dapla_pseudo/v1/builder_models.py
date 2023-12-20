@@ -15,19 +15,19 @@ from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.supported_file_format import (
     FORMAT_TO_MIMETYPE_FUNCTION,
     FORMAT_TO_POLARS_READER_FUNCTION,
-    NoFileExtensionError,
     SupportedFileFormat,
     read_to_pandas_df,
     read_to_polars_df,
     write_from_df,
 )
+from dapla_pseudo.exceptions import NoFileExtensionError
 
 
 @dataclass
 class PseudoFileResponse:
     response: Response
     content_type: Mimetypes
-    streamed: bool = False
+    streamed: bool = True
 
 
 class Result:
