@@ -4,7 +4,6 @@ from datetime import date
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
-from mock import ANY
 
 import pandas as pd
 import polars as pl
