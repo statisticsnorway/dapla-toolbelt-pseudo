@@ -39,7 +39,7 @@ def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[dat
     return sid_snapshot_date
 
 
-def get_file_format(file_path: str | Path) -> SupportedFileFormat:
+def get_file_format_from_file_name(file_path: str | Path) -> SupportedFileFormat:
     if isinstance(file_path, str):
         file_path = Path(file_path)
 

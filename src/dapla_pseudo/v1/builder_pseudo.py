@@ -1,5 +1,6 @@
 """Builder for submitting a pseudonymization request."""
 import concurrent
+from dataclasses import dataclass
 import io
 import json
 import os
@@ -33,7 +34,7 @@ from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.types import BinaryFileDecl, HierarchDatasetDecl
 from dapla_pseudo.types import DatasetDecl
 from dapla_pseudo.types import FieldDecl
-from dapla_pseudo.utils import convert_to_date, get_file_format
+from dapla_pseudo.utils import convert_to_date, get_file_format_from_file_name
 from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
@@ -53,13 +54,19 @@ from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 from dapla_pseudo.exceptions import ExtensionNotValidError, NoFileExtensionError
 
 
+@dataclass
+class File:
+    file_handle: BinaryFileDecl
+    content_type: Mimetypes
+
+
 class PseudoData:
     """Starting point for pseudonymization of datasets.
 
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: BinaryFileDecl | pl.DataFrame
+    dataset: File | pl.DataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "PseudoData._Pseudonymizer":
@@ -137,7 +144,8 @@ class PseudoData:
         if file_size == 0:
             raise ValueError("File is empty.")
 
-        PseudoData.dataset = file_handle
+        content_type = _get_content_type_from_file(file_handle)
+        PseudoData.dataset = File(file_handle, content_type)
         return PseudoData._Pseudonymizer()
 
     class _Pseudonymizer:
@@ -168,50 +176,32 @@ class PseudoData:
                 self._pseudo_keyset = with_custom_keyset
 
             self._timeout = timeout
-            match PseudoData.dataset:  # Differentiate between hierarchical and tabular datasets
-                case io.BufferedReader() | fsspec.spec.AbstractBufferedFile() | gcsfs.core.GCSFile():
+            match PseudoData.dataset:  # Differentiate between file and DataFrame
+                case File():
                     return self._pseudonymize_file()
                 case pl.DataFrame():
                     return self._pseudonymize_field()
                 case _:
                     raise ValueError(
-                        f"Unsupported data type: {type(PseudoData.dataset)}. Should only be DataFrame or BufferedReader."
+                        f"Unsupported data type: {type(PseudoData.dataset)}. Should only be DataFrame or file-like type."
                     )
 
         def _pseudonymize_file(self) -> Result:
             """Pseudonymize the entire file."""
-            # Need to type-cast explicitly. We know that PseudoData.dataset is a BufferedReader if we reach this method.
-            file_handle = t.cast(BinaryFileDecl, PseudoData.dataset)
-            if isinstance(file_handle, GCSFile):
-                file_name = file_handle.full_name
-            else:
-                file_name = file_handle.name
-            file_format = get_file_format(file_name)
-            try:  # Test whether the file extension is supported
-                content_type = Mimetypes(FORMAT_TO_MIMETYPE_FUNCTION[file_format])
-            except KeyError:  # Fall back on reading the file format from the magic bytes
-                magic_content_type = magic.from_buffer(file_handle.read(2048), mime=True)
-                # Reset the file pointer to the beginning of the file after reading from magic bytes
-                file_handle.seek(0)
-                if isinstance(magic_content_type, Mimetypes):
-                    content_type = Mimetypes(magic_content_type)
-                else:
-                    raise MimetypeNotSupportedError(
-                        f"The provided input format '{magic_content_type}' is not supported directly from a file.\n\
-                        Please read in the file as a DataFrame first."
-                    )
+            # Need to type-cast explicitly. We know that PseudoData.dataset is a "File" if we reach this method.
+            file = t.cast(File, PseudoData.dataset)
 
             pseudonymize_request = PseudonymizeFileRequest(
                 pseudo_config=PseudoConfig(rules=self._rules, keysets=KeyWrapper(self._pseudo_keyset).keyset_list()),
-                target_content_type=content_type,
+                target_content_type=file.content_type,
                 target_uri=None,
                 compression=None,
             )
 
             response: Response = _client().pseudonymize_file(
-                pseudonymize_request, file_handle, stream=True, name=None, timeout=self._timeout
+                pseudonymize_request, file.file_handle, stream=True, name=None, timeout=self._timeout
             )
-            return Result(PseudoFileResponse(response, content_type, streamed=True), self._metadata)
+            return Result(PseudoFileResponse(response, file.content_type, streamed=True), self._metadata)
 
         def _pseudonymize_field(self) -> Result:
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
@@ -301,9 +291,23 @@ class PseudoData:
 
         def _rule_constructor(self, func: PseudoFunction) -> "PseudoData._Pseudonymizer":
             # If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.
-            rule_prefix = "**/" if type(PseudoData.dataset) == io.BufferedReader else ""
+            rule_prefix = "**/" if type(PseudoData.dataset) == File else ""
             rules = [PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}") for field in self._fields]
             return PseudoData._Pseudonymizer(self._existing_rules + rules)
+
+
+def _get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
+    if isinstance(file_handle, GCSFile):
+        file_name = file_handle.full_name
+    else:
+        file_name = file_handle.name
+    file_format = get_file_format_from_file_name(file_name)
+    try:  # Test whether the file extension is supported
+        content_type = Mimetypes(FORMAT_TO_MIMETYPE_FUNCTION[file_format])
+    except:  # Fall back on reading the file format from the magic bytes
+        raise MimetypeNotSupportedError(f"The provided input format '{file_format}' is not supported from file.")
+
+    return content_type
 
 
 def _do_pseudonymize_field(

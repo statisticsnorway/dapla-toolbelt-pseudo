@@ -9,7 +9,7 @@ from typing import Sequence
 import pandas as pd
 import polars as pl
 import requests
-from dapla_pseudo.utils import get_file_format
+from dapla_pseudo.utils import get_file_format_from_file_name
 
 from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.ops import _client
@@ -67,7 +67,7 @@ class Validator:
         if not file_path.is_file() and "storage_options" not in kwargs:
             raise FileNotFoundError(f"No local file found in path: {file_path}")
 
-        file_format = get_file_format(file_path)
+        file_format = get_file_format_from_file_name(file_path)
 
         return Validator._FieldSelector(read_to_polars_df(file_format, file_path, **kwargs))
 

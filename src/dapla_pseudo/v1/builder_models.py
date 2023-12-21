@@ -9,7 +9,7 @@ import polars as pl
 from pydantic import BaseModel
 from requests import Response
 from dapla import FileClient
-from dapla_pseudo.utils import get_file_format
+from dapla_pseudo.utils import get_file_format_from_file_name
 from io import StringIO
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.supported_file_format import (
@@ -66,10 +66,10 @@ class Result:
             case _:
                 raise ValueError(f"Invalid response type '{type(self._pseudo_response)}'")
 
-    def to_file(self, file_path: str, **kwargs: t.Any) -> None:
-        file_format = get_file_format(file_path)
+    def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
+        file_format = get_file_format_from_file_name(file_path)
 
-        if file_path.startswith("gs://"):
+        if str(file_path).startswith("gs://"):
             file_handle = FileClient().gcs_open(file_path, mode="wb")
         else:
             file_handle = open(file_path, mode="wb")
@@ -86,7 +86,7 @@ class Result:
                 else:
                     file_handle.write(self._pseudo_response.response.content)
             case pl.DataFrame():
-                write_from_df(file_format, file_path, **kwargs)
+                write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
             case _:
                 raise ValueError("Invalid response type")
 

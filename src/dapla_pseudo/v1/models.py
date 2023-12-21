@@ -13,6 +13,7 @@ from pydantic import field_serializer
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
+from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.models import APIModel
 
 
@@ -21,7 +22,6 @@ class Mimetypes(str, Enum):
 
     JSON = "application/json"
     CSV = "text/csv"
-    XML = "application/xml"
 
 
 class Field(APIModel):

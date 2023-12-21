@@ -4,6 +4,7 @@ from datetime import date
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
+from mock import ANY
 
 import pandas as pd
 import polars as pl
@@ -12,15 +13,23 @@ import pytest
 from dapla_pseudo.constants import TIMEOUT_DEFAULT, PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_models import Result
-from dapla_pseudo.v1.builder_pseudo import PseudoData
+from dapla_pseudo.v1.builder_pseudo import File, PseudoData, _get_content_type_from_file
 from dapla_pseudo.v1.builder_pseudo import _do_pseudonymize_field
-from dapla_pseudo.v1.models import DaeadKeywordArgs, PseudoRule
+from dapla_pseudo.v1.models import (
+    DaeadKeywordArgs,
+    KeyWrapper,
+    Mimetypes,
+    PseudoConfig,
+    PseudoRule,
+    PseudonymizeFileRequest,
+)
 from dapla_pseudo.v1.models import FF31KeywordArgs
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import RedactArgs
-from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.exceptions import MimetypeNotSupportedError, NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
 
 PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -30,6 +39,16 @@ TEST_FILE_PATH = "tests/v1/test_files"
 def df() -> pd.DataFrame:
     with open("tests/data/personer.json") as test_data:
         return pd.json_normalize(json.load(test_data))
+
+
+@pytest.fixture()
+def json_file_path() -> pd.DataFrame:
+    return "tests/data/personer.json"
+
+
+@pytest.fixture()
+def json_hierarch_file_path() -> pd.DataFrame:
+    return "tests/data/personer_hierarchical.json"
 
 
 @pytest.fixture()
@@ -91,6 +110,64 @@ def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:
         "fornavn",
         "fnr",
     ]
+
+
+@patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
+def test_builder_file_default(patched_pseudonymize_file: MagicMock, json_file_path: str):
+    patched_pseudonymize_file.return_value = Mock()
+    PseudoData.from_file(json_file_path).on_fields("fornavn").with_default_encryption().pseudonymize()
+
+    pseudonymize_request = PseudonymizeFileRequest(
+        pseudo_config=PseudoConfig(
+            rules=[
+                PseudoRule(
+                    name=None,
+                    pattern="**/fornavn",
+                    func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()),
+                )
+            ],
+            keysets=KeyWrapper(None).keyset_list(),
+        ),
+        target_content_type=Mimetypes.JSON,
+        target_uri=None,
+        compression=None,
+    )
+    patched_pseudonymize_file.assert_called_once_with(
+        pseudonymize_request,  # use ANY to avoid having to mock the whole request
+        PseudoData.dataset.file_handle,
+        stream=True,
+        name=None,
+        timeout=30,
+    )
+
+
+@patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
+def test_builder_file_hierarchical(patched_pseudonymize_file: MagicMock, json_hierarch_file_path: str):
+    patched_pseudonymize_file.return_value = Mock()
+    PseudoData.from_file(json_hierarch_file_path).on_fields("person_info/fnr").with_default_encryption().pseudonymize()
+
+    pseudonymize_request = PseudonymizeFileRequest(
+        pseudo_config=PseudoConfig(
+            rules=[
+                PseudoRule(
+                    name=None,
+                    pattern="**/person_info/fnr",
+                    func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()),
+                )
+            ],
+            keysets=KeyWrapper(None).keyset_list(),
+        ),
+        target_content_type=Mimetypes.JSON,
+        target_uri=None,
+        compression=None,
+    )
+    patched_pseudonymize_file.assert_called_once_with(
+        pseudonymize_request,  # use ANY to avoid having to mock the whole request
+        PseudoData.dataset.file_handle,
+        stream=True,
+        name=None,
+        timeout=30,
+    )
 
 
 @patch(f"{PKG}._do_pseudonymize_field")
@@ -273,6 +350,21 @@ def test_builder_field_selector_multiple_fields(df: pd.DataFrame) -> None:
     assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [f"{f}" for f in fields]
 
 
+@pytest.mark.parametrize("supported_mimetype", Mimetypes.__members__.keys())
+def test_get_content_type_from_file(supported_mimetype: str) -> None:
+    file_extension = supported_mimetype.lower()
+    print(file_extension)
+    file_handle = open(f"{TEST_FILE_PATH}/test.{file_extension}", mode="rb")
+    content_type = _get_content_type_from_file(file_handle)
+    assert content_type.name == supported_mimetype
+
+
+def test_get_content_type_from_file_unsupported_mimetype() -> None:
+    file_handle = open(f"{TEST_FILE_PATH}/test.xml", mode="rb")
+    with pytest.raises(MimetypeNotSupportedError):
+        _get_content_type_from_file(file_handle)
+
+
 def test_builder_from_file_not_a_file() -> None:
     path = f"{TEST_FILE_PATH}/not/a/file.json"
     with pytest.raises(FileNotFoundError):
@@ -281,28 +373,9 @@ def test_builder_from_file_not_a_file() -> None:
 
 def test_builder_from_file_no_file_extension() -> None:
     path = f"{TEST_FILE_PATH}/file_no_extension"
-    PseudoData.dataset = open(f"{TEST_FILE_PATH}/file_no_extension", mode="rb")
-    pseudo = PseudoData._Pseudonymizer(
-        [
-            PseudoRule(
-                pattern="**", func=PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
-            )
-        ]
-    )
 
     with pytest.raises(NoFileExtensionError):
-        pseudo.pseudonymize()
-
-
-@patch(f"{PKG}.read_to_pandas_df")
-def test_builder_from_nonexistent_file(_mock_read_to_df: Mock) -> None:
-    # This should not raise a FileNotFoundError
-    # since the file is not on the local filesystem
-    try:
-        file_path = "path/to/your/file.csv"
-        PseudoData.from_file(file_path)
-    except FileNotFoundError:
-        pytest.fail("FileNotFoundError should not be raised when storage_options is supplied.")
+        PseudoData.from_file(path)
 
 
 def test_builder_from_file_empty_file() -> None:
@@ -312,10 +385,16 @@ def test_builder_from_file_empty_file() -> None:
         PseudoData.from_file(path)
 
 
-@pytest.mark.parametrize("file_format", ["json", "csv", "xml", "parquet"])
+@pytest.mark.parametrize("file_format", Mimetypes.__members__.keys())
 def test_builder_from_file(file_format: str) -> None:
     # Test reading all supported file extensions
-    PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format}")
+    PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format.lower()}")
+
+
+def test_builder_from_invalid_gcs_file() -> None:
+    invalid_gcs_path = "gs://invalid/path.json"
+    with pytest.raises(FileNotFoundError):
+        PseudoData.from_file(invalid_gcs_path)
 
 
 @patch(f"{PKG}._do_pseudonymize_field")

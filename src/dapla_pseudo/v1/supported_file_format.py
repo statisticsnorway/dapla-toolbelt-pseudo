@@ -50,22 +50,15 @@ FORMAT_TO_PANDAS_READER_FUNCTION: Dict[SupportedFileFormat, Callable[..., pd.Dat
     SupportedFileFormat.PARQUET: pd.read_parquet,
 }
 
-FORMAT_TO_WRITER_FUNCTION: Dict[SupportedFileFormat, Callable[..., None]] = {
-    SupportedFileFormat.CSV: pd.DataFrame.to_csv,
-    SupportedFileFormat.JSON: pd.DataFrame.to_json,
-    SupportedFileFormat.XML: pd.DataFrame.to_xml,
-    SupportedFileFormat.PARQUET: pl.DataFrame.write_parquet,
-}
-
 
 def read_to_pandas_df(
     supported_format: SupportedFileFormat, file_path: Path | StringIO, **kwargs: Dict[str, Any]
 ) -> pd.DataFrame:
     """Reads a file with a supported file format to a Dataframe."""
     try:
-        reader_function = FORMAT_TO_POLARS_READER_FUNCTION[supported_format]
+        reader_function = FORMAT_TO_PANDAS_READER_FUNCTION[supported_format]
     except KeyError:
-        raise ValueError(f"Unsupported file format for Pandas: {supported_format}")
+        raise ValueError(f"Unsupported file format for Pandas: {supported_format.name}")
     df = reader_function(file_path, **kwargs)
     assert isinstance(df, pd.DataFrame)
     return df
@@ -84,7 +77,18 @@ def read_to_polars_df(
     return df
 
 
-def write_from_df(supported_format: SupportedFileFormat, file_path: Path | str, **kwargs: Dict[str, Any]) -> None:
+def write_from_df(
+    df: pl.DataFrame, supported_format: SupportedFileFormat, file_path: Path | str, **kwargs: Dict[str, Any]
+) -> None:
     """Writes a file with a supported file format to a Dataframe."""
-    writer_function = FORMAT_TO_WRITER_FUNCTION[supported_format]
-    return writer_function(file_path, **kwargs)
+    match supported_format:
+        case SupportedFileFormat.CSV:
+            df.write_csv(file_path, **kwargs)
+        case SupportedFileFormat.JSON:
+            df.write_json(file_path, **kwargs)
+        case SupportedFileFormat.XML:
+            df.to_pandas().to_xml(file_path, **kwargs)
+        case SupportedFileFormat.PARQUET:
+            df.write_parquet(file_path, **kwargs)
+        case _:
+            raise ValueError(f"Unsupported file format for Polars: {supported_format}")
