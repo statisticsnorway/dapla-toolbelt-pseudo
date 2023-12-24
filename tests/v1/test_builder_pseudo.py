@@ -1,7 +1,6 @@
 import json
 import typing as t
 from datetime import date
-from google.auth.exceptions import DefaultCredentialsError
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -9,6 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 import polars as pl
 import pytest
+from google.auth.exceptions import DefaultCredentialsError
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PseudoFunctionTypes

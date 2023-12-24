@@ -14,8 +14,8 @@ import pandas as pd
 import polars as pl
 import requests
 from dapla import FileClient
-from google.auth.exceptions import DefaultCredentialsError
 from gcsfs.core import GCSFile
+from google.auth.exceptions import DefaultCredentialsError
 from requests import Response
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -82,6 +82,7 @@ class PseudoData:
             FileNotFoundError: If no file is found at the specified path.
             FileInvalidError: If the file is empty.
             ValueError: If the dataset is not of a supported type.
+            DefaultCredentialsError: If no Google Authentication is found in the environment.
 
         Returns:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
@@ -112,7 +113,7 @@ class PseudoData:
                             f"No GCS file found or authentication not sufficient for: {dataset}"
                         ) from err
                     except DefaultCredentialsError as err:
-                        raise DefaultCredentialsError(f"No Google Authentication found in environment") from err
+                        raise DefaultCredentialsError("No Google Authentication found in environment") from err
                 else:
                     file_handle = open(dataset, "rb")
 
