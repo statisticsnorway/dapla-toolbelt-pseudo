@@ -9,12 +9,11 @@ from typing import Sequence
 import pandas as pd
 import polars as pl
 import requests
-from dapla_pseudo.utils import get_file_format_from_file_name
 
+from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.ops import _client
-from dapla_pseudo.exceptions import NoFileExtensionError
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat, read_to_polars_df
+from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 
 
 class Validator:
@@ -43,7 +42,6 @@ class Validator:
 
         Raises:
             FileNotFoundError: If no file is found at the specified local path.
-            NoFileExtensionError: If the file has no extension.
 
         Returns:
             _FieldSelector: An instance of the _FieldSelector class.
@@ -105,7 +103,7 @@ class Validator:
                     Latest if unspecified. Format: YYYY-MM-DD
 
             Returns:
-                DataFrameResult: Containing a result dataframe with associated metadata.
+                Result: Containing a result dataframe with associated metadata.
             """
             response: requests.Response = _client()._post_to_sid_endpoint(
                 "sid/lookup/batch", self._dataframe[self._field].to_list(), sid_snapshot_date, stream=True

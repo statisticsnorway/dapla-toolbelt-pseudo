@@ -1,15 +1,17 @@
-from io import BufferedReader
 import json
+from io import BufferedReader
+from itertools import product
 from pathlib import Path
 from typing import Iterator
 from unittest.mock import Mock
+
 import pandas as pd
 import polars as pl
 import pytest
 from requests import Response
-from itertools import product
 
-from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
+from dapla_pseudo.v1.builder_models import PseudoFileResponse
+from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.models import Mimetypes
 
 
@@ -22,7 +24,7 @@ def polars_df() -> pl.DataFrame:
 @pytest.fixture(
     params=list(product([True, False], Mimetypes.__members__.values()))
 )  # tabulate every combination of "streamed" and "content_type"
-def pseudo_file_response(request: object) -> PseudoFileResponse:
+def pseudo_file_response(request: pytest.FixtureRequest) -> PseudoFileResponse:
     def get_byte_iterator(file_handle: BufferedReader) -> Iterator[bytes]:
         print(file_handle.closed)
         while True:

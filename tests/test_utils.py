@@ -1,10 +1,12 @@
 from datetime import date
 
 import pytest
-from dapla_pseudo.exceptions import NoFileExtensionError
 
-from dapla_pseudo.utils import convert_to_date, find_multipart_obj, get_file_format_from_file_name
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
+from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.utils import find_multipart_obj
+from dapla_pseudo.utils import get_file_format_from_file_name
+from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
 
 def test_find_multipart_obj() -> None:
@@ -42,9 +44,9 @@ def test_convert_to_date_with_none() -> None:
 
 def test_get_file_format_from_file_name_successful() -> None:
     file_format = get_file_format_from_file_name("test.csv")
-    assert file_format == SupportedFileFormat.CSV
+    assert file_format == SupportedOutputFileFormat.CSV
 
 
 def test_get_file_format_from_file_name_failed() -> None:
     with pytest.raises(NoFileExtensionError):
-        file_format = get_file_format_from_file_name("test")
+        get_file_format_from_file_name("test")

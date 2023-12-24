@@ -1,44 +1,34 @@
 """Builder for submitting a pseudonymization request."""
 import concurrent
-from dataclasses import dataclass
 import io
 import json
 import os
 import typing as t
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any
 from typing import Optional
 
 import fsspec
-
-from dapla import FileClient
-import gcsfs
-from gcsfs.core import GCSFile
-
-# isort: off
-import pylibmagic  # noqa Must be imported before magic
-
-# isort: on
-import magic
 import pandas as pd
 import polars as pl
 import requests
+from dapla import FileClient
+from gcsfs.core import GCSFile
 from requests import Response
-from typing_extensions import Self
 
-from dapla_pseudo.constants import PredefinedKeys
-from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
-from dapla_pseudo.types import BinaryFileDecl, HierarchDatasetDecl
-from dapla_pseudo.types import DatasetDecl
-from dapla_pseudo.types import FieldDecl
-from dapla_pseudo.utils import convert_to_date, get_file_format_from_file_name
-from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
+from dapla_pseudo.types import BinaryFileDecl
+from dapla_pseudo.types import FileLikeDatasetDecl
+from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.utils import get_file_format_from_file_name
+from dapla_pseudo.v1.builder_models import PseudoFileResponse
+from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
-from dapla_pseudo.v1.models import Field
 from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import MapSidKeywordArgs
 from dapla_pseudo.v1.models import Mimetypes
@@ -48,14 +38,13 @@ from dapla_pseudo.v1.models import PseudoKeyset
 from dapla_pseudo.v1.models import PseudonymizeFileRequest
 from dapla_pseudo.v1.models import PseudoRule
 from dapla_pseudo.v1.ops import _client
-from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
-from dapla_pseudo.exceptions import ExtensionNotValidError, NoFileExtensionError
 
 
 @dataclass
 class File:
+    """File represents a file to be pseudonymized."""
+
     file_handle: BinaryFileDecl
     content_type: Mimetypes
 
@@ -82,19 +71,19 @@ class PseudoData:
         return PseudoData._Pseudonymizer()
 
     @staticmethod
-    def from_file(dataset: DatasetDecl) -> "PseudoData._Pseudonymizer":
+    def from_file(dataset: FileLikeDatasetDecl) -> "PseudoData._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas dataframe read from file.
 
         Args:
-            file_path_str (str): The path to the file to be read.
-            kwargs (dict): Additional keyword arguments to be passed to the file reader.
+            dataset (FileLikeDatasetDecl): The path to the file to be read.
 
         Raises:
-            FileNotFoundError: If no file is found at the specified local path.
-            NoFileExtensionError: If the file has no extension.
+            FileNotFoundError: If no file is found at the specified path.
+            FileInvalidError: If the file is empty.
+            ValueError: If the dataset is not of a supported type.
 
         Returns:
-            _FieldSelector: An instance of the _FieldSelector class.
+            _Pseudonymizer: An instance of the _Pseudonymizer class.
 
         Examples:
             # Read from bucket
@@ -117,8 +106,8 @@ class PseudoData:
                 if str(dataset).startswith("gs://"):
                     try:
                         file_handle = FileClient().gcs_open(dataset, mode="rb")
-                    except:
-                        raise FileNotFoundError(f"No GCS file found or authentication failed for: {dataset}")
+                    except OSError as err:
+                        raise FileNotFoundError(f"No GCS file found or authentication failed for: {dataset}") from err
                 else:
                     file_handle = open(dataset, "rb")
 
@@ -134,7 +123,7 @@ class PseudoData:
                 dataset.seek(0)
                 file_handle = io.BufferedReader(dataset)
             case _:
-                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {HierarchDatasetDecl}")
+                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {FileLikeDatasetDecl}")
 
         if isinstance(file_handle, GCSFile):
             file_size = file_handle.size
@@ -142,7 +131,7 @@ class PseudoData:
             file_size = os.fstat(file_handle.fileno()).st_size
 
         if file_size == 0:
-            raise ValueError("File is empty.")
+            raise FileInvalidError("File is empty.")
 
         content_type = _get_content_type_from_file(file_handle)
         PseudoData.dataset = File(file_handle, content_type)
@@ -210,7 +199,7 @@ class PseudoData:
             the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
 
             Returns:
-                DataFrameResult: Containing the pseudonymized 'self._dataframe' and the associated metadata.
+                Result: Containing the pseudonymized 'self._dataframe' and the associated metadata.
             """
 
             def pseudonymize_field_runner(
@@ -219,8 +208,9 @@ class PseudoData:
                 """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
-                    series (pl.Series): The pandas Series containing the values to be pseudonymized.
                     field_name (str):  The name of the field.
+                    series (pl.Series): The pandas Series containing the values to be pseudonymized.
+                    pseudo_func (PseudoFunction): The pseudonymization function to apply to the values.
 
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
@@ -238,7 +228,7 @@ class PseudoData:
                     ),
                 )
 
-            dataframe: pd.DataFrame = PseudoData.dataset
+            dataframe = t.cast(pd.DataFrame, PseudoData.dataset)
             # Execute the pseudonymization API calls in parallel
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 pseudonymized_field: t.Dict[str, pl.Series] = {}
@@ -291,7 +281,7 @@ class PseudoData:
 
         def _rule_constructor(self, func: PseudoFunction) -> "PseudoData._Pseudonymizer":
             # If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.
-            rule_prefix = "**/" if type(PseudoData.dataset) == File else ""
+            rule_prefix = "**/" if isinstance(PseudoData.dataset, File) else ""
             rules = [PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}") for field in self._fields]
             return PseudoData._Pseudonymizer(self._existing_rules + rules)
 
@@ -304,8 +294,10 @@ def _get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
     file_format = get_file_format_from_file_name(file_name)
     try:  # Test whether the file extension is supported
         content_type = Mimetypes(FORMAT_TO_MIMETYPE_FUNCTION[file_format])
-    except:  # Fall back on reading the file format from the magic bytes
-        raise MimetypeNotSupportedError(f"The provided input format '{file_format}' is not supported from file.")
+    except KeyError:  # Fall back on reading the file format from the magic bytes
+        raise MimetypeNotSupportedError(
+            f"The provided input format '{file_format}' is not supported from file."
+        ) from None
 
     return content_type
 
@@ -327,6 +319,7 @@ def _do_pseudonymize_field(
         values (list[str]): The list of values to be pseudonymized.
         pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
         metadata_map (Dict[str, str]): A dictionary to store the metadata associated with each field.
+        timeout (int): The timeout in seconds for the API call.
         keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
 
     Returns:

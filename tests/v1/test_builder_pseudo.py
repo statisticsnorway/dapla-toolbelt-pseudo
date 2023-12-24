@@ -9,26 +9,29 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from dapla_pseudo.constants import TIMEOUT_DEFAULT, PseudoFunctionTypes
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.exceptions import FileInvalidError
+from dapla_pseudo.exceptions import MimetypeNotSupportedError
+from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_models import Result
-from dapla_pseudo.v1.builder_pseudo import File, PseudoData, _get_content_type_from_file
+from dapla_pseudo.v1.builder_pseudo import File
+from dapla_pseudo.v1.builder_pseudo import PseudoData
 from dapla_pseudo.v1.builder_pseudo import _do_pseudonymize_field
-from dapla_pseudo.v1.models import (
-    DaeadKeywordArgs,
-    KeyWrapper,
-    Mimetypes,
-    PseudoConfig,
-    PseudoRule,
-    PseudonymizeFileRequest,
-)
+from dapla_pseudo.v1.builder_pseudo import _get_content_type_from_file
+from dapla_pseudo.v1.models import DaeadKeywordArgs
 from dapla_pseudo.v1.models import FF31KeywordArgs
+from dapla_pseudo.v1.models import KeyWrapper
 from dapla_pseudo.v1.models import MapSidKeywordArgs
+from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudoConfig
 from dapla_pseudo.v1.models import PseudoFunction
 from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models import PseudoRule
 from dapla_pseudo.v1.models import RedactArgs
-from dapla_pseudo.exceptions import MimetypeNotSupportedError, NoFileExtensionError
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
+
 
 PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -112,7 +115,7 @@ def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:
 
 
 @patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
-def test_builder_file_default(patched_pseudonymize_file: MagicMock, json_file_path: str):
+def test_builder_file_default(patched_pseudonymize_file: MagicMock, json_file_path: str) -> None:
     patched_pseudonymize_file.return_value = Mock()
     PseudoData.from_file(json_file_path).on_fields("fornavn").with_default_encryption().pseudonymize()
 
@@ -131,9 +134,10 @@ def test_builder_file_default(patched_pseudonymize_file: MagicMock, json_file_pa
         target_uri=None,
         compression=None,
     )
+    file_dataset = t.cast(File, PseudoData.dataset)
     patched_pseudonymize_file.assert_called_once_with(
         pseudonymize_request,  # use ANY to avoid having to mock the whole request
-        PseudoData.dataset.file_handle,
+        file_dataset.file_handle,
         stream=True,
         name=None,
         timeout=30,
@@ -141,7 +145,7 @@ def test_builder_file_default(patched_pseudonymize_file: MagicMock, json_file_pa
 
 
 @patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
-def test_builder_file_hierarchical(patched_pseudonymize_file: MagicMock, json_hierarch_file_path: str):
+def test_builder_file_hierarchical(patched_pseudonymize_file: MagicMock, json_hierarch_file_path: str) -> None:
     patched_pseudonymize_file.return_value = Mock()
     PseudoData.from_file(json_hierarch_file_path).on_fields("person_info/fnr").with_default_encryption().pseudonymize()
 
@@ -160,9 +164,10 @@ def test_builder_file_hierarchical(patched_pseudonymize_file: MagicMock, json_hi
         target_uri=None,
         compression=None,
     )
+    file_dataset = t.cast(File, PseudoData.dataset)
     patched_pseudonymize_file.assert_called_once_with(
         pseudonymize_request,  # use ANY to avoid having to mock the whole request
-        PseudoData.dataset.file_handle,
+        file_dataset.file_handle,
         stream=True,
         name=None,
         timeout=30,
@@ -380,7 +385,7 @@ def test_builder_from_file_no_file_extension() -> None:
 def test_builder_from_file_empty_file() -> None:
     path = f"{TEST_FILE_PATH}/empty_file"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(FileInvalidError):
         PseudoData.from_file(path)
 
 

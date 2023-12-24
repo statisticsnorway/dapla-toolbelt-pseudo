@@ -1,6 +1,7 @@
 """This module defines constants that are referenced throughout the codebase."""
 from enum import Enum
 
+
 TIMEOUT_DEFAULT: int = 30  # seconds
 
 

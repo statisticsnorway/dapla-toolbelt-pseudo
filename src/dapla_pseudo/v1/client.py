@@ -7,9 +7,8 @@ from datetime import date
 
 import requests
 from dapla import AuthClient
-from dapla_pseudo.constants import TIMEOUT_DEFAULT
 
-from dapla_pseudo.models import APIModel
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoFunction

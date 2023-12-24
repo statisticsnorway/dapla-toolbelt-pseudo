@@ -13,12 +13,14 @@ from pydantic import field_serializer
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
-from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.models import APIModel
 
 
 class Mimetypes(str, Enum):
-    """Mimetypes is an enum of supported mimetypes. For use in HTTP requests"""
+    """Mimetypes is an enum of supported mimetypes, for use in HTTP requests.
+
+    As a proxy, this also defines the supported input file formats when reading from a file.
+    """
 
     JSON = "application/json"
     CSV = "text/csv"

@@ -5,9 +5,9 @@ import typing as t
 from pathlib import Path
 
 import fsspec
-import pandas as pd
-import polars as pl
 import gcsfs
+import pandas as pd
+
 from dapla_pseudo.v1.models import Field
 
 
@@ -18,5 +18,5 @@ BinaryFileDecl = t.Union[
     gcsfs.core.GCSFile,
 ]
 DatasetDecl = pd.DataFrame | BinaryFileDecl | str | Path
-HierarchDatasetDecl = BinaryFileDecl | str | Path
+FileLikeDatasetDecl = BinaryFileDecl | str | Path
 FileSpecDecl = tuple[t.Optional[str], BinaryFileDecl | str, str]

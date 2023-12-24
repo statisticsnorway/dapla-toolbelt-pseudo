@@ -1,37 +1,35 @@
 """Common API models for builder packages."""
-from dataclasses import astuple, dataclass
-from pathlib import Path
 import typing as t
+from dataclasses import dataclass
+from io import BytesIO
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 import polars as pl
-from pydantic import BaseModel
-from requests import Response
 from dapla import FileClient
+from requests import Response
+
 from dapla_pseudo.utils import get_file_format_from_file_name
-from io import StringIO
 from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.supported_file_format import (
-    FORMAT_TO_MIMETYPE_FUNCTION,
-    FORMAT_TO_POLARS_READER_FUNCTION,
-    SupportedFileFormat,
-    read_to_pandas_df,
-    read_to_polars_df,
-    write_from_df,
-)
-from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
+from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
+from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
+from dapla_pseudo.v1.supported_file_format import read_to_polars_df
+from dapla_pseudo.v1.supported_file_format import write_from_df
 
 
 @dataclass
 class PseudoFileResponse:
+    """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
+
     response: Response
     content_type: Mimetypes
     streamed: bool = True
 
 
 class Result:
-    """Holder for data and metadata returned from pseudo-service"""
+    """Result represents the result of a pseudonymization operation."""
 
     def __init__(
         self,
@@ -43,30 +41,31 @@ class Result:
         self._metadata = metadata if metadata else {}
 
     def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
-        """Pseudonymized Data as a Polars Dataframe."""
+        """Output pseudonymized data as a Polars DataFrame."""
         match self._pseudo_response:
             case pl.DataFrame():
                 return self._pseudo_response
             case PseudoFileResponse(response, content_type, _):
-                format = SupportedFileFormat(content_type.name.lower())
-                df = read_to_polars_df(format, StringIO(response.text), **kwargs)
+                format = SupportedOutputFileFormat(content_type.name.lower())
+                df = read_to_polars_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(f"Invalid response type '{type(self._pseudo_response)}'")
+                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
 
     def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
-        """Pseudonymized Data as a Pandas Dataframe."""
+        """Output pseudonymized data as a Pandas DataFrame."""
         match self._pseudo_response:
             case pl.DataFrame():
                 return self._pseudo_response.to_pandas()
             case PseudoFileResponse(response, content_type, _):
-                format = SupportedFileFormat(content_type.name.lower())
-                df = read_to_pandas_df(format, StringIO(response.text), **kwargs)
+                format = SupportedOutputFileFormat(content_type.name.lower())
+                df = read_to_pandas_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(f"Invalid response type '{type(self._pseudo_response)}'")
+                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
 
     def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
+        """Output pseudonymized data to a file."""
         file_format = get_file_format_from_file_name(file_path)
 
         if str(file_path).startswith("gs://"):
@@ -78,7 +77,8 @@ class Result:
             case PseudoFileResponse(response, content_type, streamed):
                 if FORMAT_TO_MIMETYPE_FUNCTION[file_format] != content_type:
                     raise ValueError(
-                        f'Provided output file format "{file_format}" does not match the content type of the provided input file "{content_type.name}".'
+                        f'Provided output file format "{file_format}" does not'
+                        f'match the content type of the provided input file "{content_type.name}".'
                     )
                 if streamed:
                     for chunk in response.iter_content(chunk_size=128):

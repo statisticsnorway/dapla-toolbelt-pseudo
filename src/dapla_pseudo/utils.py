@@ -1,10 +1,10 @@
-"""Utilities"""
-from pathlib import Path
+"""Utility functions for Dapla Pseudo."""
 import typing as t
 from datetime import date
+from pathlib import Path
 
 from dapla_pseudo.exceptions import NoFileExtensionError
-from dapla_pseudo.v1.supported_file_format import SupportedFileFormat
+from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.Any:
@@ -39,12 +39,13 @@ def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[dat
     return sid_snapshot_date
 
 
-def get_file_format_from_file_name(file_path: str | Path) -> SupportedFileFormat:
+def get_file_format_from_file_name(file_path: str | Path) -> SupportedOutputFileFormat:
+    """Extracts the file format from a file path."""
     if isinstance(file_path, str):
         file_path = Path(file_path)
 
     file_extension = file_path.suffix
     if not file_extension:
         raise NoFileExtensionError(f"File path '{file_path}' has no file extension.")
-    file_format = SupportedFileFormat(file_extension.replace(".", ""))
+    file_format = SupportedOutputFileFormat(file_extension.replace(".", ""))
     return file_format

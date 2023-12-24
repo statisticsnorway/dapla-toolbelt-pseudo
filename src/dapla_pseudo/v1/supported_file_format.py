@@ -1,11 +1,8 @@
 """Classes used to support reading of dataframes from file."""
 from enum import Enum
-from functools import partial
-from io import StringIO
+from io import BytesIO
 from pathlib import Path
-from typing import Any, Callable, cast
-from typing import Dict
-from typing import Union
+from typing import Any
 
 import pandas as pd
 import polars as pl
@@ -13,8 +10,11 @@ import polars as pl
 from dapla_pseudo.exceptions import ExtensionNotValidError
 
 
-class SupportedFileFormat(Enum):
-    """Enums classes containing supported file extensions for dapla_pseudo builder."""
+class SupportedOutputFileFormat(Enum):
+    """SupportedOutputFileFormat contains the supported file formats when outputting the result to a file.
+
+    Note that this does NOT describe the valid file extensions of _input_ data when reading from a file.
+    """
 
     CSV = "csv"
     JSON = "json"
@@ -22,73 +22,64 @@ class SupportedFileFormat(Enum):
     PARQUET = "parquet"
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> None:
         raise ExtensionNotValidError(
             f"{value} is not a valid file format. Valid formats: %s" % (", ".join([repr(m.value) for m in cls]))
         )
 
 
 FORMAT_TO_MIMETYPE_FUNCTION = {
-    SupportedFileFormat.CSV: "text/csv",
-    SupportedFileFormat.JSON: "application/json",
-}
-
-FORMAT_TO_POLARS_READER_FUNCTION: Dict[SupportedFileFormat, Callable[..., pl.DataFrame]] = {
-    SupportedFileFormat.CSV: lambda source, **kwargs: pl.read_csv(
-        source, separator=";", **kwargs
-    ),  # Pseudo Service separator is ';'
-    SupportedFileFormat.JSON: pl.read_json,
-    SupportedFileFormat.PARQUET: pl.read_parquet,
-}
-
-FORMAT_TO_PANDAS_READER_FUNCTION: Dict[SupportedFileFormat, Callable[..., pd.DataFrame]] = {
-    SupportedFileFormat.CSV: lambda source, **kwargs: pd.read_csv(
-        source, sep=";", **kwargs
-    ),  # Pseudo Service separator is ';'
-    SupportedFileFormat.JSON: pd.read_json,
-    SupportedFileFormat.XML: pd.read_xml,
-    SupportedFileFormat.PARQUET: pd.read_parquet,
+    SupportedOutputFileFormat.CSV: "text/csv",
+    SupportedOutputFileFormat.JSON: "application/json",
 }
 
 
 def read_to_pandas_df(
-    supported_format: SupportedFileFormat, file_path: Path | StringIO, **kwargs: Dict[str, Any]
+    supported_format: SupportedOutputFileFormat, df_dataset: BytesIO | Path, **kwargs: Any
 ) -> pd.DataFrame:
-    """Reads a file with a supported file format to a Dataframe."""
-    try:
-        reader_function = FORMAT_TO_PANDAS_READER_FUNCTION[supported_format]
-    except KeyError:
-        raise ValueError(f"Unsupported file format for Pandas: {supported_format.name}")
-    df = reader_function(file_path, **kwargs)
-    assert isinstance(df, pd.DataFrame)
-    return df
+    """Reads a file with a supported file format to a Pandas Dataframe."""
+    match supported_format:
+        case SupportedOutputFileFormat.CSV:
+            return pd.read_csv(df_dataset, sep=";", **kwargs)  # Pseudo Service CSV-separator is ';'
+        case SupportedOutputFileFormat.JSON:
+            return pd.read_json(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.XML:
+            return pd.read_xml(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.PARQUET:
+            return pd.read_parquet(df_dataset, **kwargs)
+        case _:
+            raise ValueError(f"Unsupported file format for Pandas: {supported_format}")
 
 
 def read_to_polars_df(
-    supported_format: SupportedFileFormat, file_path: Path | StringIO, **kwargs: Dict[str, Any]
+    supported_format: SupportedOutputFileFormat, df_dataset: BytesIO | Path, **kwargs: Any
 ) -> pl.DataFrame:
-    """Reads a file with a supported file format to a Dataframe."""
-    try:
-        reader_function = FORMAT_TO_POLARS_READER_FUNCTION[supported_format]
-    except KeyError:
-        raise ValueError(f"Unsupported file format for Polars: {supported_format}")
-    df = reader_function(file_path, **kwargs)
-    assert isinstance(df, pl.DataFrame)
-    return df
+    """Reads a file with a supported file format to a Polars Dataframe."""
+    match supported_format:
+        case SupportedOutputFileFormat.CSV:
+            return pl.read_csv(df_dataset, separator=";", **kwargs)  # Pseudo Service CSV-separator is ';'
+        case SupportedOutputFileFormat.JSON:
+            return pl.read_json(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.PARQUET:
+            return pl.read_parquet(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.XML:
+            raise ValueError("Unsupported file format for Polars: 'XML'. Use Pandas instead.")
+        case _:
+            raise ValueError(f"Unsupported file format for Polars: {supported_format}")
 
 
 def write_from_df(
-    df: pl.DataFrame, supported_format: SupportedFileFormat, file_path: Path | str, **kwargs: Dict[str, Any]
+    df: pl.DataFrame, supported_format: SupportedOutputFileFormat, file_path: Path | str, **kwargs: Any
 ) -> None:
-    """Writes a file with a supported file format to a Dataframe."""
+    """Writes to a file with a supported file format from a Dataframe."""
     match supported_format:
-        case SupportedFileFormat.CSV:
-            df.write_csv(file_path, **kwargs)
-        case SupportedFileFormat.JSON:
-            df.write_json(file_path, **kwargs)
-        case SupportedFileFormat.XML:
+        case SupportedOutputFileFormat.CSV:
+            df.write_csv(file=file_path, **kwargs)
+        case SupportedOutputFileFormat.JSON:
+            df.write_json(file=file_path, **kwargs)
+        case SupportedOutputFileFormat.XML:
             df.to_pandas().to_xml(file_path, **kwargs)
-        case SupportedFileFormat.PARQUET:
+        case SupportedOutputFileFormat.PARQUET:
             df.write_parquet(file_path, **kwargs)
         case _:
             raise ValueError(f"Unsupported file format for Polars: {supported_format}")

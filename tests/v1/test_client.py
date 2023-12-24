@@ -10,7 +10,9 @@ import requests
 
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
-from dapla_pseudo.v1.models import Mimetypes, PseudoKeyset, PseudonymizeFileRequest
+from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.models import PseudonymizeFileRequest
 
 
 @pytest.fixture
@@ -125,7 +127,7 @@ def test_post_to_file_endpoint_failure(mock_post: Mock, test_client: PseudoClien
     mock_post.return_value = mock_response
 
     with pytest.raises(requests.exceptions.HTTPError):
-        response = test_client._post_to_file_endpoint(
+        test_client._post_to_file_endpoint(
             path="test_path",
             request=mock_pseudo_request,
             data=Mock(spec=BinaryIO),

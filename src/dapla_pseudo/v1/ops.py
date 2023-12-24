@@ -23,7 +23,8 @@ import magic
 import pandas as pd
 import requests
 
-from dapla_pseudo.constants import TIMEOUT_DEFAULT, Env
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import BinaryFileDecl
