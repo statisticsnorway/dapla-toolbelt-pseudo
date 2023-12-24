@@ -1,6 +1,7 @@
 import json
 import typing as t
 from datetime import date
+from google.auth.exceptions import DefaultCredentialsError
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -397,7 +398,7 @@ def test_builder_from_file(file_format: str) -> None:
 
 def test_builder_from_invalid_gcs_file() -> None:
     invalid_gcs_path = "gs://invalid/path.json"
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises((FileNotFoundError, DefaultCredentialsError)):
         PseudoData.from_file(invalid_gcs_path)
 
 

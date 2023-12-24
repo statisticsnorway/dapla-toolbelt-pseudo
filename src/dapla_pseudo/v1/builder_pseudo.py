@@ -107,7 +107,13 @@ class PseudoData:
                     try:
                         file_handle = FileClient().gcs_open(dataset, mode="rb")
                     except OSError as err:
-                        raise FileNotFoundError(f"No GCS file found or authentication failed for: {dataset}") from err
+                        raise FileNotFoundError(
+                            f"No GCS file found or authentication not sufficient for: {dataset}"
+                        ) from err
+                    except google.auth.exceptions.DefaultCredentialsError as err:
+                        raise FileNotFoundError(
+                            f"No GCS file found or authentication not sufficient for: {dataset}"
+                        ) from err
                 else:
                     file_handle = open(dataset, "rb")
 
