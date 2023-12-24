@@ -14,6 +14,7 @@ import pandas as pd
 import polars as pl
 import requests
 from dapla import FileClient
+from google.auth.exceptions import DefaultCredentialsError
 from gcsfs.core import GCSFile
 from requests import Response
 
@@ -110,10 +111,8 @@ class PseudoData:
                         raise FileNotFoundError(
                             f"No GCS file found or authentication not sufficient for: {dataset}"
                         ) from err
-                    except google.auth.exceptions.DefaultCredentialsError as err:
-                        raise FileNotFoundError(
-                            f"No GCS file found or authentication not sufficient for: {dataset}"
-                        ) from err
+                    except DefaultCredentialsError as err:
+                        raise DefaultCredentialsError(f"No Google Authentication found in environment") from err
                 else:
                     file_handle = open(dataset, "rb")
 
