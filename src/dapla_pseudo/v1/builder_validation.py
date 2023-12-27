@@ -67,9 +67,7 @@ class Validator:
 
         file_format = get_file_format_from_file_name(file_path)
 
-        return Validator._FieldSelector(
-            read_to_polars_df(file_format, file_path, **kwargs)
-        )
+        return Validator._FieldSelector(read_to_polars_df(file_format, file_path, **kwargs))
 
     class _FieldSelector:
         """Select a field to be validated."""
@@ -97,9 +95,7 @@ class Validator:
             self._dataframe: pl.DataFrame = dataframe
             self._field: str = field
 
-        def validate_map_to_stable_id(
-            self, sid_snapshot_date: Optional[str | date] = None
-        ) -> Result:
+        def validate_map_to_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> Result:
             """Checks if all the selected fields can be mapped to a stable ID.
 
             Args:
@@ -123,11 +119,7 @@ class Validator:
             if "missing" in result_json:
                 result = result_json["missing"]
             if "datasetExtractionSnapshotTime" in result_json:
-                metadata = {
-                    "datasetExtractionSnapshotTime": result_json[
-                        "datasetExtractionSnapshotTime"
-                    ]
-                }
+                metadata = {"datasetExtractionSnapshotTime": result_json["datasetExtractionSnapshotTime"]}
 
             result_df = pl.DataFrame(pl.Series(self._field, result))
             return Result(pseudo_response=result_df, metadata=metadata)

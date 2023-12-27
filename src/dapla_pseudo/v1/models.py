@@ -96,11 +96,7 @@ class PseudoFunctionArgs(BaseModel):
 
     def __str__(self) -> str:
         """As a default, represent the fields of the subclasses as kwargs on the format 'k=v'."""
-        return ",".join(
-            f"{k}={v}"
-            for k, v in self.model_dump(by_alias=True).items()
-            if v is not None
-        )
+        return ",".join(f"{k}={v}" for k, v in self.model_dump(by_alias=True).items() if v is not None)
 
     model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
@@ -186,9 +182,7 @@ class PseudoRule(APIModel):
     func: PseudoFunction
 
     @field_serializer("func")
-    def serialize_func(
-        self, func: PseudoFunction, _info: FieldSerializationInfo
-    ) -> str:
+    def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
         """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
 

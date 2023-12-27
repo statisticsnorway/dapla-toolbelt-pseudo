@@ -32,18 +32,12 @@ class PseudoClient:
     ):
         """Use a default url for dapla-pseudo-service if not explicitly set."""
         self.pseudo_service_url = (
-            "http://dapla-pseudo-service.dapla.svc.cluster.local"
-            if pseudo_service_url is None
-            else pseudo_service_url
+            "http://dapla-pseudo-service.dapla.svc.cluster.local" if pseudo_service_url is None else pseudo_service_url
         )
         self.static_auth_token = auth_token
 
     def __auth_token(self) -> str:
-        return (
-            str(AuthClient.fetch_personal_token())
-            if self.static_auth_token is None
-            else str(self.static_auth_token)
-        )
+        return str(AuthClient.fetch_personal_token()) if self.static_auth_token is None else str(self.static_auth_token)
 
     def pseudonymize_file(
         self,
@@ -92,9 +86,7 @@ class PseudoClient:
             stream,
         )
 
-    def _extract_name(
-        self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]
-    ) -> str:
+    def _extract_name(self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]) -> str:
         if name is None:
             try:
                 name = data.name
@@ -147,9 +139,7 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: depseudonymized data
         """
-        return self._process_file(
-            "depseudonymize", depseudonymize_request, file_path, timeout, stream
-        )
+        return self._process_file("depseudonymize", depseudonymize_request, file_path, timeout, stream)
 
     def repseudonymize_file(
         self,
@@ -190,16 +180,12 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: repseudonymized data
         """
-        return self._process_file(
-            "repseudonymize", repseudonymize_request, file_path, timeout, stream
-        )
+        return self._process_file("repseudonymize", repseudonymize_request, file_path, timeout, stream)
 
     def _process_file(
         self,
         operation: str,
-        request: PseudonymizeFileRequest
-        | DepseudonymizeFileRequest
-        | RepseudonymizeFileRequest,
+        request: PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest,
         file_path: str,
         timeout: int,
         stream: bool = False,
@@ -221,9 +207,7 @@ class PseudoClient:
     def _post_to_file_endpoint(
         self,
         path: str,
-        request: PseudonymizeFileRequest
-        | DepseudonymizeFileRequest
-        | RepseudonymizeFileRequest,
+        request: PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest,
         data: t.BinaryIO,
         name: str,
         content_type: Mimetypes,

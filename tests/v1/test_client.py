@@ -63,9 +63,7 @@ def test_export_dataset(test_client: PseudoClient) -> None:
 
 
 @patch("requests.post")
-def test_post_to_field_endpoint_success(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test_post_to_field_endpoint_success(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
@@ -84,9 +82,7 @@ def test_post_to_field_endpoint_success(
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_success(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test_post_to_file_endpoint_success(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
@@ -110,9 +106,7 @@ def test_post_to_file_endpoint_success(
 
 
 @patch("requests.post")
-def test__post_to_field_endpoint_failure(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test__post_to_field_endpoint_failure(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         "Mocked HTTP error", response=requests.Response()
@@ -132,9 +126,7 @@ def test__post_to_field_endpoint_failure(
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_failure(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test_post_to_file_endpoint_failure(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         "Mocked HTTP error", response=requests.Response()
@@ -162,9 +154,7 @@ def test_post_to_file_endpoint_failure(
 
 
 @patch("requests.post")
-def test_post_to_field_endpoint_with_keyset(
-    _mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: PseudoClient) -> None:
     keyset = PseudoKeyset(
         encrypted_keyset="test_enc_keyset",
         keyset_info={"primaryKeyId": "test_primary_key_id"},
@@ -203,9 +193,7 @@ def test_post_to_field_endpoint_with_keyset(
 
 
 @patch("requests.post")
-def test_successful_post_to_sid_endpoint(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
+def test_successful_post_to_sid_endpoint(mock_post: Mock, test_client: PseudoClient) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None

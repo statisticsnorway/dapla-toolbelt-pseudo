@@ -43,7 +43,15 @@ class Result:
         self._metadata = metadata if metadata else {}
 
     def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
-        """Output pseudonymized data as a Polars DataFrame."""
+        """Output pseudonymized data as a Polars DataFrame.
+
+        Args:
+            **kwargs: Additional keyword arguments to be passed the Polars reader function *if* the input data is from a file.
+                The specific reader function depends on the format, e.g. `read_csv` for CSV files.
+
+        Returns:
+            pl.DataFrame: A Polars DataFrame containing the pseudonymized data.
+        """
         match self._pseudo_response:
             case pl.DataFrame():
                 return self._pseudo_response
@@ -52,12 +60,18 @@ class Result:
                 df = read_to_polars_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(
-                    f"Invalid response type: {type(self._pseudo_response)}"
-                )
+                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
 
     def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
-        """Output pseudonymized data as a Pandas DataFrame."""
+        """Output pseudonymized data as a Pandas DataFrame.
+
+        Args:
+            **kwargs: Additional keyword arguments to be passed the Pandas reader function *if* the input data is from a file.
+                The specific reader function depends on the format of the input file, e.g. `read_csv()` for CSV files.
+
+        Returns:
+            pd.DataFrame: A Pandas DataFrame containing the pseudonymized data.
+        """
         match self._pseudo_response:
             case pl.DataFrame():
                 return self._pseudo_response.to_pandas()
@@ -66,12 +80,16 @@ class Result:
                 df = read_to_pandas_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(
-                    f"Invalid response type: {type(self._pseudo_response)}"
-                )
+                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
 
     def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
-        """Output pseudonymized data to a file."""
+        """Write pseudonymized data to a file.
+
+        Args:
+            file_path (str | Path): The path to the file to be written.
+            **kwargs: Additional keyword arguments to be passed the Polars writer function *if* the input data is a DataFrame.
+                The specific writer function depends on the format of the output file, e.g. `write_csv()` for CSV files.
+        """
         file_format = get_file_format_from_file_name(file_path)
 
         if str(file_path).startswith("gs://"):
@@ -94,7 +112,7 @@ class Result:
             case pl.DataFrame():
                 write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
             case _:
-                raise ValueError("Invalid response type")
+                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
 
         file_handle.close()
 
