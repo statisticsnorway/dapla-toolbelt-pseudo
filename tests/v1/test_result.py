@@ -8,9 +8,13 @@ from unittest.mock import Mock
 import pandas as pd
 import polars as pl
 import pytest
-from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
-from dapla_pseudo.v1.models import Mimetypes
 from requests import Response
+from typeguard import suppress_type_checks
+
+from dapla_pseudo.v1.builder_models import PseudoFileResponse
+from dapla_pseudo.v1.builder_models import Result
+from dapla_pseudo.v1.models import Mimetypes
+
 
 TEST_FILE_PATH = "tests/v1/test_files"
 
@@ -78,18 +82,21 @@ def test_result_from_file_to_file(tmp_path: Path, pseudo_file_response: PseudoFi
     result.to_file(tmp_path / f"file_to_file.{file_extension}")
 
 
+@suppress_type_checks
 def test_result_to_pandas_invalid_type() -> None:
     result = Result(pseudo_response="not a DataFrame")  # type: ignore
     with pytest.raises(ValueError):
         result.to_pandas()
 
 
+@suppress_type_checks
 def test_result_to_polars_invalid_type() -> None:
     result = Result(pseudo_response="not a DataFrame")  # type: ignore
     with pytest.raises(ValueError):
         result.to_polars()
 
 
+@suppress_type_checks
 def test_result_to_file_invalid_type(tmp_path: Path) -> None:
     result = Result(pseudo_response="not a file")  # type: ignore
     with pytest.raises(ValueError):
