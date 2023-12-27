@@ -128,10 +128,21 @@ def pseudonymize(
             dataset.seek(0)
             file_handle = io.BufferedReader(dataset)
         case _:
-            raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
+            raise ValueError(
+                f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}"
+            )
     k = KeyWrapper(key)
-    sid_func_kwargs = MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)) if sid_fields else None
-    rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
+    sid_func_kwargs = (
+        MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+        if sid_fields
+        else None
+    )
+    rules = _rules_of(
+        fields=fields,
+        sid_fields=sid_fields or [],
+        key=k.key_id,
+        sid_func_kwargs=sid_func_kwargs,
+    )
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
         target_content_type=content_type,
@@ -140,10 +151,16 @@ def pseudonymize(
     )
 
     if file_handle is not None:
-        return _client().pseudonymize_file(pseudonymize_request, file_handle, stream=stream, name=name, timeout=timeout)
+        return _client().pseudonymize_file(
+            pseudonymize_request, file_handle, stream=stream, name=name, timeout=timeout
+        )
     else:
         return _client()._process_file(
-            "pseudonymize", pseudonymize_request, str(dataset), stream=stream, timeout=timeout
+            "pseudonymize",
+            pseudonymize_request,
+            str(dataset),
+            stream=stream,
+            timeout=timeout,
         )
 
 
@@ -249,11 +266,19 @@ def repseudonymize(
     content_type = _content_type_of(file_path)
     source_key_wrapper = KeyWrapper(source_key)
     target_key_wrapper = KeyWrapper(target_key)
-    source_rules = _rules_of(fields=fields, sid_fields=[], key=source_key_wrapper.key_id)
-    target_rules = _rules_of(fields=fields, sid_fields=[], key=target_key_wrapper.key_id)
+    source_rules = _rules_of(
+        fields=fields, sid_fields=[], key=source_key_wrapper.key_id
+    )
+    target_rules = _rules_of(
+        fields=fields, sid_fields=[], key=target_key_wrapper.key_id
+    )
     req = RepseudonymizeFileRequest(
-        source_pseudo_config=PseudoConfig(rules=source_rules, keysets=source_key_wrapper.keyset_list()),
-        target_pseudo_config=PseudoConfig(rules=target_rules, keysets=target_key_wrapper.keyset_list()),
+        source_pseudo_config=PseudoConfig(
+            rules=source_rules, keysets=source_key_wrapper.keyset_list()
+        ),
+        target_pseudo_config=PseudoConfig(
+            rules=target_rules, keysets=target_key_wrapper.keyset_list()
+        ),
         target_content_type=content_type,
         target_uri=None,
         compression=None,
@@ -275,11 +300,18 @@ def _rules_of(
     key: str,
     sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None,
 ) -> t.List[PseudoRule]:
-    enriched_sid_fields: t.List[Field] = [Field(pattern=f"**/{field}", mapping="sid") for field in sid_fields]
-    return [_rule_of(field, i, key, sid_func_kwargs) for i, field in enumerate(enriched_sid_fields + fields, 1)]
+    enriched_sid_fields: t.List[Field] = [
+        Field(pattern=f"**/{field}", mapping="sid") for field in sid_fields
+    ]
+    return [
+        _rule_of(field, i, key, sid_func_kwargs)
+        for i, field in enumerate(enriched_sid_fields + fields, 1)
+    ]
 
 
-def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None) -> PseudoRule:
+def _rule_of(
+    f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKeywordArgs] = None
+) -> PseudoRule:
     key = PredefinedKeys.SSB_COMMON_KEY_1 if k is None else k
 
     match f:
@@ -296,9 +328,14 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKey
             kwargs=sid_func_kwargs if sid_func_kwargs else MapSidKeywordArgs(),
         )
     elif key == "papis-common-key-1":
-        func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
+        func = PseudoFunction(
+            function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key)
+        )
     else:
-        func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
+        func = PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=MapSidKeywordArgs(key_id=key),
+        )
 
     return PseudoRule(
         name=f"rule-{n}",

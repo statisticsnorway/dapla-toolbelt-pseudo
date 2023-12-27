@@ -11,7 +11,9 @@ base_url = "https://mocked.dapla-pseudo-service"
 auth_token = "some-auth-token"
 
 
-def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_depseudonymize_request_with_default_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
@@ -27,8 +29,16 @@ def test_depseudonymize_request_with_default_key(monkeypatch: pytest.MonkeyPatch
         expected_request_dict = {
             "pseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
                 ]
             },
             "targetContentType": "application/json",

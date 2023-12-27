@@ -31,7 +31,9 @@ custom_keyset = PseudoKeyset.model_validate(
 )
 
 
-def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_repseudonymize_request_with_default_keys(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
@@ -47,14 +49,30 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
         expected_request_dict = {
             "sourcePseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
                 ]
             },
             "targetPseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
                 ]
             },
             "targetContentType": "application/json",
@@ -64,7 +82,9 @@ def test_repseudonymize_request_with_default_keys(monkeypatch: pytest.MonkeyPatc
         assert actual_request_dict == expected_request_dict
 
 
-def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_repseudonymize_request_with_explicitly_specified_common_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
@@ -85,14 +105,30 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
         expected_request_dict = {
             "sourcePseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
                 ]
             },
             "targetPseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-2)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-2)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-2)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-2)",
+                    },
                 ]
             },
             "targetContentType": "application/json",
@@ -102,7 +138,9 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(monkeypatch
         assert actual_request_dict == expected_request_dict
 
 
-def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_repseudonymize_request_with_explicitly_specified_keyset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv(Env.PSEUDO_SERVICE_URL, base_url)
     monkeypatch.setenv(Env.PSEUDO_SERVICE_AUTH_TOKEN, auth_token)
 
@@ -122,14 +160,30 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(monkeypatch: py
         expected_request_dict = {
             "sourcePseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=ssb-common-key-1)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=ssb-common-key-1)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=ssb-common-key-1)",
+                    },
                 ]
             },
             "targetPseudoConfig": {
                 "rules": [
-                    {"name": "rule-1", "pattern": "**/fnr", "func": "daead(keyId=1234567890)"},
-                    {"name": "rule-2", "pattern": "**/fornavn", "func": "daead(keyId=1234567890)"},
+                    {
+                        "name": "rule-1",
+                        "pattern": "**/fnr",
+                        "func": "daead(keyId=1234567890)",
+                    },
+                    {
+                        "name": "rule-2",
+                        "pattern": "**/fornavn",
+                        "func": "daead(keyId=1234567890)",
+                    },
                 ],
                 "keysets": [
                     {

@@ -23,7 +23,9 @@ def test_get_pandas_function_name_unsupported_format() -> None:
 def test_supported_files_read_with_polars(file_format: str) -> None:
     print(file_format)
     supported_file_format = SupportedOutputFileFormat(file_format)
-    df = read_to_polars_df(supported_file_format, Path(f"{TEST_FILE_PATH}/test.{file_format}"))
+    df = read_to_polars_df(
+        supported_file_format, Path(f"{TEST_FILE_PATH}/test.{file_format}")
+    )
     assert isinstance(df, pl.DataFrame)
 
 

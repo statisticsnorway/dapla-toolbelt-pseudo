@@ -23,7 +23,9 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: t.Set[t.Any]) -> t.
     find_multipart_obj("filename2", multipart_tuple) -> fileobj
     """
     try:
-        matching_item = next(item[1] for item in multipart_files_tuple if item[0] == obj_name)
+        matching_item = next(
+            item[1] for item in multipart_files_tuple if item[0] == obj_name
+        )
         return matching_item[1]
     except StopIteration:
         return None
@@ -35,7 +37,9 @@ def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[dat
         try:
             return date.fromisoformat(sid_snapshot_date)
         except ValueError as exc:
-            raise ValueError("Version timestamp must be a valid ISO date string (YYYY-MM-DD)") from exc
+            raise ValueError(
+                "Version timestamp must be a valid ISO date string (YYYY-MM-DD)"
+            ) from exc
     return sid_snapshot_date
 
 

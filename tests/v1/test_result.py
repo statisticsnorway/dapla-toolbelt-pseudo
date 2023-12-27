@@ -73,7 +73,9 @@ def test_result_from_file_to_pandas(pseudo_file_response: PseudoFileResponse) ->
     assert isinstance(result.to_pandas(), pd.DataFrame)
 
 
-def test_result_from_file_to_file(tmp_path: Path, pseudo_file_response: PseudoFileResponse) -> None:
+def test_result_from_file_to_file(
+    tmp_path: Path, pseudo_file_response: PseudoFileResponse
+) -> None:
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
     result.to_file(tmp_path / f"file_to_file.{file_extension}")

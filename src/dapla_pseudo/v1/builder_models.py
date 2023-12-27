@@ -12,11 +12,13 @@ from requests import Response
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
-from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
-from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
-from dapla_pseudo.v1.supported_file_format import read_to_polars_df
-from dapla_pseudo.v1.supported_file_format import write_from_df
+from dapla_pseudo.v1.supported_file_format import (
+    FORMAT_TO_MIMETYPE_FUNCTION,
+    SupportedOutputFileFormat,
+    read_to_pandas_df,
+    read_to_polars_df,
+    write_from_df,
+)
 
 
 @dataclass
@@ -50,7 +52,9 @@ class Result:
                 df = read_to_polars_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
+                raise ValueError(
+                    f"Invalid response type: {type(self._pseudo_response)}"
+                )
 
     def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
         """Output pseudonymized data as a Pandas DataFrame."""
@@ -62,7 +66,9 @@ class Result:
                 df = read_to_pandas_df(format, BytesIO(response.content), **kwargs)
                 return df
             case _:
-                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
+                raise ValueError(
+                    f"Invalid response type: {type(self._pseudo_response)}"
+                )
 
     def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
         """Output pseudonymized data to a file."""

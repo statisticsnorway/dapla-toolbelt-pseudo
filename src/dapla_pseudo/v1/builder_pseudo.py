@@ -18,26 +18,23 @@ from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 from requests import Response
 
-from dapla_pseudo.constants import TIMEOUT_DEFAULT
-from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.exceptions import FileInvalidError
-from dapla_pseudo.exceptions import MimetypeNotSupportedError
-from dapla_pseudo.types import BinaryFileDecl
-from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.utils import get_file_format_from_file_name
-from dapla_pseudo.v1.builder_models import PseudoFileResponse
-from dapla_pseudo.v1.builder_models import Result
-from dapla_pseudo.v1.models import DaeadKeywordArgs
-from dapla_pseudo.v1.models import FF31KeywordArgs
-from dapla_pseudo.v1.models import KeyWrapper
-from dapla_pseudo.v1.models import MapSidKeywordArgs
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoConfig
-from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
-from dapla_pseudo.v1.models import PseudoRule
+from dapla_pseudo.constants import TIMEOUT_DEFAULT, PseudoFunctionTypes
+from dapla_pseudo.exceptions import FileInvalidError, MimetypeNotSupportedError
+from dapla_pseudo.types import BinaryFileDecl, FileLikeDatasetDecl
+from dapla_pseudo.utils import convert_to_date, get_file_format_from_file_name
+from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
+from dapla_pseudo.v1.models import (
+    DaeadKeywordArgs,
+    FF31KeywordArgs,
+    KeyWrapper,
+    MapSidKeywordArgs,
+    Mimetypes,
+    PseudoConfig,
+    PseudoFunction,
+    PseudoKeyset,
+    PseudonymizeFileRequest,
+    PseudoRule,
+)
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 
@@ -113,7 +110,9 @@ class PseudoData:
                             f"No GCS file found or authentication not sufficient for: {dataset}"
                         ) from err
                     except DefaultCredentialsError as err:
-                        raise DefaultCredentialsError("No Google Authentication found in environment") from err
+                        raise DefaultCredentialsError(
+                            "No Google Authentication found in environment"
+                        ) from err
                 else:
                     file_handle = open(dataset, "rb")
 
@@ -129,7 +128,9 @@ class PseudoData:
                 dataset.seek(0)
                 file_handle = io.BufferedReader(dataset)
             case _:
-                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {FileLikeDatasetDecl}")
+                raise ValueError(
+                    f"Unsupported data type: {type(dataset)}. Supported types are {FileLikeDatasetDecl}"
+                )
 
         if isinstance(file_handle, GCSFile):
             file_size = file_handle.size
@@ -158,14 +159,18 @@ class PseudoData:
             return PseudoData._PseudoFuncSelector(list(fields), self._rules)
 
         def pseudonymize(
-            self, with_custom_keyset: Optional[PseudoKeyset] = None, timeout: int = TIMEOUT_DEFAULT
+            self,
+            with_custom_keyset: Optional[PseudoKeyset] = None,
+            timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the entire dataset."""
             if PseudoData.dataset is None:
                 raise ValueError("No dataset has been provided.")
 
             if self._rules == []:
-                raise ValueError("No fields have been provided. Use the 'on_fields' method.")
+                raise ValueError(
+                    "No fields have been provided. Use the 'on_fields' method."
+                )
 
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
@@ -187,16 +192,26 @@ class PseudoData:
             file = t.cast(File, PseudoData.dataset)
 
             pseudonymize_request = PseudonymizeFileRequest(
-                pseudo_config=PseudoConfig(rules=self._rules, keysets=KeyWrapper(self._pseudo_keyset).keyset_list()),
+                pseudo_config=PseudoConfig(
+                    rules=self._rules,
+                    keysets=KeyWrapper(self._pseudo_keyset).keyset_list(),
+                ),
                 target_content_type=file.content_type,
                 target_uri=None,
                 compression=None,
             )
 
             response: Response = _client().pseudonymize_file(
-                pseudonymize_request, file.file_handle, stream=True, name=None, timeout=self._timeout
+                pseudonymize_request,
+                file.file_handle,
+                stream=True,
+                name=None,
+                timeout=self._timeout,
             )
-            return Result(PseudoFileResponse(response, file.content_type, streamed=True), self._metadata)
+            return Result(
+                PseudoFileResponse(response, file.content_type, streamed=True),
+                self._metadata,
+            )
 
         def _pseudonymize_field(self) -> Result:
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
@@ -239,7 +254,12 @@ class PseudoData:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 pseudonymized_field: t.Dict[str, pl.Series] = {}
                 futures = [
-                    executor.submit(pseudonymize_field_runner, rule.pattern, dataframe[rule.pattern], rule.func)
+                    executor.submit(
+                        pseudonymize_field_runner,
+                        rule.pattern,
+                        dataframe[rule.pattern],
+                        rule.func,
+                    )
                     for rule in self._rules
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
@@ -254,11 +274,15 @@ class PseudoData:
             return Result(pseudo_response=dataframe, metadata=self._metadata)
 
     class _PseudoFuncSelector:
-        def __init__(self, fields: list[str], rules: Optional[list[PseudoRule]] = None) -> None:
+        def __init__(
+            self, fields: list[str], rules: Optional[list[PseudoRule]] = None
+        ) -> None:
             self._fields = fields
             self._existing_rules = [] if rules is None else rules
 
-        def with_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> "PseudoData._Pseudonymizer":
+        def with_stable_id(
+            self, sid_snapshot_date: Optional[str | date] = None
+        ) -> "PseudoData._Pseudonymizer":
             """Map selected fields to stable ID.
 
             Args:
@@ -270,25 +294,38 @@ class PseudoData:
             """
             function = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
+                kwargs=MapSidKeywordArgs(
+                    snapshot_date=convert_to_date(sid_snapshot_date)
+                ),
             )
             return self._rule_constructor(function)
 
         def with_default_encryption(self) -> "PseudoData._Pseudonymizer":
-            function = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+            )
             return self._rule_constructor(function)
 
         def with_papis_compatible_encryption(self) -> "PseudoData._Pseudonymizer":
-            function = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs())
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
+            )
             return self._rule_constructor(function)
 
-        def with_custom_function(self, function: PseudoFunction) -> "PseudoData._Pseudonymizer":
+        def with_custom_function(
+            self, function: PseudoFunction
+        ) -> "PseudoData._Pseudonymizer":
             return self._rule_constructor(function)
 
-        def _rule_constructor(self, func: PseudoFunction) -> "PseudoData._Pseudonymizer":
+        def _rule_constructor(
+            self, func: PseudoFunction
+        ) -> "PseudoData._Pseudonymizer":
             # If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.
             rule_prefix = "**/" if isinstance(PseudoData.dataset, File) else ""
-            rules = [PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}") for field in self._fields]
+            rules = [
+                PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}")
+                for field in self._fields
+            ]
             return PseudoData._Pseudonymizer(self._existing_rules + rules)
 
 

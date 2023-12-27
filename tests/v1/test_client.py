@@ -25,14 +25,26 @@ def test_client() -> PseudoClient:
 def test_export_dataset(test_client: PseudoClient) -> None:
     request_json = json.dumps(
         {
-            "sourceDataset": {"root": "gs://some-bucket", "path": "/path/to/some/data", "version": "123"},
+            "sourceDataset": {
+                "root": "gs://some-bucket",
+                "path": "/path/to/some/data",
+                "version": "123",
+            },
             "targetContentName": "blah",
             "targetContentType": "application/json",
             "targetPassword": "kensentme",
             "depseudonymize": True,
             "pseudoRules": [
-                {"name": "rule-1", "pattern": "**/{*Fnr,*Id}", "func": "tink-daead(ssb-common-key-1)"},
-                {"name": "rule-2", "pattern": "**/path/to/ignorable/stuff/*", "func": "redact(***)"},
+                {
+                    "name": "rule-1",
+                    "pattern": "**/{*Fnr,*Id}",
+                    "func": "tink-daead(ssb-common-key-1)",
+                },
+                {
+                    "name": "rule-2",
+                    "pattern": "**/path/to/ignorable/stuff/*",
+                    "func": "redact(***)",
+                },
             ],
         }
     )
@@ -51,7 +63,9 @@ def test_export_dataset(test_client: PseudoClient) -> None:
 
 
 @patch("requests.post")
-def test_post_to_field_endpoint_success(mock_post: Mock, test_client: PseudoClient) -> None:
+def test_post_to_field_endpoint_success(
+    mock_post: Mock, test_client: PseudoClient
+) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
@@ -70,7 +84,9 @@ def test_post_to_field_endpoint_success(mock_post: Mock, test_client: PseudoClie
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_success(mock_post: Mock, test_client: PseudoClient) -> None:
+def test_post_to_file_endpoint_success(
+    mock_post: Mock, test_client: PseudoClient
+) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
@@ -94,7 +110,9 @@ def test_post_to_file_endpoint_success(mock_post: Mock, test_client: PseudoClien
 
 
 @patch("requests.post")
-def test__post_to_field_endpoint_failure(mock_post: Mock, test_client: PseudoClient) -> None:
+def test__post_to_field_endpoint_failure(
+    mock_post: Mock, test_client: PseudoClient
+) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         "Mocked HTTP error", response=requests.Response()
@@ -114,7 +132,9 @@ def test__post_to_field_endpoint_failure(mock_post: Mock, test_client: PseudoCli
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_failure(mock_post: Mock, test_client: PseudoClient) -> None:
+def test_post_to_file_endpoint_failure(
+    mock_post: Mock, test_client: PseudoClient
+) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         "Mocked HTTP error", response=requests.Response()
@@ -142,9 +162,13 @@ def test_post_to_file_endpoint_failure(mock_post: Mock, test_client: PseudoClien
 
 
 @patch("requests.post")
-def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: PseudoClient) -> None:
+def test_post_to_field_endpoint_with_keyset(
+    _mock_post: Mock, test_client: PseudoClient
+) -> None:
     keyset = PseudoKeyset(
-        encrypted_keyset="test_enc_keyset", keyset_info={"primaryKeyId": "test_primary_key_id"}, kek_uri="test_uri"
+        encrypted_keyset="test_enc_keyset",
+        keyset_info={"primaryKeyId": "test_primary_key_id"},
+        kek_uri="test_uri",
     )
 
     test_client._post_to_field_endpoint(
@@ -168,7 +192,10 @@ def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: Pseud
 
     _mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",
-        headers={"Authorization": "Bearer some-auth-token", "Content-Type": "Mimetypes.JSON"},
+        headers={
+            "Authorization": "Bearer some-auth-token",
+            "Content-Type": "Mimetypes.JSON",
+        },
         json=expected_json,
         stream=False,
         timeout=30,
@@ -176,7 +203,9 @@ def test_post_to_field_endpoint_with_keyset(_mock_post: Mock, test_client: Pseud
 
 
 @patch("requests.post")
-def test_successful_post_to_sid_endpoint(mock_post: Mock, test_client: PseudoClient) -> None:
+def test_successful_post_to_sid_endpoint(
+    mock_post: Mock, test_client: PseudoClient
+) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
