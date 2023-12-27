@@ -327,7 +327,7 @@ def _get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
     file_format = get_file_format_from_file_name(file_name)
     try:  # Test whether the file extension is supported
         content_type = Mimetypes(FORMAT_TO_MIMETYPE_FUNCTION[file_format])
-    except KeyError:  # Fall back on reading the file format from the magic bytes
+    except KeyError:
         raise MimetypeNotSupportedError(
             f"The provided input format '{file_format}' is not supported from file."
         ) from None

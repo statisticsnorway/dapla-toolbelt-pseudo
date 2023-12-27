@@ -8,6 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 import polars as pl
 import pytest
+from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -390,10 +391,17 @@ def test_builder_field_selector_multiple_fields(df: pd.DataFrame) -> None:
 @pytest.mark.parametrize("supported_mimetype", Mimetypes.__members__.keys())
 def test_get_content_type_from_file(supported_mimetype: str) -> None:
     file_extension = supported_mimetype.lower()
-    print(file_extension)
     file_handle = open(f"{TEST_FILE_PATH}/test.{file_extension}", mode="rb")
     content_type = _get_content_type_from_file(file_handle)
     assert content_type.name == supported_mimetype
+
+
+def test_get_content_type_from_gcs_file() -> None:
+    mock_gcs_file_handle = Mock(spec=GCSFile)
+    mock_gcs_file_handle.full_name = "gs://dummy.json"
+
+    content_type = _get_content_type_from_file(mock_gcs_file_handle)
+    assert content_type.name == "JSON"
 
 
 def test_get_content_type_from_file_unsupported_mimetype() -> None:
