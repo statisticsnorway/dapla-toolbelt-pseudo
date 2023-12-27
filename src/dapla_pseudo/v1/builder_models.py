@@ -12,13 +12,11 @@ from requests import Response
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.supported_file_format import (
-    FORMAT_TO_MIMETYPE_FUNCTION,
-    SupportedOutputFileFormat,
-    read_to_pandas_df,
-    read_to_polars_df,
-    write_from_df,
-)
+from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
+from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
+from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
+from dapla_pseudo.v1.supported_file_format import read_to_polars_df
+from dapla_pseudo.v1.supported_file_format import write_from_df
 
 
 @dataclass
@@ -49,6 +47,9 @@ class Result:
             **kwargs: Additional keyword arguments to be passed the Polars reader function *if* the input data is from a file.
                 The specific reader function depends on the format, e.g. `read_csv` for CSV files.
 
+        Raises:
+            ValueError: If the result is not of type Polars DataFrame or PseudoFileResponse.
+
         Returns:
             pl.DataFrame: A Polars DataFrame containing the pseudonymized data.
         """
@@ -68,6 +69,9 @@ class Result:
         Args:
             **kwargs: Additional keyword arguments to be passed the Pandas reader function *if* the input data is from a file.
                 The specific reader function depends on the format of the input file, e.g. `read_csv()` for CSV files.
+
+        Raises:
+            ValueError: If the result is not of type Polars DataFrame or PseudoFileResponse.
 
         Returns:
             pd.DataFrame: A Pandas DataFrame containing the pseudonymized data.
@@ -89,6 +93,11 @@ class Result:
             file_path (str | Path): The path to the file to be written.
             **kwargs: Additional keyword arguments to be passed the Polars writer function *if* the input data is a DataFrame.
                 The specific writer function depends on the format of the output file, e.g. `write_csv()` for CSV files.
+
+        Raises:
+            ValueError: If the result is not of type Polars DataFrame or PseudoFileResponse.
+            ValueError: If the output file format does not match the input file format.
+
         """
         file_format = get_file_format_from_file_name(file_path)
 
