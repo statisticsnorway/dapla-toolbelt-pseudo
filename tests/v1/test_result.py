@@ -15,6 +15,9 @@ from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.models import Mimetypes
 
 
+TEST_FILE_PATH = "tests/v1/test_files"
+
+
 @pytest.fixture()
 def polars_df() -> pl.DataFrame:
     with open("tests/data/personer.json") as test_data:
@@ -26,7 +29,6 @@ def polars_df() -> pl.DataFrame:
 )  # tabulate every combination of "streamed" and "content_type"
 def pseudo_file_response(request: pytest.FixtureRequest) -> PseudoFileResponse:
     def get_byte_iterator(file_handle: BufferedReader) -> Iterator[bytes]:
-        print(file_handle.closed)
         while True:
             chunk = file_handle.read(128)
             if not chunk:  # Last chunk = empty string
@@ -35,7 +37,7 @@ def pseudo_file_response(request: pytest.FixtureRequest) -> PseudoFileResponse:
 
     streamed, content_type = request.param
 
-    fd = open("tests/data/personer.json", "rb")
+    fd = open(f"{TEST_FILE_PATH}/test.{content_type.split('/')[-1]}", "rb")
     content = fd.read()
     fd.seek(0)
     content_iterator = get_byte_iterator(fd)
@@ -77,3 +79,28 @@ def test_result_from_file_to_file(tmp_path: Path, pseudo_file_response: PseudoFi
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
     result.to_file(tmp_path / f"file_to_file.{file_extension}")
+
+
+def test_result_to_pandas_invalid_type() -> None:
+    result = Result(pseudo_response="not a DataFrame")
+    with pytest.raises(ValueError):
+        result.to_pandas()
+
+
+def test_result_to_polars_invalid_type() -> None:
+    result = Result(pseudo_response="not a DataFrame")
+    with pytest.raises(ValueError):
+        result.to_polars()
+
+
+def test_result_to_file_invalid_type(tmp_path: Path) -> None:
+    result = Result(pseudo_response="not a file")
+    with pytest.raises(ValueError):
+        result.to_file(tmp_path / "invalid_type.json")
+
+
+def test_result_different_file_format(tmp_path: Path) -> None:
+    response = Mock(spec=Response)
+    result = Result(pseudo_response=PseudoFileResponse(response, Mimetypes.JSON, streamed=True))
+    with pytest.raises(ValueError):
+        result.to_file(tmp_path / "invalid_file_format.csv")

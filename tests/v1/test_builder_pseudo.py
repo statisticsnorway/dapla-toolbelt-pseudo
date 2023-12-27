@@ -45,6 +45,12 @@ def df() -> pd.DataFrame:
 
 
 @pytest.fixture()
+def df_polars() -> pl.DataFrame:
+    with open("tests/data/personer.json") as test_data:
+        return pl.from_pandas(pd.json_normalize(json.load(test_data)))
+
+
+@pytest.fixture()
 def json_file_path() -> pd.DataFrame:
     return "tests/data/personer.json"
 
@@ -116,6 +122,10 @@ def test_single_field_do_pseudonymize_field(
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:
     PseudoData.from_pandas(df).on_fields("fornavn")._fields = ["fornavn"]
+
+
+def test_builder_fields_selector_single_field_polars(df_polars: pl.DataFrame) -> None:
+    PseudoData.from_polars(df_polars).on_fields("fornavn")._fields = ["fornavn"]
 
 
 def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:

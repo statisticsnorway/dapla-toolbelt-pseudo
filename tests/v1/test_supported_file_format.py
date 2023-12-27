@@ -1,10 +1,12 @@
 from pathlib import Path
 
+import pandas as pd
 import polars as pl
 import pytest
 
 from dapla_pseudo.exceptions import ExtensionNotValidError
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
+from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
 from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 
 
@@ -19,15 +21,21 @@ def test_get_pandas_function_name_unsupported_format() -> None:
         SupportedOutputFileFormat(unsupported_format)
 
 
+@pytest.mark.parametrize("file_format", ["json", "csv", "parquet", "xml"])
+def test_read_with_pandas_supported_formats(file_format: str) -> None:
+    supported_file_format = SupportedOutputFileFormat(file_format)
+    df = read_to_pandas_df(supported_file_format, Path(f"{TEST_FILE_PATH}/test.{file_format}"))
+    assert isinstance(df, pd.DataFrame)
+
+
 @pytest.mark.parametrize("file_format", ["json", "csv", "parquet"])
-def test_supported_files_read_with_polars(file_format: str) -> None:
-    print(file_format)
+def test_read_with_polars_supported_formats(file_format: str) -> None:
     supported_file_format = SupportedOutputFileFormat(file_format)
     df = read_to_polars_df(supported_file_format, Path(f"{TEST_FILE_PATH}/test.{file_format}"))
     assert isinstance(df, pl.DataFrame)
 
 
-def test_unsupported_files_read_with_polars() -> None:
+def test_read_with_polars_unsupported_xml() -> None:
     xml_format = SupportedOutputFileFormat("xml")
     with pytest.raises(ValueError):
         read_to_polars_df(xml_format, Path(f"{TEST_FILE_PATH}/test.xml"))
