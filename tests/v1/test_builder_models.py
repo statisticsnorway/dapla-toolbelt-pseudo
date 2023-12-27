@@ -8,10 +8,13 @@ from unittest.mock import Mock
 import pandas as pd
 import polars as pl
 import pytest
-from dapla_pseudo.v1.builder_models import PseudoFileResponse, Result
-from dapla_pseudo.v1.models import Mimetypes
 from requests import Response
 from typeguard import suppress_type_checks
+
+from dapla_pseudo.v1.builder_models import PseudoFileResponse
+from dapla_pseudo.v1.builder_models import Result
+from dapla_pseudo.v1.models import Mimetypes
+
 
 TEST_FILE_PATH = "tests/v1/test_files"
 
