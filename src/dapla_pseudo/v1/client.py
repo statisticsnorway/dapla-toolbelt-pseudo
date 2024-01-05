@@ -8,7 +8,7 @@ from datetime import date
 import requests
 from dapla import AuthClient
 
-from dapla_pseudo.models import APIModel
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.v1.models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.models import Mimetypes
 from dapla_pseudo.v1.models import PseudoFunction
@@ -43,7 +43,7 @@ class PseudoClient:
         self,
         pseudonymize_request: PseudonymizeFileRequest,
         data: BinaryFileDecl,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
         name: t.Optional[str] = None,
     ) -> requests.Response:
@@ -106,7 +106,7 @@ class PseudoClient:
         self,
         depseudonymize_request: DepseudonymizeFileRequest,
         file_path: str,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
@@ -145,7 +145,7 @@ class PseudoClient:
         self,
         repseudonymize_request: RepseudonymizeFileRequest,
         file_path: str,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
@@ -183,33 +183,43 @@ class PseudoClient:
         return self._process_file("repseudonymize", repseudonymize_request, file_path, timeout, stream)
 
     def _process_file(
-        self, operation: str, request: APIModel, file_path: str, timeout: t.Optional[int], stream: bool = False
+        self,
+        operation: str,
+        request: PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest,
+        file_path: str,
+        timeout: int,
+        stream: bool = False,
     ) -> requests.Response:
         file_name = os.path.basename(file_path).split("/")[-1]
         content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
 
         with open(file_path, "rb") as f:
             return self._post_to_file_endpoint(
-                f"{operation}/file", request, f, file_name, content_type, timeout, stream
+                f"{operation}/file",
+                request,
+                f,
+                file_name,
+                content_type,
+                timeout,
+                stream,
             )
 
     def _post_to_file_endpoint(
         self,
         path: str,
-        request: APIModel,
+        request: PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest,
         data: t.BinaryIO,
         name: str,
         content_type: Mimetypes,
-        timeout: t.Optional[int],
+        timeout: int,
         stream: bool = False,
     ) -> requests.Response:
-        auth_token = self.__auth_token()
         data_spec: FileSpecDecl = (name, data, content_type)
         request_spec: FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
-                "Authorization": f"Bearer {auth_token}",
+                "Authorization": f"Bearer {self.__auth_token()}",
                 "Accept-Encoding": "gzip",
             },
             files={
@@ -228,10 +238,15 @@ class PseudoClient:
         field_name: str,
         values: list[str],
         pseudo_func: t.Optional[PseudoFunction],
+        timeout: int,
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request: t.Dict[str, t.Collection[str]] = {"name": field_name, "values": values, "pseudoFunc": str(pseudo_func)}
+        request: t.Dict[str, t.Collection[str]] = {
+            "name": field_name,
+            "values": values,
+            "pseudoFunc": str(pseudo_func),
+        }
         if keyset:
             request["keyset"] = {
                 "kekUri": keyset.kek_uri,
@@ -240,10 +255,13 @@ class PseudoClient:
             }
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
-            headers={"Authorization": f"Bearer {self.__auth_token()}", "Content-Type": str(Mimetypes.JSON)},
+            headers={
+                "Authorization": f"Bearer {self.__auth_token()}",
+                "Content-Type": str(Mimetypes.JSON),
+            },
             json=request,
             stream=stream,
-            timeout=30,  # seconds
+            timeout=timeout,
         )
         response.raise_for_status()
         return response
@@ -263,7 +281,7 @@ class PseudoClient:
             headers={"Authorization": f"Bearer {self.__auth_token()}"},
             json=request,
             stream=stream,
-            timeout=30,  # seconds
+            timeout=TIMEOUT_DEFAULT,  # seconds
         )
         response.raise_for_status()
         return response

@@ -2,6 +2,9 @@
 from enum import Enum
 
 
+TIMEOUT_DEFAULT: int = 30  # seconds
+
+
 class Env(str, Enum):
     """Environment variable keys."""
 

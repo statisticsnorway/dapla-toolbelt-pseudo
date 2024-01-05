@@ -62,6 +62,7 @@ pandas-stubs = ">=1.5.3.230304"
 nbstripout = ">=0.6.1"
 ipython = ">=8.11.0"
 jupyterlab = ">=4.0.0"
+google-auth = ">= 2.25.2"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-typer = ">=0.0.3"

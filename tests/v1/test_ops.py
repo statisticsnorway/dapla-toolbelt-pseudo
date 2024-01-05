@@ -26,7 +26,10 @@ def test_generate_rules_from_single_field_daead() -> None:
                 "name": "rule-1",
                 "pattern": "**/some-field",
                 "func": str(
-                    PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs(key_id="some-key"))
+                    PseudoFunction(
+                        function_type=PseudoFunctionTypes.DAEAD,
+                        kwargs=DaeadKeywordArgs(key_id="some-key"),
+                    )
                 ),
             }
         ],
@@ -38,7 +41,11 @@ def test_generate_rules_from_single_field_fpe() -> None:
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
         "rules": [
-            {"name": "rule-1", "pattern": "**/some-field", "func": "ff31(keyId=papis-common-key-1,strategy=skip)"}
+            {
+                "name": "rule-1",
+                "pattern": "**/some-field",
+                "func": "ff31(keyId=papis-common-key-1,strategy=skip)",
+            }
         ],
     }
 
@@ -47,7 +54,13 @@ def test_generate_rules_from_single_field_sid() -> None:
     rules = _rules_of(key="papis-common-key-1", fields=[], sid_fields=["some-field"])
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
-        "rules": [{"name": "rule-1", "pattern": "**/some-field", "func": "map-sid(keyId=papis-common-key-1)"}],
+        "rules": [
+            {
+                "name": "rule-1",
+                "pattern": "**/some-field",
+                "func": "map-sid(keyId=papis-common-key-1)",
+            }
+        ],
     }
 
 
@@ -100,13 +113,29 @@ def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> No
 
 
 def test_generate_rules_from_multiple_field() -> None:
-    rules = _rules_of(key="some-key", fields=["some-field", "another-field", "yet-another-field"], sid_fields=[])
+    rules = _rules_of(
+        key="some-key",
+        fields=["some-field", "another-field", "yet-another-field"],
+        sid_fields=[],
+    )
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
         "rules": [
-            {"name": "rule-1", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-2", "pattern": "**/another-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-3", "pattern": "**/yet-another-field", "func": "daead(keyId=some-key)"},
+            {
+                "name": "rule-1",
+                "pattern": "**/some-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-2",
+                "pattern": "**/another-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-3",
+                "pattern": "**/yet-another-field",
+                "func": "daead(keyId=some-key)",
+            },
         ],
     }
 
@@ -127,8 +156,16 @@ def test_generate_rules_from_fields_with_version() -> None:
                 "pattern": "**/sid-field",
                 "func": "map-sid(keyId=some-key,snapshotDate=2023-05-21)",
             },
-            {"name": "rule-2", "pattern": "**/some-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-3", "pattern": "**/another-field", "func": "daead(keyId=some-key)"},
+            {
+                "name": "rule-2",
+                "pattern": "**/some-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-3",
+                "pattern": "**/another-field",
+                "func": "daead(keyId=some-key)",
+            },
         ],
     }
 
@@ -137,7 +174,13 @@ def test_generate_rules_from_hierarchy_field() -> None:
     rules = _rules_of(key="some-key", fields=["path/to/*-field"], sid_fields=[])
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
-        "rules": [{"name": "rule-1", "pattern": "**/path/to/*-field", "func": "daead(keyId=some-key)"}],
+        "rules": [
+            {
+                "name": "rule-1",
+                "pattern": "**/path/to/*-field",
+                "func": "daead(keyId=some-key)",
+            }
+        ],
     }
 
 
@@ -156,11 +199,31 @@ def test_generate_rules_from_different_field_representations() -> None:
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
         "rules": [
-            {"name": "rule-1", "pattern": "**/string-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-2", "pattern": "dict-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-3", "pattern": "dict-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
-            {"name": "rule-4", "pattern": "class-field", "func": "daead(keyId=some-key)"},
-            {"name": "rule-5", "pattern": "class-field-sid", "func": "map-sid(keyId=papis-common-key-1)"},
+            {
+                "name": "rule-1",
+                "pattern": "**/string-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-2",
+                "pattern": "dict-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-3",
+                "pattern": "dict-field-sid",
+                "func": "map-sid(keyId=papis-common-key-1)",
+            },
+            {
+                "name": "rule-4",
+                "pattern": "class-field",
+                "func": "daead(keyId=some-key)",
+            },
+            {
+                "name": "rule-5",
+                "pattern": "class-field-sid",
+                "func": "map-sid(keyId=papis-common-key-1)",
+            },
         ],
     }
 
@@ -180,7 +243,10 @@ def test_dataframe_to_json_minimal_call() -> None:
     ],
 )
 def test_dataframe_to_json_type_conversion(
-    input_dict: dict[str, Any], expected_output: dict[str, Any], fields: Sequence[str], sid_fields: Sequence[str]
+    input_dict: dict[str, Any],
+    expected_output: dict[str, Any],
+    fields: Sequence[str],
+    sid_fields: Sequence[str],
 ) -> None:
     handle = _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
     assert expected_output == json.load(handle)

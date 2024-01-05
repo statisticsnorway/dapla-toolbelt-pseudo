@@ -23,6 +23,7 @@ import magic
 import pandas as pd
 import requests
 
+from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
@@ -51,7 +52,7 @@ def pseudonymize(
     sid_fields: t.Optional[t.List[str]] = None,
     sid_snapshot_date: t.Optional[str | date] = None,
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     r"""Pseudonymize specified fields of a dataset.
@@ -130,7 +131,12 @@ def pseudonymize(
             raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {DatasetDecl}")
     k = KeyWrapper(key)
     sid_func_kwargs = MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)) if sid_fields else None
-    rules = _rules_of(fields=fields, sid_fields=sid_fields or [], key=k.key_id, sid_func_kwargs=sid_func_kwargs)
+    rules = _rules_of(
+        fields=fields,
+        sid_fields=sid_fields or [],
+        key=k.key_id,
+        sid_func_kwargs=sid_func_kwargs,
+    )
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
         target_content_type=content_type,
@@ -142,7 +148,11 @@ def pseudonymize(
         return _client().pseudonymize_file(pseudonymize_request, file_handle, stream=stream, name=name, timeout=timeout)
     else:
         return _client()._process_file(
-            "pseudonymize", pseudonymize_request, str(dataset), stream=stream, timeout=timeout
+            "pseudonymize",
+            pseudonymize_request,
+            str(dataset),
+            stream=stream,
+            timeout=timeout,
         )
 
 
@@ -150,7 +160,7 @@ def depseudonymize(
     file_path: str,
     fields: t.List[FieldDecl],
     key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     """Depseudonymize specified fields of a local file.
@@ -206,7 +216,7 @@ def repseudonymize(
     fields: t.List[FieldDecl],
     source_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
     target_key: t.Union[str, PseudoKeyset] = PredefinedKeys.SSB_COMMON_KEY_1,
-    timeout: t.Optional[int] = None,
+    timeout: int = TIMEOUT_DEFAULT,
     stream: bool = True,
 ) -> requests.Response:
     """Repseudonymize specified fields of a local, previously pseudonymized file.
@@ -297,7 +307,10 @@ def _rule_of(f: FieldDecl, n: int, k: str, sid_func_kwargs: t.Optional[MapSidKey
     elif key == "papis-common-key-1":
         func = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs(key_id=key))
     else:
-        func = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=MapSidKeywordArgs(key_id=key))
+        func = PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=MapSidKeywordArgs(key_id=key),
+        )
 
     return PseudoRule(
         name=f"rule-{n}",

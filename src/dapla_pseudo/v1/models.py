@@ -17,7 +17,10 @@ from dapla_pseudo.models import APIModel
 
 
 class Mimetypes(str, Enum):
-    """Mimetypes is an enum of supported mimetypes. For use in HTTP requests"""
+    """Mimetypes is an enum of supported mimetypes, for use in HTTP requests.
+
+    As a proxy, this also defines the supported input file formats when reading from a file.
+    """
 
     JSON = "application/json"
     CSV = "text/csv"
@@ -58,9 +61,9 @@ class KeyWrapper(BaseModel):
     """Hold information about a key, such as ID and keyset information."""
 
     key_id: str = ""
-    keyset: t.Union[PseudoKeyset, None] = None
+    keyset: t.Optional[PseudoKeyset] = None
 
-    def __init__(self, key: t.Union[str, PseudoKeyset], **kwargs: t.Any):
+    def __init__(self, key: t.Optional[str | PseudoKeyset], **kwargs: t.Any):
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
@@ -83,7 +86,7 @@ class KeyWrapper(BaseModel):
             self.key_id = key.get_key_id()
             self.keyset = key
 
-    def keyset_list(self) -> t.Union[t.List[PseudoKeyset], None]:
+    def keyset_list(self) -> t.Optional[t.List[PseudoKeyset]]:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
 
@@ -180,7 +183,7 @@ class PseudoRule(APIModel):
 
     @field_serializer("func")
     def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
-        """Explicit serialization of the 'func' field to coerce to string before serializing."""
+        """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
 
 
