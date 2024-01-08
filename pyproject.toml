@@ -89,7 +89,8 @@ module = [
     "dapla",
     "fsspec",
     "fsspec.spec",
-    "typeguard"
+    "typeguard",
+    "puremagic",
 ]
 ignore_missing_imports = true
 
