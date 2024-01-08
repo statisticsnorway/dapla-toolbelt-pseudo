@@ -24,7 +24,8 @@ class SupportedOutputFileFormat(Enum):
     @classmethod
     def _missing_(cls, value: object) -> None:
         raise ExtensionNotValidError(
-            f"{value} is not a valid file format. Valid formats: %s" % (", ".join([repr(m.value) for m in cls]))
+            f"{value} is not a valid file format. Valid formats: %s"
+            % (", ".join([repr(m.value) for m in cls]))
         )
 
 
@@ -42,9 +43,11 @@ def read_to_pandas_df(
     """Reads a file with a supported file format to a Pandas Dataframe."""
     match supported_format:
         case SupportedOutputFileFormat.CSV:
-            return pd.read_csv(df_dataset, sep=";", **kwargs)  # Pseudo Service CSV-separator is ';'
+            return pd.DataFrame(
+                pd.read_csv(df_dataset, sep=";", **kwargs)
+            )  # Pseudo Service CSV-separator is ';'
         case SupportedOutputFileFormat.JSON:
-            return pd.read_json(df_dataset, **kwargs)
+            return pd.DataFrame(pd.read_json(df_dataset, **kwargs))
         case SupportedOutputFileFormat.XML:
             return pd.read_xml(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
@@ -59,13 +62,17 @@ def read_to_polars_df(
     """Reads a file with a supported file format to a Polars Dataframe."""
     match supported_format:
         case SupportedOutputFileFormat.CSV:
-            return pl.read_csv(df_dataset, separator=";", **kwargs)  # Pseudo Service CSV-separator is ';'
+            return pl.read_csv(
+                df_dataset, separator=";", **kwargs
+            )  # Pseudo Service CSV-separator is ';'
         case SupportedOutputFileFormat.JSON:
             return pl.read_json(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
             return pl.read_parquet(df_dataset, **kwargs)
         case SupportedOutputFileFormat.XML:
-            raise ValueError("Unsupported file format for Polars: 'XML'. Use Pandas instead.")
+            raise ValueError(
+                "Unsupported file format for Polars: 'XML'. Use Pandas instead."
+            )
 
 
 def write_from_df(

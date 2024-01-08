@@ -10,7 +10,6 @@ import pandas as pd
 
 from dapla_pseudo.v1.models import Field
 
-
 FieldDecl = str | dict[str, str] | Field
 BinaryFileDecl = t.Union[
     io.BufferedReader,

@@ -12,7 +12,6 @@ from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.builder_validation import Validator
 
-
 PKG = "dapla_pseudo.v1.builder_validation"
 TEST_FILE_PATH = "tests/v1/test_files"
 
@@ -27,9 +26,7 @@ def df() -> pd.DataFrame:
 def sid_lookup_missing_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.content = (
-        b'[{"missing": ["20859374701","01234567890"], "datasetExtractionSnapshotTime": "2023-08-31"}]'
-    )
+    mock_response.content = b'[{"missing": ["20859374701","01234567890"], "datasetExtractionSnapshotTime": "2023-08-31"}]'
     return mock_response
 
 
@@ -51,7 +48,9 @@ def test_validate_with_full_response(
 
     patched_post_to_sid_endpoint.return_value = sid_lookup_missing_response
 
-    validation_result = Validator.from_pandas(df).on_field(field_name).validate_map_to_stable_id()
+    validation_result = (
+        Validator.from_pandas(df).on_field(field_name).validate_map_to_stable_id()
+    )
     validation_df = validation_result.to_pandas()
     validation_metadata = validation_result.metadata
 
@@ -114,7 +113,9 @@ def test_builder_from_file_with_storage_options(_mock_read_to_pandas_df: Mock) -
         storage_options = {"token": "fake_token"}
         Validator.from_file(file_path, storage_options=storage_options)
     except FileNotFoundError:
-        pytest.fail("FileNotFoundError should not be raised when storage_options is supplied.")
+        pytest.fail(
+            "FileNotFoundError should not be raised when storage_options is supplied."
+        )
 
 
 def test_builder_from_polars(df: pd.DataFrame) -> None:

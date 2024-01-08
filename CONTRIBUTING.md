@@ -37,7 +37,7 @@ Request features on the [Issue Tracker].
 
 ## How to set up your development environment
 
-You need Python 3.7+ and the following tools:
+You need Python 3.9+ and the following tools:
 
 - [Poetry]
 - [Nox]
@@ -84,15 +84,6 @@ $ nox --session=tests
 
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest] testing framework.
-
-### Local Testing
-
-When testing against a local instance of [dapla-pseudo-service](https://github.com/statisticsnorway/dapla-dlp-pseudo-service), you can configure the URL and authentication token by providing the following environment variables:
-
-```console
-PSEUDO_SERVICE_URL=http://localhost:<PORT>
-PSEUDO_SERVICE_AUTH_TOKEN=<KEYCLOAK_TOKEN>
-```
 
 [pytest]: https://pytest.readthedocs.io/
 

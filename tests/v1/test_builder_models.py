@@ -1,8 +1,8 @@
 import json
+from collections.abc import Iterator
 from io import BufferedReader
 from itertools import product
 from pathlib import Path
-from typing import Iterator
 from unittest.mock import Mock
 
 import pandas as pd
@@ -14,7 +14,6 @@ from typeguard import suppress_type_checks
 from dapla_pseudo.v1.builder_models import PseudoFileResponse
 from dapla_pseudo.v1.builder_models import Result
 from dapla_pseudo.v1.models import Mimetypes
-
 
 TEST_FILE_PATH = "tests/v1/test_files"
 
@@ -76,7 +75,9 @@ def test_result_from_file_to_pandas(pseudo_file_response: PseudoFileResponse) ->
     assert isinstance(result.to_pandas(), pd.DataFrame)
 
 
-def test_result_from_file_to_file(tmp_path: Path, pseudo_file_response: PseudoFileResponse) -> None:
+def test_result_from_file_to_file(
+    tmp_path: Path, pseudo_file_response: PseudoFileResponse
+) -> None:
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
     result.to_file(tmp_path / f"file_to_file.{file_extension}")
@@ -105,6 +106,8 @@ def test_result_to_file_invalid_type(tmp_path: Path) -> None:
 
 def test_result_different_file_format(tmp_path: Path) -> None:
     response = Mock(spec=Response)
-    result = Result(pseudo_response=PseudoFileResponse(response, Mimetypes.JSON, streamed=True))
+    result = Result(
+        pseudo_response=PseudoFileResponse(response, Mimetypes.JSON, streamed=True)
+    )
     with pytest.raises(ValueError):
         result.to_file(tmp_path / "invalid_file_format.csv")

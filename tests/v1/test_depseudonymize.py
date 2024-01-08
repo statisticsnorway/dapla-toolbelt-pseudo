@@ -6,7 +6,6 @@ import pytest
 from dapla_pseudo import depseudonymize
 from dapla_pseudo.constants import Env
 
-
 base_url = "https://mocked.dapla-pseudo-service"
 auth_token = "some-auth-token"
 

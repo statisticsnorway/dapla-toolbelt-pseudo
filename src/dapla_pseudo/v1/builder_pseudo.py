@@ -1,9 +1,10 @@
 """Builder for submitting a pseudonymization request."""
-import concurrent
 import io
 import json
 import os
 import typing as t
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -112,7 +113,9 @@ class PseudoData:
                             f"No GCS file found or authentication not sufficient for: {dataset}"
                         ) from err
                     except DefaultCredentialsError as err:
-                        raise DefaultCredentialsError("No Google Authentication found in environment") from err
+                        raise DefaultCredentialsError(
+                            "No Google Authentication found in environment"
+                        ) from err
                 else:
                     file_handle = open(dataset, "rb")
 
@@ -128,7 +131,9 @@ class PseudoData:
                 dataset.seek(0)
                 file_handle = io.BufferedReader(dataset)
             case _:
-                raise ValueError(f"Unsupported data type: {type(dataset)}. Supported types are {FileLikeDatasetDecl}")
+                raise ValueError(
+                    f"Unsupported data type: {type(dataset)}. Supported types are {FileLikeDatasetDecl}"
+                )
 
         if isinstance(file_handle, GCSFile):
             file_size = file_handle.size
@@ -149,7 +154,7 @@ class PseudoData:
             """Initialize the class."""
             self._rules: list[PseudoRule] = [] if rules is None else rules
             self._pseudo_keyset: Optional[PseudoKeyset] = None
-            self._metadata: t.Dict[str, str] = {}
+            self._metadata: dict[str, str] = {}
             self._timeout: int = TIMEOUT_DEFAULT
 
         def on_fields(self, *fields: str) -> "PseudoData._PseudoFuncSelector":
@@ -177,7 +182,9 @@ class PseudoData:
                 raise ValueError("No dataset has been provided.")
 
             if self._rules == []:
-                raise ValueError("No fields have been provided. Use the 'on_fields' method.")
+                raise ValueError(
+                    "No fields have been provided. Use the 'on_fields' method."
+                )
 
             if with_custom_keyset is not None:
                 self._pseudo_keyset = with_custom_keyset
@@ -256,10 +263,10 @@ class PseudoData:
                     ),
                 )
 
-            dataframe = t.cast(pd.DataFrame, PseudoData.dataset)
+            dataframe = t.cast(pl.DataFrame, PseudoData.dataset)
             # Execute the pseudonymization API calls in parallel
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                pseudonymized_field: t.Dict[str, pl.Series] = {}
+            with ThreadPoolExecutor() as executor:
+                pseudonymized_field: dict[str, pl.Series] = {}
                 futures = [
                     executor.submit(
                         pseudonymize_field_runner,
@@ -270,7 +277,7 @@ class PseudoData:
                     for rule in self._rules
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
-                for future in concurrent.futures.as_completed(futures):
+                for future in as_completed(futures):
                     result = future.result()
                     # Each future result contains the field_name (0) and the pseudonymize_values (1)
                     pseudonymized_field[result[0]] = result[1]
@@ -281,11 +288,15 @@ class PseudoData:
             return Result(pseudo_response=dataframe, metadata=self._metadata)
 
     class _PseudoFuncSelector:
-        def __init__(self, fields: list[str], rules: Optional[list[PseudoRule]] = None) -> None:
+        def __init__(
+            self, fields: list[str], rules: Optional[list[PseudoRule]] = None
+        ) -> None:
             self._fields = fields
             self._existing_rules = [] if rules is None else rules
 
-        def with_stable_id(self, sid_snapshot_date: Optional[str | date] = None) -> "PseudoData._Pseudonymizer":
+        def with_stable_id(
+            self, sid_snapshot_date: Optional[str | date] = None
+        ) -> "PseudoData._Pseudonymizer":
             """Map selected fields to stable ID.
 
             Args:
@@ -297,25 +308,38 @@ class PseudoData:
             """
             function = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID,
-                kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date)),
+                kwargs=MapSidKeywordArgs(
+                    snapshot_date=convert_to_date(sid_snapshot_date)
+                ),
             )
             return self._rule_constructor(function)
 
         def with_default_encryption(self) -> "PseudoData._Pseudonymizer":
-            function = PseudoFunction(function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs())
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+            )
             return self._rule_constructor(function)
 
         def with_papis_compatible_encryption(self) -> "PseudoData._Pseudonymizer":
-            function = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs())
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
+            )
             return self._rule_constructor(function)
 
-        def with_custom_function(self, function: PseudoFunction) -> "PseudoData._Pseudonymizer":
+        def with_custom_function(
+            self, function: PseudoFunction
+        ) -> "PseudoData._Pseudonymizer":
             return self._rule_constructor(function)
 
-        def _rule_constructor(self, func: PseudoFunction) -> "PseudoData._Pseudonymizer":
+        def _rule_constructor(
+            self, func: PseudoFunction
+        ) -> "PseudoData._Pseudonymizer":
             # If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.
             rule_prefix = "**/" if isinstance(PseudoData.dataset, File) else ""
-            rules = [PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}") for field in self._fields]
+            rules = [
+                PseudoRule(name=None, func=func, pattern=f"{rule_prefix}{field}")
+                for field in self._fields
+            ]
             return PseudoData._Pseudonymizer(self._existing_rules + rules)
 
 
@@ -340,7 +364,7 @@ def _do_pseudonymize_field(
     field_name: str,
     values: list[str],
     pseudo_func: Optional[PseudoFunction],
-    metadata_map: t.Dict[str, str],
+    metadata_map: dict[str, str],
     timeout: int,
     keyset: Optional[PseudoKeyset] = None,
 ) -> pl.Series:
