@@ -13,13 +13,8 @@ from datetime import date
 from pathlib import Path
 
 import fsspec.spec
-
-# isort: off
-import pylibmagic  # noqa Must be imported before magic
-
-# isort: on
-import magic
 import pandas as pd
+import puremagic
 import requests
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -109,20 +104,24 @@ def pseudonymize(
     match dataset:
         case str() | Path():
             # File path
-            content_type = Mimetypes(magic.from_file(dataset, mime=True))
+            content_type = Mimetypes(puremagic.from_file(dataset, mime=True))
         case pd.DataFrame():
             # Dataframe
             content_type = Mimetypes.JSON
             file_handle = _dataframe_to_json(dataset, fields, sid_fields)
         case io.BufferedReader():
             # File handle
-            content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+            content_type = Mimetypes(
+                puremagic.from_buffer(dataset.read(2048), mime=True)
+            )
             dataset.seek(0)
             file_handle = dataset
         case fsspec.spec.AbstractBufferedFile():
             # This is a file handle to a remote storage system such as GCS.
             # It provides random access for the underlying file-like data (without downloading the whole thing).
-            content_type = Mimetypes(magic.from_buffer(dataset.read(2048), mime=True))
+            content_type = Mimetypes(
+                puremagic.from_buffer(dataset.read(2048), mime=True)
+            )
             name = dataset.path.split("/")[-1] if hasattr(dataset, "path") else None
             dataset.seek(0)
             file_handle = io.BufferedReader(dataset)
