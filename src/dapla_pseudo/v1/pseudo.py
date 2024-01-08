@@ -27,19 +27,19 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import get_file_format_from_file_name
-from dapla_pseudo.v1.builder_models import PseudoFileResponse
-from dapla_pseudo.v1.builder_models import Result
-from dapla_pseudo.v1.models import DaeadKeywordArgs
-from dapla_pseudo.v1.models import FF31KeywordArgs
-from dapla_pseudo.v1.models import KeyWrapper
-from dapla_pseudo.v1.models import MapSidKeywordArgs
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoConfig
-from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
-from dapla_pseudo.v1.models import PseudoRule
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.v1.api_models import FF31KeywordArgs
+from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoConfig
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.ops import _client
+from dapla_pseudo.v1.result import PseudoFileResponse
+from dapla_pseudo.v1.result import Result
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 
 

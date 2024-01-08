@@ -25,19 +25,19 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import DatasetDecl
 from dapla_pseudo.types import FieldDecl
 from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import FF31KeywordArgs
+from dapla_pseudo.v1.api_models import Field
+from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoConfig
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import PseudoRule
+from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 from dapla_pseudo.v1.client import PseudoClient
-from dapla_pseudo.v1.models import DepseudonymizeFileRequest
-from dapla_pseudo.v1.models import FF31KeywordArgs
-from dapla_pseudo.v1.models import Field
-from dapla_pseudo.v1.models import KeyWrapper
-from dapla_pseudo.v1.models import MapSidKeywordArgs
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoConfig
-from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
-from dapla_pseudo.v1.models import PseudoRule
-from dapla_pseudo.v1.models import RepseudonymizeFileRequest
 
 
 def pseudonymize(
