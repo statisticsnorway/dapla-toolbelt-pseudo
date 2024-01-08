@@ -1,0 +1,1298 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Pseudonymization extensions for Dapla Toolbelt">
+      
+      
+      
+        <link rel="canonical" href="https://statisticsnorway.github.io/dapla-toolbelt-pseudo/">
+      
+      
+      
+        <link rel="next" href="reference/dapla_pseudo/">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+    
+    
+      
+        <title>dapla-toolbelt-pseudo</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.50c56a3b.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pseudonymization-extensions-for-dapla-toolbelt" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="dapla-toolbelt-pseudo" class="md-header__button md-logo" aria-label="dapla-toolbelt-pseudo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dapla-toolbelt-pseudo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    statisticsnorway/dapla-toolbelt-pseudo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="dapla-toolbelt-pseudo" class="md-nav__button md-logo" aria-label="dapla-toolbelt-pseudo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    dapla-toolbelt-pseudo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    statisticsnorway/dapla-toolbelt-pseudo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-sid-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validate SID mapping
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymize_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudonymize
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudonymize">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-from-file-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from file systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudoyminize-using-a-custom-keyset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudoyminize using a custom keyset
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#depseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Depseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issues
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Credits
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Code Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="reference/dapla_pseudo/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    dapla_pseudo
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            dapla_pseudo
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/constants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    constants
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_6" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="reference/dapla_pseudo/v1/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    v1
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_1_6" id="__nav_2_1_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            v1
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/builder_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    builder_models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/builder_pseudo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    builder_pseudo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/builder_validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    builder_validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/client/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/ops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ops
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/dapla_pseudo/v1/supported_file_format/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    supported_file_format
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CONTRIBUTING.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-sid-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validate SID mapping
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymize_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudonymize
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudonymize">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-from-file-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from file systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudoyminize-using-a-custom-keyset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pseudoyminize using a custom keyset
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#depseudonymize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Depseudonymize
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issues
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Credits
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="pseudonymization-extensions-for-dapla-toolbelt">Pseudonymization extensions for Dapla Toolbelt</h1>
+<p><a href="https://pypi.org/project/dapla-toolbelt-pseudo/"><img alt="PyPI" src="https://img.shields.io/pypi/v/dapla-toolbelt-pseudo.svg" /></a>
+<a href="https://pypi.org/project/dapla-toolbelt-pseudo/"><img alt="Status" src="https://img.shields.io/pypi/status/dapla-toolbelt-pseudo.svg" /></a>
+<a href="https://pypi.org/project/dapla-toolbelt-pseudo"><img alt="Python Version" src="https://img.shields.io/pypi/pyversions/dapla-toolbelt-pseudo" /></a>
+<a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/pypi/l/dapla-toolbelt-pseudo" /></a></p>
+<p><a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/actions?workflow=Tests"><img alt="Tests" src="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/workflows/Tests/badge.svg" /></a>
+<a href="https://app.codecov.io/gh/statisticsnorway/dapla-toolbelt-pseudo"><img alt="Codecov" src="https://codecov.io/gh/statisticsnorway/dapla-toolbelt-pseudo/branch/main/graph/badge.svg" /></a></p>
+<p><a href="https://github.com/pre-commit/pre-commit"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white" /></a>
+<a href="https://github.com/psf/black"><img alt="Black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a></p>
+<p>Pseudonymize, repseudonymize and depseudonymize data on Dapla.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><a href="https://github.com/statisticsnorway/dapla-toolbelt">Dapla Toolbelt</a></li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>You can install <em>dapla-toolbelt-pseudo</em> via <a href="https://pip.pypa.io/">pip</a> from <a href="https://pypi.org/">PyPI</a>:</p>
+<pre><code class="language-console">python -m pip install dapla-toolbelt-pseudo
+</code></pre>
+<h2 id="basic-usage">Basic usage</h2>
+<h3 id="pseudonymize">Pseudonymize</h3>
+<pre><code class="language-python">from dapla_pseudo import PseudoData
+import pandas as pd
+
+file_path=&quot;data/personer.json&quot;
+
+df = pd.read_json(file_path) # Create DataFrame from file
+
+# Example: Single field default encryption (DAEAD)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field(&quot;fornavn&quot;)                           # Select the field to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Multiple fields default encryption (DAEAD)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_fields(&quot;fornavn&quot;, &quot;etternavn&quot;)             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Single field sid mapping and pseudonymization (FPE)
+result_df = (
+    PseudoData.from_pandas(df)                     # Specify what dataframe to use
+    .on_field(&quot;fnr&quot;)                               # Select the field to pseudonymize
+    .map_to_stable_id()                            # Map the selected field to stable id
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+</code></pre>
+<p>The default encryption algorithm is DAEAD (Deterministic Authenticated Encryption with Associated Data). However, if the
+field is a valid Norwegian personal identification number (fnr, dnr), the recommended way to pseudonymize is to use
+the function <code>map_to_stable_id()</code> to convert the identification number to a stable ID (SID) prior to pseudonymization.
+In that case, the pseudonymization algorithm is FPE (Format Preserving Encryption).</p>
+<h3 id="validate-sid-mapping">Validate SID mapping</h3>
+<pre><code class="language-python">from dapla_pseudo import Validator
+import pandas as pd
+
+file_path=&quot;data/personer.json&quot;
+
+df = pd.read_json(file_path)
+
+result = (
+    Validator.from_pandas(df)                   # Specify what dataframe to use
+    .on_field(&quot;fnr&quot;)                            # Select the field to validate
+    .validate_map_to_stable_id()                # Validate that all the field values can be mapped to a SID
+)
+# The resulting dataframe contains the field values that didn't have a corresponding SID
+result.to_pandas()
+</code></pre>
+<p>A <code>sid_snapshot_date</code> can also be specified to validate that the field values can be mapped to a SID at a specific date:</p>
+<pre><code class="language-python">from dapla_pseudo import Validator
+from dapla_pseudo.utils import convert_to_date
+import pandas as pd
+
+file_path=&quot;data/personer.json&quot;
+
+df = pd.read_json(file_path)
+
+result = (
+    Validator.from_pandas(df)
+    .on_field(&quot;fnr&quot;)
+    .validate_map_to_stable_id(
+        sid_snapshot_date=convert_to_date(&quot;2023-08-29&quot;)
+    )
+)
+# Show metadata about the validation (e.g. which version of the SID catalog was used)
+result.metadata
+# Show the field values that didn't have a corresponding SID
+result.to_pandas()
+</code></pre>
+<h2 id="advanced-usage">Advanced usage</h2>
+<h3 id="pseudonymize_1">Pseudonymize</h3>
+<h4 id="read-from-file-systems">Read from file systems</h4>
+<pre><code class="language-python">from dapla_pseudo import PseudoData
+from dapla import AuthClient
+
+
+file_path=&quot;data/personer.json&quot;
+
+options = {
+    # Specify data types of columns in the dataset
+    &quot;dtype&quot; : { &quot;fnr&quot;: &quot;string&quot;,&quot;fornavn&quot;: &quot;string&quot;,&quot;etternavn&quot;: &quot;string&quot;,&quot;kjonn&quot;: &quot;category&quot;,&quot;fodselsdato&quot;: &quot;string&quot;}
+}
+
+# Example: Read dataframe from file
+result_df = (
+    PseudoData.from_file(file_path, **options)     # Read the DataFrame from file
+    .on_fields(&quot;fornavn&quot;, &quot;etternavn&quot;)             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Read dataframe from GCS bucket
+options = {
+    # Specify data types of columns in the dataset
+    &quot;dtype&quot; : { &quot;fnr&quot;: &quot;string&quot;,&quot;fornavn&quot;: &quot;string&quot;,&quot;etternavn&quot;: &quot;string&quot;,&quot;kjonn&quot;: &quot;category&quot;,&quot;fodselsdato&quot;: &quot;string&quot;},
+    # Specify storage options for Google Cloud Storage (GCS)
+    &quot;storage_options&quot; : {&quot;token&quot;: AuthClient.fetch_google_credentials()}
+}
+
+gcs_file_path = &quot;gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv&quot;
+
+result_df = (
+    PseudoData.from_file(gcs_file_path, **options) # Read DataFrame from GCS
+    .on_fields(&quot;fornavn&quot;, &quot;etternavn&quot;)             # Select multiple fields to pseudonymize
+    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+</code></pre>
+<h4 id="pseudoyminize-using-a-custom-keyset">Pseudoyminize using a custom keyset</h4>
+<pre><code class="language-python">from dapla_pseudo import pseudonymize
+
+# Pseudonymize fields in a local file using the default key:
+pseudonymize(file_path=&quot;./data/personer.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;])
+
+# Pseudonymize fields in a local file, explicitly denoting the key to use:
+pseudonymize(file_path=&quot;./data/personer.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;], key=&quot;ssb-common-key-1&quot;)
+
+# Pseudonymize a local file using a custom key:
+import json
+custom_keyset = json.dumps({
+    &quot;encryptedKeyset&quot;: &quot;CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=&quot;,
+    &quot;keysetInfo&quot;: {
+        &quot;primaryKeyId&quot;: 1234567890,
+        &quot;keyInfo&quot;: [
+            {
+                &quot;typeUrl&quot;: &quot;type.googleapis.com/google.crypto.tink.AesSivKey&quot;,
+                &quot;status&quot;: &quot;ENABLED&quot;,
+                &quot;keyId&quot;: 1234567890,
+                &quot;outputPrefixType&quot;: &quot;TINK&quot;,
+            }
+        ],
+    },
+    &quot;kekUri&quot;: &quot;gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1&quot;,
+})
+pseudonymize(file_path=&quot;./data/personer.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;], key=custom_keyset)
+
+# Operate on data in a streaming manner:
+import shutil
+with pseudonymize(&quot;./data/personer.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;, &quot;etternavn&quot;], stream=True) as res:
+    with open(&quot;./data/personer_deid.json&quot;, 'wb') as f:
+        res.raw.decode_content = True
+        shutil.copyfileobj(res.raw, f)
+
+# Map certain fields to stabil ID
+pseudonymize(file_path=&quot;./data/personer.json&quot;, fields=[&quot;fornavn&quot;], sid_fields=[&quot;fnr&quot;])
+</code></pre>
+<h3 id="repseudonymize">Repseudonymize</h3>
+<pre><code class="language-python">from dapla_pseudo import repseudonymize
+
+# Repseudonymize fields in a local file, denoting source and target keys to use:
+repseudonymize(file_path=&quot;./data/personer_deid.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;], source_key=&quot;ssb-common-key-1&quot;, target_key=&quot;ssb-common-key-2&quot;)
+</code></pre>
+<h3 id="depseudonymize">Depseudonymize</h3>
+<pre><code class="language-python">from dapla_pseudo import depseudonymize
+
+# Depseudonymize fields in a local file using the default key:
+depseudonymize(file_path=&quot;./data/personer_deid.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;])
+
+# Depseudonymize fields in a local file, explicitly denoting the key to use:
+depseudonymize(file_path=&quot;./data/personer_deid.json&quot;, fields=[&quot;fnr&quot;, &quot;fornavn&quot;], key=&quot;ssb-common-key-1&quot;)
+</code></pre>
+<p><em>Note that depseudonymization requires elevated access privileges.</em></p>
+<h2 id="contributing">Contributing</h2>
+<p>Contributions are very welcome.
+To learn more, see the <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/CONTRIBUTING.md">Contributor Guide</a>.</p>
+<h2 id="license">License</h2>
+<p>Distributed under the terms of the <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/blob/main/LICENSE">MIT license</a>,
+<em>Pseudonymization extensions for Dapla Toolbelt</em> is free and open source software.</p>
+<h2 id="issues">Issues</h2>
+<p>If you encounter any problems,
+please <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo/issues">file an issue</a> along with a detailed description.</p>
+<h2 id="credits">Credits</h2>
+<p>This project was generated from <a href="https://github.com/cjolowicz">@cjolowicz</a>'s <a href="https://github.com/cjolowicz/cookiecutter-hypermodern-python">Hypermodern Python Cookiecutter</a> template.</p>
+<!-- github-only -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7c377c4.min.js"></script>
+      
+    
+  </body>
+</html>

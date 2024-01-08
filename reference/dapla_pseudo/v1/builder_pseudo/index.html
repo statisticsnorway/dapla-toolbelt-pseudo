@@ -1,0 +1,1991 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Pseudonymization extensions for Dapla Toolbelt">
+      
+      
+      
+        <link rel="canonical" href="https://statisticsnorway.github.io/dapla-toolbelt-pseudo/reference/dapla_pseudo/v1/builder_pseudo/">
+      
+      
+        <link rel="prev" href="../builder_models/">
+      
+      
+        <link rel="next" href="../builder_validation/">
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+    
+    
+      
+        <title>builder_pseudo - dapla-toolbelt-pseudo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.50c56a3b.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dapla_pseudo.v1.builder_pseudo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="dapla-toolbelt-pseudo" class="md-header__button md-logo" aria-label="dapla-toolbelt-pseudo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dapla-toolbelt-pseudo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              builder_pseudo
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    statisticsnorway/dapla-toolbelt-pseudo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="dapla-toolbelt-pseudo" class="md-nav__button md-logo" aria-label="dapla-toolbelt-pseudo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    dapla-toolbelt-pseudo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/statisticsnorway/dapla-toolbelt-pseudo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    statisticsnorway/dapla-toolbelt-pseudo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Code Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    dapla_pseudo
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            dapla_pseudo
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../constants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    constants
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_6" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    v1
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_1_6" id="__nav_2_1_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            v1
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../builder_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    builder_models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    builder_pseudo
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    builder_pseudo
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      builder_pseudo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.File" class="md-nav__link">
+    <span class="md-ellipsis">
+      File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData" class="md-nav__link">
+    <span class="md-ellipsis">
+      PseudoData
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PseudoData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_file()
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from_file()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-bucket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from bucket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-local-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from local filesystem
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_pandas()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_polars" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_polars()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../builder_validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    builder_validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../client/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ops
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supported_file_format/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    supported_file_format
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../CONTRIBUTING.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      builder_pseudo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.File" class="md-nav__link">
+    <span class="md-ellipsis">
+      File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData" class="md-nav__link">
+    <span class="md-ellipsis">
+      PseudoData
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PseudoData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_file()
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from_file()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-bucket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from bucket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-local-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Read from local filesystem
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_pandas()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dapla_pseudo.v1.builder_pseudo.PseudoData.from_polars" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_polars()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>builder_pseudo</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="dapla_pseudo.v1.builder_pseudo"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Builder for submitting a pseudonymization request.</p>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="dapla_pseudo.v1.builder_pseudo.File" class="doc doc-heading">
+          <code>File</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>File represents a file to be pseudonymized.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>dapla_pseudo/v1/builder_pseudo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">File</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;File represents a file to be pseudonymized.&quot;&quot;&quot;</span>
+
+    <span class="n">file_handle</span><span class="p">:</span> <span class="n">BinaryFileDecl</span>
+    <span class="n">content_type</span><span class="p">:</span> <span class="n">Mimetypes</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="dapla_pseudo.v1.builder_pseudo.PseudoData" class="doc doc-heading">
+          <code>PseudoData</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Starting point for pseudonymization of datasets.</p>
+<p>This class should not be instantiated, only the static methods should be used.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>dapla_pseudo/v1/builder_pseudo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PseudoData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Starting point for pseudonymization of datasets.</span>
+
+<span class="sd">    This class should not be instantiated, only the static methods should be used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">File</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_pandas</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a pandas DataFrame.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+        <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_polars</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a polars DataFrame.&quot;&quot;&quot;</span>
+        <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataframe</span>
+        <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">FileLikeDatasetDecl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a pandas dataframe read from file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If no file is found at the specified path.</span>
+<span class="sd">            FileInvalidError: If the file is empty.</span>
+<span class="sd">            ValueError: If the dataset is not of a supported type.</span>
+<span class="sd">            DefaultCredentialsError: If no Google Authentication is found in the environment.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _Pseudonymizer: An instance of the _Pseudonymizer class.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            # Read from bucket</span>
+<span class="sd">            from dapla import AuthClient</span>
+<span class="sd">            from dapla_pseudo import PseudoData</span>
+<span class="sd">            bucket_path = &quot;gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet&quot;</span>
+<span class="sd">            field_selector = PseudoData.from_file(bucket_path)</span>
+
+<span class="sd">            # Read from local filesystem</span>
+<span class="sd">            from dapla_pseudo import PseudoData</span>
+
+<span class="sd">            local_path = &quot;some_file.csv&quot;</span>
+<span class="sd">            field_selector = PseudoData.from_file(local_path))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_handle</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">BinaryFileDecl</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">match</span> <span class="n">dataset</span><span class="p">:</span>
+            <span class="k">case</span> <span class="nb">str</span><span class="p">()</span> <span class="o">|</span> <span class="n">Path</span><span class="p">():</span>
+                <span class="c1"># File path</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;gs://&quot;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">file_handle</span> <span class="o">=</span> <span class="n">FileClient</span><span class="p">()</span><span class="o">.</span><span class="n">gcs_open</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;No GCS file found or authentication not sufficient for: </span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+                    <span class="k">except</span> <span class="n">DefaultCredentialsError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">DefaultCredentialsError</span><span class="p">(</span><span class="s2">&quot;No Google Authentication found in environment&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+
+                <span class="n">file_handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">case</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">():</span>
+                <span class="c1"># File handle</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">file_handle</span> <span class="o">=</span> <span class="n">dataset</span>
+            <span class="k">case</span> <span class="n">fsspec</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">AbstractBufferedFile</span><span class="p">():</span>
+                <span class="c1"># This is a file handle to a remote storage system such as GCS.</span>
+                <span class="c1"># It provides random access for the underlying file-like data (without downloading the whole thing).</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">file_handle</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">. Supported types are </span><span class="si">{</span><span class="n">FileLikeDatasetDecl</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_handle</span><span class="p">,</span> <span class="n">GCSFile</span><span class="p">):</span>
+            <span class="n">file_size</span> <span class="o">=</span> <span class="n">file_handle</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fstat</span><span class="p">(</span><span class="n">file_handle</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span><span class="o">.</span><span class="n">st_size</span>
+
+        <span class="k">if</span> <span class="n">file_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FileInvalidError</span><span class="p">(</span><span class="s2">&quot;File is empty.&quot;</span><span class="p">)</span>
+
+        <span class="n">content_type</span> <span class="o">=</span> <span class="n">_get_content_type_from_file</span><span class="p">(</span><span class="n">file_handle</span><span class="p">)</span>
+        <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">file_handle</span><span class="p">,</span> <span class="n">content_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">_Pseudonymizer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select one or multiple fields to be pseudonymized.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">PseudoRule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize the class.&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PseudoRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">rules</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rules</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_keyset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PseudoKeyset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">TIMEOUT_DEFAULT</span>
+
+        <span class="k">def</span> <span class="nf">on_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._PseudoFuncSelector&quot;</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Specify one or multiple fields to be pseudonymized.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_PseudoFuncSelector</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rules</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">pseudonymize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">with_custom_keyset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PseudoKeyset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">TIMEOUT_DEFAULT</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Pseudonymize the dataset.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                with_custom_keyset (PseudoKeyset, optional): The pseudonymization keyset to use. Defaults to None.</span>
+<span class="sd">                timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.</span>
+
+<span class="sd">            Raises:</span>
+<span class="sd">                ValueError: If no dataset has been provided, no fields have been provided, or the dataset is of an unsupported type.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                Result: The pseudonymized dataset and the associated metadata.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No dataset has been provided.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rules</span> <span class="o">==</span> <span class="p">[]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fields have been provided. Use the &#39;on_fields&#39; method.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">with_custom_keyset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_keyset</span> <span class="o">=</span> <span class="n">with_custom_keyset</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+            <span class="k">match</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span><span class="p">:</span>  <span class="c1"># Differentiate between file and DataFrame</span>
+                <span class="k">case</span> <span class="n">File</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudonymize_file</span><span class="p">()</span>
+                <span class="k">case</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudonymize_field</span><span class="p">()</span>
+                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unsupported data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">. Should only be DataFrame or file-like type.&quot;</span>
+                    <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_pseudonymize_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Pseudonymize the entire file.&quot;&quot;&quot;</span>
+            <span class="c1"># Need to type-cast explicitly. We know that PseudoData.dataset is a &quot;File&quot; if we reach this method.</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+
+            <span class="n">pseudonymize_request</span> <span class="o">=</span> <span class="n">PseudonymizeFileRequest</span><span class="p">(</span>
+                <span class="n">pseudo_config</span><span class="o">=</span><span class="n">PseudoConfig</span><span class="p">(</span>
+                    <span class="n">rules</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rules</span><span class="p">,</span>
+                    <span class="n">keysets</span><span class="o">=</span><span class="n">KeyWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_keyset</span><span class="p">)</span><span class="o">.</span><span class="n">keyset_list</span><span class="p">(),</span>
+                <span class="p">),</span>
+                <span class="n">target_content_type</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
+                <span class="n">target_uri</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">compression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">response</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">_client</span><span class="p">()</span><span class="o">.</span><span class="n">pseudonymize_file</span><span class="p">(</span>
+                <span class="n">pseudonymize_request</span><span class="p">,</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">file_handle</span><span class="p">,</span>
+                <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">PseudoFileResponse</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span> <span class="n">streamed</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_pseudonymize_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.</span>
+
+<span class="sd">            The pseudonymization is performed in parallel. After the parallel processing is finished,</span>
+<span class="sd">            the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                Result: Containing the pseudonymized &#39;self._dataframe&#39; and the associated metadata.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="k">def</span> <span class="nf">pseudonymize_field_runner</span><span class="p">(</span>
+                <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">series</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pseudo_func</span><span class="p">:</span> <span class="n">PseudoFunction</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">]:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Function that performs the pseudonymization on a pandas Series.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    field_name (str):  The name of the field.</span>
+<span class="sd">                    series (pl.Series): The pandas Series containing the values to be pseudonymized.</span>
+<span class="sd">                    pseudo_func (PseudoFunction): The pseudonymization function to apply to the values.</span>
+
+<span class="sd">                Returns:</span>
+<span class="sd">                    tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">field_name</span><span class="p">,</span>
+                    <span class="n">_do_pseudonymize_field</span><span class="p">(</span>
+                        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;pseudonymize/field&quot;</span><span class="p">,</span>
+                        <span class="n">field_name</span><span class="o">=</span><span class="n">field_name</span><span class="p">,</span>
+                        <span class="n">values</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span>
+                        <span class="n">pseudo_func</span><span class="o">=</span><span class="n">pseudo_func</span><span class="p">,</span>
+                        <span class="n">metadata_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span>
+                        <span class="n">keyset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_keyset</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+
+            <span class="n">dataframe</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="c1"># Execute the pseudonymization API calls in parallel</span>
+            <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                <span class="n">pseudonymized_field</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">futures</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                        <span class="n">pseudonymize_field_runner</span><span class="p">,</span>
+                        <span class="n">rule</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span>
+                        <span class="n">dataframe</span><span class="p">[</span><span class="n">rule</span><span class="o">.</span><span class="n">pattern</span><span class="p">],</span>
+                        <span class="n">rule</span><span class="o">.</span><span class="n">func</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rules</span>
+                <span class="p">]</span>
+                <span class="c1"># Wait for the futures to finish, then add each field to pseudonymized_field map</span>
+                <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">as_completed</span><span class="p">(</span><span class="n">futures</span><span class="p">):</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                    <span class="c1"># Each future result contains the field_name (0) and the pseudonymize_values (1)</span>
+                    <span class="n">pseudonymized_field</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="n">pseudonymized_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pseudonymized_field</span><span class="p">)</span>
+                <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pseudonymized_df</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">pseudo_response</span><span class="o">=</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">_PseudoFuncSelector</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">PseudoRule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span> <span class="n">fields</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_existing_rules</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">rules</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rules</span>
+
+        <span class="k">def</span> <span class="nf">with_stable_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid_snapshot_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">date</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Map selected fields to stable ID.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.</span>
+<span class="sd">                    Latest if unspecified. Format: YYYY-MM-DD</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                Self: The object configured to be mapped to stable ID</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">function</span> <span class="o">=</span> <span class="n">PseudoFunction</span><span class="p">(</span>
+                <span class="n">function_type</span><span class="o">=</span><span class="n">PseudoFunctionTypes</span><span class="o">.</span><span class="n">MAP_SID</span><span class="p">,</span>
+                <span class="n">kwargs</span><span class="o">=</span><span class="n">MapSidKeywordArgs</span><span class="p">(</span><span class="n">snapshot_date</span><span class="o">=</span><span class="n">convert_to_date</span><span class="p">(</span><span class="n">sid_snapshot_date</span><span class="p">)),</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rule_constructor</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">with_default_encryption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+            <span class="n">function</span> <span class="o">=</span> <span class="n">PseudoFunction</span><span class="p">(</span><span class="n">function_type</span><span class="o">=</span><span class="n">PseudoFunctionTypes</span><span class="o">.</span><span class="n">DAEAD</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">DaeadKeywordArgs</span><span class="p">())</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rule_constructor</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">with_papis_compatible_encryption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+            <span class="n">function</span> <span class="o">=</span> <span class="n">PseudoFunction</span><span class="p">(</span><span class="n">function_type</span><span class="o">=</span><span class="n">PseudoFunctionTypes</span><span class="o">.</span><span class="n">FF31</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">FF31KeywordArgs</span><span class="p">())</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rule_constructor</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">with_custom_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">:</span> <span class="n">PseudoFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rule_constructor</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_rule_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">PseudoFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+            <span class="c1"># If we use the pseudonymize_file endpoint, we need a glob catch-all prefix.</span>
+            <span class="n">rule_prefix</span> <span class="o">=</span> <span class="s2">&quot;**/&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">PseudoRule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rule_prefix</span><span class="si">}{</span><span class="n">field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_existing_rules</span> <span class="o">+</span> <span class="n">rules</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="dapla_pseudo.v1.builder_pseudo.PseudoData.from_file" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">from_file</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initialize a pseudonymization request from a pandas dataframe read from file.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>dataset</code></td>
+          <td>
+                <code><span title="dapla_pseudo.types.FileLikeDatasetDecl">FileLikeDatasetDecl</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Either a path to the file to be read, or a file handle.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>FileNotFoundError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If no file is found at the specified path.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="dapla_pseudo.exceptions.FileInvalidError" href="../../exceptions/#dapla_pseudo.exceptions.FileInvalidError">FileInvalidError</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the file is empty.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the dataset is not of a supported type.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="google.auth.exceptions.DefaultCredentialsError">DefaultCredentialsError</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If no Google Authentication is found in the environment.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>_Pseudonymizer</code></td>          <td>
+                <code><span title="dapla_pseudo.v1.builder_pseudo.PseudoData._Pseudonymizer">_Pseudonymizer</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>An instance of the _Pseudonymizer class.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <h4 id="dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-bucket">Read from bucket</h4>
+<p>from dapla import AuthClient
+from dapla_pseudo import PseudoData
+bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
+field_selector = PseudoData.from_file(bucket_path)</p>
+<h4 id="dapla_pseudo.v1.builder_pseudo.PseudoData.from_file--read-from-local-filesystem">Read from local filesystem</h4>
+<p>from dapla_pseudo import PseudoData</p>
+<p>local_path = "some_file.csv"
+field_selector = PseudoData.from_file(local_path))</p>
+
+          <details class="quote">
+            <summary>Source code in <code>dapla_pseudo/v1/builder_pseudo.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">FileLikeDatasetDecl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a pandas dataframe read from file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FileNotFoundError: If no file is found at the specified path.</span>
+<span class="sd">        FileInvalidError: If the file is empty.</span>
+<span class="sd">        ValueError: If the dataset is not of a supported type.</span>
+<span class="sd">        DefaultCredentialsError: If no Google Authentication is found in the environment.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _Pseudonymizer: An instance of the _Pseudonymizer class.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        # Read from bucket</span>
+<span class="sd">        from dapla import AuthClient</span>
+<span class="sd">        from dapla_pseudo import PseudoData</span>
+<span class="sd">        bucket_path = &quot;gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet&quot;</span>
+<span class="sd">        field_selector = PseudoData.from_file(bucket_path)</span>
+
+<span class="sd">        # Read from local filesystem</span>
+<span class="sd">        from dapla_pseudo import PseudoData</span>
+
+<span class="sd">        local_path = &quot;some_file.csv&quot;</span>
+<span class="sd">        field_selector = PseudoData.from_file(local_path))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_handle</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">BinaryFileDecl</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">match</span> <span class="n">dataset</span><span class="p">:</span>
+        <span class="k">case</span> <span class="nb">str</span><span class="p">()</span> <span class="o">|</span> <span class="n">Path</span><span class="p">():</span>
+            <span class="c1"># File path</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;gs://&quot;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">file_handle</span> <span class="o">=</span> <span class="n">FileClient</span><span class="p">()</span><span class="o">.</span><span class="n">gcs_open</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;No GCS file found or authentication not sufficient for: </span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+                <span class="k">except</span> <span class="n">DefaultCredentialsError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">DefaultCredentialsError</span><span class="p">(</span><span class="s2">&quot;No Google Authentication found in environment&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+
+            <span class="n">file_handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">case</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">():</span>
+            <span class="c1"># File handle</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">file_handle</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">case</span> <span class="n">fsspec</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">AbstractBufferedFile</span><span class="p">():</span>
+            <span class="c1"># This is a file handle to a remote storage system such as GCS.</span>
+            <span class="c1"># It provides random access for the underlying file-like data (without downloading the whole thing).</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">file_handle</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">. Supported types are </span><span class="si">{</span><span class="n">FileLikeDatasetDecl</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_handle</span><span class="p">,</span> <span class="n">GCSFile</span><span class="p">):</span>
+        <span class="n">file_size</span> <span class="o">=</span> <span class="n">file_handle</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fstat</span><span class="p">(</span><span class="n">file_handle</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span><span class="o">.</span><span class="n">st_size</span>
+
+    <span class="k">if</span> <span class="n">file_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FileInvalidError</span><span class="p">(</span><span class="s2">&quot;File is empty.&quot;</span><span class="p">)</span>
+
+    <span class="n">content_type</span> <span class="o">=</span> <span class="n">_get_content_type_from_file</span><span class="p">(</span><span class="n">file_handle</span><span class="p">)</span>
+    <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">file_handle</span><span class="p">,</span> <span class="n">content_type</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="dapla_pseudo.v1.builder_pseudo.PseudoData.from_pandas" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">from_pandas</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initialize a pseudonymization request from a pandas DataFrame.</p>
+
+          <details class="quote">
+            <summary>Source code in <code>dapla_pseudo/v1/builder_pseudo.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">from_pandas</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a pandas DataFrame.&quot;&quot;&quot;</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+    <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+    <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="dapla_pseudo.v1.builder_pseudo.PseudoData.from_polars" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">from_polars</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initialize a pseudonymization request from a polars DataFrame.</p>
+
+          <details class="quote">
+            <summary>Source code in <code>dapla_pseudo/v1/builder_pseudo.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">from_polars</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PseudoData._Pseudonymizer&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a pseudonymization request from a polars DataFrame.&quot;&quot;&quot;</span>
+    <span class="n">PseudoData</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataframe</span>
+    <span class="k">return</span> <span class="n">PseudoData</span><span class="o">.</span><span class="n">_Pseudonymizer</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../../..", "features": [], "search": "../../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      
+    
+  </body>
+</html>
