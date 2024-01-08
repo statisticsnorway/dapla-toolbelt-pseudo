@@ -1,12 +1,22 @@
 {
-  "author": "Team Skyinfrastruktur",
-  "copyright_year": "2022",
+  "_copy_without_render": [
+    "*.rst_t"
+  ],
+  "_jinja2_env_vars": {
+    "lstrip_blocks": true,
+    "trim_blocks": true
+  },
+  "_template": "https://github.com/statisticsnorway/ssb-pypitemplate.git",
+  "author": "Dapla Developers",
+  "code_quality_level": "Medium",
+  "copyright_owner": "Statistics Norway",
+  "copyright_year": "2024",
   "development_status": "Development Status :: 4 - Beta",
-  "email": "dapla@ssb.no",
-  "friendly_name": "Pseudonymization extensions for Dapla Toolbelt",
-  "github_user": "statisticsnorway",
+  "email": "dapla-platform-developers@ssb.no",
+  "friendly_name": "Dapla Toolbelt Pseudo",
+  "github_organization": "statisticsnorway",
   "license": "MIT",
   "package_name": "dapla_pseudo",
   "project_name": "dapla-toolbelt-pseudo",
-  "version": "0.0.1"
+  "version": "0.0.0"
 }

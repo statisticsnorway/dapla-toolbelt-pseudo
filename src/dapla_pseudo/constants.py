@@ -1,7 +1,6 @@
 """This module defines constants that are referenced throughout the codebase."""
 from enum import Enum
 
-
 TIMEOUT_DEFAULT: int = 30  # seconds
 
 
@@ -9,7 +8,7 @@ class Env(str, Enum):
     """Environment variable keys."""
 
     PSEUDO_SERVICE_URL = "PSEUDO_SERVICE_URL"
-    PSEUDO_SERVICE_AUTH_TOKEN = "PSEUDO_SERVICE_AUTH_TOKEN"  # noqa S105
+    PSEUDO_SERVICE_AUTH_TOKEN = "PSEUDO_SERVICE_AUTH_TOKEN"  # S105
 
     def __str__(self) -> str:
         """Use value for string representation."""

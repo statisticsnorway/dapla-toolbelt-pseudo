@@ -43,7 +43,7 @@ class PseudoKeyset(APIModel):
     """PseudoKeyset represents a wrapped data encryption key (WDEK)."""
 
     encrypted_keyset: str
-    keyset_info: t.Dict[str, t.Any]
+    keyset_info: dict[str, t.Any]
     kek_uri: str
 
     def get_key_id(self) -> str:
@@ -86,17 +86,21 @@ class KeyWrapper(BaseModel):
             self.key_id = key.get_key_id()
             self.keyset = key
 
-    def keyset_list(self) -> t.Optional[t.List[PseudoKeyset]]:
+    def keyset_list(self) -> t.Optional[list[PseudoKeyset]]:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
 
 
 class PseudoFunctionArgs(BaseModel):
-    """Representation of the possible keyword arguments"""
+    """Representation of the possible keyword arguments."""
 
     def __str__(self) -> str:
         """As a default, represent the fields of the subclasses as kwargs on the format 'k=v'."""
-        return ",".join(f"{k}={v}" for k, v in self.model_dump(by_alias=True).items() if v is not None)
+        return ",".join(
+            f"{k}={v}"
+            for k, v in self.model_dump(by_alias=True).items()
+            if v is not None
+        )
 
     model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
@@ -182,7 +186,9 @@ class PseudoRule(APIModel):
     func: PseudoFunction
 
     @field_serializer("func")
-    def serialize_func(self, func: PseudoFunction, _info: FieldSerializationInfo) -> str:
+    def serialize_func(
+        self, func: PseudoFunction, _info: FieldSerializationInfo
+    ) -> str:
         """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
 
@@ -190,8 +196,8 @@ class PseudoRule(APIModel):
 class PseudoConfig(APIModel):
     """PseudoConfig is a container for rules and keysets."""
 
-    rules: t.List[PseudoRule]
-    keysets: t.Optional[t.List[PseudoKeyset]] = None
+    rules: list[PseudoRule]
+    keysets: t.Optional[list[PseudoKeyset]] = None
 
 
 class PseudonymizeFileRequest(APIModel):

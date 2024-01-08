@@ -1,7 +1,7 @@
 import json
+from collections.abc import Sequence
 from datetime import date
 from typing import Any
-from typing import Sequence
 
 import pandas as pd
 import pytest
@@ -80,7 +80,9 @@ def test_generate_rules_from_single_field_sid_with_version_string() -> None:
                 "func": str(
                     PseudoFunction(
                         function_type=PseudoFunctionTypes.MAP_SID,
-                        kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
+                        kwargs=MapSidKeywordArgs(
+                            snapshot_date=convert_to_date("2023-05-21")
+                        ),
                     )
                 ),
             }
@@ -93,7 +95,9 @@ def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> No
         key="papis-common-key-1",
         fields=[],
         sid_fields=["some-field"],
-        sid_func_kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
+        sid_func_kwargs=MapSidKeywordArgs(
+            snapshot_date=date.fromisoformat("2023-05-21")
+        ),
     )
     assert PseudoConfig(rules=rules, keysets=None).model_dump() == {
         "keysets": None,
@@ -104,7 +108,9 @@ def test_generate_rules_from_single_field_sid_with_version_from_datetime() -> No
                 "func": str(
                     PseudoFunction(
                         function_type=PseudoFunctionTypes.MAP_SID,
-                        kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
+                        kwargs=MapSidKeywordArgs(
+                            snapshot_date=date.fromisoformat("2023-05-21")
+                        ),
                     )
                 ),
             }
@@ -141,7 +147,9 @@ def test_generate_rules_from_multiple_field() -> None:
 
 
 def test_generate_rules_from_fields_with_version() -> None:
-    sid_func_kwargs = MapSidKeywordArgs(key_id="some-key", snapshot_date=date.fromisoformat("2023-05-21"))
+    sid_func_kwargs = MapSidKeywordArgs(
+        key_id="some-key", snapshot_date=date.fromisoformat("2023-05-21")
+    )
     rules = _rules_of(
         key="some-key",
         fields=["some-field", "another-field"],
@@ -248,7 +256,9 @@ def test_dataframe_to_json_type_conversion(
     fields: Sequence[str],
     sid_fields: Sequence[str],
 ) -> None:
-    handle = _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
+    handle = _dataframe_to_json(
+        pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields
+    )
     assert expected_output == json.load(handle)
 
 
@@ -263,4 +273,6 @@ def test_dataframe_to_json_unknown_field(
     input_dict: dict[str, Any], fields: Sequence[str], sid_fields: Sequence[str]
 ) -> None:
     with pytest.raises(KeyError):
-        _dataframe_to_json(pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields)
+        _dataframe_to_json(
+            pd.DataFrame(input_dict), fields=fields, sid_fields=sid_fields
+        )

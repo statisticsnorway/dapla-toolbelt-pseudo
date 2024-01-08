@@ -34,7 +34,7 @@ class Result:
     def __init__(
         self,
         pseudo_response: pl.DataFrame | PseudoFileResponse,
-        metadata: Optional[t.Dict[str, str]] = None,
+        metadata: Optional[dict[str, str]] = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_response = pseudo_response
@@ -57,11 +57,15 @@ class Result:
             case pl.DataFrame():
                 return self._pseudo_response
             case PseudoFileResponse(response, content_type, _):
-                format = SupportedOutputFileFormat(content_type.name.lower())
-                df = read_to_polars_df(format, BytesIO(response.content), **kwargs)
+                output_format = SupportedOutputFileFormat(content_type.name.lower())
+                df = read_to_polars_df(
+                    output_format, BytesIO(response.content), **kwargs
+                )
                 return df
             case _:
-                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
+                raise ValueError(
+                    f"Invalid response type: {type(self._pseudo_response)}"
+                )
 
     def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
         """Output pseudonymized data as a Pandas DataFrame.
@@ -80,11 +84,15 @@ class Result:
             case pl.DataFrame():
                 return self._pseudo_response.to_pandas()
             case PseudoFileResponse(response, content_type, _):
-                format = SupportedOutputFileFormat(content_type.name.lower())
-                df = read_to_pandas_df(format, BytesIO(response.content), **kwargs)
+                output_format = SupportedOutputFileFormat(content_type.name.lower())
+                df = read_to_pandas_df(
+                    output_format, BytesIO(response.content), **kwargs
+                )
                 return df
             case _:
-                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
+                raise ValueError(
+                    f"Invalid response type: {type(self._pseudo_response)}"
+                )
 
     def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
         """Write pseudonymized data to a file.
@@ -121,7 +129,9 @@ class Result:
             case pl.DataFrame():
                 write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
             case _:
-                raise ValueError(f"Invalid response type: {type(self._pseudo_response)}")
+                raise ValueError(
+                    f"Invalid response type: {type(self._pseudo_response)}"
+                )
 
         file_handle.close()
 

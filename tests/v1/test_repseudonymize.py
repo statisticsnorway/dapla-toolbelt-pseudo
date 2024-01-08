@@ -8,7 +8,6 @@ from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.v1.models import PseudoKeyset
 
-
 base_url = "https://mocked.dapla-pseudo-service"
 auth_token = "some-auth-token"
 

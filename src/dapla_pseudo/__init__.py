@@ -16,7 +16,6 @@ from dapla_pseudo.v1 import pseudonymize
 
 from importlib.metadata import version
 
-
 # Avoid having to define the version multiple places.
 # Ref: https://github.com/python-poetry/poetry/issues/144#issuecomment-1488038660
 __version__ = version("dapla_toolbelt_pseudo")
@@ -28,7 +27,6 @@ from .v1 import Validator
 from .v1 import depseudonymize
 from .v1 import pseudonymize
 from .v1 import repseudonymize
-
 
 __all__ = [
     "PseudoClient",
