@@ -173,7 +173,7 @@ def test_builder_file_default(
         file_dataset.file_handle,
         stream=True,
         name=None,
-        timeout=30,
+        timeout=TIMEOUT_DEFAULT,
     )
 
 
@@ -210,7 +210,7 @@ def test_builder_file_hierarchical(
         file_dataset.file_handle,
         stream=True,
         name=None,
-        timeout=30,
+        timeout=TIMEOUT_DEFAULT,
     )
 
 
