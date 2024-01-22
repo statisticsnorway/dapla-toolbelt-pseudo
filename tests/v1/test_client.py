@@ -198,7 +198,7 @@ def test_post_to_field_endpoint_with_keyset(
         },
         json=expected_json,
         stream=False,
-        timeout=30,
+        timeout=TIMEOUT_DEFAULT,
     )
 
 
@@ -224,5 +224,5 @@ def test_successful_post_to_sid_endpoint(
         headers={"Authorization": "Bearer some-auth-token"},
         json=expected_json,
         stream=False,
-        timeout=30,
+        timeout=TIMEOUT_DEFAULT,
     )

@@ -1,7 +1,7 @@
 """This module defines constants that are referenced throughout the codebase."""
 from enum import Enum
 
-TIMEOUT_DEFAULT: int = 30  # seconds
+TIMEOUT_DEFAULT: int = 300  # seconds
 
 
 class Env(str, Enum):
