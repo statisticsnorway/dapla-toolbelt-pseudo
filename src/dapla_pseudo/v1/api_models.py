@@ -30,7 +30,7 @@ class Mimetypes(str, Enum):
 class Field(APIModel):
     """Field represents a targeted piece of data within a dataset or record.
 
-    Attributes:
+    Parameters:
         pattern: field name or expression (e.g. a glob)
         mapping: If defined, denotes a mapping transformation that should be applied before the operation in question,
             e.g. "sid", meaning the field should be transformed to Stabil ID before being pseudonymized.
@@ -44,22 +44,20 @@ class PseudoKeyset(APIModel):
     """PseudoKeyset represents a wrapped data encryption key (WDEK).
 
     Example structure, represented as JSON:
+    {"encrypted_keyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
+    "keyset_info": {
+    "primaryKeyId": 1234567890,
+    "keyInfo": [
     {
-        "encrypted_keyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
-        "keyset_info": {
-            "primaryKeyId": 1234567890,
-            "keyInfo": [
-            {
-                "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
-                "status": "ENABLED",
-                "keyId": 1234567890,
-                "outputPrefixType": "TINK"
-            }
-            ]
-        },
-        "kek_uri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
+    "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
+    "status": "ENABLED",
+    "keyId": 1234567890,
+    "outputPrefixType": "TINK"
     }
-
+    ]
+    },
+    "kek_uri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
+    }
     """
 
     encrypted_keyset: str
@@ -133,8 +131,8 @@ class PseudoFunctionArgs(BaseModel):
 class MapSidKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'map-sid' function.
 
-    Attributes:
-        key_id (PredefinedKeys | str): The key to be used for pseudonomization
+    Parameters:
+        key_id: The key to be used for pseudonomization.
         snapshot_date (date): The timestamp for the version of the SID catalogue.
             If not specified, will choose the latest version.
             The format is: YYYY-MM-DD, e.g. 2021-05-21
@@ -197,7 +195,7 @@ class PseudoRule(APIModel):
     Lists of PseudoRules are processed by the dapla-pseudo-service in the order they are defined, and only the first
     matching rule will be applied (thus: rule ordering is important).
 
-    Attributes:
+    Parameters:
         name: A friendly name of the rule. This is optional, but can be handy for debugging
         pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
