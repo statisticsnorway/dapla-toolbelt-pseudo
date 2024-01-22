@@ -10,9 +10,9 @@ import requests
 
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 
 
 @pytest.fixture

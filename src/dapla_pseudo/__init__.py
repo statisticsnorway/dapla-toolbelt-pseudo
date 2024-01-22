@@ -22,7 +22,8 @@ __version__ = version("dapla_toolbelt_pseudo")
 
 from .v1 import Field
 from .v1 import PseudoClient
-from .v1 import PseudoData
+from .v1 import PseudoKeyset
+from .v1 import Pseudonymize
 from .v1 import Validator
 from .v1 import depseudonymize
 from .v1 import pseudonymize
@@ -33,7 +34,8 @@ __all__ = [
     "pseudonymize",
     "depseudonymize",
     "repseudonymize",
-    "PseudoData",
+    "Pseudonymize",
     "Validator",
     "Field",
+    "PseudoKeyset",
 ]

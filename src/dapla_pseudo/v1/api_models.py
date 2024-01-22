@@ -8,6 +8,7 @@ from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import FieldSerializationInfo
+from pydantic import ValidationError
 from pydantic import field_serializer
 
 from dapla_pseudo.constants import PredefinedKeys
@@ -40,7 +41,26 @@ class Field(APIModel):
 
 
 class PseudoKeyset(APIModel):
-    """PseudoKeyset represents a wrapped data encryption key (WDEK)."""
+    """PseudoKeyset represents a wrapped data encryption key (WDEK).
+
+    Example structure, represented as JSON:
+    {
+        "encrypted_keyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
+        "keyset_info": {
+            "primaryKeyId": 1234567890,
+            "keyInfo": [
+            {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
+                "status": "ENABLED",
+                "keyId": 1234567890,
+                "outputPrefixType": "TINK"
+            }
+            ]
+        },
+        "kek_uri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
+    }
+
+    """
 
     encrypted_keyset: str
     keyset_info: dict[str, t.Any]
@@ -63,7 +83,7 @@ class KeyWrapper(BaseModel):
     key_id: str = ""
     keyset: t.Optional[PseudoKeyset] = None
 
-    def __init__(self, key: t.Optional[str | PseudoKeyset], **kwargs: t.Any):
+    def __init__(self, key: t.Optional[str | PseudoKeyset] = None, **kwargs: t.Any):
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
@@ -72,15 +92,20 @@ class KeyWrapper(BaseModel):
         """
         super().__init__(**kwargs)
         if isinstance(key, str):
-            # Either we have a keyset json
-            if key.startswith("{"):
-                pseudo_keyset = PseudoKeyset.parse_obj(json.loads(key))
+            try:  # Attempt to parse the key as a JSON-string matching the PseudoKeyset model
+                pseudo_keyset = PseudoKeyset.model_validate(json.loads(key))
                 self.key_id = pseudo_keyset.get_key_id()
                 self.keyset = pseudo_keyset
-            # Either or a "key reference" (i.e. an id of a "common" key)
-            else:
+                return
+            except (ValidationError, json.JSONDecodeError):
+                pass
+
+            # Else, attempt to parse the key as one of the predefined keys
+            if key in PredefinedKeys.__members__.values():
                 self.key_id = key
                 self.keyset = None
+            else:
+                raise ValueError(f"Key '{key}' is not a valid key reference or keyset")
         # Or we have an already parsed PseudoKeyset
         elif isinstance(key, PseudoKeyset):
             self.key_id = key.get_key_id()
@@ -112,10 +137,7 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
         key_id (PredefinedKeys | str): The key to be used for pseudonomization
         snapshot_date (date): The timestamp for the version of the SID catalogue.
             If not specified, will choose the latest version.
-
-            The format is:
-            g<YYYY>m<MM>d<DD>
-            where the bracketed parts represent year, month and day respectively
+            The format is: YYYY-MM-DD, e.g. 2021-05-21
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
@@ -143,7 +165,7 @@ class RedactArgs(PseudoFunctionArgs):
     def __str__(self) -> str:
         """Overload the parent class. The redact function is expected as an arg, not kwarg.
 
-        I.e. 'redact(<replacement_string>)
+        I.e. 'redact(<replacement_string>)'
         """
         return self.replacement_string
 
@@ -214,7 +236,7 @@ class DepseudonymizeFileRequest(APIModel):
 
     pseudo_config: PseudoConfig
     target_uri: t.Optional[str] = None
-    target_content_type: t.Optional[str] = None
+    target_content_type: Mimetypes
     compression: t.Optional[TargetCompression] = None
 
 
@@ -224,5 +246,5 @@ class RepseudonymizeFileRequest(APIModel):
     source_pseudo_config: PseudoConfig
     target_pseudo_config: PseudoConfig
     target_uri: t.Optional[str] = None
-    target_content_type: str
+    target_content_type: Mimetypes
     compression: t.Optional[TargetCompression] = None

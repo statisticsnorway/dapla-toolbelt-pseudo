@@ -209,7 +209,7 @@ def depseudonymize(
     rules = _rules_of(fields=fields, sid_fields=[], key=k.key_id)
     req = DepseudonymizeFileRequest(
         pseudo_config=PseudoConfig(rules=rules, keysets=k.keyset_list()),
-        target_content_type=content_type,
+        target_content_type=content_type,  # type: ignore [arg-type]
         target_uri=None,
         compression=None,
     )
@@ -277,7 +277,7 @@ def repseudonymize(
         target_pseudo_config=PseudoConfig(
             rules=target_rules, keysets=target_key_wrapper.keyset_list()
         ),
-        target_content_type=content_type,
+        target_content_type=content_type,  # type: ignore [arg-type]
         target_uri=None,
         compression=None,
     )

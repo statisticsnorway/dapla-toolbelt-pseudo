@@ -9,12 +9,12 @@ import requests
 from dapla import AuthClient
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
-from dapla_pseudo.v1.models import DepseudonymizeFileRequest
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
-from dapla_pseudo.v1.models import RepseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 
 from ..types import BinaryFileDecl
 from ..types import FileSpecDecl
@@ -24,6 +24,8 @@ class PseudoClient:
     """Client for interacting with the Dapla Pseudo Service REST API."""
 
     PSEUDONYMIZE_FILE_ENDPOINT = "pseudonymize/file"
+    DEPSEUDONYMIZE_FILE_ENDPOINT = "depseudonymize/file"
+    REPSEUDONYMIZE_FILE_ENDPOINT = "repseudonymize/file"
 
     def __init__(
         self,
@@ -92,30 +94,13 @@ class PseudoClient:
             stream,
         )
 
-    def _extract_name(
-        self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]
-    ) -> str:
-        if name is None:
-            try:
-                name = data.name
-            except AttributeError:
-                # Fallback to default name
-                name = "unknown"
-
-        if not name.endswith(".json") and content_type is Mimetypes.JSON:
-            name = f"{name}.json"  # Pseudo service expects a file extension
-
-        if "/" in name:
-            name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
-
-        return name
-
     def depseudonymize_file(
         self,
         depseudonymize_request: DepseudonymizeFileRequest,
-        file_path: str,
+        data: BinaryFileDecl,
         timeout: int,
         stream: bool = False,
+        name: t.Optional[str] = None,
     ) -> requests.Response:
         """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -147,16 +132,23 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: depseudonymized data
         """
-        return self._process_file(
-            "depseudonymize", depseudonymize_request, file_path, timeout, stream
+        return self._post_to_file_endpoint(
+            self.DEPSEUDONYMIZE_FILE_ENDPOINT,
+            depseudonymize_request,
+            data,
+            self._extract_name(data, depseudonymize_request.target_content_type, name),
+            depseudonymize_request.target_content_type,
+            timeout,
+            stream,
         )
 
     def repseudonymize_file(
         self,
         repseudonymize_request: RepseudonymizeFileRequest,
-        file_path: str,
+        data: BinaryFileDecl,
         timeout: int,
         stream: bool = False,
+        name: t.Optional[str] = None,
     ) -> requests.Response:
         """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
 
@@ -190,9 +182,33 @@ class PseudoClient:
         :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
         :return: repseudonymized data
         """
-        return self._process_file(
-            "repseudonymize", repseudonymize_request, file_path, timeout, stream
+        return self._post_to_file_endpoint(
+            self.REPSEUDONYMIZE_FILE_ENDPOINT,
+            repseudonymize_request,
+            data,
+            self._extract_name(data, repseudonymize_request.target_content_type, name),
+            repseudonymize_request.target_content_type,
+            timeout,
+            stream,
         )
+
+    def _extract_name(
+        self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]
+    ) -> str:
+        if name is None:
+            try:
+                name = data.name
+            except AttributeError:
+                # Fallback to default name
+                name = "unknown"
+
+        if not name.endswith(".json") and content_type is Mimetypes.JSON:
+            name = f"{name}.json"  # Pseudo service expects a file extension
+
+        if "/" in name:
+            name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
+
+        return name
 
     def _process_file(
         self,

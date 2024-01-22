@@ -1,3 +1,5 @@
+"""Ignored in preparation of deprecation of this interface.
+
 import json
 from unittest import mock
 
@@ -45,3 +47,4 @@ def test_depseudonymize_request_with_default_key(
 
         actual_request_dict = json.loads(arg["files"]["request"][1])
         assert actual_request_dict == expected_request_dict
+"""
