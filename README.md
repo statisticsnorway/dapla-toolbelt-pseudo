@@ -29,6 +29,8 @@ Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
 ## Features
 
+Other examples can also be viewed through notebook files for [pseudo](tests/pseudo_examples.ipynb) and [depseudo](tests/depseudo_examples.ipynb)
+
 ### Pseudonymize
 
 ```python
@@ -210,6 +212,39 @@ df = (
 )
 ```
 
+### Depseudonymize
+
+The "Depseudonymize" functions are almost exactly the same as when pseudonymizing.
+The only difference being the lack of a "with_stable_id()"-function.
+This is to say, that you cannot map from Stable ID *back to* FNR as of Jan 2023.
+
+```python
+from dapla_pseudo import Depseudonymize
+import polars as pl
+
+file_path="data/personer_pseudonymized.csv"
+dtypes = {"fnr": pl.Utf8, "fornavn": pl.Utf8, "etternavn": pl.Utf8, "kjonn": pl.Categorical, "fodselsdato": pl.Utf8}
+df = pl.read_csv(file_path, dtypes=dtypes) # Create DataFrame from file
+
+# Example: Single field default encryption (DAEAD)
+result_df = (
+    Depseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fornavn")                          # Select the field to depseudonymize
+    .with_default_encryption()                     # Select the depseudonymization algorithm to apply
+    .run()                                         # Apply depseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
+# Example: Multiple fields default encryption (DAEAD)
+result_df = (
+    Depseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fornavn", "etternavn")             # Select multiple fields to depseudonymize
+    .with_default_encryption()                     # Select the depseudonymization algorithm to apply
+    .run()                                         # Apply depseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+```
+
 ### Repseudonymize
 
 ```python
@@ -217,11 +252,6 @@ df = (
 ## TODO
 ```
 
-### Depseudonymize
-
-```python
-## TODO
-```
 
 _Note that depseudonymization requires elevated access privileges._
 

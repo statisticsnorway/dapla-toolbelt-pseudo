@@ -20,6 +20,7 @@ from importlib.metadata import version
 # Ref: https://github.com/python-poetry/poetry/issues/144#issuecomment-1488038660
 __version__ = version("dapla_toolbelt_pseudo")
 
+from .v1 import Depseudonymize
 from .v1 import Field
 from .v1 import PseudoClient
 from .v1 import PseudoKeyset
@@ -35,6 +36,7 @@ __all__ = [
     "depseudonymize",
     "repseudonymize",
     "Pseudonymize",
+    "Depseudonymize",
     "Validator",
     "Field",
     "PseudoKeyset",
