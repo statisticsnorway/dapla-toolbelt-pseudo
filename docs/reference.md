@@ -13,14 +13,118 @@ delete the .rst file afterwards.
 
 ```{eval-rst}
 dapla\_pseudo package
-=============================================================================
+=====================
 
+Subpackages
+-----------
 
-dapla\_pseudo.functions module
------------------------------------------------------------------------------
+dapla\_pseudo.constants module
+------------------------------
 
-.. automodule:: dapla_pseudo.functions
+.. automodule:: dapla_pseudo.constants
    :members:
    :undoc-members:
    :show-inheritance:
+
+dapla\_pseudo.exceptions module
+-------------------------------
+
+.. automodule:: dapla_pseudo.exceptions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.models module
+---------------------------
+
+.. automodule:: dapla_pseudo.models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.types module
+--------------------------
+
+.. automodule:: dapla_pseudo.types
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.utils module
+--------------------------
+
+.. automodule:: dapla_pseudo.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1 package
+========================
+
+
+dapla\_pseudo.v1.api\_models module
+-----------------------------------
+
+.. automodule:: dapla_pseudo.v1.api_models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.client module
+------------------------------
+
+.. automodule:: dapla_pseudo.v1.client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.ops module
+---------------------------
+
+.. automodule:: dapla_pseudo.v1.ops
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.pseudo module
+------------------------------
+
+.. automodule:: dapla_pseudo.v1.pseudo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.pseudo\_commons module
+---------------------------------------
+
+.. automodule:: dapla_pseudo.v1.pseudo_commons
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.result module
+------------------------------
+
+.. automodule:: dapla_pseudo.v1.result
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.supported\_file\_format module
+-----------------------------------------------
+
+.. automodule:: dapla_pseudo.v1.supported_file_format
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dapla\_pseudo.v1.validation module
+----------------------------------
+
+.. automodule:: dapla_pseudo.v1.validation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 ```

@@ -8,33 +8,30 @@ from unittest.mock import patch
 import pandas as pd
 import polars as pl
 import pytest
-from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.exceptions import FileInvalidError
-from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.builder_models import Result
-from dapla_pseudo.v1.builder_pseudo import File
-from dapla_pseudo.v1.builder_pseudo import PseudoData
-from dapla_pseudo.v1.builder_pseudo import _do_pseudonymize_field
-from dapla_pseudo.v1.builder_pseudo import _get_content_type_from_file
-from dapla_pseudo.v1.models import DaeadKeywordArgs
-from dapla_pseudo.v1.models import FF31KeywordArgs
-from dapla_pseudo.v1.models import KeyWrapper
-from dapla_pseudo.v1.models import MapSidKeywordArgs
-from dapla_pseudo.v1.models import Mimetypes
-from dapla_pseudo.v1.models import PseudoConfig
-from dapla_pseudo.v1.models import PseudoFunction
-from dapla_pseudo.v1.models import PseudoKeyset
-from dapla_pseudo.v1.models import PseudonymizeFileRequest
-from dapla_pseudo.v1.models import PseudoRule
-from dapla_pseudo.v1.models import RedactArgs
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.v1.api_models import FF31KeywordArgs
+from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoConfig
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import PseudoRule
+from dapla_pseudo.v1.api_models import RedactArgs
+from dapla_pseudo.v1.pseudo import Pseudonymize
+from dapla_pseudo.v1.pseudo import _do_pseudonymize_field
+from dapla_pseudo.v1.pseudo_commons import File
+from dapla_pseudo.v1.result import Result
 
-PKG = "dapla_pseudo.v1.builder_pseudo"
+PKG = "dapla_pseudo.v1.pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
 
 
@@ -86,10 +83,10 @@ def test_builder_pandas_pseudonymize_minimal_call(
     patched_post_to_field_endpoint.return_value = single_field_response
 
     pseudo_result = (
-        PseudoData.from_pandas(df)
+        Pseudonymize.from_pandas(df)
         .on_fields(field_name)
         .with_default_encryption()
-        .pseudonymize()
+        .run()
     )
     assert isinstance(pseudo_result, Result)
     pseudo_dataframe = pseudo_result.to_pandas()
@@ -126,15 +123,15 @@ def test_single_field_do_pseudonymize_field(
 
 
 def test_builder_fields_selector_single_field(df: pd.DataFrame) -> None:
-    PseudoData.from_pandas(df).on_fields("fornavn")._fields = ["fornavn"]
+    Pseudonymize.from_pandas(df).on_fields("fornavn")._fields = ["fornavn"]
 
 
 def test_builder_fields_selector_single_field_polars(df_polars: pl.DataFrame) -> None:
-    PseudoData.from_polars(df_polars).on_fields("fornavn")._fields = ["fornavn"]
+    Pseudonymize.from_polars(df_polars).on_fields("fornavn")._fields = ["fornavn"]
 
 
 def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:
-    PseudoData.from_pandas(df).on_fields("fornavn", "fnr")._fields = [
+    Pseudonymize.from_pandas(df).on_fields("fornavn", "fnr")._fields = [
         "fornavn",
         "fnr",
     ]
@@ -145,9 +142,9 @@ def test_builder_file_default(
     patched_pseudonymize_file: MagicMock, json_file_path: str
 ) -> None:
     patched_pseudonymize_file.return_value = Mock()
-    PseudoData.from_file(json_file_path).on_fields(
+    Pseudonymize.from_file(json_file_path).on_fields(
         "fornavn"
-    ).with_default_encryption().pseudonymize()
+    ).with_default_encryption().run()
 
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(
@@ -167,7 +164,7 @@ def test_builder_file_default(
         target_uri=None,
         compression=None,
     )
-    file_dataset = t.cast(File, PseudoData.dataset)
+    file_dataset = t.cast(File, Pseudonymize.dataset)
     patched_pseudonymize_file.assert_called_once_with(
         pseudonymize_request,  # use ANY to avoid having to mock the whole request
         file_dataset.file_handle,
@@ -182,9 +179,9 @@ def test_builder_file_hierarchical(
     patched_pseudonymize_file: MagicMock, json_hierarch_file_path: str
 ) -> None:
     patched_pseudonymize_file.return_value = Mock()
-    PseudoData.from_file(json_hierarch_file_path).on_fields(
+    Pseudonymize.from_file(json_hierarch_file_path).on_fields(
         "person_info/fnr"
-    ).with_default_encryption().pseudonymize()
+    ).with_default_encryption().run()
 
     pseudonymize_request = PseudonymizeFileRequest(
         pseudo_config=PseudoConfig(
@@ -204,7 +201,7 @@ def test_builder_file_hierarchical(
         target_uri=None,
         compression=None,
     )
-    file_dataset = t.cast(File, PseudoData.dataset)
+    file_dataset = t.cast(File, Pseudonymize.dataset)
     patched_pseudonymize_file.assert_called_once_with(
         pseudonymize_request,  # use ANY to avoid having to mock the whole request
         file_dataset.file_handle,
@@ -219,9 +216,7 @@ def test_builder_pseudo_function_selector_default(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    PseudoData.from_pandas(df).on_fields(
-        "fornavn"
-    ).with_default_encryption().pseudonymize()
+    Pseudonymize.from_pandas(df).on_fields("fornavn").with_default_encryption().run()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
         field_name="fornavn",
@@ -240,7 +235,7 @@ def test_builder_pseudo_function_selector_with_sid(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    PseudoData.from_pandas(df).on_fields("fnr").with_stable_id().pseudonymize()
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_stable_id().run()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
@@ -259,9 +254,9 @@ def test_builder_pseudo_function_with_sid_snapshot_date_string(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    PseudoData.from_pandas(df).on_fields("fnr").with_stable_id(
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_stable_id(
         sid_snapshot_date=convert_to_date("2023-05-21")
-    ).pseudonymize()
+    ).run()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
@@ -281,9 +276,9 @@ def test_builder_pseudo_function_with_sid_snapshot_date_date(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    PseudoData.from_pandas(df).on_fields("fnr").with_stable_id(
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_stable_id(
         sid_snapshot_date=date.fromisoformat("2023-05-21")
-    ).pseudonymize()
+    ).run()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
@@ -303,9 +298,9 @@ def test_builder_pseudo_function_selector_fpe(
     patch_do_pseudonymize_field: MagicMock, df: pd.DataFrame
 ) -> None:
     mock_return_do_pseudonymize_field(patch_do_pseudonymize_field)
-    PseudoData.from_pandas(df).on_fields(
+    Pseudonymize.from_pandas(df).on_fields(
         "fnr"
-    ).with_papis_compatible_encryption().pseudonymize()
+    ).with_papis_compatible_encryption().run()
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
         values=df["fnr"].tolist(),
@@ -327,9 +322,9 @@ def test_builder_pseudo_function_selector_custom(
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
     )
-    PseudoData.from_pandas(df).on_fields("fnr").with_custom_function(
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_custom_function(
         pseudo_func
-    ).pseudonymize()
+    ).run()
 
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -351,9 +346,9 @@ def test_builder_pseudo_function_selector_redact(
         function_type=PseudoFunctionTypes.REDACT,
         kwargs=RedactArgs(replacement_string="test"),
     )
-    PseudoData.from_pandas(df).on_fields("fnr").with_custom_function(
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_custom_function(
         pseudo_func
-    ).pseudonymize()
+    ).run()
 
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -387,15 +382,15 @@ def test_builder_pseudo_keyset_selector_custom(
     }
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.DAEAD,
-        kwargs=DaeadKeywordArgs(key_id="1403797237"),
+        kwargs=DaeadKeywordArgs(key_id="123"),
     )
     keyset = PseudoKeyset(
         kek_uri=kek_uri, encrypted_keyset=encrypted_keyset, keyset_info=keyset_info
     )
 
-    PseudoData.from_pandas(df).on_fields("fnr").with_custom_function(
-        pseudo_func
-    ).pseudonymize(with_custom_keyset=keyset)
+    Pseudonymize.from_pandas(df).on_fields("fnr").with_custom_function(pseudo_func).run(
+        custom_keyset=keyset
+    )
 
     patch_do_pseudonymize_field.assert_called_once_with(
         path="pseudonymize/field",
@@ -420,10 +415,10 @@ def test_pseudonymize_field_dataframe_setup(
 
     fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
     result = (
-        PseudoData.from_pandas(df)
+        Pseudonymize.from_pandas(df)
         .on_fields(*fields_to_pseudonymize)
         .with_default_encryption()
-        .pseudonymize()
+        .run()
     )
     assert isinstance(result, Result)
     dataframe = result.to_pandas()
@@ -434,63 +429,41 @@ def test_pseudonymize_field_dataframe_setup(
 
 def test_builder_field_selector_multiple_fields(df: pd.DataFrame) -> None:
     fields = ["snr", "snr_mor", "snr_far"]
-    assert PseudoData.from_pandas(df).on_fields(*fields)._fields == [
+    assert Pseudonymize.from_pandas(df).on_fields(*fields)._fields == [
         f"{f}" for f in fields
     ]
-
-
-@pytest.mark.parametrize("supported_mimetype", Mimetypes.__members__.keys())
-def test_get_content_type_from_file(supported_mimetype: str) -> None:
-    file_extension = supported_mimetype.lower()
-    file_handle = open(f"{TEST_FILE_PATH}/test.{file_extension}", mode="rb")
-    content_type = _get_content_type_from_file(file_handle)
-    assert content_type.name == supported_mimetype
-
-
-def test_get_content_type_from_gcs_file() -> None:
-    mock_gcs_file_handle = Mock(spec=GCSFile)
-    mock_gcs_file_handle.full_name = "gs://dummy.json"
-
-    content_type = _get_content_type_from_file(mock_gcs_file_handle)
-    assert content_type.name == "JSON"
-
-
-def test_get_content_type_from_file_unsupported_mimetype() -> None:
-    file_handle = open(f"{TEST_FILE_PATH}/test.xml", mode="rb")
-    with pytest.raises(MimetypeNotSupportedError):
-        _get_content_type_from_file(file_handle)
 
 
 def test_builder_from_file_not_a_file() -> None:
     path = f"{TEST_FILE_PATH}/not/a/file.json"
     with pytest.raises(FileNotFoundError):
-        PseudoData.from_file(path)
+        Pseudonymize.from_file(path)
 
 
 def test_builder_from_file_no_file_extension() -> None:
     path = f"{TEST_FILE_PATH}/file_no_extension"
 
     with pytest.raises(NoFileExtensionError):
-        PseudoData.from_file(path)
+        Pseudonymize.from_file(path)
 
 
 def test_builder_from_file_empty_file() -> None:
     path = f"{TEST_FILE_PATH}/empty_file"
 
     with pytest.raises(FileInvalidError):
-        PseudoData.from_file(path)
+        Pseudonymize.from_file(path)
 
 
 @pytest.mark.parametrize("file_format", Mimetypes.__members__.keys())
 def test_builder_from_file(file_format: str) -> None:
     # Test reading all supported file extensions
-    PseudoData.from_file(f"{TEST_FILE_PATH}/test.{file_format.lower()}")
+    Pseudonymize.from_file(f"{TEST_FILE_PATH}/test.{file_format.lower()}")
 
 
 def test_builder_from_invalid_gcs_file() -> None:
     invalid_gcs_path = "gs://invalid/path.json"
     with pytest.raises((FileNotFoundError, DefaultCredentialsError)):
-        PseudoData.from_file(invalid_gcs_path)
+        Pseudonymize.from_file(invalid_gcs_path)
 
 
 @patch(f"{PKG}._do_pseudonymize_field")
@@ -504,12 +477,12 @@ def test_builder_to_polars_from_polars_chaining(
     patch_do_pseudonymize_field.side_effect = side_effect
     fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
     result: pl.DataFrame = (
-        PseudoData.from_pandas(df)
+        Pseudonymize.from_pandas(df)
         .on_fields(*fields_to_pseudonymize)
         .with_default_encryption()
         .on_fields("fnr")
         .with_stable_id()
-        .pseudonymize()
+        .run()
         .to_polars()
     )
     assert result is not None

@@ -11,7 +11,7 @@ from dapla import FileClient
 from requests import Response
 
 from dapla_pseudo.utils import get_file_format_from_file_name
-from dapla_pseudo.v1.models import Mimetypes
+from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import read_to_pandas_df

@@ -10,9 +10,9 @@ import pytest
 
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.builder_validation import Validator
+from dapla_pseudo.v1.validation import Validator
 
-PKG = "dapla_pseudo.v1.builder_validation"
+PKG = "dapla_pseudo.v1.validation"
 TEST_FILE_PATH = "tests/v1/test_files"
 
 

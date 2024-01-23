@@ -8,11 +8,11 @@ import pytest
 
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.models import DaeadKeywordArgs
-from dapla_pseudo.v1.models import Field
-from dapla_pseudo.v1.models import MapSidKeywordArgs
-from dapla_pseudo.v1.models import PseudoConfig
-from dapla_pseudo.v1.models import PseudoFunction
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.v1.api_models import Field
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import PseudoConfig
+from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.ops import _dataframe_to_json
 from dapla_pseudo.v1.ops import _rules_of
 

@@ -1,12 +1,15 @@
+"""Ignored in preparation of deprecation of this interface.
+
 import json
 from unittest import mock
 
 import pytest
+from typeguard import typeguard_ignore
 
 from dapla_pseudo import repseudonymize
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
-from dapla_pseudo.v1.models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoKeyset
 
 base_url = "https://mocked.dapla-pseudo-service"
 auth_token = "some-auth-token"
@@ -30,6 +33,7 @@ custom_keyset = PseudoKeyset.model_validate(
 )
 
 
+@typeguard_ignore
 def test_repseudonymize_request_with_default_keys(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -81,6 +85,7 @@ def test_repseudonymize_request_with_default_keys(
         assert actual_request_dict == expected_request_dict
 
 
+@typeguard_ignore
 def test_repseudonymize_request_with_explicitly_specified_common_key(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -137,6 +142,7 @@ def test_repseudonymize_request_with_explicitly_specified_common_key(
         assert actual_request_dict == expected_request_dict
 
 
+@typeguard_ignore
 def test_repseudonymize_request_with_explicitly_specified_keyset(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -207,3 +213,4 @@ def test_repseudonymize_request_with_explicitly_specified_keyset(
 
         actual_request_dict = json.loads(arg["files"]["request"][1])
         assert actual_request_dict == expected_request_dict
+"""
