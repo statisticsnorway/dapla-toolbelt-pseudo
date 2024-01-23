@@ -46,7 +46,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fornavn")                          # Select the field to pseudonymize
     .with_default_encryption()                     # Select the pseudonymization algorithm to apply
-    .pseudonymize()                                # Apply pseudonymization to the selected field
+    .run()                                # Apply pseudonymization to the selected field
     .to_polars()                                   # Get the result as a polars dataframe
 )
 
@@ -55,7 +55,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
     .with_default_encryption()                     # Select the pseudonymization algorithm to apply
-    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .run()                                # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
 
@@ -64,7 +64,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fnr")                              # Select the field to pseudonymize
     .with_stable_id()                              # Map the selected field to stable id
-    .pseudonymize()                                # Apply pseudonymization to the selected fields
+    .run()                                # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
 ```
