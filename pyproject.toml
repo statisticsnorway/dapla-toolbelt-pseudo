@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dapla-toolbelt-pseudo"
-version = "1.0.2"
+version = "1.0.3"
 description = "Pseudonymization extensions for Dapla"
 authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
 license = "MIT"
@@ -91,6 +91,7 @@ module = [
     "fsspec.spec",
     "typeguard",
     "puremagic",
+    "google.*",
 ]
 ignore_missing_imports = true
 
