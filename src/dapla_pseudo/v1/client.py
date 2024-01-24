@@ -5,6 +5,8 @@ import os
 import typing as t
 from datetime import date
 
+import google.auth.transport.requests
+import google.oauth2.id_token
 import requests
 from dapla import AuthClient
 
@@ -41,11 +43,19 @@ class PseudoClient:
         self.static_auth_token = auth_token
 
     def __auth_token(self) -> str:
-        return (
-            str(AuthClient.fetch_personal_token())
-            if self.static_auth_token is None
-            else str(self.static_auth_token)
-        )
+        if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
+            audience = os.environ["PSEUDO_SERVICE_URL"]
+            auth_req = google.auth.transport.requests.Request()
+            token = t.cast(
+                str, google.oauth2.id_token.fetch_id_token(auth_req, audience)
+            )
+            return token
+        else:
+            return (
+                str(AuthClient.fetch_personal_token())
+                if self.static_auth_token is None
+                else str(self.static_auth_token)
+            )
 
     def pseudonymize_file(
         self,

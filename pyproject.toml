@@ -91,6 +91,7 @@ module = [
     "fsspec.spec",
     "typeguard",
     "puremagic",
+    "google.*",
 ]
 ignore_missing_imports = true
 
