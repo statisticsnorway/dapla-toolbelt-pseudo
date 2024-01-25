@@ -30,7 +30,7 @@ from dapla_pseudo.v1.result import Result
 
 
 class Depseudonymize:
-    """Starting point for pseudonymization of datasets.
+    """Starting point for depseudonymization of datasets.
 
     This class should not be instantiated, only the static methods should be used.
     """
@@ -39,7 +39,7 @@ class Depseudonymize:
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Depseudonymize._Depseudonymizer":
-        """Initialize a pseudonymization request from a pandas DataFrame."""
+        """Initialize a depseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         Depseudonymize.dataset = dataset
         return Depseudonymize._Depseudonymizer()
@@ -52,7 +52,7 @@ class Depseudonymize:
 
     @staticmethod
     def from_file(dataset: FileLikeDatasetDecl) -> "Depseudonymize._Depseudonymizer":
-        """Initialize a pseudonymization request from a pandas dataframe read from file.
+        """Initialize a depseudonymization request from a pandas dataframe read from file.
 
         Args:
             dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.
@@ -88,7 +88,7 @@ class Depseudonymize:
             self._timeout: int = TIMEOUT_DEFAULT
 
         def on_fields(self, *fields: str) -> "Depseudonymize._DepseudoFuncSelector":
-            """Specify one or multiple fields to be pseudonymized."""
+            """Specify one or multiple fields to be depseudonymized."""
             return Depseudonymize._DepseudoFuncSelector(list(fields), self._rules)
 
         def run(
@@ -133,7 +133,7 @@ class Depseudonymize:
                     )
 
         def _depseudonymize_file(self) -> Result:
-            """Pseudonymize the entire file."""
+            """Depseudonymize the entire file."""
             # Need to type-cast explicitly. We know that Depseudonymize.dataset is a "File" if we reach this method.
             file = t.cast(File, Depseudonymize.dataset)
 
@@ -160,13 +160,13 @@ class Depseudonymize:
             )
 
         def _depseudonymize_field(self) -> Result:
-            """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
+            """Depseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
-            The pseudonymization is performed in parallel. After the parallel processing is finished,
-            the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
+            The depseudonymization is performed in parallel. After the parallel processing is finished,
+            the depseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
 
             Returns:
-                Result: Containing the pseudonymized 'self._dataframe' and the associated metadata.
+                Result: Containing the depseudonymized 'self._dataframe' and the associated metadata.
             """
 
             def depseudonymize_field_runner(
@@ -229,7 +229,7 @@ class Depseudonymize:
         def with_default_encryption(
             self, custom_key: Optional[PredefinedKeys | str] = None
         ) -> "Depseudonymize._Depseudonymizer":
-            """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
+            """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
             Args:
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
@@ -251,7 +251,7 @@ class Depseudonymize:
         def with_papis_compatible_encryption(
             self, custom_key: Optional[PredefinedKeys | str] = None
         ) -> "Depseudonymize._Depseudonymizer":
-            """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
+            """Depseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 
             Args:
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
