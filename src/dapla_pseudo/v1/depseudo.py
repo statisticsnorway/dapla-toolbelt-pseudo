@@ -46,7 +46,7 @@ class Depseudonymize:
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
-        """Initialize a pseudonymization request from a polars DataFrame."""
+        """Initialize a depseudonymization request from a polars DataFrame."""
         Depseudonymize.dataset = dataframe
         return Depseudonymize._Depseudonymizer()
 
