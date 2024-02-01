@@ -1,0 +1,39 @@
+name: Pseudo service
+
+env:
+  PSEUDO_SERVICE_URL: "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+
+on:
+  push:
+    branches:
+      - integration-test
+
+permissions:
+  contents: "read"
+  id-token: "write"
+
+jobs:
+  integration_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - id: "auth"
+      name: "Authenticate to Google Cloud"
+      uses: "google-github-actions/auth@v1.1.1"
+      with:
+        workload_identity_provider: ${{ secret.WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secret.INTEGRATION_TEST_SA_EMAIL }}
+        token_format: "access_token"
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        version: '>= 363.0.0'
+    - name: Generate, mask, and output Google ID token as a secret
+      id: get-id-token
+      run: |
+        pseudo_service_auth_token=$(shuf -i 1-100 -n 1)
+        echo "::add-mask::$pseudo_service_auth_token"
+        echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT""
+    - name: try to echo secret
+      run: echo "the secret number is ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}"
