@@ -32,10 +32,40 @@ jobs:
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
       run: |
-        pseudo_service_auth_token="$(shuf -i 1-100 -n 1)"
+        pseudo_service_auth_token="$(gcloud auth print-identity-token)"
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
-    - name: try to echo secret
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+      run: pip install .
+    - name: Test toolbelt pseudo
       env:
         PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
-      run: echo "the secret number is $PSEUDO_SERVICE_AUTH_TOKEN"
+      run: |
+        import pandas as pd
+        from dapla_pseudo import Pseudonymize
+
+        JSON_FILE = "tests/data/personer_pseudonymized.json"
+
+        df = pd.read_json(
+            JSON_FILE,
+            dtype={
+                "fnr": "string",
+                "fornavn": "string",
+                "etternavn": "string",
+                "kjonn": "category",
+                "fodselsdato": "string",
+            },
+        )
+
+        result = (
+            Pseudonymize                   ### GENERAL WORKFLOW ###
+            .from_pandas(df)             # Select dataset
+            .on_fields("fnr")            # Select fields in dataset
+            .with_default_encryption()   # Select encryption method on fields
+            .run()                       # Apply pseudonymization
+        )
+        result.to_polars().head()        # Convert result to Polars DataFrame
+      shell: python
