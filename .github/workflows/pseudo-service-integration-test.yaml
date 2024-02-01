@@ -32,7 +32,7 @@ jobs:
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
       run: |
-        pseudo_service_auth_token=$(shuf -i 1-100 -n 1)
+        pseudo_service_auth_token="$(shuf -i 1-100 -n 1)"
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT""
     - name: try to echo secret
