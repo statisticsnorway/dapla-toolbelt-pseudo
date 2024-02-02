@@ -35,4 +35,4 @@ def test_pseudonymize() -> None:
         .with_default_encryption()  # Select encryption method on fields
         .run()  # Apply pseudonymization
     )
-    assert result.to_pandas().eq(expected_df)
+    assert result.to_pandas().equals(expected_df)
