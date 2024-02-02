@@ -49,8 +49,10 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python }}
-    - name : Install dapla-toolbelt-pseudo
-      run: pip install .
+    - name : Install requirements
+      run: |
+        pip install .
+        pip install pytest==8.0.0
     - name: Integration test
       env:
         PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
