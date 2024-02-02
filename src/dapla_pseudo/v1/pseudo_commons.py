@@ -1,12 +1,16 @@
 """Common functions shared by all pseudo modules."""
 import io
+import json
 import os
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
 
 import fsspec
+import polars as pl
+import requests
 from dapla import FileClient
+from datadoc_model.model import PseudoVariable
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 
@@ -16,6 +20,9 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 
 
@@ -115,3 +122,52 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
         ) from None
 
     return content_type
+
+
+@dataclass
+class PseudoFieldResponse:
+    """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
+
+    data: pl.Series
+    metadata: PseudoVariable
+
+
+def pseudonymize_operation_field(
+    path: str,
+    field_name: str,
+    values: list[str],
+    pseudo_func: t.Optional[PseudoFunction],
+    metadata_map: dict[str, str],
+    timeout: int,
+    keyset: t.Optional[PseudoKeyset] = None,
+) -> PseudoFieldResponse:
+    """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
+
+    Args:
+        path (str): The path to the pseudonymization endpoint.
+        field_name (str): The name of the field being pseudonymized.
+        values (list[str]): The list of values to be pseudonymized.
+        pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
+        metadata_map (Dict[str, str]): A dictionary to store the metadata associated with each field.
+        timeout (int): The timeout in seconds for the API call.
+        keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
+
+    Returns:
+        pl.Series: A pandas Series containing the pseudonymized values.
+    """
+    response: requests.Response = _client()._post_to_field_endpoint(
+        path, field_name, values, pseudo_func, timeout, keyset, stream=True
+    )
+    metadata_map[field_name] = str(response.headers.get("metadata") or "")
+
+    # The response content is received as a buffered byte stream from the server.
+    # We decode the content using UTF-8, which gives us a List[List[str]] structure.
+    # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
+    payload = json.loads(response.content.decode("utf-8"))
+    metadata = payload["metadata"]
+    data = payload["data"]
+    combined_list = []
+    for sublist in data:
+        combined_list.extend(sublist)
+
+    return PseudoFieldResponse(pl.Series(combined_list), metadata)

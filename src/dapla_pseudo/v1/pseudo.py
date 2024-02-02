@@ -1,5 +1,4 @@
 """Builder for submitting a pseudonymization request."""
-import json
 import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
@@ -8,7 +7,9 @@ from typing import Optional
 
 import pandas as pd
 import polars as pl
-import requests
+from datadoc_model.model import MetadataContainer
+from datadoc_model.model import PseudonymizationJsonSchema
+from datadoc_model.model import PseudoVariable
 from requests import Response
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -27,7 +28,9 @@ from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.pseudo_commons import File
+from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
+from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import PseudoFileResponse
 from dapla_pseudo.v1.result import Result
 
@@ -172,7 +175,7 @@ class Pseudonymize:
 
             def pseudonymize_field_runner(
                 field_name: str, series: pl.Series, pseudo_func: PseudoFunction
-            ) -> tuple[str, pl.Series]:
+            ) -> tuple[str, PseudoFieldResponse]:
                 """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
@@ -183,23 +186,21 @@ class Pseudonymize:
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
-                return (
-                    field_name,
-                    _do_pseudonymize_field(
-                        path="pseudonymize/field",
-                        field_name=field_name,
-                        values=series.to_list(),
-                        pseudo_func=pseudo_func,
-                        metadata_map=self._metadata,
-                        timeout=self._timeout,
-                        keyset=KeyWrapper(self._pseudo_keyset).keyset,
-                    ),
+                return field_name, pseudonymize_operation_field(
+                    path="pseudonymize/field",
+                    field_name=field_name,
+                    values=series.to_list(),
+                    pseudo_func=pseudo_func,
+                    metadata_map=self._metadata,
+                    timeout=self._timeout,
+                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
 
             dataframe = t.cast(pl.DataFrame, Pseudonymize.dataset)
             # Execute the pseudonymization API calls in parallel
             with ThreadPoolExecutor() as executor:
                 pseudonymized_field: dict[str, pl.Series] = {}
+                metadata_variables: list[PseudoVariable] = []
                 futures = [
                     executor.submit(
                         pseudonymize_field_runner,
@@ -211,14 +212,20 @@ class Pseudonymize:
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
                 for future in as_completed(futures):
-                    result = future.result()
+                    field_name, response = future.result()
+                    metadata_variables.append(response.metadata)
                     # Each future result contains the field_name (0) and the pseudonymize_values (1)
-                    pseudonymized_field[result[0]] = result[1]
+                    pseudonymized_field[field_name] = response.data
 
+                metadata = MetadataContainer(
+                    pseudonymization=PseudonymizationJsonSchema(
+                        pseudo_variables=metadata_variables
+                    )
+                )
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
                 dataframe = dataframe.update(pseudonymized_df)
 
-            return Result(pseudo_response=dataframe, metadata=self._metadata)
+            return Result(pseudo_response=dataframe, metadata=metadata.model_dump())
 
     class _PseudoFuncSelector:
         def __init__(
@@ -315,42 +322,3 @@ class Pseudonymize:
                 for field in self._fields
             ]
             return Pseudonymize._Pseudonymizer(self._existing_rules + rules)
-
-
-def _do_pseudonymize_field(
-    path: str,
-    field_name: str,
-    values: list[str],
-    pseudo_func: Optional[PseudoFunction],
-    metadata_map: dict[str, str],
-    timeout: int,
-    keyset: Optional[PseudoKeyset] = None,
-) -> pl.Series:
-    """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
-
-    Args:
-        path (str): The path to the pseudonymization endpoint.
-        field_name (str): The name of the field being pseudonymized.
-        values (list[str]): The list of values to be pseudonymized.
-        pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
-        metadata_map (Dict[str, str]): A dictionary to store the metadata associated with each field.
-        timeout (int): The timeout in seconds for the API call.
-        keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
-
-    Returns:
-        pl.Series: A pandas Series containing the pseudonymized values.
-    """
-    response: requests.Response = _client()._post_to_field_endpoint(
-        path, field_name, values, pseudo_func, timeout, keyset, stream=True
-    )
-    metadata_map[field_name] = str(response.headers.get("metadata") or "")
-
-    # The response content is received as a buffered byte stream from the server.
-    # We decode the content using UTF-8, which gives us a List[List[str]] structure.
-    # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
-    nested_list = json.loads(response.content.decode("utf-8"))
-    combined_list = []
-    for sublist in nested_list:
-        combined_list.extend(sublist)
-
-    return pl.Series(combined_list)

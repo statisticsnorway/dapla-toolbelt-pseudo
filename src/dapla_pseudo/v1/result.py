@@ -3,6 +3,7 @@ import typing as t
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from typing import Optional
 
 import pandas as pd
@@ -34,7 +35,7 @@ class Result:
     def __init__(
         self,
         pseudo_response: pl.DataFrame | PseudoFileResponse,
-        metadata: Optional[dict[str, str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_response = pseudo_response
