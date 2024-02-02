@@ -5,7 +5,7 @@ from dapla_pseudo import Pseudonymize
 JSON_FILE = "tests/data/personer_pseudonymized.json"
 
 
-def test_pseudonymize():
+def test_pseudonymize() -> None:
     df = pd.read_json(
         JSON_FILE,
         dtype={
