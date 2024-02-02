@@ -51,32 +51,7 @@ jobs:
         python-version: ${{ matrix.python }}
     - name : Install dapla-toolbelt-pseudo
       run: pip install .
-    - name: Test toolbelt pseudo
+    - name: Integration test
       env:
         PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
-      run: |
-        import pandas as pd
-        from dapla_pseudo import Pseudonymize
-
-        JSON_FILE = "tests/data/personer_pseudonymized.json"
-
-        df = pd.read_json(
-            JSON_FILE,
-            dtype={
-                "fnr": "string",
-                "fornavn": "string",
-                "etternavn": "string",
-                "kjonn": "category",
-                "fodselsdato": "string",
-            },
-        )
-
-        result = (
-            Pseudonymize                   ### GENERAL WORKFLOW ###
-            .from_pandas(df)             # Select dataset
-            .on_fields("fnr")            # Select fields in dataset
-            .with_default_encryption()   # Select encryption method on fields
-            .run()                       # Apply pseudonymization
-        )
-        print(result.to_polars())
-      shell: python
+      run: pytest test/integration
