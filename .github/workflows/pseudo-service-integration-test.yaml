@@ -48,6 +48,7 @@ jobs:
     - name: Test toolbelt pseudo
       env:
         PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
+        PYTHONUNBUFFERED: "1"
       run: |
         import pandas as pd
         from dapla_pseudo import Pseudonymize
@@ -72,5 +73,5 @@ jobs:
             .with_default_encryption()   # Select encryption method on fields
             .run()                       # Apply pseudonymization
         )
-        result.to_polars().head()        # Convert result to Polars DataFrame
+        print(result.to_polars())
       shell: python
