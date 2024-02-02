@@ -14,7 +14,8 @@ JSON_FILE = "tests/data/personer.json"
 @pytest.fixture
 def setup() -> Generator[None, None, None]:
     # Setup step that runs when integration test are ran on local machine
-    if os.environ.get("DAPLA_REGION") is None:
+    # This should not run in GH actions since PSEUDO_SERVICE_URL is set
+    if os.environ.get("PSEUDO_SERVICE_URL") is None:
         # Could not find a way to generate id tokes without a SA to impersonate.
         # https://google-auth.readthedocs.io/en/master/reference/google.oauth2.id_token.html
         # Subprocessing `glcoud auth` as a temporary workaround
