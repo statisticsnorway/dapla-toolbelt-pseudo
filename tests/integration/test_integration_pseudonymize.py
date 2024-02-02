@@ -11,7 +11,7 @@ from tests.integration.utils import integration_test
 JSON_FILE = "tests/data/personer.json"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup() -> Generator[None, None, None]:
     # Setup step that runs when integration test are ran on local machine
     # This should not run in GH actions since PSEUDO_SERVICE_URL is set
@@ -27,6 +27,7 @@ def setup() -> Generator[None, None, None]:
         yield
         os.unsetenv("PSEUDO_SERVICE_URL")
         os.unsetenv("PSEUDO_SERVICE_AUTH_TOKEN")
+    yield
 
 
 @pytest.fixture(scope="module")
