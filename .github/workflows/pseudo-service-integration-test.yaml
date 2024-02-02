@@ -31,8 +31,12 @@ jobs:
         version: '>= 363.0.0'
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
+      env:
+        PRIVILEGED_SERVICE_ACCOUNT: ${{ secrets.INTEGRATION_TEST_PRIV_SA_EMAIL }}
       run: |
-        pseudo_service_auth_token="$(gcloud auth print-identity-token)"
+        # REQUIRED TO KEEP GH ACTIONS FOR LOGGING THE ID TOKEN
+        # SEE: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
+        pseudo_service_auth_token="$(gcloud auth print-identity-token --impersonate-service-account=$PRIVILEGED_SERVICE_ACCOUNT --audiences=$PSEUDO_SERVICE_URL)"
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
     - name: Setup python
