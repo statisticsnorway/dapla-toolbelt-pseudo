@@ -46,7 +46,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fornavn")                          # Select the field to pseudonymize
     .with_default_encryption()                     # Select the pseudonymization algorithm to apply
-    .run()                                # Apply pseudonymization to the selected field
+    .run()                                         # Apply pseudonymization to the selected field
     .to_polars()                                   # Get the result as a polars dataframe
 )
 
@@ -55,7 +55,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fornavn", "etternavn")             # Select multiple fields to pseudonymize
     .with_default_encryption()                     # Select the pseudonymization algorithm to apply
-    .run()                                # Apply pseudonymization to the selected fields
+    .run()                                         # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
 
@@ -64,7 +64,7 @@ result_df = (
     Pseudonymize.from_polars(df)                   # Specify what dataframe to use
     .on_fields("fnr")                              # Select the field to pseudonymize
     .with_stable_id()                              # Map the selected field to stable id
-    .run()                                # Apply pseudonymization to the selected fields
+    .run()                                         # Apply pseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
 ```
@@ -73,6 +73,25 @@ The default encryption algorithm is DAEAD (Deterministic Authenticated Encryptio
 field is a valid Norwegian personal identification number (fnr, dnr), the recommended way to pseudonymize is to use
 the function `with_stable_id()` to convert the identification number to a stable ID (SID) prior to pseudonymization.
 In that case, the pseudonymization algorithm is FPE (Format Preserving Encryption).
+
+
+Note that you may also use a Pandas DataFrame as an input or output, by exchanging `from_polars` with `from_pandas`
+and `to_polars` with `to_pandas`. However, Pandas is much less performant, so take special care especially if your
+dataset is large.
+
+Example:
+
+```python
+# Example: Single field default encryption (DAEAD)
+df_pandas = (
+    Pseudonymize.from_pandas(df)                   # Specify what dataframe to use
+    .on_fields("fornavn")                          # Select the field to pseudonymize
+    .with_default_encryption()                     # Select the pseudonymization algorithm to apply
+    .run()                                         # Apply pseudonymization to the selected field
+    .to_pandas()                                   # Get the result as a polars dataframe
+)
+```
+
 
 ### Validate SID mapping
 
