@@ -164,7 +164,7 @@ def pseudonymize_operation_field(
     # We decode the content using UTF-8, which gives us a List[List[str]] structure.
     # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
     payload = json.loads(response.content.decode("utf-8"))
-    metadata = payload["metadata"]
+    metadata = payload["datadoc_metadata"]
     data = payload["data"]
     combined_list = []
     for sublist in data:
