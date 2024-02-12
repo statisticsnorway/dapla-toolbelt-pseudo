@@ -73,7 +73,11 @@ class Result:
         match self._pseudo_response:
             case PseudoFieldResponse():
                 # Drop statement a workaround to https://github.com/pola-rs/polars/issues/7291
-                return self._pseudo_response.data.drop("__index_level_0__")
+                if "__index_level_0__" in self._pseudo_response.data.columns:
+                    self._pseudo_response.data = self._pseudo_response.data.drop(
+                        "__index_level_0__"
+                    )
+                return self._pseudo_response.data
             case PseudoFileResponse(response, content_type, _):
                 output_format = SupportedOutputFileFormat(content_type.name.lower())
                 df = read_to_polars_df(
