@@ -1,4 +1,4 @@
-name: Pseudo service
+name: Pseudo service integration test
 
 env:
   PSEUDO_SERVICE_URL: "https://dapla-pseudo-service.staging-bip-app.ssb.no"
