@@ -7,9 +7,6 @@ from typing import Optional
 
 import pandas as pd
 import polars as pl
-from datadoc_model.model import MetadataContainer
-from datadoc_model.model import PseudonymizationJsonSchema
-from datadoc_model.model import PseudoVariable
 from requests import Response
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -29,6 +26,7 @@ from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
+from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import PseudoFileResponse
@@ -158,9 +156,9 @@ class Pseudonymize:
                 stream=True,
                 name=None,
             )
+
             return Result(
-                PseudoFileResponse(response, file.content_type, streamed=True),
-                self._metadata,
+                PseudoFileResponse(response, file.content_type, streamed=True)
             )
 
         def _pseudonymize_field(self) -> Result:
@@ -175,7 +173,7 @@ class Pseudonymize:
 
             def pseudonymize_field_runner(
                 field_name: str, series: pl.Series, pseudo_func: PseudoFunction
-            ) -> tuple[str, PseudoFieldResponse]:
+            ) -> tuple[str, pl.Series, RawPseudoMetadata]:
                 """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
@@ -186,21 +184,21 @@ class Pseudonymize:
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
-                return field_name, pseudonymize_operation_field(
+                data, metadata = pseudonymize_operation_field(
                     path="pseudonymize/field",
                     field_name=field_name,
                     values=series.to_list(),
                     pseudo_func=pseudo_func,
-                    metadata_map=self._metadata,
                     timeout=self._timeout,
                     keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
+                return field_name, data, metadata
 
             dataframe = t.cast(pl.DataFrame, Pseudonymize.dataset)
             # Execute the pseudonymization API calls in parallel
             with ThreadPoolExecutor() as executor:
                 pseudonymized_field: dict[str, pl.Series] = {}
-                metadata_variables: list[PseudoVariable] = []
+                raw_metadata_fields: list[RawPseudoMetadata] = []
                 futures = [
                     executor.submit(
                         pseudonymize_field_runner,
@@ -212,20 +210,17 @@ class Pseudonymize:
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
                 for future in as_completed(futures):
-                    field_name, response = future.result()
-                    metadata_variables.append(response.metadata)
-                    # Each future result contains the field_name (0) and the pseudonymize_values (1)
-                    pseudonymized_field[field_name] = response.data
+                    field_name, data, raw_metadata = future.result()
+                    pseudonymized_field[field_name] = data
+                    raw_metadata_fields.append(raw_metadata)
 
-                metadata = MetadataContainer(
-                    pseudonymization=PseudonymizationJsonSchema(
-                        pseudo_variables=metadata_variables
-                    )
-                )
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
                 dataframe = dataframe.update(pseudonymized_df)
-
-            return Result(pseudo_response=dataframe, metadata=metadata.model_dump())
+            return Result(
+                pseudo_response=PseudoFieldResponse(
+                    data=dataframe, raw_metadata=raw_metadata_fields
+                )
+            )
 
     class _PseudoFuncSelector:
         def __init__(

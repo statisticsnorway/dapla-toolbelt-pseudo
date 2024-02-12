@@ -2,6 +2,7 @@
 import io
 import json
 import os
+import pprint
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,9 +11,9 @@ import fsspec
 import polars as pl
 import requests
 from dapla import FileClient
-from datadoc_model.model import PseudoVariable
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
+from requests import Response
 
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
@@ -125,11 +126,28 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
 
 
 @dataclass
+class RawPseudoMetadata:
+    logs: list[str]
+    metrics: list[str]
+    datadoc: list[dict[str, t.Any]]
+    field_name: str
+
+
+@dataclass
 class PseudoFieldResponse:
+    """PseudoFileResponse holds the data and metadata from a Pseudo Service field response."""
+
+    data: pl.DataFrame
+    raw_metadata: list[RawPseudoMetadata]
+
+
+@dataclass
+class PseudoFileResponse:
     """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
 
-    data: pl.Series
-    metadata: PseudoVariable
+    response: Response
+    content_type: Mimetypes
+    streamed: bool = True
 
 
 def pseudonymize_operation_field(
@@ -137,10 +155,9 @@ def pseudonymize_operation_field(
     field_name: str,
     values: list[str],
     pseudo_func: t.Optional[PseudoFunction],
-    metadata_map: dict[str, str],
     timeout: int,
     keyset: t.Optional[PseudoKeyset] = None,
-) -> PseudoFieldResponse:
+) -> tuple[pl.Series, RawPseudoMetadata]:
     """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
 
     Args:
@@ -158,16 +175,19 @@ def pseudonymize_operation_field(
     response: requests.Response = _client()._post_to_field_endpoint(
         path, field_name, values, pseudo_func, timeout, keyset, stream=True
     )
-    metadata_map[field_name] = str(response.headers.get("metadata") or "")
 
-    # The response content is received as a buffered byte stream from the server.
-    # We decode the content using UTF-8, which gives us a List[List[str]] structure.
-    # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
     payload = json.loads(response.content.decode("utf-8"))
+<<<<<<< Updated upstream
     metadata = payload["datadoc_metadata"]
+=======
+    pprint.pprint(payload)
+>>>>>>> Stashed changes
     data = payload["data"]
-    combined_list = []
-    for sublist in data:
-        combined_list.extend(sublist)
+    metadata = RawPseudoMetadata(
+        field_name=field_name,
+        logs={},  # To be implemented
+        metrics={},  # To be implemented
+        datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+    )
 
-    return PseudoFieldResponse(pl.Series(combined_list), metadata)
+    return pl.Series(data), metadata
