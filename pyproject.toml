@@ -151,6 +151,7 @@ classmethod-decorators = ["classmethod", "validator", "root_validator", "pydanti
     "D103",
     "D100",
 ]
+"tests/integration/*" = ["F401", "F811"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
