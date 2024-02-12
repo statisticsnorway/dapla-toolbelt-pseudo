@@ -47,7 +47,8 @@ class PseudoClient:
             audience = os.environ["PSEUDO_SERVICE_URL"]
             auth_req = google.auth.transport.requests.Request()
             token = t.cast(
-                str, google.oauth2.id_token.fetch_id_token(auth_req, audience)
+                str,
+                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
             )
             return token
         else:

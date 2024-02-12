@@ -26,10 +26,10 @@ from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
+from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
-from dapla_pseudo.v1.result import PseudoFileResponse
 from dapla_pseudo.v1.result import Result
 
 
@@ -88,7 +88,6 @@ class Pseudonymize:
             """Initialize the class."""
             self._rules: list[PseudoRule] = [] if rules is None else rules
             self._pseudo_keyset: Optional[PseudoKeyset | str] = None
-            self._metadata: dict[str, str] = {}
             self._timeout: int = TIMEOUT_DEFAULT
 
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":

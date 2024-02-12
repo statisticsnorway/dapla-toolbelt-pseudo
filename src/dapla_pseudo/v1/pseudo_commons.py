@@ -2,7 +2,6 @@
 import io
 import json
 import os
-import pprint
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
@@ -58,7 +57,7 @@ def get_file_data_from_dataset(
             # File path
             if str(dataset).startswith("gs://"):
                 try:
-                    file_handle = FileClient().gcs_open(dataset, mode="rb")
+                    file_handle = FileClient().gcs_open(str(dataset), mode="rb")
                 except OSError as err:
                     raise FileNotFoundError(
                         f"No GCS file found or authentication not sufficient for: {dataset}"
@@ -127,6 +126,8 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
 
 @dataclass
 class RawPseudoMetadata:
+    """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
+
     logs: list[str]
     metrics: list[str]
     datadoc: list[dict[str, t.Any]]
@@ -175,18 +176,12 @@ def pseudonymize_operation_field(
     response: requests.Response = _client()._post_to_field_endpoint(
         path, field_name, values, pseudo_func, timeout, keyset, stream=True
     )
-
     payload = json.loads(response.content.decode("utf-8"))
-<<<<<<< Updated upstream
-    metadata = payload["datadoc_metadata"]
-=======
-    pprint.pprint(payload)
->>>>>>> Stashed changes
     data = payload["data"]
     metadata = RawPseudoMetadata(
         field_name=field_name,
-        logs={},  # To be implemented
-        metrics={},  # To be implemented
+        logs=payload["logs"],
+        metrics=payload["metrics"],
         datadoc=payload["datadoc_metadata"]["pseudo_variables"],
     )
 

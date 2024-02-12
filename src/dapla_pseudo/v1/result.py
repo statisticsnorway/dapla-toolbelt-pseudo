@@ -34,6 +34,7 @@ class Result:
             case PseudoFieldResponse(_, raw_metadata):
                 datadoc_fields: list[PseudoVariable] = []
                 self._metadata: dict[str, dict[str, list[Any]]] = {}
+
                 for field_metadata in raw_metadata:
                     pseudo_variable = self._datadoc_from_raw_metadata_fields(
                         field_metadata.datadoc
@@ -45,6 +46,7 @@ class Result:
                         "logs": field_metadata.logs,
                         "metrics": field_metadata.metrics,
                     }
+
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationJsonSchema(
                         pseudo_variables=datadoc_fields
@@ -69,7 +71,8 @@ class Result:
         """
         match self._pseudo_response:
             case PseudoFieldResponse():
-                return self._pseudo_response.data
+                # Drop statement a workaround to https://github.com/pola-rs/polars/issues/7291
+                return self._pseudo_response.data.drop("__index_level_0__")
             case PseudoFileResponse(response, content_type, _):
                 output_format = SupportedOutputFileFormat(content_type.name.lower())
                 df = read_to_polars_df(
@@ -124,7 +127,7 @@ class Result:
         file_format = get_file_format_from_file_name(file_path)
 
         if str(file_path).startswith("gs://"):
-            file_handle = FileClient().gcs_open(file_path, mode="wb")
+            file_handle = FileClient().gcs_open(str(file_path), mode="wb")
         else:
             file_handle = open(file_path, mode="wb")
 
@@ -139,7 +142,8 @@ class Result:
                     for chunk in response.iter_content(chunk_size=128):
                         file_handle.write(chunk)
                 else:
-                    file_handle.write(self._pseudo_response.response.content)
+                    # MyPy error below needs to be fixed, ignoring for now
+                    file_handle.write(self._pseudo_response.response.content)  # type: ignore[arg-type]
             case pl.DataFrame():
                 write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
             case _:

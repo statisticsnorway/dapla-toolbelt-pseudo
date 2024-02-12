@@ -61,7 +61,7 @@ def test_validate_with_full_response(
         stream=True,
     )
     assert validation_df[field_name].tolist() == ["20859374701", "01234567890"]
-    assert validation_metadata == {"datasetExtractionSnapshotTime": "2023-08-31"}
+    assert validation_metadata[field_name]["logs"] == ["SID snapshot time 2023-08-31"]
 
 
 @patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint")
@@ -89,7 +89,7 @@ def test_validate_with_empty_response(
         stream=True,
     )
     assert validation_df[field_name].tolist() == []
-    assert validation_metadata == {"datasetExtractionSnapshotTime": "2023-08-31"}
+    assert validation_metadata[field_name]["logs"] == ["SID snapshot time 2023-08-31"]
 
 
 def test_builder_from_file_not_a_file() -> None:
