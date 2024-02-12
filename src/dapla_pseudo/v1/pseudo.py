@@ -348,9 +348,7 @@ def _do_pseudonymize_field(
     # The response content is received as a buffered byte stream from the server.
     # We decode the content using UTF-8, which gives us a List[List[str]] structure.
     # To obtain a single list of strings, we combine the values from the nested sublists into a flat list.
-    nested_list = json.loads(response.content.decode("utf-8"))
-    combined_list = []
-    for sublist in nested_list:
-        combined_list.extend(sublist)
-
-    return pl.Series(combined_list)
+    payload = json.loads(
+        response.content.decode("utf-8")
+    )  # Temporary fix because of changes in test
+    return pl.Series(payload["data"])
