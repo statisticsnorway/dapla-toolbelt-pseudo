@@ -1,4 +1,5 @@
 """Common functions shared by all pseudo modules."""
+
 import io
 import json
 import os
@@ -166,7 +167,6 @@ def pseudonymize_operation_field(
         field_name (str): The name of the field being pseudonymized.
         values (list[str]): The list of values to be pseudonymized.
         pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
-        metadata_map (Dict[str, str]): A dictionary to store the metadata associated with each field.
         timeout (int): The timeout in seconds for the API call.
         keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
 

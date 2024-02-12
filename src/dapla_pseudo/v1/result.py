@@ -1,4 +1,5 @@
 """Common API models for builder packages."""
+
 import typing as t
 from io import BytesIO
 from pathlib import Path
@@ -169,8 +170,7 @@ class Result:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
-            Optional[dict[str, str]]: A dictionary containing pseudonymization metadata,
-            according to the DataDoc spec.
+            str: A JSON-formattted string representing the datadoc metadata.
         """
         return self._datadoc.model_dump_json()
 

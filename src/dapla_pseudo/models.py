@@ -1,4 +1,5 @@
 """The models module contains base classes used by other models."""
+
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict

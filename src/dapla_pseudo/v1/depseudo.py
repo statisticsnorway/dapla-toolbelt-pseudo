@@ -1,4 +1,5 @@
 """Builder for submitting a pseudonymization request."""
+
 import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed

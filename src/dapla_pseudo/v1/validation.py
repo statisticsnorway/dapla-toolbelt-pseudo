@@ -1,4 +1,5 @@
 """Builder for submitting a validation request."""
+
 import json
 from collections.abc import Sequence
 from datetime import date

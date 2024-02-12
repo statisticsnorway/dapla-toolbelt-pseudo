@@ -108,7 +108,6 @@ def test_single_field_do_pseudonymize_field(
         function_type=PseudoFunctionTypes.MAP_SID,
         kwargs=MapSidKeywordArgs(key_id="fake-key"),
     )
-    metadata: dict[str, str] = dict()
     series, _ = pseudonymize_operation_field(
         "fake.endpoint",
         "fornavn",
@@ -461,7 +460,7 @@ def test_builder_from_invalid_gcs_file() -> None:
 def test_builder_to_polars_from_polars_chaining(
     patch_pseudonymize_operation_field: MagicMock, df: pd.DataFrame
 ) -> None:
-    def side_effect(**kwargs: t.Any) -> tuple[pl.Series]:
+    def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
         return pl.Series([f"{name}1", f"{name}2", f"{name}3"]), RawPseudoMetadata(
             logs=[], metrics=[], datadoc=[], field_name="tester"

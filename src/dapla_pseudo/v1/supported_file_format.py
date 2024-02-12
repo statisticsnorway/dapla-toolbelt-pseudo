@@ -1,4 +1,5 @@
 """Classes used to support reading of dataframes from file."""
+
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
