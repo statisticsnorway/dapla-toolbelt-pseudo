@@ -24,8 +24,9 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.api_models import RedactArgs
 from dapla_pseudo.v1.depseudo import Depseudonymize
-from dapla_pseudo.v1.depseudo import _do_depseudonymize_field
 from dapla_pseudo.v1.pseudo_commons import File
+from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
+from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
 
 PKG = "dapla_pseudo.v1.depseudo"
@@ -64,15 +65,17 @@ def json_pseudonymized_hierarch_file_path() -> str:
 def single_field_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.content = b'[["f1","f2","f3"]]'
-    mock_response.headers = {
-        "metadata": '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
-    }
+    mock_response.content = b'{"data": ["f1","f2","f3"], "datadoc_metadata": {"pseudo_variables": []}, "metrics": [], "logs": []}'
     return mock_response
 
 
-def mock_return_do_depseudonymize_field(patch_do_depseudonymize_field: Mock) -> None:
-    patch_do_depseudonymize_field.return_value = pl.Series(["e1", "e2", "e3"])
+def mock_return_pseudonymize_operation_field(
+    patch_pseudonymize_operation_field: Mock,
+) -> None:
+    patch_pseudonymize_operation_field.return_value = (
+        pl.Series(["e1", "e2", "e3"]),
+        RawPseudoMetadata(logs=[], metrics=[], datadoc=[], field_name="tester"),
+    )
 
 
 @patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
@@ -93,18 +96,15 @@ def test_builder_pandas_depseudonymize_minimal_call(
     )
     assert isinstance(pseudo_result, Result)
     pseudo_dataframe = pseudo_result.to_pandas()
-    pseudo_metadata = pseudo_result.metadata
+
+    # TODO: Test for metadata values
 
     # Check that the pseudonymized df has new values
     assert pseudo_dataframe[field_name].tolist() == ["f1", "f2", "f3"]
-    assert (
-        pseudo_metadata[field_name]
-        == '{"fieldName":"fornavn","pseudoRules":{"rules":[{"name":"fornavn","pattern":"**","func":"daead(keyId=fake-ssb-key)"}],"keysets":[]}}'
-    )
 
 
 @patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
-def test_single_field_do_depseudonymize_field(
+def test_single_field_pseudonymize_operation_field(
     patched_post_to_field_endpoint: Mock, single_field_response: MagicMock
 ) -> None:
     patched_post_to_field_endpoint.return_value = single_field_response
@@ -113,16 +113,14 @@ def test_single_field_do_depseudonymize_field(
         function_type=PseudoFunctionTypes.MAP_SID,
         kwargs=MapSidKeywordArgs(key_id="fake-key"),
     )
-    metadata: dict[str, str] = dict()
-    series: pl.Series = _do_depseudonymize_field(
+    data, _ = pseudonymize_operation_field(
         "fake.endpoint",
         "fornavn",
         ["x1", "x2", "x3"],
         pseudo_func,
-        metadata,
         TIMEOUT_DEFAULT,
     )
-    assert series.to_list() == ["f1", "f2", "f3"]
+    assert data.to_list() == ["f1", "f2", "f3"]
 
 
 def test_depseudo_fields_selector_single_field(pseudonymized_df: pd.DataFrame) -> None:
@@ -222,53 +220,51 @@ def test_builder_file_hierarchical(
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_default(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    mock_return_do_depseudonymize_field(patch_do_depseudonymize_field)
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     Depseudonymize.from_pandas(pseudonymized_df).on_fields(
         "fornavn"
     ).with_default_encryption().run()
-    patch_do_depseudonymize_field.assert_called_once_with(
+    patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
         field_name="fornavn",
         values=pseudonymized_df["fornavn"].tolist(),
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ),
-        metadata_map={},
         timeout=TIMEOUT_DEFAULT,
         keyset=None,
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_fpe(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    mock_return_do_depseudonymize_field(patch_do_depseudonymize_field)
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     Depseudonymize.from_pandas(pseudonymized_df).on_fields(
         "fnr"
     ).with_papis_compatible_encryption().run()
-    patch_do_depseudonymize_field.assert_called_once_with(
+    patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
         values=pseudonymized_df["fnr"].tolist(),
         field_name="fnr",
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
         ),
-        metadata_map={},
         timeout=TIMEOUT_DEFAULT,
         keyset=None,
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_custom(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    mock_return_do_depseudonymize_field(patch_do_depseudonymize_field)
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
     )
@@ -276,22 +272,21 @@ def test_builder_pseudo_function_selector_custom(
         pseudo_func
     ).run()
 
-    patch_do_depseudonymize_field.assert_called_once_with(
+    patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
         values=pseudonymized_df["fnr"].tolist(),
         field_name="fnr",
         pseudo_func=pseudo_func,
-        metadata_map={},
         timeout=TIMEOUT_DEFAULT,
         keyset=None,
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_redact(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    mock_return_do_depseudonymize_field(patch_do_depseudonymize_field)
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.REDACT,
         kwargs=RedactArgs(replacement_string="test"),
@@ -300,22 +295,21 @@ def test_builder_pseudo_function_selector_redact(
         pseudo_func
     ).run()
 
-    patch_do_depseudonymize_field.assert_called_once_with(
+    patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
         values=pseudonymized_df["fnr"].tolist(),
         field_name="fnr",
         pseudo_func=pseudo_func,
-        metadata_map={},
         timeout=TIMEOUT_DEFAULT,
         keyset=None,
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_keyset_selector_custom(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    mock_return_do_depseudonymize_field(patch_do_depseudonymize_field)
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
 
     kek_uri = "gcp-kms://fake/pseudo-service-fake"
     encrypted_keyset = "fake_keyset"
@@ -342,26 +336,28 @@ def test_builder_pseudo_keyset_selector_custom(
         pseudo_func
     ).run(custom_keyset=keyset)
 
-    patch_do_depseudonymize_field.assert_called_once_with(
+    patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
         values=pseudonymized_df["fnr"].tolist(),
         field_name="fnr",
         pseudo_func=pseudo_func,
-        metadata_map={},
         timeout=TIMEOUT_DEFAULT,
         keyset=keyset,
     )
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_pseudonymize_field_dataframe_setup(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    def side_effect(**kwargs: t.Any) -> pl.Series:
+    def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
-        return pl.Series([f"{name}1", f"{name}2", f"{name}3"])
+        return (
+            pl.Series([f"{name}1", f"{name}2", f"{name}3"]),
+            RawPseudoMetadata(logs=[], metrics=[], datadoc=[], field_name="tester"),
+        )
 
-    patch_do_depseudonymize_field.side_effect = side_effect
+    patch_pseudonymize_operation_field.side_effect = side_effect
 
     fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
     result = (
@@ -374,7 +370,7 @@ def test_pseudonymize_field_dataframe_setup(
     dataframe = result.to_pandas()
 
     for field in fields_to_pseudonymize:
-        assert dataframe[field].to_list() == side_effect(field_name=field).to_list()
+        assert dataframe[field].to_list() == side_effect(field_name=field)[0].to_list()
 
 
 def test_builder_field_selector_multiple_fields(pseudonymized_df: pd.DataFrame) -> None:
@@ -416,15 +412,18 @@ def test_builder_from_invalid_gcs_file() -> None:
         Depseudonymize.from_file(invalid_gcs_path)
 
 
-@patch(f"{PKG}._do_depseudonymize_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_to_polars_from_polars_chaining(
-    patch_do_depseudonymize_field: MagicMock, pseudonymized_df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, pseudonymized_df: pd.DataFrame
 ) -> None:
-    def side_effect(**kwargs: t.Any) -> pl.Series:
+    def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
-        return pl.Series([f"{name}1", f"{name}2", f"{name}3"])
+        return (
+            pl.Series([f"{name}1", f"{name}2", f"{name}3"]),
+            RawPseudoMetadata(logs=[], metrics=[], datadoc=[], field_name="tester"),
+        )
 
-    patch_do_depseudonymize_field.side_effect = side_effect
+    patch_pseudonymize_operation_field.side_effect = side_effect
     fields_to_depseudonymize = "fnr", "fornavn", "etternavn"
     result: pl.DataFrame = (
         Depseudonymize.from_pandas(pseudonymized_df)

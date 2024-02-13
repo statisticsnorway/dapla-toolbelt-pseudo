@@ -1,4 +1,5 @@
 """Builder for submitting a validation request."""
+
 import json
 from collections.abc import Sequence
 from datetime import date
@@ -12,6 +13,8 @@ import requests
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.ops import _client
+from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
+from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.result import Result
 from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 
@@ -119,15 +122,25 @@ class Validator:
             # We decode the content using UTF-8, which gives us a List[Dict[str]] structure.
             result_json = json.loads(response.content.decode("utf-8"))[0]
             result: Sequence[str] = []
-            metadata: dict[str, str] = {}
+            metadata: list[str] = []
             if "missing" in result_json:
                 result = result_json["missing"]
             if "datasetExtractionSnapshotTime" in result_json:
-                metadata = {
-                    "datasetExtractionSnapshotTime": result_json[
-                        "datasetExtractionSnapshotTime"
-                    ]
-                }
+                extraction_time = result_json["datasetExtractionSnapshotTime"]
+                metadata = [f"SID snapshot time {extraction_time}"]
 
-            result_df = pl.DataFrame(pl.Series(self._field, result))
-            return Result(pseudo_response=result_df, metadata=metadata)
+            result_df = pl.Series(self._field, result).to_frame()
+            # TODO - make the Validator fit the Result() class better
+            return Result(
+                PseudoFieldResponse(
+                    data=result_df,
+                    raw_metadata=[
+                        RawPseudoMetadata(
+                            logs=metadata,
+                            metrics=[],
+                            datadoc=[],
+                            field_name=self._field,
+                        )
+                    ],
+                )
+            )

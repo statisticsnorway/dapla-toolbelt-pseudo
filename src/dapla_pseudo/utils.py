@@ -1,4 +1,5 @@
 """Utility functions for Dapla Pseudo."""
+
 import typing as t
 from datetime import date
 from pathlib import Path

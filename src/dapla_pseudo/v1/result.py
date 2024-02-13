@@ -1,17 +1,20 @@
 """Common API models for builder packages."""
+
 import typing as t
-from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import pandas as pd
 import polars as pl
 from dapla import FileClient
-from requests import Response
+from datadoc_model.model import MetadataContainer
+from datadoc_model.model import PseudonymizationJsonSchema
+from datadoc_model.model import PseudoVariable
 
 from dapla_pseudo.utils import get_file_format_from_file_name
-from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
+from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
@@ -19,26 +22,40 @@ from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 from dapla_pseudo.v1.supported_file_format import write_from_df
 
 
-@dataclass
-class PseudoFileResponse:
-    """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
-
-    response: Response
-    content_type: Mimetypes
-    streamed: bool = True
-
-
 class Result:
     """Result represents the result of a pseudonymization operation."""
 
     def __init__(
         self,
-        pseudo_response: pl.DataFrame | PseudoFileResponse,
-        metadata: Optional[dict[str, str]] = None,
+        pseudo_response: PseudoFieldResponse | PseudoFileResponse,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_response = pseudo_response
-        self._metadata = metadata if metadata else {}
+        match pseudo_response:
+            case PseudoFieldResponse(_, raw_metadata):
+                datadoc_fields: list[PseudoVariable] = []
+                self._metadata: dict[str, dict[str, list[Any]]] = {}
+
+                for field_metadata in raw_metadata:
+                    pseudo_variable = self._datadoc_from_raw_metadata_fields(
+                        field_metadata.datadoc
+                    )
+                    if pseudo_variable is not None:
+                        datadoc_fields.append(pseudo_variable)
+
+                    self._metadata[field_metadata.field_name] = {
+                        "logs": field_metadata.logs,
+                        "metrics": field_metadata.metrics,
+                    }
+
+                self._datadoc = MetadataContainer(
+                    pseudonymization=PseudonymizationJsonSchema(
+                        pseudo_variables=datadoc_fields
+                    )
+                )
+
+            case PseudoFileResponse():
+                self._metadata = {}
 
     def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.
@@ -54,8 +71,13 @@ class Result:
             pl.DataFrame: A Polars DataFrame containing the pseudonymized data.
         """
         match self._pseudo_response:
-            case pl.DataFrame():
-                return self._pseudo_response
+            case PseudoFieldResponse():
+                # Drop statement a workaround to https://github.com/pola-rs/polars/issues/7291
+                if "__index_level_0__" in self._pseudo_response.data.columns:
+                    self._pseudo_response.data = self._pseudo_response.data.drop(
+                        "__index_level_0__"
+                    )
+                return self._pseudo_response.data
             case PseudoFileResponse(response, content_type, _):
                 output_format = SupportedOutputFileFormat(content_type.name.lower())
                 df = read_to_polars_df(
@@ -81,8 +103,8 @@ class Result:
             pd.DataFrame: A Pandas DataFrame containing the pseudonymized data.
         """
         match self._pseudo_response:
-            case pl.DataFrame():
-                return self._pseudo_response.to_pandas()
+            case PseudoFieldResponse(data, _):
+                return data.to_pandas()
             case PseudoFileResponse(response, content_type, _):
                 output_format = SupportedOutputFileFormat(content_type.name.lower())
                 df = read_to_pandas_df(
@@ -110,7 +132,7 @@ class Result:
         file_format = get_file_format_from_file_name(file_path)
 
         if str(file_path).startswith("gs://"):
-            file_handle = FileClient().gcs_open(file_path, mode="wb")
+            file_handle = FileClient().gcs_open(str(file_path), mode="wb")
         else:
             file_handle = open(file_path, mode="wb")
 
@@ -125,7 +147,8 @@ class Result:
                     for chunk in response.iter_content(chunk_size=128):
                         file_handle.write(chunk)
                 else:
-                    file_handle.write(self._pseudo_response.response.content)
+                    # MyPy error below needs to be fixed, ignoring for now
+                    file_handle.write(self._pseudo_response.response.content)  # type: ignore[arg-type]
             case pl.DataFrame():
                 write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
             case _:
@@ -136,7 +159,7 @@ class Result:
         file_handle.close()
 
     @property
-    def metadata(self) -> dict[str, str]:
+    def metadata(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
@@ -145,3 +168,42 @@ class Result:
             If no metadata is set, returns an empty dictionary.
         """
         return self._metadata
+
+    @property
+    def datadoc(self) -> str:
+        """Returns the pseudonymization metadata as a dictionary.
+
+        Returns:
+            str: A JSON-formattted string representing the datadoc metadata.
+        """
+        return self._datadoc.model_dump_json()
+
+    def _datadoc_from_raw_metadata_fields(
+        self,
+        raw_metadata: list[dict[str, Any]],
+    ) -> t.Optional[PseudoVariable]:
+        if len(raw_metadata) == 1:  # Only one element in list if NOT using SID-mapping
+            return PseudoVariable.model_validate(raw_metadata[0])
+        elif len(raw_metadata) == 2 and any(
+            "stable_identifier_type" in pseudo_var for pseudo_var in raw_metadata
+        ):  # SID-mapping
+            sid_metadata = next(
+                pseudo_var
+                for pseudo_var in raw_metadata
+                if "stable_identifier_type" in pseudo_var
+            )
+            encrypt_metadata = next(
+                pseudo_var
+                for pseudo_var in raw_metadata
+                if "stable_identifier_type" not in pseudo_var
+            )
+            pseudo_variable = PseudoVariable.model_validate(encrypt_metadata)
+            pseudo_variable.stable_identifier_type = sid_metadata[
+                "stable_identifier_type"
+            ]
+            pseudo_variable.stable_identifier_version = sid_metadata[
+                "stable_identifier_version"
+            ]
+            return pseudo_variable
+        else:
+            return None

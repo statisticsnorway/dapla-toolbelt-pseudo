@@ -47,7 +47,8 @@ class PseudoClient:
             audience = os.environ["PSEUDO_SERVICE_URL"]
             auth_req = google.auth.transport.requests.Request()
             token = t.cast(
-                str, google.oauth2.id_token.fetch_id_token(auth_req, audience)
+                str,
+                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
             )
             return token
         else:
@@ -223,9 +224,11 @@ class PseudoClient:
     def _process_file(
         self,
         operation: str,
-        request: PseudonymizeFileRequest
-        | DepseudonymizeFileRequest
-        | RepseudonymizeFileRequest,
+        request: (
+            PseudonymizeFileRequest
+            | DepseudonymizeFileRequest
+            | RepseudonymizeFileRequest
+        ),
         file_path: str,
         timeout: int,
         stream: bool = False,
@@ -247,9 +250,11 @@ class PseudoClient:
     def _post_to_file_endpoint(
         self,
         path: str,
-        request: PseudonymizeFileRequest
-        | DepseudonymizeFileRequest
-        | RepseudonymizeFileRequest,
+        request: (
+            PseudonymizeFileRequest
+            | DepseudonymizeFileRequest
+            | RepseudonymizeFileRequest
+        ),
         data: t.BinaryIO,
         name: str,
         content_type: Mimetypes,

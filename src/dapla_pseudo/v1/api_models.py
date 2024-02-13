@@ -1,4 +1,5 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
+
 import json
 import typing as t
 from datetime import date
