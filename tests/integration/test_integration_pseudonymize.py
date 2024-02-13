@@ -57,7 +57,7 @@ def test_pseudonymize_default_encryption_all_fields(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result._datadoc == expected_metadata_container
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -91,7 +91,7 @@ def test_pseudonymize_default_encryption_null(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result._datadoc == expected_metadata_container
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -116,8 +116,7 @@ def test_pseudonymize_sid(
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
-
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result._datadoc == expected_metadata_container
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -142,5 +141,5 @@ def test_pseudonymize_sid_null(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result._datadoc == expected_metadata_container
     assert result.to_polars().equals(expected_result_df)
