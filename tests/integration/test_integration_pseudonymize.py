@@ -1,9 +1,11 @@
+import inspect
 from collections.abc import Generator
 
 import polars as pl
 
 from dapla_pseudo import Pseudonymize
 from tests.integration.utils import df_personer
+from tests.integration.utils import get_expected_datadoc_metadata_container
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
 
@@ -28,6 +30,12 @@ def test_pseudonymize_default_encryption(
         .with_default_encryption()
         .run()
     )
+    current_function_name = inspect.currentframe().f_code.co_name
+    expected_metadata_container = get_expected_datadoc_metadata_container(
+        current_function_name
+    )
+
+    assert result.datadoc == expected_metadata_container.model_dump_json()
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -56,6 +64,12 @@ def test_pseudonymize_default_encryption_null(
         .with_default_encryption()
         .run()
     )
+    current_function_name = inspect.currentframe().f_code.co_name
+    expected_metadata_container = get_expected_datadoc_metadata_container(
+        current_function_name
+    )
+
+    assert result.datadoc == expected_metadata_container.model_dump_json()
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -76,6 +90,12 @@ def test_pseudonymize_sid(
     result = (
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
     )
+    current_function_name = inspect.currentframe().f_code.co_name
+    expected_metadata_container = get_expected_datadoc_metadata_container(
+        current_function_name
+    )
+
+    assert result.datadoc == expected_metadata_container.model_dump_json()
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -95,5 +115,10 @@ def test_pseudonymize_sid_null(
     result = (
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
     )
+    current_function_name = inspect.currentframe().f_code.co_name
+    expected_metadata_container = get_expected_datadoc_metadata_container(
+        current_function_name
+    )
 
+    assert result.datadoc == expected_metadata_container.model_dump_json()
     assert result.to_polars().equals(expected_result_df)

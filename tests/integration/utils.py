@@ -1,9 +1,11 @@
+import json
 import os
 import subprocess
 from collections.abc import Generator
 
 import polars as pl
 import pytest
+from datadoc_model.model import MetadataContainer
 
 
 @pytest.fixture
@@ -47,9 +49,9 @@ def integration_test() -> pytest.MarkDecorator:
 
 @pytest.fixture()
 def setup() -> Generator[None, None, None]:
-    os.environ[
-        "PSEUDO_SERVICE_URL"
-    ] = "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+    os.environ["PSEUDO_SERVICE_URL"] = (
+        "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+    )
     # Setup step that runs when integration test are ran on local machine
     # This will not run in GH actions since GITHUB_ACTIONS is set to `true` per default
     # https://docs.github.com/en/actions/learn-github-actions/variables
@@ -66,3 +68,15 @@ def setup() -> Generator[None, None, None]:
     else:
         # If ran from GitHub action setup is required
         yield
+
+
+def get_expected_datadoc_metadata_container(
+    calling_function_name: str,
+) -> MetadataContainer:
+    """Helper function that returns the expected MetadataContainer for a given calling function."""
+    expected_metadata_json_file = (
+        f"tests/data/datadoc/expected_metadata_{calling_function_name}.json"
+    )
+    with open(expected_metadata_json_file) as json_file:
+        expected_datadoc_json = json.load(json_file)
+    return MetadataContainer(**expected_datadoc_json)
