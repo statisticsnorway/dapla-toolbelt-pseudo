@@ -1,14 +1,19 @@
 """Common functions shared by all pseudo modules."""
+
 import io
+import json
 import os
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
 
 import fsspec
+import polars as pl
+import requests
 from dapla import FileClient
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
+from requests import Response
 
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
@@ -16,6 +21,9 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoFunction
+from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 
 
@@ -50,7 +58,7 @@ def get_file_data_from_dataset(
             # File path
             if str(dataset).startswith("gs://"):
                 try:
-                    file_handle = FileClient().gcs_open(dataset, mode="rb")
+                    file_handle = FileClient().gcs_open(str(dataset), mode="rb")
                 except OSError as err:
                     raise FileNotFoundError(
                         f"No GCS file found or authentication not sufficient for: {dataset}"
@@ -115,3 +123,66 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
         ) from None
 
     return content_type
+
+
+@dataclass
+class RawPseudoMetadata:
+    """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
+
+    logs: list[str]
+    metrics: list[str]
+    datadoc: list[dict[str, t.Any]]
+    field_name: str
+
+
+@dataclass
+class PseudoFieldResponse:
+    """PseudoFileResponse holds the data and metadata from a Pseudo Service field response."""
+
+    data: pl.DataFrame
+    raw_metadata: list[RawPseudoMetadata]
+
+
+@dataclass
+class PseudoFileResponse:
+    """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
+
+    response: Response
+    content_type: Mimetypes
+    streamed: bool = True
+
+
+def pseudonymize_operation_field(
+    path: str,
+    field_name: str,
+    values: list[str],
+    pseudo_func: t.Optional[PseudoFunction],
+    timeout: int,
+    keyset: t.Optional[PseudoKeyset] = None,
+) -> tuple[pl.Series, RawPseudoMetadata]:
+    """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
+
+    Args:
+        path (str): The path to the pseudonymization endpoint.
+        field_name (str): The name of the field being pseudonymized.
+        values (list[str]): The list of values to be pseudonymized.
+        pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
+        timeout (int): The timeout in seconds for the API call.
+        keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
+
+    Returns:
+        pl.Series: A pandas Series containing the pseudonymized values.
+    """
+    response: requests.Response = _client()._post_to_field_endpoint(
+        path, field_name, values, pseudo_func, timeout, keyset, stream=True
+    )
+    payload = json.loads(response.content.decode("utf-8"))
+    data = payload["data"]
+    metadata = RawPseudoMetadata(
+        field_name=field_name,
+        logs=payload["logs"],
+        metrics=payload["metrics"],
+        datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+    )
+
+    return pl.Series(data), metadata

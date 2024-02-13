@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import polars as pl
 
+from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.result import Result
 
 
@@ -30,5 +31,7 @@ def test_result_index_level(tmp_path: Path) -> None:
     df_pl_filtered = pl.read_parquet(path_filtered)
     assert "__index_level_0__" in df_pl_filtered.columns
 
-    df_result = Result(df_pl_filtered).to_polars()
+    df_result = Result(
+        PseudoFieldResponse(data=df_pl_filtered, raw_metadata=[])
+    ).to_polars()
     assert "__index_level_0__" not in df_result.columns
