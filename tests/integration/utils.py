@@ -66,7 +66,7 @@ def setup() -> Generator[None, None, None]:
         os.unsetenv("PSEUDO_SERVICE_URL")
         os.unsetenv("PSEUDO_SERVICE_AUTH_TOKEN")
     else:
-        # If ran from GitHub action setup is required
+        # If ran from GitHub action no setup is required
         yield
 
 
