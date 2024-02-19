@@ -5,6 +5,7 @@ import polars as pl
 
 from dapla_pseudo import Pseudonymize
 from tests.integration.utils import df_personer
+from tests.integration.utils import get_calling_function_name
 from tests.integration.utils import get_expected_datadoc_metadata_container
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
@@ -30,7 +31,7 @@ def test_pseudonymize_default_encryption(
         .with_default_encryption()
         .run()
     )
-    current_function_name = inspect.currentframe().f_code.co_name
+    current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
@@ -52,7 +53,7 @@ def test_pseudonymize_default_encryption_all_fields(
         .with_default_encryption()
         .run()
     )
-    current_function_name = inspect.currentframe().f_code.co_name
+    current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
@@ -60,21 +61,26 @@ def test_pseudonymize_default_encryption_all_fields(
     # we need the pseudo_variables to be in the same order. This is not guaranteed by the API
     # `pseudo_variables` are therefore sorted before we make the comparison.
     # In the context of this test we can guarantee that the `short_name` is unique, which allows us to sort by it.
-    result._datadoc.pseudonymization.pseudo_variables = sorted(
-        result._datadoc.pseudonymization.pseudo_variables,
-        key=lambda pseudo_var: (
-            pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
-        ),
-    )
-    expected_metadata_container.pseudonymization.pseudo_variables = sorted(
-        expected_metadata_container.pseudonymization.pseudo_variables,
-        key=lambda pseudo_var: (
-            pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
-        ),
-    )
+    if (result._datadoc.pseudonymization is not None) and (
+        expected_metadata_container.pseudonymization is not None
+    ):
+        result._datadoc.pseudonymization.pseudo_variables = sorted(
+            result._datadoc.pseudonymization.pseudo_variables,
+            key=lambda pseudo_var: (
+                pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
+            ),
+        )
+        expected_metadata_container.pseudonymization.pseudo_variables = sorted(
+            expected_metadata_container.pseudonymization.pseudo_variables,
+            key=lambda pseudo_var: (
+                pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
+            ),
+        )
 
-    assert result._datadoc == expected_metadata_container
-    assert result.to_polars().equals(expected_result_df)
+        assert result._datadoc == expected_metadata_container
+        assert result.to_polars().equals(expected_result_df)
+    else:
+        raise AssertionError("MetadataContainer's pseudonymization object is None")
 
 
 @integration_test()
@@ -102,7 +108,7 @@ def test_pseudonymize_default_encryption_null(
         .with_default_encryption()
         .run()
     )
-    current_function_name = inspect.currentframe().f_code.co_name
+    current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
@@ -128,7 +134,7 @@ def test_pseudonymize_sid(
     result = (
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
     )
-    current_function_name = inspect.currentframe().f_code.co_name
+    current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
@@ -152,7 +158,7 @@ def test_pseudonymize_sid_null(
     result = (
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
     )
-    current_function_name = inspect.currentframe().f_code.co_name
+    current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
