@@ -90,7 +90,7 @@ def get_calling_function_name() -> str:
         str: The name of the function that called this function.
 
     Raises:
-    RuntimeError: If the calling frame cannot be determined.
+        RuntimeError: If the calling frame cannot be determined.
     """
     frame = inspect.currentframe().f_back
     if frame is not None:
