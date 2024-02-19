@@ -6,7 +6,8 @@ env:
 on:
   push:
     branches:
-      - integration-test
+      - main
+  pull_request:
 
 permissions:
   contents: "read"
