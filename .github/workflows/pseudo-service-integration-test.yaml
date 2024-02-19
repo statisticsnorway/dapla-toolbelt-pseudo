@@ -1,0 +1,61 @@
+name: Pseudo service integration test
+
+env:
+  PSEUDO_SERVICE_URL: "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: "read"
+  id-token: "write"
+
+jobs:
+  integration_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { python: "3.10"}
+          - { python: "3.11"}
+          - { python: "3.12"}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - id: "auth"
+      name: "Authenticate to Google Cloud"
+      uses: "google-github-actions/auth@v1.1.1"
+      with:
+        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.INTEGRATION_TEST_SA_EMAIL }}
+        token_format: "access_token"
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        version: '>= 363.0.0'
+    - name: Generate, mask, and output Google ID token as a secret
+      id: get-id-token
+      env:
+        PRIVILEGED_SERVICE_ACCOUNT: ${{ secrets.INTEGRATION_TEST_PRIV_SA_EMAIL }}
+      run: |
+        # REQUIRED TO KEEP GH ACTIONS FOR LOGGING THE ID TOKEN
+        # SEE: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
+        pseudo_service_auth_token="$(gcloud auth print-identity-token --impersonate-service-account=$PRIVILEGED_SERVICE_ACCOUNT --audiences=$PSEUDO_SERVICE_URL --include-email)"
+        echo "::add-mask::$pseudo_service_auth_token"
+        echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python }}
+    - name : Install requirements
+      run: |
+        pip install .
+        pip install pytest==8.0.0
+    - name: Integration test
+      env:
+        PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
+      run: pytest tests/integration

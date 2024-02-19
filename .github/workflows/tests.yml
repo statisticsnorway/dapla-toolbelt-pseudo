@@ -6,6 +6,8 @@ on:
       - main
       - master
   pull_request:
+env:
+  INTEGRATION_TESTS: FALSE
 
 jobs:
   tests:

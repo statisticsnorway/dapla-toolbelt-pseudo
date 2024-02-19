@@ -12,8 +12,11 @@ Here is a list of important resources for contributors:
 - [Code of Conduct]
 
 [mit license]: https://opensource.org/licenses/MIT
+
 [source code]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo
+
 [documentation]: https://statisticsnorway.github.io/dapla-toolbelt-pseudo
+
 [issue tracker]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/issues
 
 ## How to report a bug
@@ -58,7 +61,9 @@ $ poetry run dapla-toolbelt-pseudo
 ```
 
 [poetry]: https://python-poetry.org/
+
 [nox]: https://nox.thea.codes/
+
 [nox-poetry]: https://nox-poetry.readthedocs.io/
 
 ## How to test the project
@@ -85,6 +90,10 @@ $ nox --session=tests
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest] testing framework.
 
+Integration tests are located in _tests/integration_,
+and require the `@integration_test` decorator and `setup` fixture for environment-specific configurations.
+To run the tests locally, the user must either be part of the `pseudo-service-admin-t@ssb.no` group or included in the [admin list](https://github.com/statisticsnorway/platform-dev/blob/43b8620bc3628d5f30a6598755a05078a4a715c9/flux/staging-bip-app/dapla/dapla-pseudo-service/dapla-pseudo-service.yaml#L245) for the service in staging.
+
 [pytest]: https://pytest.readthedocs.io/
 
 ## How to submit changes
@@ -99,7 +108,8 @@ Your pull request needs to meet the following guidelines for acceptance:
 
 Feel free to submit early, though—we can always iterate on this.
 
-To run linting and code formatting checks before committing your change, you can install pre-commit as a Git hook by running the following command:
+To run linting and code formatting checks before committing your change, you can install pre-commit as a Git hook by
+running the following command:
 
 ```console
 $ nox --session=pre-commit -- install
