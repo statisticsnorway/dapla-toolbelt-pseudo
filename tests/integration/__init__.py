@@ -1,1 +1,1 @@
-"""Integration Test for the dapla_pseudo."""
+"""Integration test for  dapla_pseudo."""
