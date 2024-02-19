@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import subprocess
@@ -80,3 +81,23 @@ def get_expected_datadoc_metadata_container(
     with open(expected_metadata_json_file) as json_file:
         expected_datadoc_json = json.load(json_file)
     return MetadataContainer(**expected_datadoc_json)
+
+
+def get_calling_function_name() -> str:
+    """Retrieves the name of the function that called this function.
+
+    Returns:
+        str: The name of the function that called this function.
+
+    Raises:
+    RuntimeError: If the calling frame cannot be determined.
+    """
+    frame = inspect.currentframe().f_back
+    if frame is not None:
+        function_name = frame.f_code.co_name
+        return function_name
+    else:
+        # If no frame is found, raise an exception to fail the test
+        raise RuntimeError(
+            "Failed to get the calling frame, which is required for this test."
+        )
