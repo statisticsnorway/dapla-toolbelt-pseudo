@@ -62,11 +62,15 @@ def test_pseudonymize_default_encryption_all_fields(
     # In the context of this test we can guarantee that the `short_name` is unique, which allows us to sort by it.
     result._datadoc.pseudonymization.pseudo_variables = sorted(
         result._datadoc.pseudonymization.pseudo_variables,
-        key=lambda pseudo_var: pseudo_var.short_name,
+        key=lambda pseudo_var: (
+            pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
+        ),
     )
     expected_metadata_container.pseudonymization.pseudo_variables = sorted(
         expected_metadata_container.pseudonymization.pseudo_variables,
-        key=lambda pseudo_var: pseudo_var.short_name,
+        key=lambda pseudo_var: (
+            pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
+        ),
     )
 
     assert result._datadoc == expected_metadata_container
