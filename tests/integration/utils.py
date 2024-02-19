@@ -92,7 +92,7 @@ def get_calling_function_name() -> str:
     Raises:
         RuntimeError: If the calling frame cannot be determined.
     """
-    frame = inspect.currentframe().f_back
+    frame = inspect.currentframe().f_back  # type: ignore
     if frame is not None:
         function_name = frame.f_code.co_name
         return function_name

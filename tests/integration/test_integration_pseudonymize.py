@@ -65,13 +65,13 @@ def test_pseudonymize_default_encryption_all_fields(
         expected_metadata_container.pseudonymization is not None
     ):
         result._datadoc.pseudonymization.pseudo_variables = sorted(
-            result._datadoc.pseudonymization.pseudo_variables,
+            result._datadoc.pseudonymization.pseudo_variables,  # type: ignore
             key=lambda pseudo_var: (
                 pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
             ),
         )
         expected_metadata_container.pseudonymization.pseudo_variables = sorted(
-            expected_metadata_container.pseudonymization.pseudo_variables,
+            expected_metadata_container.pseudonymization.pseudo_variables,  # type: ignore
             key=lambda pseudo_var: (
                 pseudo_var.short_name if isinstance(pseudo_var.short_name, str) else ""
             ),
