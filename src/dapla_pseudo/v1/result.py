@@ -9,7 +9,7 @@ import pandas as pd
 import polars as pl
 from dapla import FileClient
 from datadoc_model.model import MetadataContainer
-from datadoc_model.model import PseudonymizationJsonSchema
+from datadoc_model.model import PseudonymizationMetadata
 from datadoc_model.model import PseudoVariable
 
 from dapla_pseudo.utils import get_file_format_from_file_name
@@ -49,7 +49,7 @@ class Result:
                     }
 
                 self._datadoc = MetadataContainer(
-                    pseudonymization=PseudonymizationJsonSchema(
+                    pseudonymization=PseudonymizationMetadata(
                         pseudo_variables=datadoc_fields
                     )
                 )

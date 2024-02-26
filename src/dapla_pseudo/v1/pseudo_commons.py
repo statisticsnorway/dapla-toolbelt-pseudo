@@ -176,13 +176,7 @@ def pseudonymize_operation_field(
     response: requests.Response = _client()._post_to_field_endpoint(
         path, field_name, values, pseudo_func, timeout, keyset, stream=True
     )
-    payload = json.loads(response.content.decode("utf-8"))
-    data = payload["data"]
-    metadata = RawPseudoMetadata(
-        field_name=field_name,
-        logs=payload["logs"],
-        metrics=payload["metrics"],
-        datadoc=payload["datadoc_metadata"]["pseudo_variables"],
-    )
+    data = json.loads(response.content.decode("utf-8"))
+    metadata = RawPseudoMetadata(field_name="", logs=[], metrics=[], datadoc={})
 
     return pl.Series(data), metadata

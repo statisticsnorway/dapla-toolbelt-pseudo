@@ -7,6 +7,7 @@ from datetime import date
 
 import google.auth.transport.requests
 import google.oauth2.id_token
+import msgspec
 import requests
 from dapla import AuthClient
 
@@ -289,24 +290,23 @@ class PseudoClient:
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request: dict[str, t.Collection[str]] = {
-            "name": field_name,
-            "values": values,
-            "pseudoFunc": str(pseudo_func),
-        }
-        if keyset:
-            request["keyset"] = {
-                "kekUri": keyset.kek_uri,
-                "encryptedKeyset": keyset.encrypted_keyset,
-                "keysetInfo": keyset.keyset_info,
-            }
+        class PseudoRequest(msgspec.Struct):
+            column_name: str
+            column_data: list[str]
+            pseudo_func: str
+
+        path = "pseudo"
+        request = PseudoRequest(
+            column_name=field_name, column_data=values, pseudo_func=str(pseudo_func)
+        )
+
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
                 "Authorization": f"Bearer {self.__auth_token()}",
                 "Content-Type": str(Mimetypes.JSON),
             },
-            json=request,
+            data=msgspec.json.encode(request),
             stream=stream,
             timeout=timeout,
         )
