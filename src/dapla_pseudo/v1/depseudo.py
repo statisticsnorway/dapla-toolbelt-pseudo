@@ -16,6 +16,7 @@ from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
@@ -127,9 +128,9 @@ class Depseudonymize:
                     return self._depseudonymize_file()
                 case pl.DataFrame():
                     return self._depseudonymize_field()
-                case _:
+                case _ as invalid_dataset:
                     raise ValueError(
-                        f"Unsupported data type: {type(Depseudonymize.dataset)}. Should only be DataFrame or file-like type."
+                        f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                     )
 
         def _depseudonymize_file(self) -> Result:
@@ -142,13 +143,15 @@ class Depseudonymize:
                     rules=self._rules,
                     keysets=KeyWrapper(self._pseudo_keyset).keyset_list(),
                 ),
-                target_content_type=file.content_type,
+                target_content_type=Mimetypes.JSON,
                 target_uri=None,
                 compression=None,
             )
 
             pseudo_response: PseudoFileResponse = pseudo_operation_file(
-                depseudonymize_request, file.file_handle, file.content_type
+                file_handle=file.file_handle,
+                pseudo_operation_request=depseudonymize_request,
+                input_content_type=file.content_type,
             )
             return Result(pseudo_response=pseudo_response)
 

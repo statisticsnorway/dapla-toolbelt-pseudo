@@ -160,23 +160,35 @@ class PseudoFileResponse:
 
 
 def pseudo_operation_file(
-    pseudo_operation_request: PseudonymizeFileRequest
-    | DepseudonymizeFileRequest
-    | RepseudonymizeFileRequest,
-    data: t.BinaryIO,
+    file_handle: t.BinaryIO,
+    pseudo_operation_request: (
+        PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest
+    ),
     input_content_type: Mimetypes,
 ) -> PseudoFileResponse:
+    """Makes pseudonymization API calls for a file and returns the pseudonymized data and metadata.
+
+    Args:
+        file_handle: A file handle repreresenting the data to be pseudonymized
+        pseudo_operation_request: An object representing the data and how it should be pseudonymized
+        input_content_type: A supported Mimetype for the file.
+
+    Returns:
+        PseudoFileResponse: An object representing the response from the Pseudo Service.
+    """
     request_spec: FileSpecDecl = (
         None,
         pseudo_operation_request.to_json(),
         str(Mimetypes.JSON),
     )
 
-    file_name = _extract_name(data=data, input_content_type=input_content_type)
+    file_name = _extract_name(
+        file_handle=file_handle, input_content_type=input_content_type
+    )
 
     data_spec: FileSpecDecl = (
         file_name,
-        data,
+        file_handle,
         str(pseudo_operation_request.target_content_type),
     )
 
@@ -186,6 +198,8 @@ def pseudo_operation_file(
         data_spec=data_spec,
         stream=True,
     )
+
+    file_handle.close()
 
     payload = json.loads(response.content.decode("utf-8"))
     pseudo_data = payload["data"]

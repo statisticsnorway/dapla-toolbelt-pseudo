@@ -69,9 +69,9 @@ class Result:
                 )
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationJsonSchema(
-                        pseudo_variables=[pseudo_variable]
-                        if pseudo_variable is not None
-                        else []
+                        pseudo_variables=(
+                            [pseudo_variable] if pseudo_variable is not None else []
+                        )
                     )
                 )
 

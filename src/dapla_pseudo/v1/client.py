@@ -140,9 +140,9 @@ class PseudoClient:
         return response
 
 
-def _extract_name(data: t.BinaryIO, input_content_type: Mimetypes) -> str:
+def _extract_name(file_handle: t.BinaryIO, input_content_type: Mimetypes) -> str:
     try:
-        name = data.name
+        name = file_handle.name
     except AttributeError:
         # Fallback to default name
         name = "unknown"

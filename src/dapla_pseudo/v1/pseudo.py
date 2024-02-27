@@ -129,9 +129,9 @@ class Pseudonymize:
                     return self._pseudonymize_file()
                 case pl.DataFrame():
                     return self._pseudonymize_field()
-                case _:
+                case _ as invalid_dataset:
                     raise ValueError(
-                        f"Unsupported data type: {type(Pseudonymize.dataset)}. Should only be DataFrame or file-like type."
+                        f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                     )
 
         def _pseudonymize_file(self) -> Result:
@@ -150,7 +150,9 @@ class Pseudonymize:
             )
 
             pseudo_response: PseudoFileResponse = pseudo_operation_file(
-                pseudonymize_request, file.file_handle, file.content_type
+                file_handle=file.file_handle,
+                pseudo_operation_request=pseudonymize_request,
+                input_content_type=file.content_type,
             )
 
             return Result(pseudo_response=pseudo_response)
