@@ -8,7 +8,6 @@ from typing import Optional
 
 import pandas as pd
 import polars as pl
-from requests import Response
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PredefinedKeys
@@ -19,17 +18,18 @@ from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
 from dapla_pseudo.v1.api_models import MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
-from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
+from dapla_pseudo.v1.pseudo_commons import pseudo_operation_file
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
 
@@ -144,22 +144,16 @@ class Pseudonymize:
                     rules=self._rules,
                     keysets=KeyWrapper(self._pseudo_keyset).keyset_list(),
                 ),
-                target_content_type=file.content_type,
+                target_content_type=Mimetypes.JSON,
                 target_uri=None,
                 compression=None,
             )
 
-            response: Response = _client().pseudonymize_file(
-                pseudonymize_request,
-                file.file_handle,
-                timeout=self._timeout,
-                stream=True,
-                name=None,
+            pseudo_response: PseudoFileResponse = pseudo_operation_file(
+                pseudonymize_request, file.file_handle, file.content_type
             )
 
-            return Result(
-                PseudoFileResponse(response, file.content_type, streamed=True)
-            )
+            return Result(pseudo_response=pseudo_response)
 
         def _pseudonymize_field(self) -> Result:
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.

@@ -19,3 +19,6 @@ BinaryFileDecl = t.Union[
 DatasetDecl = pd.DataFrame | BinaryFileDecl | str | Path
 FileLikeDatasetDecl = BinaryFileDecl | str | Path
 FileSpecDecl = tuple[t.Optional[str], BinaryFileDecl | str, str]
+# FileSpecDecl is derived from the "files" argument in multi-part requests from the "Requests"-library
+# The tuple semantically means: ('filename', fileobj, 'content_type')
+# See "files" in https://requests.readthedocs.io/en/latest/api/#requests.request

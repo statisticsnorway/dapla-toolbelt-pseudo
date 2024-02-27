@@ -7,6 +7,7 @@ from typing import Any
 
 import pandas as pd
 import polars as pl
+from fsspec.spec import AbstractBufferedFile
 
 from dapla_pseudo.exceptions import ExtensionNotValidError
 
@@ -79,16 +80,16 @@ def read_to_polars_df(
 def write_from_df(
     df: pl.DataFrame,
     supported_format: SupportedOutputFileFormat,
-    file_path: Path | str,
+    file_like: AbstractBufferedFile | str,
     **kwargs: Any,
 ) -> None:
     """Writes to a file with a supported file format from a Dataframe."""
     match supported_format:
         case SupportedOutputFileFormat.CSV:
-            df.write_csv(file=file_path, **kwargs)
+            df.write_csv(file=file_like, **kwargs)
         case SupportedOutputFileFormat.JSON:
-            df.write_json(file=file_path, **kwargs)
+            df.write_json(file=file_like, **kwargs)
         case SupportedOutputFileFormat.XML:
-            df.to_pandas().to_xml(file_path, **kwargs)
+            df.to_pandas().to_xml(file_like, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
-            df.write_parquet(file_path, **kwargs)
+            df.write_parquet(file_like, **kwargs)

@@ -7,7 +7,6 @@ from typing import Optional
 
 import pandas as pd
 import polars as pl
-from requests import Response
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PredefinedKeys
@@ -21,12 +20,12 @@ from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudoRule
-from dapla_pseudo.v1.ops import _client
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
+from dapla_pseudo.v1.pseudo_commons import pseudo_operation_file
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
 
@@ -148,16 +147,10 @@ class Depseudonymize:
                 compression=None,
             )
 
-            response: Response = _client().depseudonymize_file(
-                depseudonymize_request,
-                file.file_handle,
-                timeout=self._timeout,
-                stream=True,
-                name=None,
+            pseudo_response: PseudoFileResponse = pseudo_operation_file(
+                depseudonymize_request, file.file_handle, file.content_type
             )
-            return Result(
-                PseudoFileResponse(response, file.content_type, streamed=True),
-            )
+            return Result(pseudo_response=pseudo_response)
 
         def _depseudonymize_field(self) -> Result:
             """Depseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
