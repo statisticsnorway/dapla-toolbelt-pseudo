@@ -1,6 +1,4 @@
-import json
 from typing import BinaryIO
-from unittest import mock
 from unittest.mock import ANY
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -10,6 +8,7 @@ import requests
 
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
@@ -20,46 +19,6 @@ def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"
     return PseudoClient(pseudo_service_url=base_url, auth_token=auth_token)
-
-
-def test_export_dataset(test_client: PseudoClient) -> None:
-    request_json = json.dumps(
-        {
-            "sourceDataset": {
-                "root": "gs://some-bucket",
-                "path": "/path/to/some/data",
-                "version": "123",
-            },
-            "targetContentName": "blah",
-            "targetContentType": "application/json",
-            "targetPassword": "kensentme",
-            "depseudonymize": True,
-            "pseudoRules": [
-                {
-                    "name": "rule-1",
-                    "pattern": "**/{*Fnr,*Id}",
-                    "func": "tink-daead(ssb-common-key-1)",
-                },
-                {
-                    "name": "rule-2",
-                    "pattern": "**/path/to/ignorable/stuff/*",
-                    "func": "redact(***)",
-                },
-            ],
-        }
-    )
-
-    with mock.patch("requests.post") as patched:
-        test_client.export_dataset(request_json=request_json)
-        patched.assert_called_once()
-        arg = patched.call_args.kwargs
-
-        assert arg["url"] == f"{test_client.pseudo_service_url}/export"
-        assert arg["headers"] == {
-            "Authorization": f"Bearer {test_client.static_auth_token}",
-            "Content-Type": "application/json",
-        }
-        assert arg["data"] == request_json
 
 
 @patch("requests.post")
@@ -94,14 +53,23 @@ def test_post_to_file_endpoint_success(
     mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
     mock_pseudo_request.to_json.return_value = Mock()
 
+    data_spec: FileSpecDecl = (
+        "tester",
+        Mock(spec=BinaryIO),
+        Mock(),
+    )
+
+    request_spec: FileSpecDecl = (
+        None,
+        mock_pseudo_request.to_json(),
+        str(Mimetypes.JSON),
+    )
+
     mock_post.return_value = mock_response
     response = test_client._post_to_file_endpoint(
         path="test_path",
-        request=mock_pseudo_request,
-        data=Mock(spec=BinaryIO),
-        name="test_name",
-        content_type=Mimetypes.JSON,
-        timeout=TIMEOUT_DEFAULT,
+        request_spec=request_spec,
+        data_spec=data_spec,
         stream=True,
     )
 
@@ -146,14 +114,25 @@ def test_post_to_file_endpoint_failure(
 
     mock_post.return_value = mock_response
 
+    data_spec: FileSpecDecl = (
+        "tester",
+        Mock(spec=BinaryIO),
+        Mock(),
+    )
+
+    request_spec: FileSpecDecl = (
+        None,
+        mock_pseudo_request.to_json(),
+        str(Mimetypes.JSON),
+    )
+
+    mock_post.return_value = mock_response
+
     with pytest.raises(requests.exceptions.HTTPError):
         test_client._post_to_file_endpoint(
             path="test_path",
-            request=mock_pseudo_request,
-            data=Mock(spec=BinaryIO),
-            name="test_name",
-            content_type=Mimetypes.JSON,
-            timeout=TIMEOUT_DEFAULT,
+            request_spec=request_spec,
+            data_spec=data_spec,
             stream=True,
         )
 

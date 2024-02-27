@@ -133,11 +133,11 @@ def test_builder_fields_selector_multiple_fields(df: pd.DataFrame) -> None:
     ]
 
 
-@patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
+@patch(f"{PKG}.pseudo_operation_file")
 def test_builder_file_default(
-    patched_pseudonymize_file: MagicMock, json_file_path: str
+    patched_pseudo_operation_file: MagicMock, json_file_path: str
 ) -> None:
-    patched_pseudonymize_file.return_value = Mock()
+    patched_pseudo_operation_file.return_value = Mock()
     Pseudonymize.from_file(json_file_path).on_fields(
         "fornavn"
     ).with_default_encryption().run()
@@ -161,16 +161,14 @@ def test_builder_file_default(
         compression=None,
     )
     file_dataset = t.cast(File, Pseudonymize.dataset)
-    patched_pseudonymize_file.assert_called_once_with(
-        pseudonymize_request,  # use ANY to avoid having to mock the whole request
-        file_dataset.file_handle,
-        stream=True,
-        name=None,
-        timeout=TIMEOUT_DEFAULT,
+    patched_pseudo_operation_file.assert_called_once_with(
+        file_handle=file_dataset.file_handle,
+        pseudo_operation_request=pseudonymize_request,
+        input_content_type=Mimetypes.JSON,
     )
 
 
-@patch("dapla_pseudo.v1.PseudoClient.pseudonymize_file")
+@patch(f"{PKG}.pseudo_operation_file")
 def test_builder_file_hierarchical(
     patched_pseudonymize_file: MagicMock, json_hierarch_file_path: str
 ) -> None:
@@ -199,11 +197,9 @@ def test_builder_file_hierarchical(
     )
     file_dataset = t.cast(File, Pseudonymize.dataset)
     patched_pseudonymize_file.assert_called_once_with(
-        pseudonymize_request,  # use ANY to avoid having to mock the whole request
-        file_dataset.file_handle,
-        stream=True,
-        name=None,
-        timeout=TIMEOUT_DEFAULT,
+        file_handle=file_dataset.file_handle,
+        pseudo_operation_request=pseudonymize_request,
+        input_content_type=Mimetypes.JSON,
     )
 
 
