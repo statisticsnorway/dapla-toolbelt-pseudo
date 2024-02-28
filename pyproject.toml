@@ -28,7 +28,8 @@ polars = ">=0.18.2"
 pygments = ">2.15.0"
 click = ">=8.0.1"
 ssb-datadoc-model = ">=5.0.0"
-
+cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
+pyarrow = ">=14.0.2, <15"
 
 [tool.poetry.group.test.dependencies]
 typeguard = ">=2.13.3"

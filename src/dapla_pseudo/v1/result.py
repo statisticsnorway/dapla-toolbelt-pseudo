@@ -7,11 +7,12 @@ from typing import Any
 
 import pandas as pd
 import polars as pl
-from dapla import FileClient
+from cloudpathlib import GSClient
+from cloudpathlib import GSPath
+from dapla import AuthClient
 from datadoc_model.model import MetadataContainer
 from datadoc_model.model import PseudonymizationMetadata
 from datadoc_model.model import PseudoVariable
-from fsspec.spec import AbstractBufferedFile
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
@@ -120,11 +121,11 @@ class Result:
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
-    def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
-        """Write pseudonymized data to a file.
+    def to_file(self, file_path: str, **kwargs: t.Any) -> None:
+        """Write pseudonymized data to a file, with the metadata being written to the same folder.
 
         Args:
-            file_path (str | Path): The path to the file to be written.
+            file_path (str | Path): The path to the file to be written. If writing to a bucket, use the "gs://" prefix.
             **kwargs: Additional keyword arguments to be passed the Polars writer function *if* the input data is a DataFrame.
                 The specific writer function depends on the format of the output file, e.g. `write_csv()` for CSV files.
 
@@ -135,28 +136,35 @@ class Result:
         """
         file_format = get_file_format_from_file_name(file_path)
 
+        datadoc_file_name = f"{Path(file_path).stem}__DOC.json"
+
+        datadoc_file_path: Path | GSPath
+        if file_path.startswith(GSPath.cloud_prefix):
+            client = GSClient(credentials=AuthClient.fetch_google_credentials())
+            gs_path = GSPath(file_path, client)
+
+            file_handle = gs_path.open(mode="wb")
+
+            datadoc_file_path = gs_path.parent.joinpath(Path(datadoc_file_name))
+            datadoc_file_handle = datadoc_file_path.open(mode="w")
+        else:
+            file_handle = Path(file_path).open(mode="wb")
+
+            datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
+            datadoc_file_handle = datadoc_file_path.open(mode="w")
+
         match self._pseudo_data:
             case pl.DataFrame() as df:
-                if str(file_path).startswith("gs://"):
-                    with FileClient().gcs_open(
-                        str(file_path), mode="wb"
-                    ) as file_handle:
-                        # If we ask for a file to be opened in binary mode, we know that the type is AbstractBufferedFile
-                        file_handle = t.cast(AbstractBufferedFile, file_handle)
-                        write_from_df(df, file_format, file_handle, **kwargs)
-                else:
-                    write_from_df(df, file_format, str(file_path), **kwargs)
+                write_from_df(df, file_format, file_handle, **kwargs)
+                datadoc_file_handle.write(self.datadoc)
             case list() as file_data:
-                if str(file_path).startswith("gs://"):
-                    with FileClient().gcs_open(str(file_path), mode="w") as file_handle:
-                        # If we ask for a file to be opened in binary mode, we know that the type is AbstractBufferedFile
-                        file_handle.write(json.dumps(file_data))
-                else:
-                    with open(file_path, mode="w") as file_handle:
-                        file_handle.write(json.dumps(file_data))
-
+                file_handle.write(bytes(json.dumps(file_data), encoding="utf-8"))
+                datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
+
+        file_handle.close()
+        datadoc_file_handle.close()
 
     @property
     def metadata(self) -> dict[str, Any]:

@@ -1,5 +1,6 @@
 """Classes used to support reading of dataframes from file."""
 
+import typing as t
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
@@ -75,6 +76,19 @@ def read_to_polars_df(
             raise ValueError(
                 "Unsupported file format for Polars: 'XML'. Use Pandas instead."
             )
+
+
+def write_from_dict(
+    data: list[dict[str, t.Any]],
+    supported_format: SupportedOutputFileFormat,
+    file_like: AbstractBufferedFile | str,
+) -> None:
+    match supported_format:
+        case SupportedOutputFileFormat.PARQUET:
+            df = pl.DataFrame(data)
+            df.write_csv(file_like)
+        case _:
+            raise ValueError("hei")
 
 
 def write_from_df(
