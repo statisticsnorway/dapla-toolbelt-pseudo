@@ -9,7 +9,7 @@ import pandas as pd
 import polars as pl
 from dapla import FileClient
 from datadoc_model.model import MetadataContainer
-from datadoc_model.model import PseudonymizationJsonSchema
+from datadoc_model.model import PseudonymizationMetadata
 from datadoc_model.model import PseudoVariable
 from fsspec.spec import AbstractBufferedFile
 
@@ -51,7 +51,7 @@ class Result:
                     }
 
                 self._datadoc = MetadataContainer(
-                    pseudonymization=PseudonymizationJsonSchema(
+                    pseudonymization=PseudonymizationMetadata(
                         pseudo_variables=datadoc_fields
                     )
                 )
@@ -68,7 +68,7 @@ class Result:
                     file_metadata.datadoc
                 )
                 self._datadoc = MetadataContainer(
-                    pseudonymization=PseudonymizationJsonSchema(
+                    pseudonymization=PseudonymizationMetadata(
                         pseudo_variables=(
                             [pseudo_variable] if pseudo_variable is not None else []
                         )
