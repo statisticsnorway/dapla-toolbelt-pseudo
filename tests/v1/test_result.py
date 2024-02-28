@@ -28,7 +28,7 @@ def pseudo_file_response() -> PseudoFileResponse:
     return PseudoFileResponse(
         data=data,
         raw_metadata=RawPseudoMetadata(
-            logs=[], metrics=[], datadoc=[{"tester": []}], field_name="test"
+            logs=[], metrics=[], datadoc=[], field_name="test"
         ),
         content_type=Mimetypes.JSON,
         file_name="personer.json",
