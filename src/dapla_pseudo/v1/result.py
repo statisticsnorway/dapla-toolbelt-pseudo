@@ -1,7 +1,7 @@
 """Common API models for builder packages."""
 
+import json
 import typing as t
-from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -11,14 +11,11 @@ from dapla import FileClient
 from datadoc_model.model import MetadataContainer
 from datadoc_model.model import PseudonymizationJsonSchema
 from datadoc_model.model import PseudoVariable
+from fsspec.spec import AbstractBufferedFile
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
-from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
-from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
-from dapla_pseudo.v1.supported_file_format import read_to_pandas_df
-from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 from dapla_pseudo.v1.supported_file_format import write_from_df
 
 
@@ -30,11 +27,13 @@ class Result:
         pseudo_response: PseudoFieldResponse | PseudoFileResponse,
     ) -> None:
         """Initialise a PseudonymizationResult."""
-        self._pseudo_response = pseudo_response
+        self._pseudo_data: pl.DataFrame | list[dict[str, t.Any]]
+        self._metadata: dict[str, dict[str, list[Any]]] = {}
         match pseudo_response:
-            case PseudoFieldResponse(_, raw_metadata):
+            case PseudoFieldResponse(dataframe, raw_metadata):
+                self._pseudo_data = dataframe
+
                 datadoc_fields: list[PseudoVariable] = []
-                self._metadata: dict[str, dict[str, list[Any]]] = {}
 
                 for field_metadata in raw_metadata:
                     pseudo_variable = self._datadoc_from_raw_metadata_fields(
@@ -42,6 +41,9 @@ class Result:
                     )
                     if pseudo_variable is not None:
                         datadoc_fields.append(pseudo_variable)
+
+                    if field_metadata.field_name is None:
+                        field_metadata.field_name = "unknown_field"
 
                     self._metadata[field_metadata.field_name] = {
                         "logs": field_metadata.logs,
@@ -54,15 +56,30 @@ class Result:
                     )
                 )
 
-            case PseudoFileResponse():
-                self._metadata = {}
+            case PseudoFileResponse(
+                data, file_metadata, _content_type, file_name, _streamed
+            ):
+                self._pseudo_data = data
+                self._metadata[file_name] = {
+                    "logs": file_metadata.logs,
+                    "metrics": file_metadata.metrics,
+                }
+                pseudo_variable = self._datadoc_from_raw_metadata_fields(
+                    file_metadata.datadoc
+                )
+                self._datadoc = MetadataContainer(
+                    pseudonymization=PseudonymizationJsonSchema(
+                        pseudo_variables=(
+                            [pseudo_variable] if pseudo_variable is not None else []
+                        )
+                    )
+                )
 
     def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.
 
         Args:
-            **kwargs: Additional keyword arguments to be passed the Polars reader function *if* the input data is from a file.
-                The specific reader function depends on the format, e.g. `read_csv` for CSV files.
+            **kwargs: Additional keyword arguments to be passed the Polars "from_dicts" function *if* the input data is from a file.
 
         Raises:
             ValueError: If the result is not of type Polars DataFrame or PseudoFileResponse.
@@ -70,24 +87,17 @@ class Result:
         Returns:
             pl.DataFrame: A Polars DataFrame containing the pseudonymized data.
         """
-        match self._pseudo_response:
-            case PseudoFieldResponse():
+        match self._pseudo_data:
+            case pl.DataFrame() as df:
                 # Drop statement a workaround to https://github.com/pola-rs/polars/issues/7291
-                if "__index_level_0__" in self._pseudo_response.data.columns:
-                    self._pseudo_response.data = self._pseudo_response.data.drop(
-                        "__index_level_0__"
-                    )
-                return self._pseudo_response.data
-            case PseudoFileResponse(response, content_type, _):
-                output_format = SupportedOutputFileFormat(content_type.name.lower())
-                df = read_to_polars_df(
-                    output_format, BytesIO(response.content), **kwargs
-                )
+                if "__index_level_0__" in df.columns:
+                    df = df.drop("__index_level_0__")
                 return df
-            case _:
-                raise ValueError(
-                    f"Invalid response type: {type(self._pseudo_response)}"
-                )
+            case list() as file_data:
+                df = pl.from_dicts(file_data, **kwargs)
+                return df
+            case _ as invalid_pseudo_data:
+                raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
 
     def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
         """Output pseudonymized data as a Pandas DataFrame.
@@ -102,19 +112,13 @@ class Result:
         Returns:
             pd.DataFrame: A Pandas DataFrame containing the pseudonymized data.
         """
-        match self._pseudo_response:
-            case PseudoFieldResponse(data, _):
-                return data.to_pandas()
-            case PseudoFileResponse(response, content_type, _):
-                output_format = SupportedOutputFileFormat(content_type.name.lower())
-                df = read_to_pandas_df(
-                    output_format, BytesIO(response.content), **kwargs
-                )
-                return df
-            case _:
-                raise ValueError(
-                    f"Invalid response type: {type(self._pseudo_response)}"
-                )
+        match self._pseudo_data:
+            case pl.DataFrame() as df:
+                return df.to_pandas()
+            case list() as file_data:
+                return pd.DataFrame.from_records(file_data, **kwargs)
+            case _ as invalid_pseudo_data:
+                raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
     def to_file(self, file_path: str | Path, **kwargs: t.Any) -> None:
         """Write pseudonymized data to a file.
@@ -131,32 +135,28 @@ class Result:
         """
         file_format = get_file_format_from_file_name(file_path)
 
-        if str(file_path).startswith("gs://"):
-            file_handle = FileClient().gcs_open(str(file_path), mode="wb")
-        else:
-            file_handle = open(file_path, mode="wb")
-
-        match self._pseudo_response:
-            case PseudoFileResponse(response, content_type, streamed):
-                if FORMAT_TO_MIMETYPE_FUNCTION[file_format] != content_type:
-                    raise ValueError(
-                        f'Provided output file format "{file_format}" does not'
-                        f'match the content type of the provided input file "{content_type.name}".'
-                    )
-                if streamed:
-                    for chunk in response.iter_content(chunk_size=128):
-                        file_handle.write(chunk)
+        match self._pseudo_data:
+            case pl.DataFrame() as df:
+                if str(file_path).startswith("gs://"):
+                    with FileClient().gcs_open(
+                        str(file_path), mode="wb"
+                    ) as file_handle:
+                        # If we ask for a file to be opened in binary mode, we know that the type is AbstractBufferedFile
+                        file_handle = t.cast(AbstractBufferedFile, file_handle)
+                        write_from_df(df, file_format, file_handle, **kwargs)
                 else:
-                    # MyPy error below needs to be fixed, ignoring for now
-                    file_handle.write(self._pseudo_response.response.content)  # type: ignore[arg-type]
-            case pl.DataFrame():
-                write_from_df(self._pseudo_response, file_format, file_path, **kwargs)
-            case _:
-                raise ValueError(
-                    f"Invalid response type: {type(self._pseudo_response)}"
-                )
+                    write_from_df(df, file_format, str(file_path), **kwargs)
+            case list() as file_data:
+                if str(file_path).startswith("gs://"):
+                    with FileClient().gcs_open(str(file_path), mode="w") as file_handle:
+                        # If we ask for a file to be opened in binary mode, we know that the type is AbstractBufferedFile
+                        file_handle.write(json.dumps(file_data))
+                else:
+                    with open(file_path, mode="w") as file_handle:
+                        file_handle.write(json.dumps(file_data))
 
-        file_handle.close()
+            case _ as invalid_pseudo_data:
+                raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
     @property
     def metadata(self) -> dict[str, Any]:

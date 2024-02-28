@@ -1,11 +1,38 @@
 import io
+import json
 from pathlib import Path
 
 import pandas as pd
 import polars as pl
+import pytest
 
+from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
+from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
+from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.result import Result
+
+
+@pytest.fixture()
+def polars_df() -> pl.DataFrame:
+    with open("tests/data/personer.json") as test_data:
+        return pl.from_pandas(pd.json_normalize(json.load(test_data)))
+
+
+@pytest.fixture()
+def pseudo_file_response() -> PseudoFileResponse:
+    fd = open("tests/data/personer.json")
+    data = json.loads(fd.read())
+    fd.seek(0)
+
+    return PseudoFileResponse(
+        data=data,
+        raw_metadata=RawPseudoMetadata(
+            logs=[], metrics=[], datadoc=[{"tester": []}], field_name="test"
+        ),
+        content_type=Mimetypes.JSON,
+        file_name="personer.json",
+    )
 
 
 def test_result_index_level(tmp_path: Path) -> None:
@@ -35,3 +62,36 @@ def test_result_index_level(tmp_path: Path) -> None:
         PseudoFieldResponse(data=df_pl_filtered, raw_metadata=[])
     ).to_polars()
     assert "__index_level_0__" not in df_result.columns
+
+
+def test_result_from_polars_to_polars(polars_df: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+    assert isinstance(result.to_polars(), pl.DataFrame)
+
+
+def test_result_from_polars_to_pandas(polars_df: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+    assert isinstance(result.to_pandas(), pd.DataFrame)
+
+
+def test_result_from_polars_to_file(tmp_path: Path, polars_df: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+    result.to_file(tmp_path / "polars_to_file.json")
+
+
+def test_result_from_file_to_polars(pseudo_file_response: PseudoFileResponse) -> None:
+    result = Result(pseudo_response=pseudo_file_response)
+    assert isinstance(result.to_polars(), pl.DataFrame)
+
+
+def test_result_from_file_to_pandas(pseudo_file_response: PseudoFileResponse) -> None:
+    result = Result(pseudo_response=pseudo_file_response)
+    assert isinstance(result.to_pandas(), pd.DataFrame)
+
+
+def test_result_from_file_to_file(
+    tmp_path: Path, pseudo_file_response: PseudoFileResponse
+) -> None:
+    result = Result(pseudo_response=pseudo_file_response)
+    file_extension = pseudo_file_response.content_type.name.lower()
+    result.to_file(tmp_path / f"file_to_file.{file_extension}")

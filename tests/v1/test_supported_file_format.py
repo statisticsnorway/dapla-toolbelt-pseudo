@@ -43,6 +43,7 @@ def test_read_with_polars_supported_formats(file_format: str) -> None:
     df = read_to_polars_df(
         supported_file_format, Path(f"{TEST_FILE_PATH}/test.{file_format}")
     )
+
     assert isinstance(df, pl.DataFrame)
 
 
@@ -58,4 +59,4 @@ def test_write_from_df(
 ) -> None:
     supported_format = SupportedOutputFileFormat(file_format)
 
-    write_from_df(df_polars, supported_format, Path(f"{tmp_path}/test.{file_format}"))
+    write_from_df(df_polars, supported_format, f"{tmp_path}/test.{file_format}")

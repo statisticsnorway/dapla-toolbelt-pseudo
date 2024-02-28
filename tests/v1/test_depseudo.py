@@ -146,11 +146,14 @@ def test_builder_fields_selector_multiple_fields(
     ]
 
 
-@patch("dapla_pseudo.v1.PseudoClient.depseudonymize_file")
+@patch(f"{PKG}.pseudo_operation_file")
 def test_builder_file_default(
-    patched_depseudonymize_file: MagicMock, json_pseudonymized_file_path: str
+    patched_pseudo_operation_file: MagicMock, json_pseudonymized_file_path: str
 ) -> None:
-    patched_depseudonymize_file.return_value = Mock()
+    mock_pseudo_file_response = Mock()
+    mock_pseudo_file_response.data = File(file_handle=Mock(), content_type=Mock())
+    print(type(mock_pseudo_file_response.data))
+    patched_pseudo_operation_file.return_value = mock_pseudo_file_response
     Depseudonymize.from_file(json_pseudonymized_file_path).on_fields(
         "fornavn"
     ).with_default_encryption().run()
@@ -174,20 +177,18 @@ def test_builder_file_default(
         compression=None,
     )
     file_dataset = t.cast(File, Depseudonymize.dataset)
-    patched_depseudonymize_file.assert_called_once_with(
-        depseudonymize_request,  # use ANY to avoid having to mock the whole request
-        file_dataset.file_handle,
-        stream=True,
-        name=None,
-        timeout=TIMEOUT_DEFAULT,
+    patched_pseudo_operation_file.assert_called_once_with(
+        file_handle=file_dataset.file_handle,
+        pseudo_operation_request=depseudonymize_request,
+        input_content_type=Mimetypes.JSON,
     )
 
 
-@patch("dapla_pseudo.v1.PseudoClient.depseudonymize_file")
+@patch(f"{PKG}.pseudo_operation_file")
 def test_builder_file_hierarchical(
-    patched_depseudonymize_file: MagicMock, json_pseudonymized_hierarch_file_path: str
+    patched_pseudo_operation_file: MagicMock, json_pseudonymized_hierarch_file_path: str
 ) -> None:
-    patched_depseudonymize_file.return_value = Mock()
+    patched_pseudo_operation_file.return_value = Mock()
     Depseudonymize.from_file(json_pseudonymized_hierarch_file_path).on_fields(
         "person_info/fnr"
     ).with_default_encryption().run()
@@ -211,12 +212,10 @@ def test_builder_file_hierarchical(
         compression=None,
     )
     file_dataset = t.cast(File, Depseudonymize.dataset)
-    patched_depseudonymize_file.assert_called_once_with(
-        depseudonymize_request,  # use ANY to avoid having to mock the whole request
-        file_dataset.file_handle,
-        stream=True,
-        name=None,
-        timeout=TIMEOUT_DEFAULT,
+    patched_pseudo_operation_file.assert_called_once_with(
+        file_handle=file_dataset.file_handle,
+        pseudo_operation_request=depseudonymize_request,
+        input_content_type=Mimetypes.JSON,
     )
 
 

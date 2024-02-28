@@ -1,6 +1,5 @@
 """Module that implements a client abstraction that makes it easy to communicate with the Dapla Pseudo Service REST API."""
 
-import mimetypes
 import os
 import typing as t
 from datetime import date
@@ -11,6 +10,8 @@ import requests
 from dapla import AuthClient
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import Env
+from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoFunction
@@ -18,16 +19,15 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 
-from ..types import BinaryFileDecl
-from ..types import FileSpecDecl
-
 
 class PseudoClient:
     """Client for interacting with the Dapla Pseudo Service REST API."""
 
-    PSEUDONYMIZE_FILE_ENDPOINT = "pseudonymize/file"
-    DEPSEUDONYMIZE_FILE_ENDPOINT = "depseudonymize/file"
-    REPSEUDONYMIZE_FILE_ENDPOINT = "repseudonymize/file"
+    pseudo_op_to_endpoint: t.ClassVar[dict[type, str]] = {
+        PseudonymizeFileRequest: "pseudonymize/file",
+        DepseudonymizeFileRequest: "depseudonymize/file",
+        RepseudonymizeFileRequest: "repseudonymize/file",
+    }
 
     def __init__(
         self,
@@ -58,224 +58,30 @@ class PseudoClient:
                 else str(self.static_auth_token)
             )
 
-    def pseudonymize_file(
-        self,
-        pseudonymize_request: PseudonymizeFileRequest,
-        data: BinaryFileDecl,
-        timeout: int,
-        stream: bool = False,
-        name: t.Optional[str] = None,
-    ) -> requests.Response:
-        """Pseudonymize data from a file-like object.
-
-        Choose between streaming the result back, or storing it as a file in GCS (by providing a `targetUri`).
-
-        Notice that you can specify the `targetContentType` if you want to convert to either of the supported file
-        formats. E.g. your source could be a CSV file and the result could be a JSON file.
-
-        Reduce transmission times by applying compression both to the source and target files.
-        Specify `compression` if you want the result to be a zipped (and optionally) encrypted archive.
-
-        Pseudonymization will be applied according to a list of "rules" that target the fields of the file being
-        processed. Each rule defines a `pattern` (as a glob
-        (https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)) that identifies one or multiple
-        fields, and a `func` that will be applied to the matching fields. Rules are processed in the order they are
-        defined, and only the first matching rule will be applied (thus: rule ordering is important).
-
-        Pseudo rules will most times refer to crypto keys. You can provide your own keys to use (via the `keysets`
-        param) or use one of the predefined keys: `ssb-common-key-1` or `ssb-common-key-2`.
-
-        See https://dapla-pseudo-service.staging-bip-app.ssb.no/api-docs/redoc#tag/Pseudo-operations/operation/pseudonymizeFile
-
-        :param pseudonymize_request: the request to send to Dapla Pseudo Service
-        :param data: file handle that should be pseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
-        :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
-        :param name: optional name for logging purposes
-        :return: pseudonymized data
-        """
-        return self._post_to_file_endpoint(
-            self.PSEUDONYMIZE_FILE_ENDPOINT,
-            pseudonymize_request,
-            data,
-            self._extract_name(data, pseudonymize_request.target_content_type, name),
-            pseudonymize_request.target_content_type,
-            timeout,
-            stream,
-        )
-
-    def depseudonymize_file(
-        self,
-        depseudonymize_request: DepseudonymizeFileRequest,
-        data: BinaryFileDecl,
-        timeout: int,
-        stream: bool = False,
-        name: t.Optional[str] = None,
-    ) -> requests.Response:
-        """Depseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
-
-        Notice that only certain whitelisted users can depseudonymize data.
-
-        Choose between streaming the result back, or storing it as a file in GCS (by providing a `targetUri`).
-
-        Notice that you can specify the `targetContentType` if you want to convert to either of the supported file
-        formats. E.g. your source could be a CSV file and the result could be a JSON file.
-
-        Reduce transmission times by applying compression both to the source and target files.
-        Specify `compression` if you want the result to be a zipped (and optionally) encrypted archive.
-
-        Depseudonymization will be applied according to a list of "rules" that target the fields of the file being
-        processed. Each rule defines a `pattern` (as a
-        glob (https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)) that identifies one or multiple
-        fields, and a `func` that will be applied to the matching fields. Rules are processed in the order they are
-        defined, and only the first matching rule will be applied (thus: rule ordering is important).
-
-        Pseudo rules will most times refer to crypto keys. You can provide your own keys to use (via the `keysets`
-        param) or use one of the predefined keys: `ssb-common-key-1` or `ssb-common-key-2`.
-
-        See https://dapla-pseudo-service.staging-bip-app.ssb.no/api-docs/redoc#tag/Pseudo-operations/operation/depseudonymizeFile
-
-        :param request_json: the request JSON to send to Dapla Pseudo Service
-        :param file_path: path to a local file that should be depseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
-        :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
-        :return: depseudonymized data
-        """
-        return self._post_to_file_endpoint(
-            self.DEPSEUDONYMIZE_FILE_ENDPOINT,
-            depseudonymize_request,
-            data,
-            self._extract_name(data, depseudonymize_request.target_content_type, name),
-            depseudonymize_request.target_content_type,
-            timeout,
-            stream,
-        )
-
-    def repseudonymize_file(
-        self,
-        repseudonymize_request: RepseudonymizeFileRequest,
-        data: BinaryFileDecl,
-        timeout: int,
-        stream: bool = False,
-        name: t.Optional[str] = None,
-    ) -> requests.Response:
-        """Repseudonymize a file (JSON or CSV - or a zip with potentially multiple such files) by uploading the file.
-
-        Repseudonymization is done by first applying depseudonuymization and then pseudonymization to fields of the file.
-
-        Choose between streaming the result back, or storing it as a file in GCS (by providing a `targetUri`).
-
-        Notice that you can specify the `targetContentType` if you want to convert to either of the supported file
-        formats. E.g. your source could be a CSV file and the result could be a JSON file.
-
-        Reduce transmission times by applying compression both to the source and target files.
-        Specify `compression` if you want the result to be a zipped (and optionally) encrypted archive.
-
-        Repseudonymization will be applied according to a list of "rules" that target the fields of the file being
-        processed. Each rule defines a `pattern` (as a
-        glob (https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)) that identifies one or multiple
-        fields, and a `func` that will be applied to the matching fields. Rules are processed in the order they are
-        defined, and only the first matching rule will be applied (thus: rule ordering is important). Two sets of rules
-        are provided: one that defines how to depseudonymize and a second that defines how to pseudonymize. These sets
-        of rules are linked to separate keysets.
-
-        Pseudo rules will most times refer to crypto keys. You can provide your own keys to use (via the `keysets`
-        param) or use one of the predefined keys: `ssb-common-key-1` or `ssb-common-key-2`.
-
-        See https://dapla-pseudo-service.staging-bip-app.ssb.no/api-docs/redoc#tag/Pseudo-operations/operation/repseudonymizeFile
-
-        :param request_json: the request JSON to send to Dapla Pseudo Service
-        :param file_path: path to a local file that should be depseudonymized
-        :param timeout: connection and read timeout, see
-            https://requests.readthedocs.io/en/latest/user/advanced/?highlight=timeout#timeouts
-        :param stream: set to true if the results should be chunked into pieces, e.g. if you operate on large files.
-        :return: repseudonymized data
-        """
-        return self._post_to_file_endpoint(
-            self.REPSEUDONYMIZE_FILE_ENDPOINT,
-            repseudonymize_request,
-            data,
-            self._extract_name(data, repseudonymize_request.target_content_type, name),
-            repseudonymize_request.target_content_type,
-            timeout,
-            stream,
-        )
-
-    def _extract_name(
-        self, data: t.BinaryIO, content_type: Mimetypes, name: t.Optional[str]
-    ) -> str:
-        if name is None:
-            try:
-                name = data.name
-            except AttributeError:
-                # Fallback to default name
-                name = "unknown"
-
-        if not name.endswith(".json") and content_type is Mimetypes.JSON:
-            name = f"{name}.json"  # Pseudo service expects a file extension
-
-        if "/" in name:
-            name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
-
-        return name
-
-    def _process_file(
-        self,
-        operation: str,
-        request: (
-            PseudonymizeFileRequest
-            | DepseudonymizeFileRequest
-            | RepseudonymizeFileRequest
-        ),
-        file_path: str,
-        timeout: int,
-        stream: bool = False,
-    ) -> requests.Response:
-        file_name = os.path.basename(file_path).split("/")[-1]
-        content_type = Mimetypes(mimetypes.MimeTypes().guess_type(file_path)[0])
-
-        with open(file_path, "rb") as f:
-            return self._post_to_file_endpoint(
-                f"{operation}/file",
-                request,
-                f,
-                file_name,
-                content_type,
-                timeout,
-                stream,
-            )
-
     def _post_to_file_endpoint(
         self,
         path: str,
-        request: (
-            PseudonymizeFileRequest
-            | DepseudonymizeFileRequest
-            | RepseudonymizeFileRequest
-        ),
-        data: t.BinaryIO,
-        name: str,
-        content_type: Mimetypes,
-        timeout: int,
-        stream: bool = False,
+        request_spec: FileSpecDecl,
+        data_spec: FileSpecDecl,
+        stream: bool,
     ) -> requests.Response:
-        data_spec: FileSpecDecl = (name, data, content_type)
-        request_spec: FileSpecDecl = (None, request.to_json(), str(Mimetypes.JSON))
+        """POST to a file endpoint in the Pseudo Service.
+
+        Requests to the file endpoint are sent as multi-part requests,
+        where the first part represents the filedata itself, and the second part represents
+        the transformations to apply on that data.
+        """
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
                 "Authorization": f"Bearer {self.__auth_token()}",
                 "Accept-Encoding": "gzip",
             },
-            files={
-                "data": data_spec,
-                "request": request_spec,
-            },
+            files={"data": data_spec, "request": request_spec},
             stream=stream,
-            timeout=timeout,
+            timeout=TIMEOUT_DEFAULT,
         )
+
         response.raise_for_status()
         return response
 
@@ -333,31 +139,25 @@ class PseudoClient:
         response.raise_for_status()
         return response
 
-    def export_dataset(self, request_json: str) -> requests.Response:
-        """Export a dataset in GCS to CSV or JSON, and optionally depseudonymize the data.
 
-        The dataset will be archived in an encrypted zip file protected by a user provided password.
+def _extract_name(file_handle: t.BinaryIO, input_content_type: Mimetypes) -> str:
+    try:
+        name = file_handle.name
+    except AttributeError:
+        # Fallback to default name
+        name = "unknown"
 
-        It is possible to specify `columnSelectors`, that allows for partial export, e.g. only specific fields.
-        This can be applied as a means to perform data minimization.
+    if not name.endswith(".json") and input_content_type is Mimetypes.JSON:
+        name = f"{name}.json"  # Pseudo service expects a file extension
 
-        Data is exported and stored to a specific, predefined GCS bucket. This is specified in the application
-        configuration and cannot be overridden.
+    if "/" in name:
+        name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
 
-        See https://dapla-pseudo-service.staging-bip-app.ssb.no/api-docs/redoc#tag/Pseudo-operations/operation/export
+    return name
 
-        :param request_json: the request JSON to send to Dapla Pseudo Service
-        :return: JSON response with a reference to the export "job"
-        """
-        auth_token = self.__auth_token()
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/export",
-            headers={
-                "Authorization": f"Bearer {auth_token}",
-                "Content-Type": "application/json",
-            },
-            data=request_json,
-            timeout=30,  # seconds
-        )
-        response.raise_for_status()
-        return response
+
+def _client() -> PseudoClient:
+    return PseudoClient(
+        pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
+        auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
+    )

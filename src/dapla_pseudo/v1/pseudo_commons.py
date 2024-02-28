@@ -13,17 +13,22 @@ import requests
 from dapla import FileClient
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
-from requests import Response
 
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
+from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import get_file_format_from_file_name
+from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.ops import _client
+from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
+from dapla_pseudo.v1.client import PseudoClient
+from dapla_pseudo.v1.client import _client
+from dapla_pseudo.v1.client import _extract_name
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 
 
@@ -132,7 +137,7 @@ class RawPseudoMetadata:
     logs: list[str]
     metrics: list[str]
     datadoc: list[dict[str, t.Any]]
-    field_name: str
+    field_name: t.Optional[str] = None
 
 
 @dataclass
@@ -147,9 +152,70 @@ class PseudoFieldResponse:
 class PseudoFileResponse:
     """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
 
-    response: Response
+    data: list[dict[str, t.Any]]
+    raw_metadata: RawPseudoMetadata
     content_type: Mimetypes
+    file_name: str
     streamed: bool = True
+
+
+def pseudo_operation_file(
+    file_handle: t.BinaryIO,
+    pseudo_operation_request: (
+        PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest
+    ),
+    input_content_type: Mimetypes,
+) -> PseudoFileResponse:
+    """Makes pseudonymization API calls for a file and returns the pseudonymized data and metadata.
+
+    Args:
+        file_handle: A file handle repreresenting the data to be pseudonymized
+        pseudo_operation_request: An object representing the data and how it should be pseudonymized
+        input_content_type: A supported Mimetype for the file.
+
+    Returns:
+        PseudoFileResponse: An object representing the response from the Pseudo Service.
+    """
+    request_spec: FileSpecDecl = (
+        None,
+        pseudo_operation_request.to_json(),
+        str(Mimetypes.JSON),
+    )
+
+    file_name = _extract_name(
+        file_handle=file_handle, input_content_type=input_content_type
+    )
+
+    data_spec: FileSpecDecl = (
+        file_name,
+        file_handle,
+        str(pseudo_operation_request.target_content_type),
+    )
+
+    response = _client()._post_to_file_endpoint(
+        path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
+        request_spec=request_spec,
+        data_spec=data_spec,
+        stream=True,
+    )
+
+    file_handle.close()
+
+    payload = json.loads(response.content.decode("utf-8"))
+    pseudo_data = payload["data"]
+    metadata = RawPseudoMetadata(
+        logs=payload["logs"],
+        metrics=payload["metrics"],
+        datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+    )
+
+    return PseudoFileResponse(
+        data=pseudo_data,
+        raw_metadata=metadata,
+        content_type=Mimetypes.JSON,
+        streamed=True,
+        file_name=file_name,
+    )
 
 
 def pseudonymize_operation_field(
