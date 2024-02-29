@@ -58,6 +58,7 @@ class PseudoClient:
                 else str(self.static_auth_token)
             )
 
+    @staticmethod
     def _handle_response_error(response: requests.Response) -> None:
         """Report error messages in response object."""
         match response.status_code:
