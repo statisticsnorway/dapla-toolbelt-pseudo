@@ -104,7 +104,7 @@ class PseudoClient:
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request: dict[str, t.Collection[str]] = {
+        request: dict[str, t.Any] = {
             "request": {
                 "name": field_name,
                 "values": values,
@@ -112,11 +112,7 @@ class PseudoClient:
             }
         }
         if keyset:
-            request["keyset"] = {
-                "kekUri": keyset.kek_uri,
-                "encryptedKeyset": keyset.encrypted_keyset,
-                "keysetInfo": keyset.keyset_info,
-            }
+            request["request"]["keyset"] = keyset.model_dump(by_alias=True)
 
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
