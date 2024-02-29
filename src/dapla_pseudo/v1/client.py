@@ -58,6 +58,15 @@ class PseudoClient:
                 else str(self.static_auth_token)
             )
 
+    def _handle_response_error(response: requests.Response) -> None:
+        """Report error messages in response object."""
+        match response.status_code:
+            case status if status in range(200, 300):
+                pass
+            case _:
+                print(response.text)
+                response.raise_for_status()
+
     def _post_to_file_endpoint(
         self,
         path: str,
@@ -82,7 +91,7 @@ class PseudoClient:
             timeout=TIMEOUT_DEFAULT,
         )
 
-        response.raise_for_status()
+        PseudoClient._handle_response_error(response)
         return response
 
     def _post_to_field_endpoint(
@@ -96,9 +105,11 @@ class PseudoClient:
         stream: bool = False,
     ) -> requests.Response:
         request: dict[str, t.Collection[str]] = {
-            "name": field_name,
-            "values": values,
-            "pseudoFunc": str(pseudo_func),
+            "request": {
+                "name": field_name,
+                "values": values,
+                "pseudoFunc": str(pseudo_func),
+            }
         }
         if keyset:
             request["keyset"] = {
@@ -106,17 +117,20 @@ class PseudoClient:
                 "encryptedKeyset": keyset.encrypted_keyset,
                 "keysetInfo": keyset.keyset_info,
             }
+
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
                 "Authorization": f"Bearer {self.__auth_token()}",
-                "Content-Type": str(Mimetypes.JSON),
+                "Content-Type": Mimetypes.JSON.value,
             },
             json=request,
             stream=stream,
             timeout=timeout,
         )
-        response.raise_for_status()
+
+        PseudoClient._handle_response_error(response)
+
         return response
 
     def _post_to_sid_endpoint(
@@ -136,7 +150,8 @@ class PseudoClient:
             stream=stream,
             timeout=TIMEOUT_DEFAULT,  # seconds
         )
-        response.raise_for_status()
+
+        PseudoClient._handle_response_error(response)
         return response
 
 
