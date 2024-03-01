@@ -74,7 +74,7 @@ class TargetCompression(StructModel):
     password: str
 
 
-class KeyWrapper(StructModel):
+class KeyWrapper:
     """Hold information about a key, such as ID and keyset information."""
 
     key_id: str = ""
