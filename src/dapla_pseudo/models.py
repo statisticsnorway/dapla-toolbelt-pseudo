@@ -1,5 +1,6 @@
 """The models module contains base classes used by other models."""
 
+import msgspec
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
@@ -20,3 +21,7 @@ class APIModel(BaseModel):
         return self.model_dump_json(
             exclude_unset=True, exclude_none=True, by_alias=True
         )
+
+
+class StructModel(msgspec.Struct, rename="camel"):
+    pass

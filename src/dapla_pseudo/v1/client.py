@@ -285,7 +285,7 @@ class PseudoClient:
         path: str,
         field_name: str,
         values: list[str],
-        pseudo_func: t.Optional[PseudoFunction],
+        pseudo_func: PseudoFunction,
         timeout: int,
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
@@ -293,11 +293,11 @@ class PseudoClient:
         class PseudoRequest(msgspec.Struct):
             column_name: str
             column_data: list[str]
-            pseudo_func: str
+            pseudo_func: PseudoFunction
 
         path = "pseudo"
         request = PseudoRequest(
-            column_name=field_name, column_data=values, pseudo_func=str(pseudo_func)
+            column_name=field_name, column_data=values, pseudo_func=pseudo_func
         )
 
         response = requests.post(

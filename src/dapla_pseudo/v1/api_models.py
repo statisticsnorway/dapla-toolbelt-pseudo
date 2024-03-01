@@ -16,6 +16,7 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.models import APIModel
+from dapla_pseudo.models import StructModel
 
 
 class Mimetypes(str, Enum):
@@ -143,20 +144,20 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
     snapshot_date: t.Optional[date] = None
 
 
-class DaeadKeywordArgs(PseudoFunctionArgs):
+class DaeadKeywordArgs(StructModel):
     """Representation of kwargs for the 'daead' function."""
 
     key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
 
 
-class FF31KeywordArgs(PseudoFunctionArgs):
+class FF31KeywordArgs(StructModel):
     """Representation of kwargs for the 'FF31' function."""
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
 
 
-class RedactArgs(PseudoFunctionArgs):
+class RedactArgs(StructModel):
     """Representation of kwargs for the 'redact' function."""
 
     replacement_string: str
@@ -169,7 +170,7 @@ class RedactArgs(PseudoFunctionArgs):
         return self.replacement_string
 
 
-class PseudoFunction(BaseModel):
+class PseudoFunction(StructModel):
     """Formal representation of a pseudo function.
 
     Use to build up the string representation expected by pseudo service.
@@ -181,10 +182,6 @@ class PseudoFunction(BaseModel):
 
     function_type: PseudoFunctionTypes
     kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
-
-    def __str__(self) -> str:
-        """Create the function representation as expected by pseudo service."""
-        return f"{self.function_type}({self.kwargs})"
 
 
 class PseudoRule(APIModel):
