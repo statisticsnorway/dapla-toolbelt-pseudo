@@ -211,18 +211,18 @@ class PseudonymizeFileRequest(StructModel):
     """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
     target_content_type: Mimetypes
     compression: t.Optional[TargetCompression] = None
+    target_uri: t.Optional[str] = None
 
 
 class DepseudonymizeFileRequest(StructModel):
     """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
     target_content_type: Mimetypes
     compression: t.Optional[TargetCompression] = None
+    target_uri: t.Optional[str] = None
 
 
 class RepseudonymizeFileRequest(StructModel):
@@ -230,6 +230,6 @@ class RepseudonymizeFileRequest(StructModel):
 
     source_pseudo_config: PseudoConfig
     target_pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
     target_content_type: Mimetypes
     compression: t.Optional[TargetCompression] = None
+    target_uri: t.Optional[str] = None
