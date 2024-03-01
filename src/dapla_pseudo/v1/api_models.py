@@ -6,11 +6,8 @@ from datetime import date
 from enum import Enum
 
 from humps import camelize
-from pydantic import BaseModel
 from pydantic import ConfigDict
-from pydantic import FieldSerializationInfo
 from pydantic import ValidationError
-from pydantic import field_serializer
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
@@ -29,7 +26,7 @@ class Mimetypes(str, Enum):
     CSV = "text/csv"
 
 
-class Field(APIModel):
+class Field(StructModel):
     """Field represents a targeted piece of data within a dataset or record.
 
     Parameters:
@@ -42,7 +39,7 @@ class Field(APIModel):
     mapping: t.Optional[str] = None
 
 
-class PseudoKeyset(APIModel):
+class PseudoKeyset(StructModel):
     """PseudoKeyset represents a wrapped data encryption key (WDEK).
 
     Example structure, represented as JSON:
@@ -71,13 +68,13 @@ class PseudoKeyset(APIModel):
         return str(self.keyset_info["primaryKeyId"])
 
 
-class TargetCompression(APIModel):
+class TargetCompression(StructModel):
     """TargetCompression denotes if and how results from the API should be compressed and password encrypted."""
 
     password: str
 
 
-class KeyWrapper(BaseModel):
+class KeyWrapper(StructModel):
     """Hold information about a key, such as ID and keyset information."""
 
     key_id: str = ""
@@ -116,7 +113,7 @@ class KeyWrapper(BaseModel):
         return None if self.keyset is None else [self.keyset]
 
 
-class PseudoFunctionArgs(BaseModel):
+class PseudoFunctionArgs(StructModel):
     """Representation of the possible keyword arguments."""
 
     def __str__(self) -> str:
@@ -184,7 +181,7 @@ class PseudoFunction(StructModel):
     kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
 
 
-class PseudoRule(APIModel):
+class PseudoRule(StructModel):
     """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
 
     Each rule defines a glob pattern (see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
@@ -199,19 +196,12 @@ class PseudoRule(APIModel):
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
     """
 
-    name: t.Optional[str] = None
     pattern: str
     func: PseudoFunction
-
-    @field_serializer("func")
-    def serialize_func(
-        self, func: PseudoFunction, _info: FieldSerializationInfo
-    ) -> str:
-        """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
-        return str(func)
+    name: t.Optional[str] = None
 
 
-class PseudoConfig(APIModel):
+class PseudoConfig(StructModel):
     """PseudoConfig is a container for rules and keysets."""
 
     rules: list[PseudoRule]
