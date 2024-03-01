@@ -26,6 +26,7 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.api_models import RedactArgs
+from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.pseudo import Pseudonymize
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
@@ -114,6 +115,7 @@ def test_single_field_do_pseudonymize_field(
         ["x1", "x2", "x3"],
         pseudo_func,
         TIMEOUT_DEFAULT,
+        PseudoClient(pseudo_service_url="mock_url", auth_token="mock_token"),
     )
     assert series.to_list() == ["f1", "f2", "f3"]
 
