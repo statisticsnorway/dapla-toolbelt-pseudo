@@ -5,7 +5,6 @@ from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import Field
 from dapla_pseudo.v1.api_models import MapSidKeywordArgs
 from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoFunctionTypes
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import RedactArgs
 from dapla_pseudo.v1.client import PseudoClient
@@ -30,6 +29,5 @@ __all__ = [
     "MapSidKeywordArgs",
     "FF31KeywordArgs",
     "DaeadKeywordArgs",
-    "PseudoFunctionTypes",
     "RedactArgs",
 ]
