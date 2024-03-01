@@ -12,7 +12,6 @@ from pydantic import ValidationError
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
-from dapla_pseudo.models import APIModel
 from dapla_pseudo.models import StructModel
 
 
@@ -208,7 +207,7 @@ class PseudoConfig(StructModel):
     keysets: t.Optional[list[PseudoKeyset]] = None
 
 
-class PseudonymizeFileRequest(APIModel):
+class PseudonymizeFileRequest(StructModel):
     """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
@@ -217,7 +216,7 @@ class PseudonymizeFileRequest(APIModel):
     compression: t.Optional[TargetCompression] = None
 
 
-class DepseudonymizeFileRequest(APIModel):
+class DepseudonymizeFileRequest(StructModel):
     """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
@@ -226,7 +225,7 @@ class DepseudonymizeFileRequest(APIModel):
     compression: t.Optional[TargetCompression] = None
 
 
-class RepseudonymizeFileRequest(APIModel):
+class RepseudonymizeFileRequest(StructModel):
     """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
 
     source_pseudo_config: PseudoConfig
