@@ -23,5 +23,5 @@ class APIModel(BaseModel):
         )
 
 
-class StructModel(msgspec.Struct, rename="camel"):
+class StructModel(msgspec.Struct):
     pass
