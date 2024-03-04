@@ -33,6 +33,7 @@ from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
+from tests.v1.test_client import test_client  # noqa:F401
 
 PKG = "dapla_pseudo.v1.pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -104,7 +105,7 @@ def test_builder_pandas_pseudonymize_minimal_call(
 def test_single_field_do_pseudonymize_field(
     patched_post_to_field_endpoint: Mock,
     single_field_response: MagicMock,
-    test_client: PseudoClient,
+    test_client: PseudoClient,  # noqa: F811
 ) -> None:
     patched_post_to_field_endpoint.return_value = single_field_response
 
