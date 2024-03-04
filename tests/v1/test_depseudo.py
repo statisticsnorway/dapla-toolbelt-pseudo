@@ -1,4 +1,5 @@
 import typing as t
+from unittest.mock import ANY
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -237,6 +238,7 @@ def test_builder_pseudo_function_selector_default(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -257,6 +259,7 @@ def test_builder_pseudo_function_selector_fpe(
             function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -279,6 +282,7 @@ def test_builder_pseudo_function_selector_custom(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -302,6 +306,7 @@ def test_builder_pseudo_function_selector_redact(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -343,6 +348,7 @@ def test_builder_pseudo_keyset_selector_custom(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=keyset,
     )
 

@@ -120,6 +120,7 @@ class PseudoClient:
             }
         }
         if keyset:
+            print(keyset.model_dump(by_alias=True))
             request["request"]["keyset"] = keyset.model_dump(by_alias=True)
 
         response = requests.post(

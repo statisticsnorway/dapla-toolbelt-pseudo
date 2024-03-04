@@ -27,7 +27,6 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.client import PseudoClient
-from dapla_pseudo.v1.correlation import Correlation
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
@@ -86,7 +85,7 @@ class Pseudonymize:
         Pseudonymize.dataset = File(file_handle, content_type)
         return Pseudonymize._Pseudonymizer()
 
-    class _Pseudonymizer(Correlation):
+    class _Pseudonymizer:
         """Select one or multiple fields to be pseudonymized."""
 
         def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
