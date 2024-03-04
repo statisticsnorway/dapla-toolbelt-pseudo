@@ -78,7 +78,7 @@ def read_to_polars_df(
             )
 
 
-def write_from_dict(
+def write_from_dicts(
     data: list[dict[str, t.Any]],
     supported_format: SupportedOutputFileFormat,
     file_like: AbstractBufferedFile | str,
@@ -86,9 +86,18 @@ def write_from_dict(
     match supported_format:
         case SupportedOutputFileFormat.PARQUET:
             df = pl.DataFrame(data)
+            df.write_parquet(file_like)
+        case SupportedOutputFileFormat.CSV:
+            df = pl.DataFrame(data)
             df.write_csv(file_like)
+        case SupportedOutputFileFormat.JSON:
+            df = pl.DataFrame(data)
+            df.write_json(file_like,row_oriented=True)
+        case SupportedOutputFileFormat.XML:
+            df_pandas = pd.DataFrame.from_records(data)
+            df_pandas.to_xml(file_like)
         case _:
-            raise ValueError("hei")
+            raise ValueError("Unsupported output file format")
 
 
 def write_from_df(

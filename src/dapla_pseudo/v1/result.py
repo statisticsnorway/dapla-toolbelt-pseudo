@@ -1,6 +1,5 @@
 """Common API models for builder packages."""
 
-import json
 import typing as t
 from pathlib import Path
 from typing import Any
@@ -17,7 +16,9 @@ from datadoc_model.model import PseudoVariable
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
+from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import write_from_df
+from dapla_pseudo.v1.supported_file_format import write_from_dicts
 
 
 class Result:
@@ -158,7 +159,7 @@ class Result:
                 write_from_df(df, file_format, file_handle, **kwargs)
                 datadoc_file_handle.write(self.datadoc)
             case list() as file_data:
-                file_handle.write(bytes(json.dumps(file_data), encoding="utf-8"))
+                write_from_dicts(file_data, SupportedOutputFileFormat(file_format), file_handle)
                 datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
