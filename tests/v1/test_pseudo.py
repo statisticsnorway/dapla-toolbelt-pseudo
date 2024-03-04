@@ -1,6 +1,7 @@
 import json
 import typing as t
 from datetime import date
+from unittest.mock import ANY
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -26,11 +27,13 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.api_models import RedactArgs
+from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.pseudo import Pseudonymize
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
+from tests.v1.test_client import test_client  # noqa:F401
 
 PKG = "dapla_pseudo.v1.pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -100,7 +103,9 @@ def test_builder_pandas_pseudonymize_minimal_call(
 
 @patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
 def test_single_field_do_pseudonymize_field(
-    patched_post_to_field_endpoint: Mock, single_field_response: MagicMock
+    patched_post_to_field_endpoint: Mock,
+    single_field_response: MagicMock,
+    test_client: PseudoClient,  # noqa: F811
 ) -> None:
     patched_post_to_field_endpoint.return_value = single_field_response
 
@@ -114,6 +119,7 @@ def test_single_field_do_pseudonymize_field(
         ["x1", "x2", "x3"],
         pseudo_func,
         TIMEOUT_DEFAULT,
+        test_client,
     )
     assert series.to_list() == ["f1", "f2", "f3"]
 
@@ -205,7 +211,8 @@ def test_builder_file_hierarchical(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_default(
-    patch_pseudonymize_operation_field: MagicMock, df: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock,
+    df: pd.DataFrame,
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     Pseudonymize.from_pandas(df).on_fields("fornavn").with_default_encryption().run()
@@ -217,6 +224,7 @@ def test_builder_pseudo_function_selector_default(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -235,6 +243,7 @@ def test_builder_pseudo_function_selector_with_sid(
             function_type=PseudoFunctionTypes.MAP_SID, kwargs=MapSidKeywordArgs()
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -256,6 +265,7 @@ def test_builder_pseudo_function_with_sid_snapshot_date_string(
             kwargs=MapSidKeywordArgs(snapshot_date=convert_to_date("2023-05-21")),
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -277,6 +287,7 @@ def test_builder_pseudo_function_with_sid_snapshot_date_date(
             kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -297,6 +308,7 @@ def test_builder_pseudo_function_selector_fpe(
             function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
         ),
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -319,6 +331,7 @@ def test_builder_pseudo_function_selector_custom(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -342,6 +355,7 @@ def test_builder_pseudo_function_selector_redact(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=None,
     )
 
@@ -383,6 +397,7 @@ def test_builder_pseudo_keyset_selector_custom(
         field_name="fnr",
         pseudo_func=pseudo_func,
         timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
         keyset=keyset,
     )
 

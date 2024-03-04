@@ -1,5 +1,6 @@
 """Builder for submitting a pseudonymization request."""
 
+import os
 import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
@@ -10,6 +11,7 @@ import pandas as pd
 import polars as pl
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileLikeDatasetDecl
@@ -24,6 +26,7 @@ from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
+from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.pseudo_commons import File
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
@@ -90,6 +93,10 @@ class Pseudonymize:
             self._rules: list[PseudoRule] = [] if rules is None else rules
             self._pseudo_keyset: Optional[PseudoKeyset | str] = None
             self._timeout: int = TIMEOUT_DEFAULT
+            self._pseudo_client: PseudoClient = PseudoClient(
+                pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
+                auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
+            )
 
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":
             """Specify one or multiple fields to be pseudonymized."""
@@ -186,6 +193,7 @@ class Pseudonymize:
                     values=series.to_list(),
                     pseudo_func=pseudo_func,
                     timeout=self._timeout,
+                    pseudo_client=self._pseudo_client,
                     keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
                 return field_name, data, metadata

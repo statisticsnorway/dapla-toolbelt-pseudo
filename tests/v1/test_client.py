@@ -86,6 +86,8 @@ def test__post_to_field_endpoint_failure(
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         "Mocked HTTP error", response=requests.Response()
     )
+    mock_response.headers = ANY
+    mock_response.text = ANY
     mock_post.return_value = mock_response
 
     with pytest.raises(requests.exceptions.HTTPError):
@@ -110,6 +112,9 @@ def test_post_to_file_endpoint_failure(
     )
     mock_response.status_code = 400
     mock_post.return_value = mock_response
+
+    mock_response.headers = ANY
+    mock_response.text = ANY
 
     mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
     mock_pseudo_request.to_json.return_value = Mock()
@@ -178,6 +183,7 @@ def test_post_to_field_endpoint_with_keyset(
         headers={
             "Authorization": "Bearer some-auth-token",
             "Content-Type": "application/json",
+            "X-Correlation-Id": ANY,
         },
         json=expected_json,
         stream=False,
@@ -204,7 +210,10 @@ def test_successful_post_to_sid_endpoint(
     mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",
         params=None,
-        headers={"Authorization": "Bearer some-auth-token"},
+        headers={
+            "Authorization": "Bearer some-auth-token",
+            "X-Correlation-Id": ANY,
+        },
         json=expected_json,
         stream=False,
         timeout=TIMEOUT_DEFAULT,
