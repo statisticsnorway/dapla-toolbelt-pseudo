@@ -8,6 +8,7 @@ import google.auth.transport.requests
 import google.oauth2.id_token
 import requests
 from dapla import AuthClient
+from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
@@ -58,6 +59,21 @@ class PseudoClient:
                 else str(self.static_auth_token)
             )
 
+    @staticmethod
+    def _generate_new_correlation_id() -> str:
+        return str(ULID())
+
+    @staticmethod
+    def _handle_response_error(response: requests.Response) -> None:
+        """Report error messages in response object."""
+        match response.status_code:
+            case status if status in range(200, 300):
+                pass
+            case _:
+                print(response.headers)
+                print(response.text)
+                response.raise_for_status()
+
     def _post_to_file_endpoint(
         self,
         path: str,
@@ -76,13 +92,14 @@ class PseudoClient:
             headers={
                 "Authorization": f"Bearer {self.__auth_token()}",
                 "Accept-Encoding": "gzip",
+                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
             files={"data": data_spec, "request": request_spec},
             stream=stream,
             timeout=TIMEOUT_DEFAULT,
         )
 
-        response.raise_for_status()
+        PseudoClient._handle_response_error(response)
         return response
 
     def _post_to_field_endpoint(
@@ -95,28 +112,30 @@ class PseudoClient:
         keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request: dict[str, t.Collection[str]] = {
-            "name": field_name,
-            "values": values,
-            "pseudoFunc": str(pseudo_func),
+        request: dict[str, t.Any] = {
+            "request": {
+                "name": field_name,
+                "values": values,
+                "pseudoFunc": str(pseudo_func),
+            }
         }
         if keyset:
-            request["keyset"] = {
-                "kekUri": keyset.kek_uri,
-                "encryptedKeyset": keyset.encrypted_keyset,
-                "keysetInfo": keyset.keyset_info,
-            }
+            print(keyset.model_dump(by_alias=True))
+            request["request"]["keyset"] = keyset.model_dump(by_alias=True)
+
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
                 "Authorization": f"Bearer {self.__auth_token()}",
-                "Content-Type": str(Mimetypes.JSON),
+                "Content-Type": Mimetypes.JSON.value,
+                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
             json=request,
             stream=stream,
             timeout=timeout,
         )
-        response.raise_for_status()
+
+        PseudoClient._handle_response_error(response)
         return response
 
     def _post_to_sid_endpoint(
@@ -131,12 +150,16 @@ class PseudoClient:
             url=f"{self.pseudo_service_url}/{path}",
             params={"snapshot": str(sid_snapshot_date)} if sid_snapshot_date else None,
             # Do not set content-type, as this will cause the json to serialize incorrectly
-            headers={"Authorization": f"Bearer {self.__auth_token()}"},
+            headers={
+                "Authorization": f"Bearer {self.__auth_token()}",
+                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+            },
             json=request,
             stream=stream,
             timeout=TIMEOUT_DEFAULT,  # seconds
         )
-        response.raise_for_status()
+
+        PseudoClient._handle_response_error(response)
         return response
 
 

@@ -224,6 +224,7 @@ def pseudonymize_operation_field(
     values: list[str],
     pseudo_func: t.Optional[PseudoFunction],
     timeout: int,
+    pseudo_client: PseudoClient,
     keyset: t.Optional[PseudoKeyset] = None,
 ) -> tuple[pl.Series, RawPseudoMetadata]:
     """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
@@ -234,13 +235,20 @@ def pseudonymize_operation_field(
         values (list[str]): The list of values to be pseudonymized.
         pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
         timeout (int): The timeout in seconds for the API call.
+        pseudo_client (PseudoClient): The instance of the pseudo_client used to make http requests.
         keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
 
     Returns:
         pl.Series: A pandas Series containing the pseudonymized values.
     """
-    response: requests.Response = _client()._post_to_field_endpoint(
-        path, field_name, values, pseudo_func, timeout, keyset, stream=True
+    response: requests.Response = pseudo_client._post_to_field_endpoint(
+        path,
+        field_name,
+        values,
+        pseudo_func,
+        timeout,
+        keyset,
+        stream=True,
     )
     payload = json.loads(response.content.decode("utf-8"))
     data = payload["data"]

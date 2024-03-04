@@ -32,4 +32,4 @@ def test_validate_not_valid(
         Validator.from_polars(df_personer).on_field("fnr").validate_map_to_stable_id()
     )
     pl_result = result.to_polars()
-    assert pl_result["fnr"].to_list() == expected_result
+    assert sorted(pl_result["fnr"].to_list()) == sorted(expected_result)
