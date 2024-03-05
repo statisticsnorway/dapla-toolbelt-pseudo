@@ -25,17 +25,21 @@ def df_personer() -> pl.DataFrame:
         },
     )
 
+
 @pytest.fixture
 def df_personer_pandas() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer.json"
-    return pd.read_json(JSON_FILE,
+    return pd.read_json(
+        JSON_FILE,
         dtype={
             "fnr": str,
             "fornavn": str,
             "etternavn": str,
             "kjonn": str,
             "fodselsdato": str,
-        })
+        },
+    )
+
 
 @pytest.fixture
 def personer_file_path() -> str:
@@ -56,6 +60,7 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
         },
     )
 
+
 @pytest.fixture
 def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
@@ -69,7 +74,6 @@ def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
             "fodselsdato": str,
         },
     )
-
 
 
 def integration_test() -> pytest.MarkDecorator:

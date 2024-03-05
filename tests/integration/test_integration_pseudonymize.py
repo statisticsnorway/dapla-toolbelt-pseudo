@@ -77,7 +77,6 @@ def test_pseudonymize_papis_compatible_encryption(
     assert result.to_polars().equals(expected_result_df)
 
 
-
 @integration_test()
 def test_pseudonymize_default_encryption_null(
     setup: Generator[None, None, None], df_personer: pl.DataFrame

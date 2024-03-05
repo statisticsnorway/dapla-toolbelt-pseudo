@@ -50,7 +50,9 @@ def pseudonymized_df_polars() -> pl.DataFrame:
         "kjonn": pl.Categorical,
         "fodselsdato": pl.Utf8,
     }
-    return pl.read_csv("tests/data/personer_pseudonymized_default_encryption.csv", dtypes=dtypes)
+    return pl.read_csv(
+        "tests/data/personer_pseudonymized_default_encryption.csv", dtypes=dtypes
+    )
 
 
 @pytest.fixture()

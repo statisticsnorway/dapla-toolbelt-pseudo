@@ -35,10 +35,10 @@ def test_pseudonymize_input_output_funcs(
     df_personer_pandas: pd.DataFrame,
     df_personer: pl.DataFrame,
     df_personer_fnr_daead_encrypted: pl.DataFrame,
-    df_pandas_personer_fnr_daead_encrypted: pd.DataFrame
+    df_pandas_personer_fnr_daead_encrypted: pd.DataFrame,
 ) -> None:
     """This test runs several times, once for every combination of the possible input and output datatypes.
-    
+
     It is intended to end-to-end-test for the conversion between data types, e.g. Polars DataFrame -> File.
     """
     match input_func:
@@ -50,15 +50,17 @@ def test_pseudonymize_input_output_funcs(
             pseudonymizer = Pseudonymize.from_polars(df_personer)
 
     result = pseudonymizer.on_fields("fnr").with_default_encryption().run()
-    
+
     match output_func:
         case "file":
             file_path = tmp_path / "personer_pseudo.json"
             result.to_file(str(file_path))
-            
-            expected = json.loads(open("tests/data/personer_pseudonymized_default_encryption.json").read())
+
+            expected = json.loads(
+                open("tests/data/personer_pseudonymized_default_encryption.json").read()
+            )
             actual = json.loads(file_path.open().read())
-            
+
             assert expected == actual
         case "pandas":
             df_pandas = result.to_pandas()
