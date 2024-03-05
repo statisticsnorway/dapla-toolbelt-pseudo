@@ -17,7 +17,7 @@ def test_depseudonymize_default_encryption(
 ) -> None:
     result = (
         Depseudonymize.from_polars(df_personer_fnr_daead_encrypted)
-        .on_fields("fnr", "fornavn", "etternavn", "kjonn", "fodselsdato")
+        .on_fields("fnr")
         .with_default_encryption()
         .run()
         .to_polars()

@@ -37,7 +37,7 @@ TEST_FILE_PATH = "tests/v1/test_files"
 
 @pytest.fixture()
 def pseudonymized_df() -> pd.DataFrame:
-    with open("tests/data/personer_pseudonymized.csv") as test_data:
+    with open("tests/data/personer_pseudonymized_default_encryption.csv") as test_data:
         return pd.read_csv(test_data)
 
 
@@ -50,12 +50,12 @@ def pseudonymized_df_polars() -> pl.DataFrame:
         "kjonn": pl.Categorical,
         "fodselsdato": pl.Utf8,
     }
-    return pl.read_csv("tests/data/personer_pseudonymized.csv", dtypes=dtypes)
+    return pl.read_csv("tests/data/personer_pseudonymized_default_encryption.csv", dtypes=dtypes)
 
 
 @pytest.fixture()
 def json_pseudonymized_file_path() -> str:
-    return "tests/data/personer_pseudonymized.json"
+    return "tests/data/personer_pseudonymized_default_encryption.json"
 
 
 @pytest.fixture()

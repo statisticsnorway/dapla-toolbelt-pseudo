@@ -60,3 +60,4 @@ def test_write_from_df(
     supported_format = SupportedOutputFileFormat(file_format)
 
     write_from_df(df_polars, supported_format, f"{tmp_path}/test.{file_format}")
+

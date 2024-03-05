@@ -3,7 +3,9 @@ import json
 import os
 import subprocess
 from collections.abc import Generator
+from pathlib import Path
 
+import pandas as pd
 import polars as pl
 import pytest
 from datadoc_model.model import MetadataContainer
@@ -23,6 +25,22 @@ def df_personer() -> pl.DataFrame:
         },
     )
 
+@pytest.fixture
+def df_personer_pandas() -> pd.DataFrame:
+    JSON_FILE = "tests/data/personer.json"
+    return pd.read_json(JSON_FILE,
+        dtype={
+            "fnr": str,
+            "fornavn": str,
+            "etternavn": str,
+            "kjonn": str,
+            "fodselsdato": str,
+        })
+
+@pytest.fixture
+def personer_file_path() -> str:
+    return "tests/data/personer.json"
+
 
 @pytest.fixture
 def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
@@ -37,6 +55,21 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
             "fodselsdato": pl.String,
         },
     )
+
+@pytest.fixture
+def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
+    JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
+    return pd.read_json(
+        JSON_FILE,
+        dtype={
+            "fnr": str,
+            "fornavn": str,
+            "etternavn": str,
+            "kjonn": str,
+            "fodselsdato": str,
+        },
+    )
+
 
 
 def integration_test() -> pytest.MarkDecorator:
