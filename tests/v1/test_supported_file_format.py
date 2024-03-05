@@ -58,5 +58,6 @@ def test_write_from_df(
     tmp_path: Path, df_polars: pl.DataFrame, file_format: str
 ) -> None:
     supported_format = SupportedOutputFileFormat(file_format)
-
-    write_from_df(df_polars, supported_format, f"{tmp_path}/test.{file_format}")
+    file_path = tmp_path / f"test.{file_format}"
+    file_handle = file_path.open(mode="wb")
+    write_from_df(df_polars, supported_format, file_handle)

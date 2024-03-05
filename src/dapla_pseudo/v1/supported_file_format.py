@@ -1,14 +1,15 @@
 """Classes used to support reading of dataframes from file."""
 
+import json
 import typing as t
 from enum import Enum
+from io import BufferedWriter
 from io import BytesIO
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import polars as pl
-from fsspec.spec import AbstractBufferedFile
 
 from dapla_pseudo.exceptions import ExtensionNotValidError
 
@@ -81,18 +82,18 @@ def read_to_polars_df(
 def write_from_dicts(
     data: list[dict[str, t.Any]],
     supported_format: SupportedOutputFileFormat,
-    file_like: AbstractBufferedFile | str,
+    file_like: BufferedWriter,
 ) -> None:
     match supported_format:
         case SupportedOutputFileFormat.PARQUET:
             df = pl.DataFrame(data)
-            df.write_parquet(file_like)
+            # type hints lying
+            df.write_parquet(file_like) # type: ignore[arg-type]
         case SupportedOutputFileFormat.CSV:
             df = pl.DataFrame(data)
             df.write_csv(file_like)
         case SupportedOutputFileFormat.JSON:
-            df = pl.DataFrame(data)
-            df.write_json(file_like,row_oriented=True)
+            file_like.write(bytes(json.dumps(data), encoding="utf-8"))
         case SupportedOutputFileFormat.XML:
             df_pandas = pd.DataFrame.from_records(data)
             df_pandas.to_xml(file_like)
@@ -103,7 +104,7 @@ def write_from_dicts(
 def write_from_df(
     df: pl.DataFrame,
     supported_format: SupportedOutputFileFormat,
-    file_like: AbstractBufferedFile | str,
+    file_like: BufferedWriter,
     **kwargs: Any,
 ) -> None:
     """Writes to a file with a supported file format from a Dataframe."""
@@ -115,4 +116,5 @@ def write_from_df(
         case SupportedOutputFileFormat.XML:
             df.to_pandas().to_xml(file_like, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
-            df.write_parquet(file_like, **kwargs)
+            # type hints lying
+            df.write_parquet(file_like, **kwargs) # type: ignore[arg-type]
