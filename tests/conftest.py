@@ -34,6 +34,7 @@ def df_personer_pandas() -> pd.DataFrame:
         },
     )
 
+
 @pytest.fixture()
 def personer_hierarch_file_path() -> str:
     return "tests/data/personer_hierarchical.json"
@@ -47,6 +48,7 @@ def personer_pseudonymized_hierarch_file_path() -> str:
 @pytest.fixture
 def personer_file_path() -> str:
     return "tests/data/personer.json"
+
 
 @pytest.fixture()
 def personer_pseudonymized_file_path() -> str:
@@ -67,6 +69,7 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
         },
     )
 
+
 @pytest.fixture
 def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
@@ -80,7 +83,8 @@ def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
             "fodselsdato": str,
         },
     )
-    
+
+
 @pytest.fixture()
 def single_field_response() -> MagicMock:
     mock_response = MagicMock()
