@@ -62,7 +62,7 @@ def test_validate_with_full_response(
 @patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint")
 def test_validate_with_empty_response(
     patched_post_to_sid_endpoint: Mock,
-    df_personer: pd.DataFrame,
+    df_personer: pl.DataFrame,
     sid_lookup_empty_response: MagicMock,
 ) -> None:
     field_name = "fnr"

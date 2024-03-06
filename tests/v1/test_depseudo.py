@@ -47,7 +47,7 @@ def mock_return_pseudonymize_operation_field(
 @patch("dapla_pseudo.v1.PseudoClient._post_to_field_endpoint")
 def test_builder_pandas_depseudonymize_minimal_call(
     patched_post_to_field_endpoint: Mock,
-    df_personer_fnr_daead_encrypted: pd.DataFrame,
+    df_personer_fnr_daead_encrypted: pl.DataFrame,
     single_field_response: MagicMock,
 ) -> None:
     field_name = "fornavn"
@@ -258,7 +258,7 @@ def test_builder_pseudo_function_selector_custom(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_redact(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
@@ -324,7 +324,7 @@ def test_builder_pseudo_keyset_selector_custom(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_pseudonymize_field_dataframe_setup(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
@@ -390,7 +390,7 @@ def test_builder_from_invalid_gcs_file() -> None:
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_to_polars_from_polars_chaining(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]

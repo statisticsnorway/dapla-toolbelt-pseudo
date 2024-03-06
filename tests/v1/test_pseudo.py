@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
-import pandas as pd
 import polars as pl
 import pytest
 from google.auth.exceptions import DefaultCredentialsError
@@ -103,7 +102,7 @@ def test_builder_fields_selector_single_field_polars(df_personer: pl.DataFrame) 
     Pseudonymize.from_polars(df_personer).on_fields("fornavn")._fields = ["fornavn"]
 
 
-def test_builder_fields_selector_multiple_fields(df_personer: pd.DataFrame) -> None:
+def test_builder_fields_selector_multiple_fields(df_personer: pl.DataFrame) -> None:
     assert Pseudonymize.from_polars(df_personer).on_fields(
         "fornavn", "fnr"
     )._fields == [
@@ -225,7 +224,7 @@ def test_builder_pseudo_function_selector_with_sid(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_with_sid_snapshot_date_string(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id(
@@ -313,7 +312,7 @@ def test_builder_pseudo_function_selector_custom(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_pseudo_function_selector_redact(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
@@ -379,7 +378,7 @@ def test_builder_pseudo_keyset_selector_custom(
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_pseudonymize_field_dataframe_setup(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
@@ -444,7 +443,7 @@ def test_builder_from_invalid_gcs_file() -> None:
 
 @patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_to_polars_from_polars_chaining(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pd.DataFrame
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
         name = kwargs["field_name"]
