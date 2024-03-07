@@ -3,7 +3,6 @@ from collections.abc import Generator
 import polars as pl
 
 from dapla_pseudo import Validator
-from tests.integration.utils import df_personer
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
 
