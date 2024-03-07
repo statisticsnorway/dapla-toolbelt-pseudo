@@ -49,7 +49,7 @@ class PseudoClient:
             auth_req = google.auth.transport.requests.Request()
             token = t.cast(
                 str,
-                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
+                google.oauth2.id_token.fetch_id_token(auth_req, audience),
             )
             return token
         else:

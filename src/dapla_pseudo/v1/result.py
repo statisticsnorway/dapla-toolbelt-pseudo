@@ -127,7 +127,7 @@ class Result:
         """Write pseudonymized data to a file, with the metadata being written to the same folder.
 
         Args:
-            file_path (str | Path): The path to the file to be written. If writing to a bucket, use the "gs://" prefix.
+            file_path (str): The path to the file to be written. If writing to a bucket, use the "gs://" prefix.
             **kwargs: Additional keyword arguments to be passed the Polars writer function *if* the input data is a DataFrame.
                 The specific writer function depends on the format of the output file, e.g. `write_csv()` for CSV files.
 
@@ -155,14 +155,18 @@ class Result:
             datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
 
-        file_handle = t.cast(BufferedWriter, file_handle) # file handle is always BufferedWriter when opening with "wb"
-        
+        file_handle = t.cast(
+            BufferedWriter, file_handle
+        )  # file handle is always BufferedWriter when opening with "wb"
+
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 write_from_df(df, file_format, file_handle, **kwargs)
                 datadoc_file_handle.write(self.datadoc)
             case list() as file_data:
-                write_from_dicts(file_data, SupportedOutputFileFormat(file_format), file_handle)
+                write_from_dicts(
+                    file_data, SupportedOutputFileFormat(file_format), file_handle
+                )
                 datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
