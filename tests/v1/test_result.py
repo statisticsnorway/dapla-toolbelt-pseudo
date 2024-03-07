@@ -14,12 +14,6 @@ from dapla_pseudo.v1.result import Result
 
 
 @pytest.fixture()
-def polars_df() -> pl.DataFrame:
-    with open("tests/data/personer.json") as test_data:
-        return pl.from_pandas(pd.json_normalize(json.load(test_data)))
-
-
-@pytest.fixture()
 def pseudo_file_response() -> PseudoFileResponse:
     fd = open("tests/data/personer.json")
     data = json.loads(fd.read())
@@ -64,18 +58,18 @@ def test_result_index_level(tmp_path: Path) -> None:
     assert "__index_level_0__" not in df_result.columns
 
 
-def test_result_from_polars_to_polars(polars_df: pl.DataFrame) -> None:
-    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+def test_result_from_polars_to_polars(df_personer: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=df_personer, raw_metadata=[]))
     assert isinstance(result.to_polars(), pl.DataFrame)
 
 
-def test_result_from_polars_to_pandas(polars_df: pl.DataFrame) -> None:
-    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+def test_result_from_polars_to_pandas(df_personer: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=df_personer, raw_metadata=[]))
     assert isinstance(result.to_pandas(), pd.DataFrame)
 
 
-def test_result_from_polars_to_file(tmp_path: Path, polars_df: pl.DataFrame) -> None:
-    result = Result(PseudoFieldResponse(data=polars_df, raw_metadata=[]))
+def test_result_from_polars_to_file(tmp_path: Path, df_personer: pl.DataFrame) -> None:
+    result = Result(PseudoFieldResponse(data=df_personer, raw_metadata=[]))
     result.to_file(tmp_path / "polars_to_file.json")
 
 
