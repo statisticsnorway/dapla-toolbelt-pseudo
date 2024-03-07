@@ -70,7 +70,7 @@ def test_result_from_polars_to_pandas(df_personer: pl.DataFrame) -> None:
 
 def test_result_from_polars_to_file(tmp_path: Path, df_personer: pl.DataFrame) -> None:
     result = Result(PseudoFieldResponse(data=df_personer, raw_metadata=[]))
-    result.to_file(tmp_path / "polars_to_file.json")
+    result.to_file(str(tmp_path / "polars_to_file.json"))
 
 
 def test_result_from_file_to_polars(pseudo_file_response: PseudoFileResponse) -> None:
@@ -88,4 +88,4 @@ def test_result_from_file_to_file(
 ) -> None:
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
-    result.to_file(tmp_path / f"file_to_file.{file_extension}")
+    result.to_file(str(tmp_path / f"file_to_file.{file_extension}"))
