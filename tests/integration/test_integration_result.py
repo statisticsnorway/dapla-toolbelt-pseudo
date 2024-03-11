@@ -83,7 +83,7 @@ def test_pseudonymize_input_output_funcs(
             )
             result.to_file(result_gsutil_uri)
 
-            fs = gcsfs.GCSFileSystem()
+            fs = gcsfs.GCSFileSystem(token="google_default")
             with fs.open(result_gsutil_uri, "r") as f:
                 # Read the json file that was written to bucket
                 json_data = json.load(f)

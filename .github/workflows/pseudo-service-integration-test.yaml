@@ -38,6 +38,7 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v1'
       with:
         version: '>= 363.0.0'
+        create_credentials_file: true
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
       env:
