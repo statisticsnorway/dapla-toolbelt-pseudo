@@ -7,7 +7,6 @@ import gcsfs
 import pandas as pd
 import polars as pl
 import pytest
-from google.cloud import storage
 
 from dapla_pseudo import Pseudonymize
 from tests.integration.utils import df_pandas_personer_fnr_daead_encrypted
