@@ -40,7 +40,7 @@ def test_pseudonymize_input_output_funcs(
     df_personer_fnr_daead_encrypted: pl.DataFrame,
     df_pandas_personer_fnr_daead_encrypted: pd.DataFrame,
 ) -> None:
-    """This test runs several times, once for every combination of the possible input, output datatypes and file_formats.
+    """This test runs several times, once for every combination of the possible input and output datatypes.
 
     It is intended to end-to-end-test for the conversion between data types, e.g. Polars DataFrame -> File.
     """
