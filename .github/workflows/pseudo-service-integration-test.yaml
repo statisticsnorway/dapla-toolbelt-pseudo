@@ -49,7 +49,7 @@ jobs:
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
         # Create ADC file for the impersonated service account
-        gcloud auth application-default login --impersonate-service-account $PRIVILEGED_SERVICE_ACCOUNT
+        gcloud auth application-default login --impersonate-service-account $PRIVILEGED_SERVICE_ACCOUNT --quiet
     - name: Setup python
       uses: actions/setup-python@v5
       with:
