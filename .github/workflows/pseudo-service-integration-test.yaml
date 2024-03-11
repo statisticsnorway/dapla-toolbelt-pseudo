@@ -38,7 +38,6 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v2'
       with:
         version: '>= 363.0.0'
-        create_credentials_file: true
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
       env:
@@ -50,7 +49,7 @@ jobs:
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
         # Create ADC file for the impersonated service account
-        gcloud config set auth/impersonate_service_account $PRIVILEGED_SERVICE_ACCOUNT
+        gcloud auth application-default login --impersonate-service-account $PRIVILEGED_SERVICE_ACCOUNT --quiet
     - name: Setup python
       uses: actions/setup-python@v5
       with:
