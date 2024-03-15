@@ -18,7 +18,7 @@
             "keyId": "papis-common-key-1"
           },
           {
-            "strategy": "SKIP"
+            "strategy": "skip"
           }
         ],
         "source_variable": null,
