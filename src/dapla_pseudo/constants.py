@@ -32,7 +32,7 @@ class PseudoFunctionTypes(str, Enum):
     """Names of well known pseudo functions."""
 
     DAEAD = "daead"
-    MAP_SID = "map-sid"
+    MAP_SID = "map-sid-ff31"
     FF31 = "ff31"
     REDACT = "redact"
 
