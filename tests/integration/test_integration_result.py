@@ -9,12 +9,7 @@ import polars as pl
 import pytest
 
 from dapla_pseudo import Pseudonymize
-from tests.integration.utils import df_pandas_personer_fnr_daead_encrypted
-from tests.integration.utils import df_personer
-from tests.integration.utils import df_personer_fnr_daead_encrypted
-from tests.integration.utils import df_personer_pandas
 from tests.integration.utils import integration_test
-from tests.integration.utils import personer_file_path
 from tests.integration.utils import setup
 
 BUCKET_GSUTIL_URI = "gs://ssb-dapla-pseudo-data-produkt-test"

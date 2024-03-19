@@ -78,10 +78,10 @@ dapla\_pseudo.v1.client module
    :undoc-members:
    :show-inheritance:
 
-dapla\_pseudo.v1.ops module
----------------------------
+dapla\_pseudo.v1.depseudo module
+--------------------------------
 
-.. automodule:: dapla_pseudo.v1.ops
+.. automodule:: dapla_pseudo.v1.depseudo
    :members:
    :undoc-members:
    :show-inheritance:
@@ -125,6 +125,5 @@ dapla\_pseudo.v1.validation module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 ```

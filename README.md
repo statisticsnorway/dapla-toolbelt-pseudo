@@ -264,6 +264,9 @@ result_df = (
 )
 ```
 
+
+_Note that depseudonymization requires elevated access privileges._
+
 ### Repseudonymize
 
 ```python
@@ -271,8 +274,53 @@ result_df = (
 ## TODO
 ```
 
+### Datadoc
 
-_Note that depseudonymization requires elevated access privileges._
+Datadoc metadata is gathered while pseudonymizing, and can be seen like so:
+
+```python
+result = (
+    Pseudonymize.from_polars(df)
+    .on_fields("fornavn")
+    .with_default_encryption()
+    .run()
+)
+
+print(result.datadoc)
+```
+
+Datadoc metadata is automatically written to the folder or bucket as the pseudonymized
+data, when using the `to_file()` method on the result object.
+The metadata file has the suffix `__DOC`, and is always a `.json` file.
+The data and metadata is written to the file like so:
+
+```python
+result = (
+    Pseudonymize.from_polars(df)
+    .on_fields("fornavn")
+    .with_default_encryption()
+    .run()
+)
+
+# The line of code below also writes the file "gs://bucket/test__DOC.json"
+result.to_file("gs://bucket/test.parquet")
+```
+
+Note that if you choose to only use the DataFrame from the result, **the metadata will be lost forever**!
+An example of how this can happen:
+
+```python
+import dapla as dp
+result = (
+    Pseudonymize.from_polars(df)
+    .on_fields("fornavn")
+    .with_default_encryption()
+    .run()
+)
+df = result.to_pandas()
+
+dp.write_pandas(df, "gs://bucket/test.parquet", file_format="parquet") # The metadata is lost!!
+```
 
 
 ## Requirements
