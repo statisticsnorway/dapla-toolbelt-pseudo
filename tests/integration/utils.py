@@ -3,10 +3,6 @@ import json
 import os
 import subprocess
 from collections.abc import Generator
-from pathlib import Path
-
-import pandas as pd
-import polars as pl
 import pytest
 from datadoc_model.model import MetadataContainer
 

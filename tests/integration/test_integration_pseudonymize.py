@@ -2,7 +2,6 @@ from collections.abc import Generator
 import polars as pl
 
 from dapla_pseudo import Pseudonymize
-from tests.integration.utils import df_personer
 from tests.integration.utils import get_calling_function_name
 from tests.integration.utils import get_expected_datadoc_metadata_container
 from tests.integration.utils import integration_test
