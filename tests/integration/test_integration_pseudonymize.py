@@ -1,4 +1,5 @@
 from collections.abc import Generator
+
 import polars as pl
 
 from dapla_pseudo import Pseudonymize

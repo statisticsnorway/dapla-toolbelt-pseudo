@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 from collections.abc import Generator
+
 import pytest
 from datadoc_model.model import MetadataContainer
 
