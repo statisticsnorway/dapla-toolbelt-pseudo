@@ -49,6 +49,7 @@ jobs:
         pseudo_service_auth_token="$(gcloud auth print-identity-token --impersonate-service-account=$PRIVILEGED_SERVICE_ACCOUNT --audiences=$PSEUDO_SERVICE_URL --include-email)"
         echo "::add-mask::$pseudo_service_auth_token"
         echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
+        gcloud storage cat gs://ssb-dapla-pseudo-data-produkt-test/integration_tests_result/input_bucket_output_bucket.json
     - name: Setup python
       uses: actions/setup-python@v5
       with:
