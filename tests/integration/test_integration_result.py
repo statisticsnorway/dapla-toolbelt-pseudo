@@ -3,10 +3,10 @@ import typing as t
 from collections.abc import Generator
 from pathlib import Path
 
-import gcsfs
 import pandas as pd
 import polars as pl
 import pytest
+from dapla import FileClient
 
 from dapla_pseudo import Pseudonymize
 from tests.integration.utils import integration_test
@@ -78,9 +78,6 @@ def test_pseudonymize_input_output_funcs(
             )
             result.to_file(result_gsutil_uri)
 
-            fs = gcsfs.GCSFileSystem()
-            with fs.open(result_gsutil_uri, "r") as f:
-                # Read the json file that was written to bucket
+            with FileClient().gcs_open(result_gsutil_uri, mode="rb") as f:
                 json_data = json.load(f)
-
             assert json_data == expected
