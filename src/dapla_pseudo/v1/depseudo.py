@@ -4,6 +4,7 @@ import os
 import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
+from datetime import date
 from typing import Optional
 
 import pandas as pd
@@ -14,7 +15,8 @@ from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs, MapSidKeywordArgs
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
@@ -230,6 +232,30 @@ class Depseudonymize:
         ) -> None:
             self._fields = fields
             self._existing_rules = [] if rules is None else rules
+
+        def with_stable_id(
+            self,
+            sid_snapshot_date: Optional[str | date] = None,
+            custom_key: Optional[str] = None,
+        ) -> "Depseudonymize._Depseudonymizer":
+            """
+
+            :param sid_snapshot_date:
+            :param custom_key:
+            :return:
+            """
+            kwargs = (
+                MapSidKeywordArgs(
+                    key_id=custom_key,
+                    snapshot_date=convert_to_date(sid_snapshot_date),
+                )
+                if custom_key
+                else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+            )
+            function = PseudoFunction(
+                function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs
+            )
+            return self._rule_constructor(function)
 
         def with_default_encryption(
             self, custom_key: Optional[PredefinedKeys | str] = None

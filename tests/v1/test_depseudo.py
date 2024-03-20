@@ -116,6 +116,25 @@ def test_builder_fields_selector_multiple_fields(
     ]
 
 
+@patch(f"{PKG}.depseudonymize_operation_field")
+def test_builder_depseudo_function_selector_with_sid(
+    patch_depseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
+) -> None:
+    mock_return_pseudonymize_operation_field(patch_depseudonymize_operation_field)
+    Depseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
+    patch_depseudonymize_operation_field.assert_called_once_with(
+        path="depseudonymize/field",
+        values=df_personer["fnr"].to_list(),
+        field_name="fnr",
+        pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.MAP_SID, kwargs=MapSidKeywordArgs()
+        ),
+        timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
+        keyset=None,
+    )
+
+
 @patch(f"{PKG}.pseudo_operation_file")
 def test_builder_file_default(
     patched_pseudo_operation_file: MagicMock, personer_pseudonymized_file_path: str
