@@ -34,11 +34,11 @@ jobs:
         workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.INTEGRATION_TEST_SA_EMAIL }}
         token_format: "access_token"
+        create_credentials_file: true
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v2'
       with:
         version: '>= 363.0.0'
-        create_credentials_file: true
     - name: Generate, mask, and output Google ID token as a secret
       id: get-id-token
       env:
