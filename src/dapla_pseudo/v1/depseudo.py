@@ -16,10 +16,11 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.utils import convert_to_date
-from dapla_pseudo.v1.api_models import DaeadKeywordArgs, MapSidKeywordArgs
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
@@ -238,9 +239,7 @@ class Depseudonymize:
             sid_snapshot_date: Optional[str | date] = None,
             custom_key: Optional[str] = None,
         ) -> "Depseudonymize._Depseudonymizer":
-            """
-
-            :param sid_snapshot_date:
+            """:param sid_snapshot_date:
             :param custom_key:
             :return:
             """

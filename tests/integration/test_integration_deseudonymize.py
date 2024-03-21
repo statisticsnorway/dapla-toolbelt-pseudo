@@ -22,6 +22,7 @@ def test_depseudonymize_default_encryption(
     )
     assert result.equals(df_personer)
 
+
 @integration_test()
 def test_depseudonymize_sid(
     setup: Generator[None, None, None],
