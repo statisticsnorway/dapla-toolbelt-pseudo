@@ -21,7 +21,7 @@ class PredefinedKeys(str, Enum):
 
     SSB_COMMON_KEY_1 = "ssb-common-key-1"
     SSB_COMMON_KEY_2 = "ssb-common-key-2"
-    PAPIS_COMMON_KEY_1 = "pseudo-secret-papis-key-1"
+    PAPIS_COMMON_KEY_1 = "papis-common-key-1"
 
     def __str__(self) -> str:
         """Use value for string representation."""

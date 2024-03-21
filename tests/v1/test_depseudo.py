@@ -116,7 +116,7 @@ def test_builder_fields_selector_multiple_fields(
     ]
 
 
-@patch(f"{PKG}.depseudonymize_operation_field")
+@patch(f"{PKG}.pseudonymize_operation_field")
 def test_builder_depseudo_function_selector_with_sid(
     patch_depseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
