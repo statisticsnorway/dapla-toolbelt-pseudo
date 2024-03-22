@@ -71,6 +71,36 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
 
 
 @pytest.fixture
+def df_personer_pseudo_stable_id() -> pl.DataFrame:
+    JSON_FILE = "tests/data/person_3_sid_deid.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest.fixture
+def df_personer_depseudo_stable_id() -> pl.DataFrame:
+    JSON_FILE = "tests/data/person_3_sid.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest.fixture
 def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
     return pd.read_json(
