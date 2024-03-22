@@ -240,9 +240,8 @@ class Depseudonymize:
             custom_key: Optional[str] = None,
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
-
-            In other words, this is a compound operation that both:
-            1) Encrypt fnr 2) then map stable id back to fnr.
+            1) Decrypt stable-id
+            2) Then map decrypted stable-id to fnr and return original fnr.
 
             Args:
                 sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
