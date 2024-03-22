@@ -252,6 +252,8 @@ def pseudonymize_operation_field(
     )
     payload = json.loads(response.content.decode("utf-8"))
     data = payload["data"]
+    print(payload["logs"])
+    print(payload["metrics"])
     metadata = RawPseudoMetadata(
         field_name=field_name,
         logs=payload["logs"],
