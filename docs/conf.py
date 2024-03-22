@@ -67,3 +67,6 @@ autodoc_typehints = "description"
 
 # Do not prepend module names to object names
 add_module_names = False
+
+# Suppress warnings from README.md when linking to .ipynb files
+suppress_warnings = ["myst.xref_missing"]

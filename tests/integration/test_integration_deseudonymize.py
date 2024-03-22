@@ -21,3 +21,20 @@ def test_depseudonymize_default_encryption(
         .to_polars()
     )
     assert result.equals(df_personer)
+
+
+@integration_test()
+def test_depseudonymize_sid(
+    setup: Generator[None, None, None],
+    df_personer: pl.DataFrame,
+    df_personer_pseudo_stable_id: pl.DataFrame,
+    df_personer_depseudo_stable_id: pl.DataFrame,
+) -> None:
+    result = (
+        Depseudonymize.from_polars(df_personer_pseudo_stable_id)
+        .on_fields("fnr")
+        .with_stable_id()
+        .run()
+        .to_polars()
+    )
+    assert result.equals(df_personer_depseudo_stable_id)

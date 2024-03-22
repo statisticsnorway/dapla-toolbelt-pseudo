@@ -137,10 +137,12 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
         snapshot_date (date): The timestamp for the version of the SID catalogue.
             If not specified, will choose the latest version.
             The format is: YYYY-MM-DD, e.g. 2021-05-21
+        strategy: defines how encryption/decryption should handle non-alphabet characters
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     snapshot_date: t.Optional[date] = None
+    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
