@@ -240,6 +240,7 @@ class Depseudonymize:
             custom_key: Optional[str] = None,
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
+
             1) Decrypt stable-id
             2) Then map decrypted stable-id to fnr and return original fnr.
 
