@@ -234,8 +234,7 @@ df = (
 ### Depseudonymize
 
 The "Depseudonymize" functions are almost exactly the same as when pseudonymizing.
-The only difference being the lack of a "with_stable_id()"-function.
-This is to say, that you cannot map from Stable ID *back to* FNR as of Jan 2023.
+User can map from Stable ID *back to* FNR.
 
 ```python
 from dapla_pseudo import Depseudonymize
@@ -262,6 +261,16 @@ result_df = (
     .run()                                         # Apply depseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
+
+# Example: Depseudonymize Fnr field with SID mapping
+result_df = (
+    Depseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fnr")                              # Select fnr field to depseudonymize
+    .with_stable_id()                              # Select the depseudonymization method (SID mapping) to apply
+    .run()                                         # Apply depseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
 ```
 
 
