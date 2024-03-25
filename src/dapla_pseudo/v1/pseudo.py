@@ -22,6 +22,7 @@ from dapla_pseudo.v1.api_models import KeyWrapper
 from dapla_pseudo.v1.api_models import MapSidKeywordArgs
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoConfig
+from dapla_pseudo.v1.api_models import PseudoFieldRequest
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
@@ -187,14 +188,19 @@ class Pseudonymize:
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
+                print(self._pseudo_keyset)
+                print(KeyWrapper(self._pseudo_keyset).keyset)
+                request = PseudoFieldRequest(
+                    pseudo_func=pseudo_func,
+                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
+                    name=field_name,
+                    values=series.to_list(),
+                )
                 data, metadata = pseudonymize_operation_field(
                     path="pseudonymize/field",
-                    field_name=field_name,
-                    values=series.to_list(),
-                    pseudo_func=pseudo_func,
+                    pseudo_field_request=request,
                     timeout=self._timeout,
                     pseudo_client=self._pseudo_client,
-                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
                 return field_name, data, metadata
 

@@ -20,11 +20,12 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import get_file_format_from_file_name
+from dapla_pseudo.v1.api_models import DepseudoFieldRequest
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoFieldRequest
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import RepseudoFieldRequest
 from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.client import _client
@@ -220,40 +221,33 @@ def pseudo_operation_file(
 
 def pseudonymize_operation_field(
     path: str,
-    field_name: str,
-    values: list[str],
-    pseudo_func: t.Optional[PseudoFunction],
+    pseudo_field_request: (
+        PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+    ),
     timeout: int,
     pseudo_client: PseudoClient,
-    keyset: t.Optional[PseudoKeyset] = None,
 ) -> tuple[pl.Series, RawPseudoMetadata]:
     """Makes pseudonymization API calls for a list of values for a specific field and processes it into a polars Series.
 
     Args:
         path (str): The path to the pseudonymization endpoint.
-        field_name (str): The name of the field being pseudonymized.
-        values (list[str]): The list of values to be pseudonymized.
-        pseudo_func (Optional[PseudoFunction]): The pseudonymization function to apply to the values.
+        pseudo_field_request: The request made to the Psuedo Service.
         timeout (int): The timeout in seconds for the API call.
         pseudo_client (PseudoClient): The instance of the pseudo_client used to make http requests.
-        keyset (Optional[PseudoKeyset], optional): The pseudonymization keyset to use. Defaults to None.
 
     Returns:
         pl.Series: A pandas Series containing the pseudonymized values.
     """
     response: requests.Response = pseudo_client._post_to_field_endpoint(
         path,
-        field_name,
-        values,
-        pseudo_func,
+        pseudo_field_request,
         timeout,
-        keyset,
         stream=True,
     )
     payload = json.loads(response.content.decode("utf-8"))
     data = payload["data"]
     metadata = RawPseudoMetadata(
-        field_name=field_name,
+        field_name=pseudo_field_request.name,
         logs=payload["logs"],
         metrics=payload["metrics"],
         datadoc=payload["datadoc_metadata"]["pseudo_variables"],

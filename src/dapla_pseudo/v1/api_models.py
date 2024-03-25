@@ -11,6 +11,7 @@ from pydantic import ConfigDict
 from pydantic import FieldSerializationInfo
 from pydantic import ValidationError
 from pydantic import field_serializer
+from pydantic import model_serializer
 
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
@@ -188,6 +189,11 @@ class PseudoFunction(BaseModel):
         """Create the function representation as expected by pseudo service."""
         return f"{self.function_type}({self.kwargs})"
 
+    @model_serializer()
+    def serialize_model(self) -> str:
+        """Serialize the function as expected by the pseudo service."""
+        return f"{self.function_type}({self.kwargs})"
+
 
 class PseudoRule(APIModel):
     """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
@@ -214,6 +220,35 @@ class PseudoRule(APIModel):
     ) -> str:
         """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
+
+
+class PseudoFieldRequest(APIModel):
+    """Model of the pseudo field request sent to the service."""
+
+    pseudo_func: PseudoFunction
+    name: str
+    values: list[str]
+    keyset: t.Optional[PseudoKeyset] = None
+
+
+class DepseudoFieldRequest(APIModel):
+    """Model of the depseudo field request sent to the service."""
+
+    pseudo_func: PseudoFunction
+    name: str
+    values: list[str]
+    keyset: t.Optional[PseudoKeyset] = None
+
+
+class RepseudoFieldRequest(APIModel):
+    """Model of the repseudo field request sent to the service."""
+
+    source_pseudo_func: PseudoFunction
+    target_pseudo_func: PseudoFunction
+    name: str
+    values: list[str]
+    source_keyset: t.Optional[PseudoKeyset] = None
+    target_keyset: t.Optional[PseudoKeyset] = None
 
 
 class PseudoConfig(APIModel):

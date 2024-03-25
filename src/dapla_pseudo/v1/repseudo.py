@@ -19,8 +19,9 @@ from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
+from dapla_pseudo.v1.api_models import RepseudoFieldRequest
+from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 from dapla_pseudo.v1.baseclass import _RuleConstructor
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.pseudo_commons import File
@@ -106,7 +107,8 @@ class Repseudonymize:
                 Repseudonymize._Repseudonymizer.source_rules.extend(source_rules)
                 Repseudonymize._Repseudonymizer.target_rules.extend(target_rules)
 
-            self._pseudo_keyset: Optional[PseudoKeyset | str] = None
+            self._source_pseudo_keyset: Optional[PseudoKeyset | str] = None
+            self._target_pseudo_keyset: Optional[PseudoKeyset | str] = None
             self._timeout: int
             self._pseudo_client: PseudoClient = PseudoClient(
                 pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
@@ -121,13 +123,15 @@ class Repseudonymize:
 
         def run(
             self,
-            custom_keyset: Optional[PseudoKeyset | str] = None,
+            custom_source_keyset: Optional[PseudoKeyset | str] = None,
+            custom_target_keyset: Optional[PseudoKeyset | str] = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
 
             Args:
-                custom_keyset (PseudoKeyset, optional): The pseudonymization keyset to use. Defaults to None.
+                custom_source_keyset (PseudoKeyset, optional): The source pseudonymization keyset to use. Defaults to None.
+                custom_target_keyset (PseudoKeyset, optional): The target pseudonymization keyset to use. Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
             Raises:
@@ -141,14 +145,17 @@ class Repseudonymize:
 
             if (
                 Repseudonymize._Repseudonymizer.source_rules == []
-                or Repseudonymize._Repseudonymizer.target_rules
+                or Repseudonymize._Repseudonymizer.target_rules == []
             ):
                 raise ValueError(
                     "No fields have been provided. Use the 'on_fields' method."
                 )
 
-            if custom_keyset is not None:
-                self._pseudo_keyset = custom_keyset
+            if custom_source_keyset is not None:
+                self._source_pseudo_keyset = custom_source_keyset
+
+            if custom_target_keyset is not None:
+                self._target_pseudo_keyset = custom_target_keyset
 
             self._timeout = timeout
             match Repseudonymize.dataset:  # Differentiate between file and DataFrame
@@ -166,10 +173,14 @@ class Repseudonymize:
             # Need to type-cast explicitly. We know that Pseudonymize.dataset is a "File" if we reach this method.
             file = t.cast(File, Repseudonymize.dataset)
 
-            pseudonymize_request = PseudonymizeFileRequest(
-                pseudo_config=PseudoConfig(
-                    rules=self._rules,
-                    keysets=KeyWrapper(self._pseudo_keyset).keyset_list(),
+            pseudonymize_request = RepseudonymizeFileRequest(
+                source_pseudo_config=PseudoConfig(
+                    rules=self.source_rules,
+                    keysets=KeyWrapper(self._source_pseudo_keyset).keyset_list(),
+                ),
+                target_pseudo_config=PseudoConfig(
+                    rules=self.target_rules,
+                    keysets=KeyWrapper(self._target_pseudo_keyset).keyset_list(),
                 ),
                 target_content_type=Mimetypes.JSON,
                 target_uri=None,
@@ -195,26 +206,35 @@ class Repseudonymize:
             """
 
             def repseudonymize_field_runner(
-                field_name: str, series: pl.Series, pseudo_func: PseudoFunction
+                field_name: str,
+                series: pl.Series,
+                source_pseudo_func: PseudoFunction,
+                target_pseudo_func: PseudoFunction,
             ) -> tuple[str, pl.Series, RawPseudoMetadata]:
                 """Function that performs the pseudonymization on a pandas Series.
 
                 Args:
                     field_name (str):  The name of the field.
                     series (pl.Series): The pandas Series containing the values to be pseudonymized.
-                    pseudo_func (PseudoFunction): The pseudonymization function to apply to the values.
+                    source_pseudo_func (PseudoFunction): The Pseudo function previously used to pseudonymize the dataset.
+                    target_pseudo_func (PseudoFunction): The Pseudo function to apply to the dataset.
 
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
-                data, metadata = pseudonymize_operation_field(
-                    path="pseudonymize/field",
-                    field_name=field_name,
+                request = RepseudoFieldRequest(
+                    source_pseudo_func=source_pseudo_func,
+                    target_pseudo_func=target_pseudo_func,
+                    source_keyset=KeyWrapper(self._source_pseudo_keyset).keyset,
+                    target_keyset=KeyWrapper(self._target_pseudo_keyset).keyset,
+                    name=field_name,
                     values=series.to_list(),
-                    pseudo_func=pseudo_func,
+                )
+                data, metadata = pseudonymize_operation_field(
+                    path="repseudonymize/field",
+                    pseudo_field_request=request,
                     timeout=self._timeout,
                     pseudo_client=self._pseudo_client,
-                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
                 return field_name, data, metadata
 
@@ -226,11 +246,14 @@ class Repseudonymize:
                 futures = [
                     executor.submit(
                         repseudonymize_field_runner,
-                        rule.pattern,
-                        dataframe[rule.pattern],
-                        rule.func,
+                        source_rule.pattern,
+                        dataframe[source_rule.pattern],
+                        source_rule.func,
+                        target_rule.func,
                     )
-                    for rule in self._rules
+                    for (source_rule, target_rule) in zip(
+                        self.source_rules, self.target_rules
+                    )
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
                 for future in as_completed(futures):
