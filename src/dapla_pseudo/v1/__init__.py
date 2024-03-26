@@ -12,7 +12,8 @@ __all__ = [
     "PseudoClient",
     "Pseudonymize",
     "Depseudonymize",
-    "RepseudonymizeValidator",
+    "Repseudonymize",
+    "Validator",
     "Field",
     "PseudoKeyset",
 ]

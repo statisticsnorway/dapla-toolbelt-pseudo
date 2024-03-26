@@ -33,10 +33,10 @@ class _RuleConstructor:
             if custom_key
             else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
         )
-        function = PseudoFunction(
+        pseudo_func = PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs
         )
-        return self._rule_constructor(function)
+        return self._rule_constructor(pseudo_func)
 
     def _with_daead_encryption(
         self, custom_key: t.Optional[PredefinedKeys | str] = None
@@ -44,17 +44,19 @@ class _RuleConstructor:
         kwargs = (
             DaeadKeywordArgs(key_id=custom_key) if custom_key else DaeadKeywordArgs()
         )
-        function = PseudoFunction(
+        pseudo_func = PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=kwargs
         )
-        return self._rule_constructor(function)
+        return self._rule_constructor(pseudo_func)
 
     def _with_ff31_encryption(
         self, custom_key: t.Optional[PredefinedKeys | str] = None
     ) -> list[PseudoRule]:
         kwargs = FF31KeywordArgs(key_id=custom_key) if custom_key else FF31KeywordArgs()
-        function = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=kwargs)
-        return self._rule_constructor(function)
+        pseudo_func = PseudoFunction(
+            function_type=PseudoFunctionTypes.FF31, kwargs=kwargs
+        )
+        return self._rule_constructor(pseudo_func)
 
     def _with_custom_function(self, function: PseudoFunction) -> list[PseudoRule]:
         return self._rule_constructor(function)
