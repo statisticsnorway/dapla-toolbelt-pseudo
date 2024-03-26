@@ -17,6 +17,7 @@ from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.v1.api_models import DepseudoFieldRequest
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
@@ -188,14 +189,17 @@ class Depseudonymize:
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
+                request = DepseudoFieldRequest(
+                    pseudo_func=pseudo_func,
+                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
+                    name=field_name,
+                    values=series.to_list(),
+                )
                 data, metadata = pseudonymize_operation_field(
                     path="depseudonymize/field",
-                    field_name=field_name,
-                    values=series.to_list(),
-                    pseudo_func=pseudo_func,
+                    pseudo_field_request=request,
                     timeout=self._timeout,
                     pseudo_client=self._pseudo_client,
-                    keyset=KeyWrapper(self._pseudo_keyset).keyset,
                 )
                 return field_name, data, metadata
 

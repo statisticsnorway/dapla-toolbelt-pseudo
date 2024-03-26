@@ -8,10 +8,16 @@ import requests
 
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import Mimetypes
+from dapla_pseudo.v1.api_models import PseudoFieldRequest
+from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+
+PKG = "dapla_pseudo.v1.client"
 
 
 @pytest.fixture
@@ -28,13 +34,11 @@ def test_post_to_field_endpoint_success(
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
-
+    mock_pseudo_field_request = Mock(spec=PseudoFieldRequest)
     mock_post.return_value = mock_response
     response = test_client._post_to_field_endpoint(
         path="test_path",
-        field_name="test_field",
-        values=["value1", "value2"],
-        pseudo_func=None,
+        pseudo_field_request=mock_pseudo_field_request,
         timeout=TIMEOUT_DEFAULT,
     )
 
@@ -90,12 +94,12 @@ def test__post_to_field_endpoint_failure(
     mock_response.text = ANY
     mock_post.return_value = mock_response
 
+    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
+
     with pytest.raises(requests.exceptions.HTTPError):
         test_client._post_to_field_endpoint(
             path="test_path",
-            field_name="test_field",
-            values=["value1", "value2"],
-            pseudo_func=None,
+            pseudo_field_request=mock_pseudo_request,
             timeout=TIMEOUT_DEFAULT,
         )
     mock_post.assert_called_once()
@@ -156,27 +160,19 @@ def test_post_to_field_endpoint_with_keyset(
         keyset_info={"primaryKeyId": "test_primary_key_id"},
         kek_uri="test_uri",
     )
+    pseudo_func = PseudoFunction(
+        function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+    )
+    pseudo_field_request = PseudoFieldRequest(
+        pseudo_func=pseudo_func, name="", values=[], keyset=keyset
+    )
 
     test_client._post_to_field_endpoint(
         path="test_path",
-        field_name="test_field",
-        values=["value1", "value2"],
-        pseudo_func=None,
+        pseudo_field_request=pseudo_field_request,
         timeout=TIMEOUT_DEFAULT,
-        keyset=keyset,
     )
-    expected_json = {
-        "request": {
-            "name": ANY,
-            "values": ANY,
-            "pseudoFunc": ANY,
-            "keyset": {
-                "kekUri": "test_uri",
-                "encryptedKeyset": "test_enc_keyset",
-                "keysetInfo": {"primaryKeyId": "test_primary_key_id"},
-            },
-        }
-    }
+    expected_json = {"request": pseudo_field_request.model_dump_json(by_alias=True)}
 
     _mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",

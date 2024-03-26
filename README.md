@@ -202,7 +202,6 @@ df = (
     .run()                                         # Apply pseudonymization to the selected field
     .to_polars()                                            # Get the result as a polars dataframe
 )
-pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key="ssb-common-key-1")
 
 # Pseudonymize a local file using a custom keyset:
 import json
@@ -277,12 +276,32 @@ result_df = (
 _Note that depseudonymization requires elevated access privileges._
 
 ### Repseudonymize
+Repseudonymize can either 1) Change the algorithm used to pseudonymize, and/or 2)
+change the key used in pseudonymization, while keeping the algorithm.
 
 ```python
-
-## TODO
+# Example: Repseudonymize from PAPIS-compatible encryption to Stable ID
+result_df = (
+    Repseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fnr")                              # Select the field to pseudonymize
+    .from_papis_compatible_encryption()            # Select the pseudonymization algorithm previously used
+    .to_stable_id()                                # Select the new pseudonymization rule
+    .run()                                         # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
 ```
 
+```python
+# Example: Repseudonymize with the same algorithm, but with a different key
+result_df = (
+    Repseudonymize.from_polars(df)                     # Specify what dataframe to use
+    .on_fields("fnr")                                  # Select the field to pseudonymize
+    .from_papis_compatible_encryption()                # Select the pseudonymization algorithm previously used
+    .to_papis_compatible_encryption(key_id="some-key") # Select the new pseudonymization rule
+    .run()                                             # Apply pseudonymization to the selected field
+    .to_polars()                                       # Get the result as a polars dataframe
+)
+```
 ### Datadoc
 
 Datadoc metadata is gathered while pseudonymizing, and can be seen like so:
