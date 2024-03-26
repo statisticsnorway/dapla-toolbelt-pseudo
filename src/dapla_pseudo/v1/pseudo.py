@@ -188,8 +188,6 @@ class Pseudonymize:
                 Returns:
                     tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
                 """
-                print(self._pseudo_keyset)
-                print(KeyWrapper(self._pseudo_keyset).keyset)
                 request = PseudoFieldRequest(
                     pseudo_func=pseudo_func,
                     keyset=KeyWrapper(self._pseudo_keyset).keyset,

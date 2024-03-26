@@ -14,6 +14,7 @@ from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.v1.api_models import DaeadKeywordArgs
+from dapla_pseudo.v1.api_models import DepseudoFieldRequest
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
@@ -78,11 +79,15 @@ def test_single_field_pseudonymize_operation_field(
         function_type=PseudoFunctionTypes.MAP_SID,
         kwargs=MapSidKeywordArgs(key_id="fake-key"),
     )
+    req = DepseudoFieldRequest(
+        pseudo_func=pseudo_func,
+        name="fornavn",
+        values=["1", "2", "3"],
+        keyset=None,
+    )
     data, _ = pseudonymize_operation_field(
         "fake.endpoint",
-        "fornavn",
-        ["x1", "x2", "x3"],
-        pseudo_func,
+        req,
         TIMEOUT_DEFAULT,
         PseudoClient(pseudo_service_url="mock_url", auth_token="mock_token"),
     )
@@ -122,16 +127,19 @@ def test_builder_depseudo_function_selector_with_sid(
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_depseudonymize_operation_field)
     Depseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
-    patch_depseudonymize_operation_field.assert_called_once_with(
-        path="depseudonymize/field",
-        values=df_personer["fnr"].to_list(),
-        field_name="fnr",
+    req = DepseudoFieldRequest(
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID, kwargs=MapSidKeywordArgs()
         ),
+        name="fnr",
+        values=df_personer["fnr"].to_list(),
+        keyset=None,
+    )
+    patch_depseudonymize_operation_field.assert_called_once_with(
+        path="depseudonymize/field",
+        pseudo_field_request=req,
         timeout=TIMEOUT_DEFAULT,
         pseudo_client=ANY,
-        keyset=None,
     )
 
 
@@ -218,16 +226,19 @@ def test_builder_pseudo_function_selector_default(
     Depseudonymize.from_polars(df_personer).on_fields(
         "fornavn"
     ).with_default_encryption().run()
-    patch_pseudonymize_operation_field.assert_called_once_with(
-        path="depseudonymize/field",
-        field_name="fornavn",
-        values=df_personer["fornavn"].to_list(),
+    req = DepseudoFieldRequest(
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ),
+        name="fornavn",
+        values=df_personer["fornavn"].to_list(),
+        keyset=None,
+    )
+    patch_pseudonymize_operation_field.assert_called_once_with(
+        path="depseudonymize/field",
+        pseudo_field_request=req,
         timeout=TIMEOUT_DEFAULT,
         pseudo_client=ANY,
-        keyset=None,
     )
 
 
@@ -239,16 +250,20 @@ def test_builder_pseudo_function_selector_fpe(
     Depseudonymize.from_polars(df_personer).on_fields(
         "fnr"
     ).with_papis_compatible_encryption().run()
-    patch_pseudonymize_operation_field.assert_called_once_with(
-        path="depseudonymize/field",
-        values=df_personer["fnr"].to_list(),
-        field_name="fnr",
+
+    req = DepseudoFieldRequest(
         pseudo_func=PseudoFunction(
             function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
         ),
+        name="fnr",
+        values=df_personer["fnr"].to_list(),
+        keyset=None,
+    )
+    patch_pseudonymize_operation_field.assert_called_once_with(
+        path="depseudonymize/field",
+        pseudo_field_request=req,
         timeout=TIMEOUT_DEFAULT,
         pseudo_client=ANY,
-        keyset=None,
     )
 
 
@@ -264,14 +279,18 @@ def test_builder_pseudo_function_selector_custom(
         pseudo_func
     ).run()
 
+    req = DepseudoFieldRequest(
+        pseudo_func=pseudo_func,
+        name="fnr",
+        values=df_personer["fnr"].to_list(),
+        keyset=None,
+    )
+
     patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
-        values=df_personer["fnr"].to_list(),
-        field_name="fnr",
-        pseudo_func=pseudo_func,
+        pseudo_field_request=req,
         timeout=TIMEOUT_DEFAULT,
         pseudo_client=ANY,
-        keyset=None,
     )
 
 
@@ -288,14 +307,18 @@ def test_builder_pseudo_function_selector_redact(
         pseudo_func
     ).run()
 
+    req = DepseudoFieldRequest(
+        pseudo_func=pseudo_func,
+        name="fnr",
+        values=df_personer["fnr"].to_list(),
+        keyset=None,
+    )
+
     patch_pseudonymize_operation_field.assert_called_once_with(
         path="depseudonymize/field",
-        values=df_personer["fnr"].to_list(),
-        field_name="fnr",
-        pseudo_func=pseudo_func,
+        pseudo_field_request=req,
         timeout=TIMEOUT_DEFAULT,
         pseudo_client=ANY,
-        keyset=None,
     )
 
 
@@ -330,42 +353,19 @@ def test_builder_pseudo_keyset_selector_custom(
         pseudo_func
     ).run(custom_keyset=keyset)
 
-    patch_pseudonymize_operation_field.assert_called_once_with(
-        path="depseudonymize/field",
-        values=df_personer["fnr"].to_list(),
-        field_name="fnr",
+    req = DepseudoFieldRequest(
         pseudo_func=pseudo_func,
-        timeout=TIMEOUT_DEFAULT,
-        pseudo_client=ANY,
+        name="fnr",
+        values=df_personer["fnr"].to_list(),
         keyset=keyset,
     )
 
-
-@patch(f"{PKG}.pseudonymize_operation_field")
-def test_pseudonymize_field_dataframe_setup(
-    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
-) -> None:
-    def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
-        name = kwargs["field_name"]
-        return (
-            pl.Series([f"{name}1", f"{name}2", f"{name}3"]),
-            RawPseudoMetadata(logs=[], metrics=[], datadoc=[], field_name="tester"),
-        )
-
-    patch_pseudonymize_operation_field.side_effect = side_effect
-
-    fields_to_pseudonymize = "fnr", "fornavn", "etternavn"
-    result = (
-        Depseudonymize.from_polars(df_personer)
-        .on_fields(*fields_to_pseudonymize)
-        .with_default_encryption()
-        .run()
+    patch_pseudonymize_operation_field.assert_called_once_with(
+        path="depseudonymize/field",
+        pseudo_field_request=req,
+        timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
     )
-    assert isinstance(result, Result)
-    dataframe = result.to_pandas()
-
-    for field in fields_to_pseudonymize:
-        assert dataframe[field].to_list() == side_effect(field_name=field)[0].to_list()
 
 
 def test_builder_field_selector_multiple_fields(df_personer: pl.DataFrame) -> None:
@@ -412,7 +412,7 @@ def test_builder_to_polars_from_polars_chaining(
     patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
 ) -> None:
     def side_effect(**kwargs: t.Any) -> tuple[pl.Series, RawPseudoMetadata]:
-        name = kwargs["field_name"]
+        name = kwargs["pseudo_field_request"]
         return (
             pl.Series([f"{name}1", f"{name}2", f"{name}3"]),
             RawPseudoMetadata(logs=[], metrics=[], datadoc=[], field_name="tester"),
