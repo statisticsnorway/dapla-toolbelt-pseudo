@@ -291,6 +291,9 @@ class Repseudonymize:
                     Latest if unspecified. Format: YYYY-MM-DD
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+
+            Returns:
+                An object with methods to choose how the field should be pseudonymized.
             """
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key
@@ -300,18 +303,37 @@ class Repseudonymize:
         def from_default_encryption(
             self, custom_key: t.Optional[PredefinedKeys | str] = None
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
+            """Claim that the selected fields were pseudonymized with default encryption.
+
+            Args:
+                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                    Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+
+            Returns:
+                An object with methods to choose how the field should be pseudonymized.
+            """
             rules = super()._with_daead_encryption(custom_key)
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
         def from_papis_compatible_encryption(
             self, custom_key: t.Optional[PredefinedKeys | str] = None
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
+            """Claim that the selected fields were pseudonymized with PAPIS-compatible encryption.
+
+            Args:
+                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                    Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+
+            Returns:
+                An object with methods to choose how the field should be pseudonymized.
+            """
             rules = super()._with_ff31_encryption(custom_key)
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
         def from_custom_function(
             self, function: PseudoFunction
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
+            """Claim that the selected fields were pseudonymized with a custom, specified Pseudo Function."""
             rules = super()._with_custom_function(function)
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
@@ -331,6 +353,19 @@ class Repseudonymize:
             sid_snapshot_date: t.Optional[str | date] = None,
             custom_key: t.Optional[PredefinedKeys | str] = None,
         ) -> "Repseudonymize._Repseudonymizer":
+            """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
+
+            In other words, this is a compound operation that both: 1) maps FNR to stable ID 2) then encrypts the Stable IDs.
+
+            Args:
+                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                    Latest if unspecified. Format: YYYY-MM-DD
+                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                    Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
+            """
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key
             )
@@ -339,12 +374,30 @@ class Repseudonymize:
         def to_default_encryption(
             self, custom_key: t.Optional[PredefinedKeys | str] = None
         ) -> "Repseudonymize._Repseudonymizer":
+            """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
+
+            Args:
+                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                    Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (ssb-common-key-1)
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
+            """
             rules = super()._with_daead_encryption(custom_key)
             return Repseudonymize._Repseudonymizer(self.source_rules, rules)
 
         def to_papis_compatible_encryption(
             self, custom_key: t.Optional[PredefinedKeys | str] = None
         ) -> "Repseudonymize._Repseudonymizer":
+            """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
+
+            Args:
+                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                    Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+
+            Returns:
+                Self: The object configured to be mapped to stable ID
+            """
             rules = super()._with_ff31_encryption(custom_key)
             return Repseudonymize._Repseudonymizer(self.source_rules, rules)
 

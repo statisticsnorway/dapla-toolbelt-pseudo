@@ -41,15 +41,6 @@ class _RuleConstructor:
     def _with_daead_encryption(
         self, custom_key: t.Optional[PredefinedKeys | str] = None
     ) -> list[PseudoRule]:
-        """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
-
-        Args:
-            custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
-                Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (ssb-common-key-1)
-
-        Returns:
-            Self: The object configured to be mapped to stable ID
-        """
         kwargs = (
             DaeadKeywordArgs(key_id=custom_key) if custom_key else DaeadKeywordArgs()
         )
@@ -61,15 +52,6 @@ class _RuleConstructor:
     def _with_ff31_encryption(
         self, custom_key: t.Optional[PredefinedKeys | str] = None
     ) -> list[PseudoRule]:
-        """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
-
-        Args:
-            custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
-                Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
-
-        Returns:
-            Self: The object configured to be mapped to stable ID
-        """
         kwargs = FF31KeywordArgs(key_id=custom_key) if custom_key else FF31KeywordArgs()
         function = PseudoFunction(function_type=PseudoFunctionTypes.FF31, kwargs=kwargs)
         return self._rule_constructor(function)
