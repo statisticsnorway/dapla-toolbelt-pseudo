@@ -112,7 +112,6 @@ class PseudoClient:
         timeout: int,
         stream: bool = False,
     ) -> requests.Response:
-        print(pseudo_field_request.model_dump_json(by_alias=True))
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
