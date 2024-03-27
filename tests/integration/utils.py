@@ -22,9 +22,9 @@ def integration_test() -> pytest.MarkDecorator:
 
 @pytest.fixture()
 def setup() -> Generator[None, None, None]:
-    os.environ["PSEUDO_SERVICE_URL"] = (
-        "https://dapla-pseudo-service.staging-bip-app.ssb.no"
-    )
+    os.environ[
+        "PSEUDO_SERVICE_URL"
+    ] = "https://dapla-pseudo-service.staging-bip-app.ssb.no"
     # Setup step that runs when integration test are ran on local machine
     # This will not run in GH actions since GITHUB_ACTIONS is set to `true` per default
     # https://docs.github.com/en/actions/learn-github-actions/variables
