@@ -203,4 +203,3 @@ class Result:
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
         return PseudoVariable.model_validate(raw_metadata[0])
-
