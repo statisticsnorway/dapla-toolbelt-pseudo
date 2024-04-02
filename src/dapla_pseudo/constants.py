@@ -16,6 +16,14 @@ class Env(str, Enum):
         return str(self.value)
 
 
+class PseudoOperation(str, Enum):
+    """Pseudo operation."""
+
+    PSEUDONYMIZE = "pseudonymize"
+    DEPSEUDONYMIZE = "depseudonymize"
+    REPSEUDONYMIZE = "repseudonymize"
+
+
 class PredefinedKeys(str, Enum):
     """Names of 'global keys' that the Dapla Pseudo Service is familiar with."""
 
