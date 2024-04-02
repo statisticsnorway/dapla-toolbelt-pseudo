@@ -103,6 +103,21 @@ def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
 
 
 @pytest.fixture
+def df_personer_daead_encrypted_ssb_common_key_1() -> pl.DataFrame:
+    JSON_FILE = "tests/data/person_3_daead_ssb_common_key_1.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest.fixture
 def df_personer_pseudo_stable_id() -> pl.DataFrame:
     JSON_FILE = "tests/data/person_3_sid_deid.json"
     return pl.read_json(
@@ -118,7 +133,7 @@ def df_personer_pseudo_stable_id() -> pl.DataFrame:
 
 
 @pytest.fixture
-def df_personer_depseudo_stable_id() -> pl.DataFrame:
+def df_personer_3() -> pl.DataFrame:
     JSON_FILE = "tests/data/person_3_sid.json"
     return pl.read_json(
         JSON_FILE,

@@ -3,6 +3,8 @@ from collections.abc import Generator
 import polars as pl
 
 from dapla_pseudo import Depseudonymize
+from dapla_pseudo import Pseudonymize
+from dapla_pseudo import Repseudonymize
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
 
@@ -26,15 +28,16 @@ def test_depseudonymize_default_encryption(
 @integration_test()
 def test_depseudonymize_sid(
     setup: Generator[None, None, None],
-    df_personer: pl.DataFrame,
     df_personer_pseudo_stable_id: pl.DataFrame,
-    df_personer_depseudo_stable_id: pl.DataFrame,
+    df_personer_3: pl.DataFrame,
 ) -> None:
     result = (
         Depseudonymize.from_polars(df_personer_pseudo_stable_id)
         .on_fields("fnr")
         .with_stable_id()
+        .on_fields("fornavn", "etternavn")
+        .with_default_encryption(custom_key="ssb-common-key-1")
         .run()
         .to_polars()
     )
-    assert result.equals(df_personer_depseudo_stable_id)
+    assert result.equals(df_personer_3)
