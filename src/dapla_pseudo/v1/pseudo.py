@@ -28,12 +28,12 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.client import PseudoClient
-from dapla_pseudo.v1.pseudo_commons import File
+from dapla_pseudo.v1.pseudo_commons import File, HierarchicalDataFrame
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
-from dapla_pseudo.v1.pseudo_commons import pseudo_operation_file
+from dapla_pseudo.v1.pseudo_commons import pseudo_operation_dataset
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
 
@@ -44,19 +44,25 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame
+    dataset: File | pl.DataFrame | HierarchicalDataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        Pseudonymize.dataset = dataset
+        if pl.Struct in dataset.dtypes:
+            Pseudonymize.dataset = HierarchicalDataFrame(dataset)
+        else:
+            Pseudonymize.dataset = dataset
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        Pseudonymize.dataset = dataframe
+        if pl.Struct in dataframe.dtypes:
+            Pseudonymize.dataset = HierarchicalDataFrame(dataframe)
+        else:
+            Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
@@ -103,6 +109,10 @@ class Pseudonymize:
             """Specify one or multiple fields to be pseudonymized."""
             return Pseudonymize._PseudoFuncSelector(list(fields), self._rules)
 
+        def add_rules(self, rules: list[PseudoRule]) -> "Pseudonymize._Pseudonymizer":
+            """Specify one or more existing pseudonymization rule."""
+            return Pseudonymize._Pseudonymizer(self._rules + rules)
+
         def run(
             self,
             custom_keyset: Optional[PseudoKeyset | str] = None,
@@ -125,7 +135,7 @@ class Pseudonymize:
 
             if self._rules == []:
                 raise ValueError(
-                    "No fields have been provided. Use the 'on_fields' method."
+                    "No fields have been provided. Use the 'on_fields' or the 'add_rules' method."
                 )
 
             if custom_keyset is not None:
@@ -134,18 +144,18 @@ class Pseudonymize:
             self._timeout = timeout
             match Pseudonymize.dataset:  # Differentiate between file and DataFrame
                 case File():
-                    return self._pseudonymize_file()
+                    return self._pseudonymize_dataframe(Pseudonymize.dataset)
                 case pl.DataFrame():
-                    return self._pseudonymize_field()
+                    return self._pseudonymize_field(Pseudonymize.dataset)
+                case HierarchicalDataFrame():
+                    return self._pseudonymize_dataframe(Pseudonymize.dataset.contents)
                 case _ as invalid_dataset:
                     raise ValueError(
                         f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                     )
 
-        def _pseudonymize_file(self) -> Result:
-            """Pseudonymize the entire file."""
-            # Need to type-cast explicitly. We know that Pseudonymize.dataset is a "File" if we reach this method.
-            file = t.cast(File, Pseudonymize.dataset)
+        def _pseudonymize_dataframe(self, dataframe: File | pl.DataFrame) -> Result:
+            """Pseudonymize the entire dataframe."""
 
             pseudonymize_request = PseudonymizeFileRequest(
                 pseudo_config=PseudoConfig(
@@ -157,15 +167,14 @@ class Pseudonymize:
                 compression=None,
             )
 
-            pseudo_response: PseudoFileResponse = pseudo_operation_file(
-                file_handle=file.file_handle,
+            pseudo_response: PseudoFileResponse = pseudo_operation_dataset(
+                dataset_ref=dataframe,
                 pseudo_operation_request=pseudonymize_request,
-                input_content_type=file.content_type,
             )
 
             return Result(pseudo_response=pseudo_response)
 
-        def _pseudonymize_field(self) -> Result:
+        def _pseudonymize_field(self, dataframe: pl.DataFrame) -> Result:
             """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
             The pseudonymization is performed in parallel. After the parallel processing is finished,
@@ -202,7 +211,6 @@ class Pseudonymize:
                 )
                 return field_name, data, metadata
 
-            dataframe = t.cast(pl.DataFrame, Pseudonymize.dataset)
             # Execute the pseudonymization API calls in parallel
             with ThreadPoolExecutor() as executor:
                 pseudonymized_field: dict[str, pl.Series] = {}

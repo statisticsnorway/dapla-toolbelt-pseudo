@@ -132,6 +132,13 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
 
 
 @dataclass
+class HierarchicalDataFrame:
+    """HierarchicalDataset holds a hierarchical dataframe."""
+
+    contents: pl.DataFrame
+
+
+@dataclass
 class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
 
@@ -160,19 +167,18 @@ class PseudoFileResponse:
     streamed: bool = True
 
 
-def pseudo_operation_file(
-    file_handle: t.BinaryIO,
+def pseudo_operation_dataset(
+    dataset_ref: File | pl.DataFrame,
     pseudo_operation_request: (
         PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest
     ),
-    input_content_type: Mimetypes,
 ) -> PseudoFileResponse:
-    """Makes pseudonymization API calls for a file and returns the pseudonymized data and metadata.
+    """Makes pseudonymization API calls for an entire dataset (file handle or dataframe) and returns the pseudonymized
+    data and metadata.
 
     Args:
-        file_handle: A file handle repreresenting the data to be pseudonymized
+        dataset_ref: A file handle or a dataframe representing the data to be pseudonymized
         pseudo_operation_request: An object representing the data and how it should be pseudonymized
-        input_content_type: A supported Mimetype for the file.
 
     Returns:
         PseudoFileResponse: An object representing the response from the Pseudo Service.
@@ -182,16 +188,28 @@ def pseudo_operation_file(
         pseudo_operation_request.to_json(),
         str(Mimetypes.JSON),
     )
+    file_name: str
+    data_spec: FileSpecDecl
 
-    file_name = _extract_name(
-        file_handle=file_handle, input_content_type=input_content_type
-    )
-
-    data_spec: FileSpecDecl = (
-        file_name,
-        file_handle,
-        str(pseudo_operation_request.target_content_type),
-    )
+    if dataset_ref is pl.DataFrame:
+        dataset = t.cast(pl.DataFrame, dataset_ref)
+        file_name = "data.json"
+        data_spec = (
+            file_name,
+            dataset.to_dicts(),
+            str(pseudo_operation_request.target_content_type),
+        )
+    else:
+        file = t.cast(File, dataset_ref)
+        with file.file_handle as file_handle:
+            file_name = _extract_name(
+                file_handle=file_handle, input_content_type=file.content_type
+            )
+            data_spec = (
+                file_name,
+                file_handle,
+                str(pseudo_operation_request.target_content_type),
+            )
 
     response = _client()._post_to_file_endpoint(
         path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
@@ -199,8 +217,6 @@ def pseudo_operation_file(
         data_spec=data_spec,
         stream=True,
     )
-
-    file_handle.close()
 
     payload = json.loads(response.content.decode("utf-8"))
     pseudo_data = payload["data"]
