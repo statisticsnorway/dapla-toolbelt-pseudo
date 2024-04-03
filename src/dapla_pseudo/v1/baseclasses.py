@@ -46,14 +46,19 @@ from dapla_pseudo.v1.result import Result
 
 
 class _BasePseudonymizer:
+    """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders.
+
+    The constructor of this class takes parameters that are NOT changed during
+    the course of a 'Pseudonymizer' builder, i.e. through the 'on_fields()' method.
+
+    The remainder of the parameters are passed to
+    :meth:`~baseclasses._BasePseudonymizer._execute_pseudo_operation`.
+    """
+
     def __init__(
         self, pseudo_operation: PseudoOperation, dataset: File | pl.DataFrame
     ) -> None:
-        """The constructor of the base class.
-
-        It takes parameters that are NOT changed during the course
-        of a 'Pseudonymizer' builder, i.e. through the 'on_fields()' method.
-        """
+        """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
         self._pseudo_client: PseudoClient = PseudoClient(
             pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
@@ -210,6 +215,8 @@ class _BasePseudonymizer:
 
 
 class _BaseRuleConstructor:
+    """Base class for the _PseudoFuncSelector/_DepseudoFuncSelector/_RepseudoFuncSelector builders."""
+
     def __init__(
         self, fields: list[str], dataset_type: type[pl.DataFrame] | type[File]
     ) -> None:
