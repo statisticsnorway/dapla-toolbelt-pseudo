@@ -190,7 +190,7 @@ def pseudo_operation_dataset(
     file_name: str
     data_spec: FileSpecDecl
 
-    if dataset_ref is pl.DataFrame:
+    if type(dataset_ref) is pl.DataFrame:
         dataset = t.cast(pl.DataFrame, dataset_ref)
         file_name = "data.json"
         data_spec = (
