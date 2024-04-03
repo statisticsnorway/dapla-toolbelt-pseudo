@@ -13,8 +13,8 @@ import requests
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.client import _client
-from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
-from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
+from dapla_pseudo.v1.models.api import PseudoFieldResponse
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.result import Result
 from dapla_pseudo.v1.supported_file_format import read_to_polars_df
 

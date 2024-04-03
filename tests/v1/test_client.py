@@ -10,12 +10,12 @@ from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileSpecDecl
-from dapla_pseudo.v1.api_models import DaeadKeywordArgs
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoFieldRequest
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models.api import PseudoFieldRequest
+from dapla_pseudo.v1.models.api import PseudoFileRequest
+from dapla_pseudo.v1.models.core import DaeadKeywordArgs
+from dapla_pseudo.v1.models.core import Mimetypes
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoKeyset
 
 PKG = "dapla_pseudo.v1.client"
 
@@ -54,7 +54,7 @@ def test_post_to_file_endpoint_success(
     mock_response.status_code = 200
     mock_response.raise_for_status.return_value = None
 
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
+    mock_pseudo_request = Mock(spec=PseudoFileRequest)
     mock_pseudo_request.to_json.return_value = Mock()
 
     data_spec: FileSpecDecl = (
@@ -94,7 +94,7 @@ def test__post_to_field_endpoint_failure(
     mock_response.text = ANY
     mock_post.return_value = mock_response
 
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
+    mock_pseudo_request = Mock(spec=PseudoFileRequest)
 
     with pytest.raises(requests.exceptions.HTTPError):
         test_client._post_to_field_endpoint(
@@ -120,7 +120,7 @@ def test_post_to_file_endpoint_failure(
     mock_response.headers = ANY
     mock_response.text = ANY
 
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
+    mock_pseudo_request = Mock(spec=PseudoFileRequest)
     mock_pseudo_request.to_json.return_value = Mock()
 
     mock_post.return_value = mock_response

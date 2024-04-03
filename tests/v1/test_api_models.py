@@ -1,12 +1,12 @@
 import json
 
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.v1.api_models import DaeadKeywordArgs
-from dapla_pseudo.v1.api_models import FF31KeywordArgs
-from dapla_pseudo.v1.api_models import KeyWrapper
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.api_models import RedactArgs
+from dapla_pseudo.v1.models.core import DaeadKeywordArgs
+from dapla_pseudo.v1.models.core import FF31KeywordArgs
+from dapla_pseudo.v1.models.core import KeyWrapper
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoKeyset
+from dapla_pseudo.v1.models.core import RedactArgs
 
 TEST_FILE_PATH = "tests/v1/test_files"
 

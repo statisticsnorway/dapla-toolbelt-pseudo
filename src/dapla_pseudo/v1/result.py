@@ -15,8 +15,8 @@ from datadoc_model.model import PseudonymizationMetadata
 from datadoc_model.model import PseudoVariable
 
 from dapla_pseudo.utils import get_file_format_from_file_name
-from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
-from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
+from dapla_pseudo.v1.models.api import PseudoFieldResponse
+from dapla_pseudo.v1.models.api import PseudoFileResponse
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import write_from_df
 from dapla_pseudo.v1.supported_file_format import write_from_dicts

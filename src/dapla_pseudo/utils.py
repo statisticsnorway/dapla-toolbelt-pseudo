@@ -7,16 +7,28 @@ from datetime import date
 from pathlib import Path
 
 import fsspec
+import polars as pl
 from dapla import FileClient
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 
+from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.v1.models.api import Mimetypes
+from dapla_pseudo.v1.models.api import DepseudoFieldRequest
+from dapla_pseudo.v1.models.api import DepseudoFileRequest
+from dapla_pseudo.v1.models.api import PseudoFieldRequest
+from dapla_pseudo.v1.models.api import PseudoFileRequest
+from dapla_pseudo.v1.models.api import RepseudoFieldRequest
+from dapla_pseudo.v1.models.api import RepseudoFileRequest
+from dapla_pseudo.v1.models.core import KeyWrapper
+from dapla_pseudo.v1.models.core import Mimetypes
+from dapla_pseudo.v1.models.core import PseudoConfig
+from dapla_pseudo.v1.models.core import PseudoKeyset
+from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
@@ -67,6 +79,101 @@ def get_file_format_from_file_name(file_path: str | Path) -> SupportedOutputFile
         raise NoFileExtensionError(f"File path '{file_path}' has no file extension.")
     file_format = SupportedOutputFileFormat(file_extension.replace(".", ""))
     return file_format
+
+
+def build_pseudo_field_request(
+    pseudo_operation: PseudoOperation,
+    dataframe: pl.DataFrame,
+    rules: list[PseudoRule],  # "source rules" if repseudo
+    custom_keyset: t.Optional[PseudoKeyset | str] = None,
+    target_custom_keyset: t.Optional[PseudoKeyset | str] = None,  # used in repseudo
+    target_rules: t.Optional[list[PseudoRule]] = None,  # used in repseudo)
+) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
+    """Builds a FieldRequest object."""
+    match pseudo_operation:
+        case PseudoOperation.PSEUDONYMIZE:
+            return [
+                PseudoFieldRequest(
+                    pseudo_func=rule.func,
+                    name=rule.pattern,
+                    values=dataframe[rule.pattern].to_list(),
+                    keyset=KeyWrapper(custom_keyset).keyset,
+                )
+                for rule in rules
+            ]
+        case PseudoOperation.DEPSEUDONYMIZE:
+            return [
+                DepseudoFieldRequest(
+                    pseudo_func=rule.func,
+                    name=rule.pattern,
+                    values=dataframe[rule.pattern].to_list(),
+                    keyset=KeyWrapper(custom_keyset).keyset,
+                )
+                for rule in rules
+            ]
+        case PseudoOperation.REPSEUDONYMIZE:
+            if target_rules is not None:
+                return [
+                    RepseudoFieldRequest(
+                        source_pseudo_func=source_rule.func,
+                        target_pseudo_func=target_rule.func,
+                        name=source_rule.pattern,
+                        values=dataframe[source_rule.pattern].to_list(),
+                        source_keyset=KeyWrapper(custom_keyset).keyset,
+                        target_keyset=KeyWrapper(target_custom_keyset).keyset,
+                    )
+                    for source_rule, target_rule in zip(rules, target_rules)
+                ]
+            else:
+                raise ValueError("Found no target rules")
+
+
+def build_pseudo_file_request(
+    pseudo_operation: PseudoOperation,
+    rules: list[PseudoRule],  # "source rules" if repseudo
+    custom_keyset: t.Optional[PseudoKeyset | str] = None,
+    target_custom_keyset: t.Optional[PseudoKeyset | str] = None,  # used in repseudo
+    target_rules: t.Optional[list[PseudoRule]] = None,  # used in repseudo)
+) -> PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest:
+    """Builds a file request object."""
+    match pseudo_operation:
+        case PseudoOperation.PSEUDONYMIZE:
+            return PseudoFileRequest(
+                pseudo_config=PseudoConfig(
+                    rules=rules,
+                    keysets=KeyWrapper(custom_keyset).keyset_list(),
+                ),
+                target_content_type=Mimetypes.JSON,
+                target_uri=None,
+                compression=None,
+            )
+        case PseudoOperation.DEPSEUDONYMIZE:
+            return DepseudoFileRequest(
+                pseudo_config=PseudoConfig(
+                    rules=rules,
+                    keysets=KeyWrapper(custom_keyset).keyset_list(),
+                ),
+                target_content_type=Mimetypes.JSON,
+                target_uri=None,
+                compression=None,
+            )
+        case PseudoOperation.REPSEUDONYMIZE:
+            if target_rules is not None:
+                return RepseudoFileRequest(
+                    source_pseudo_config=PseudoConfig(
+                        rules=rules,
+                        keysets=KeyWrapper(custom_keyset).keyset_list(),
+                    ),
+                    target_pseudo_config=PseudoConfig(
+                        rules=target_rules,
+                        keysets=KeyWrapper(target_custom_keyset).keyset_list(),
+                    ),
+                    target_content_type=Mimetypes.JSON,
+                    target_uri=None,
+                    compression=None,
+                )
+            else:
+                raise ValueError("Found no target rules")
 
 
 def get_file_data_from_dataset(

@@ -6,10 +6,10 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
-from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
-from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
+from dapla_pseudo.v1.models.api import PseudoFieldResponse
+from dapla_pseudo.v1.models.api import PseudoFileResponse
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
+from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.result import Result
 
 

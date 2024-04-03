@@ -1,9 +1,6 @@
 """Builder for submitting a pseudonymization request."""
 
-import os
 import typing as t
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from datetime import date
 from typing import Optional
 
@@ -11,26 +8,16 @@ import pandas as pd
 import polars as pl
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
-from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
+from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.v1.api_models import KeyWrapper
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoConfig
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.api_models import PseudoRule
-from dapla_pseudo.v1.api_models import RepseudoFieldRequest
-from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
-from dapla_pseudo.v1.baseclass import _RuleConstructor
-from dapla_pseudo.v1.client import PseudoClient
-from dapla_pseudo.v1.pseudo_commons import File
-from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
-from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
-from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
-from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
-from dapla_pseudo.v1.pseudo_commons import pseudo_operation_file
-from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
+from dapla_pseudo.utils import get_file_data_from_dataset
+from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
+from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
+from dapla_pseudo.v1.models.core import File
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoKeyset
+from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.result import Result
 
 
@@ -82,7 +69,7 @@ class Repseudonymize:
         Repseudonymize.dataset = File(file_handle, content_type)
         return Repseudonymize._Repseudonymizer()
 
-    class _Repseudonymizer:
+    class _Repseudonymizer(_BasePseudonymizer):
         """Select one or multiple fields to be pseudonymized."""
 
         source_rules: t.ClassVar[list[PseudoRule]] = []
@@ -107,12 +94,9 @@ class Repseudonymize:
                 Repseudonymize._Repseudonymizer.source_rules.extend(source_rules)
                 Repseudonymize._Repseudonymizer.target_rules.extend(target_rules)
 
-            self._source_pseudo_keyset: Optional[PseudoKeyset | str] = None
-            self._target_pseudo_keyset: Optional[PseudoKeyset | str] = None
-            self._timeout: int
-            self._pseudo_client: PseudoClient = PseudoClient(
-                pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
-                auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
+            super().__init__(
+                pseudo_operation=PseudoOperation.REPSEUDONYMIZE,
+                dataset=Repseudonymize.dataset,
             )
 
         def on_fields(
@@ -123,15 +107,15 @@ class Repseudonymize:
 
         def run(
             self,
-            custom_source_keyset: Optional[PseudoKeyset | str] = None,
-            custom_target_keyset: Optional[PseudoKeyset | str] = None,
+            source_custom_keyset: Optional[PseudoKeyset | str] = None,
+            target_custom_keyset: Optional[PseudoKeyset | str] = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
 
             Args:
-                custom_source_keyset (PseudoKeyset, optional): The source pseudonymization keyset to use. Defaults to None.
-                custom_target_keyset (PseudoKeyset, optional): The target pseudonymization keyset to use. Defaults to None.
+                source_custom_keyset (PseudoKeyset, optional): The source pseudonymization keyset to use. Defaults to None.
+                target_custom_keyset (PseudoKeyset, optional): The target pseudonymization keyset to use. Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
             Raises:
@@ -140,144 +124,18 @@ class Repseudonymize:
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """
-            if Repseudonymize.dataset is None:
-                raise ValueError("No dataset has been provided.")
-
-            if (
-                Repseudonymize._Repseudonymizer.source_rules == []
-                or Repseudonymize._Repseudonymizer.target_rules == []
-            ):
-                raise ValueError(
-                    "No fields have been provided. Use the 'on_fields' method."
-                )
-
-            if custom_source_keyset is not None:
-                self._source_pseudo_keyset = custom_source_keyset
-
-            if custom_target_keyset is not None:
-                self._target_pseudo_keyset = custom_target_keyset
-
-            self._timeout = timeout
-            match Repseudonymize.dataset:  # Differentiate between file and DataFrame
-                case File():
-                    return self._repseudonymize_file()
-                case pl.DataFrame():
-                    return self._repseudonymize_field()
-                case _ as invalid_dataset:
-                    raise ValueError(
-                        f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
-                    )
-
-        def _repseudonymize_file(self) -> Result:
-            """Pseudonymize the entire file."""
-            # Need to type-cast explicitly. We know that Pseudonymize.dataset is a "File" if we reach this method.
-            file = t.cast(File, Repseudonymize.dataset)
-
-            pseudonymize_request = RepseudonymizeFileRequest(
-                source_pseudo_config=PseudoConfig(
-                    rules=self.source_rules,
-                    keysets=KeyWrapper(self._source_pseudo_keyset).keyset_list(),
-                ),
-                target_pseudo_config=PseudoConfig(
-                    rules=self.target_rules,
-                    keysets=KeyWrapper(self._target_pseudo_keyset).keyset_list(),
-                ),
-                target_content_type=Mimetypes.JSON,
-                target_uri=None,
-                compression=None,
+            return super()._execute_pseudo_operation(
+                rules=self.source_rules,
+                target_rules=self.target_rules,
+                custom_keyset=source_custom_keyset,
+                target_custom_keyset=target_custom_keyset,
+                timeout=timeout,
             )
 
-            pseudo_response: PseudoFileResponse = pseudo_operation_file(
-                file_handle=file.file_handle,
-                pseudo_operation_request=pseudonymize_request,
-                input_content_type=file.content_type,
-            )
-
-            return Result(pseudo_response=pseudo_response)
-
-        def _repseudonymize_field(self) -> Result:
-            """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
-
-            The pseudonymization is performed in parallel. After the parallel processing is finished,
-            the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
-
-            Returns:
-                Result: Containing the pseudonymized 'self._dataframe' and the associated metadata.
-            """
-
-            def repseudonymize_field_runner(
-                field_name: str,
-                series: pl.Series,
-                source_pseudo_func: PseudoFunction,
-                target_pseudo_func: PseudoFunction,
-            ) -> tuple[str, pl.Series, RawPseudoMetadata]:
-                """Function that performs the pseudonymization on a pandas Series.
-
-                Args:
-                    field_name (str):  The name of the field.
-                    series (pl.Series): The pandas Series containing the values to be pseudonymized.
-                    source_pseudo_func (PseudoFunction): The Pseudo function previously used to pseudonymize the dataset.
-                    target_pseudo_func (PseudoFunction): The Pseudo function to apply to the dataset.
-
-                Returns:
-                    tuple[str,pl.Series]: A tuple containing the field_name and the corresponding series.
-                """
-                request = RepseudoFieldRequest(
-                    source_pseudo_func=source_pseudo_func,
-                    target_pseudo_func=target_pseudo_func,
-                    source_keyset=KeyWrapper(self._source_pseudo_keyset).keyset,
-                    target_keyset=KeyWrapper(self._target_pseudo_keyset).keyset,
-                    name=field_name,
-                    values=series.to_list(),
-                )
-                data, metadata = pseudonymize_operation_field(
-                    path="repseudonymize/field",
-                    pseudo_field_request=request,
-                    timeout=self._timeout,
-                    pseudo_client=self._pseudo_client,
-                )
-                return field_name, data, metadata
-
-            dataframe = t.cast(pl.DataFrame, Repseudonymize.dataset)
-            # Execute the pseudonymization API calls in parallel
-            with ThreadPoolExecutor() as executor:
-                pseudonymized_field: dict[str, pl.Series] = {}
-                raw_metadata_fields: list[RawPseudoMetadata] = []
-                futures = [
-                    executor.submit(
-                        repseudonymize_field_runner,
-                        source_rule.pattern,
-                        dataframe[source_rule.pattern],
-                        source_rule.func,
-                        target_rule.func,
-                    )
-                    for (source_rule, target_rule) in zip(
-                        self.source_rules, self.target_rules
-                    )
-                ]
-                # Wait for the futures to finish, then add each field to pseudonymized_field map
-                for future in as_completed(futures):
-                    field_name, data, raw_metadata = future.result()
-                    pseudonymized_field[field_name] = data
-                    raw_metadata_fields.append(raw_metadata)
-
-                pseudonymized_df = pl.DataFrame(pseudonymized_field)
-                dataframe = dataframe.update(pseudonymized_df)
-            return Result(
-                pseudo_response=PseudoFieldResponse(
-                    data=dataframe, raw_metadata=raw_metadata_fields
-                )
-            )
-
-    class _RepseudoFuncSelectorSource(_RuleConstructor):
+    class _RepseudoFuncSelectorSource(_BaseRuleConstructor):
         def __init__(self, fields: list[str]):
-            dataset_type: t.Literal["dataframe", "file"] = (
-                "dataframe"
-                if isinstance(Repseudonymize.dataset, pl.DataFrame)
-                else "file"
-            )
             self.fields = fields
-            super().__init__(fields, dataset_type)
+            super().__init__(fields, type(Repseudonymize.dataset))
 
         def from_stable_id(
             self,
@@ -337,16 +195,10 @@ class Repseudonymize:
             rules = super()._with_custom_function(function)
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
-    class _RepseudoFuncSelectorTarget(_RuleConstructor):
+    class _RepseudoFuncSelectorTarget(_BaseRuleConstructor):
         def __init__(self, fields: list[str], source_rules: list[PseudoRule]):
             self.source_rules = source_rules
-
-            dataset_type: t.Literal["dataframe", "file"] = (
-                "dataframe"
-                if isinstance(Repseudonymize.dataset, pl.DataFrame)
-                else "file"
-            )
-            super().__init__(fields, dataset_type)
+            super().__init__(fields, type(Repseudonymize.dataset))
 
         def to_stable_id(
             self,

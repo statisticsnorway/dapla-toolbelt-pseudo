@@ -11,13 +11,13 @@ from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileLikeDatasetDecl
+from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
-from dapla_pseudo.v1.models.api import PseudoFunction
-from dapla_pseudo.v1.models.api import PseudoKeyset
-from dapla_pseudo.v1.models.api import PseudoRule
-from dapla_pseudo.v1.pseudo_commons import File
-from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
+from dapla_pseudo.v1.models.core import File
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoKeyset
+from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.result import Result
 
 
@@ -76,7 +76,10 @@ class Pseudonymize:
 
         def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
             """Initialize the class."""
-            super().__init__(pseudo_operation=PseudoOperation.PSEUDONYMIZE)
+            super().__init__(
+                pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+                dataset=Pseudonymize.dataset,
+            )
             if rules is None:
                 Pseudonymize._Pseudonymizer.rules = []
             else:
@@ -103,9 +106,7 @@ class Pseudonymize:
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """
-            return super()._execute_pseudo_operation(
-                Pseudonymize.dataset, self.rules, timeout, custom_keyset
-            )
+            return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
 
     class _PseudoFuncSelector(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:

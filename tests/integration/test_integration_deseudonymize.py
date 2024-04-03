@@ -1,6 +1,7 @@
 from collections.abc import Generator
 
 import polars as pl
+from polars.testing import assert_frame_equal
 
 from dapla_pseudo import Depseudonymize
 from tests.integration.utils import integration_test
@@ -20,7 +21,8 @@ def test_depseudonymize_default_encryption(
         .run()
         .to_polars()
     )
-    assert result.equals(df_personer)
+
+    assert_frame_equal(result, df_personer)
 
 
 @integration_test()

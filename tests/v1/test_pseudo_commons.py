@@ -4,8 +4,8 @@ import pytest
 from gcsfs.core import GCSFile
 
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.pseudo_commons import get_content_type_from_file
+from dapla_pseudo.utils import get_content_type_from_file
+from dapla_pseudo.v1.models.core import Mimetypes
 
 PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
