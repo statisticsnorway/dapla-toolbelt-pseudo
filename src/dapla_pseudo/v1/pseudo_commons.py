@@ -199,6 +199,12 @@ def pseudo_operation_dataset(
             dataset.to_dicts(),
             str(pseudo_operation_request.target_content_type),
         )
+        response = _client()._post_to_file_endpoint(
+            path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
+            request_spec=request_spec,
+            data_spec=data_spec,
+            stream=True,
+        )
     else:
         file = t.cast(File, dataset_ref)
         with file.file_handle as file_handle:
@@ -210,13 +216,13 @@ def pseudo_operation_dataset(
                 file_handle,
                 str(pseudo_operation_request.target_content_type),
             )
-
-    response = _client()._post_to_file_endpoint(
-        path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
-        request_spec=request_spec,
-        data_spec=data_spec,
-        stream=True,
-    )
+            # Post to file endpoint must be within the 'with' block to keep the file_handle open
+            response = _client()._post_to_file_endpoint(
+                path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
+                request_spec=request_spec,
+                data_spec=data_spec,
+                stream=True,
+            )
 
     payload = json.loads(response.content.decode("utf-8"))
     pseudo_data = payload["data"]
