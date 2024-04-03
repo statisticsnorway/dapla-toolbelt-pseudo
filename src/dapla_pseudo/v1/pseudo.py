@@ -1,7 +1,6 @@
 """Builder for submitting a pseudonymization request."""
 
 import os
-import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
@@ -28,7 +27,8 @@ from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.client import PseudoClient
-from dapla_pseudo.v1.pseudo_commons import File, HierarchicalDataFrame
+from dapla_pseudo.v1.pseudo_commons import File
+from dapla_pseudo.v1.pseudo_commons import HierarchicalDataFrame
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
@@ -156,7 +156,6 @@ class Pseudonymize:
 
         def _pseudonymize_dataframe(self, dataframe: File | pl.DataFrame) -> Result:
             """Pseudonymize the entire dataframe."""
-
             pseudonymize_request = PseudonymizeFileRequest(
                 pseudo_config=PseudoConfig(
                     rules=self._rules,
