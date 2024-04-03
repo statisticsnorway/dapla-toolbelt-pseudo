@@ -173,8 +173,7 @@ def pseudo_operation_dataset(
         PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest
     ),
 ) -> PseudoFileResponse:
-    """Makes pseudonymization API calls for an entire dataset (file handle or dataframe) and returns the pseudonymized
-    data and metadata.
+    """Calls pseudonymization API for an entire dataset (file handle or dataframe) and returns the pseudonymized data and metadata.
 
     Args:
         dataset_ref: A file handle or a dataframe representing the data to be pseudonymized
