@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 import polars as pl
 
-from dapla_pseudo import Repseudonymize, Pseudonymize, Depseudonymize
+from dapla_pseudo import Repseudonymize
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
 
@@ -52,7 +52,9 @@ def test_repseudonymize_from_sid_to_daead(
     df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2: pl.DataFrame,
 ) -> None:
     result = (
-        Repseudonymize.from_polars(df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2)
+        Repseudonymize.from_polars(
+            df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2
+        )
         .on_fields("fnr")
         .from_stable_id()
         .to_default_encryption()

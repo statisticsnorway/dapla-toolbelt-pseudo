@@ -32,7 +32,9 @@ def test_depseudonymize_sid(
     df_personer: pl.DataFrame,
 ) -> None:
     result = (
-        Depseudonymize.from_polars(df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2)
+        Depseudonymize.from_polars(
+            df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2
+        )
         .on_fields("fnr")
         .with_stable_id()
         .on_fields("fornavn", "etternavn")
