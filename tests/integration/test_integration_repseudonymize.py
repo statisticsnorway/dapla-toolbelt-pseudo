@@ -31,9 +31,10 @@ def test_repseudonymize_change_keys(
     df_personer_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_1: pl.DataFrame,
 ) -> None:
+
     result = (
         Repseudonymize.from_polars(df_personer_daead_encrypted_ssb_common_key_1)
-        .on_fields("fnr")
+        .on_fields("fnr","fornavn","etternavn")
         .from_default_encryption()
         .to_default_encryption(custom_key="ssb-common-key-2")
         .run()
@@ -48,7 +49,7 @@ def test_repseudonymize_from_sid_to_daead(
     setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_1: pl.DataFrame,
-    df_personer_stable_id_daead_encrypted_ssb_common_key_2: pl.DataFrame,
+    df_personer_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2: pl.DataFrame,
 ) -> None:
     result = (
@@ -65,4 +66,4 @@ def test_repseudonymize_from_sid_to_daead(
         .to_polars()
     )
 
-    assert result.equals(df_personer_stable_id_daead_encrypted_ssb_common_key_2)
+    assert result.equals(df_personer_daead_encrypted_ssb_common_key_1)
