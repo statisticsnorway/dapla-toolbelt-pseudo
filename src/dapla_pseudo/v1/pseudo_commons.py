@@ -195,7 +195,7 @@ def pseudo_operation_dataset(
         file_name = "data.json"
         data_spec = (
             file_name,
-            dataset.to_dicts(),
+            str(dataset.to_dicts()),
             str(pseudo_operation_request.target_content_type),
         )
         response = _client()._post_to_file_endpoint(
