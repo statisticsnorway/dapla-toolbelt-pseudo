@@ -3,8 +3,6 @@ from collections.abc import Generator
 import polars as pl
 
 from dapla_pseudo import Depseudonymize
-from dapla_pseudo import Pseudonymize
-from dapla_pseudo import Repseudonymize
 from tests.integration.utils import integration_test
 from tests.integration.utils import setup
 
