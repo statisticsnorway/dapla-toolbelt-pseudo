@@ -115,7 +115,6 @@ def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
     )
 
 
-
 @pytest.fixture
 def df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_sid_daead_ssb_common_key_2.json"
