@@ -162,14 +162,8 @@ class FF31KeywordArgs(PseudoFunctionArgs):
 class RedactArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'redact' function."""
 
-    replacement_string: str
-
-    def __str__(self) -> str:
-        """Overload the parent class. The redact function is expected as an arg, not kwarg.
-
-        I.e. 'redact(<replacement_string>)'
-        """
-        return self.replacement_string
+    placeholder: t.Optional[str] = None
+    regex: t.Optional[str] = None
 
 
 class PseudoFunction(BaseModel):

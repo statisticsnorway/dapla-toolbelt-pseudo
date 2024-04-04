@@ -70,10 +70,10 @@ def test_pseudo_function() -> None:
 
 
 def test_redact_function() -> None:
-    assert "redact(test)" == str(
+    assert "redact(placeholder=#)" == str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.REDACT,
-            kwargs=RedactArgs(replacement_string="test"),
+            kwargs=RedactArgs(placeholder="#"),
         )
     )
 

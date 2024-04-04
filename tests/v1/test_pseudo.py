@@ -324,7 +324,7 @@ def test_builder_pseudo_function_selector_redact(
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.REDACT,
-        kwargs=RedactArgs(replacement_string="test"),
+        kwargs=RedactArgs(placeholder="test"),
     )
     Pseudonymize.from_polars(df_personer).on_fields("fnr").with_custom_function(
         pseudo_func
