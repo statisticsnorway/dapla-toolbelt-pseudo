@@ -101,6 +101,10 @@ nox --session=tests
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest] testing framework.
 
+Integration tests are located in _tests/integration_,
+and require the `@integration_test` decorator and `setup` fixture for environment-specific configurations.
+To run the tests locally, the user must either be part of the `pseudo-service-admin-t@ssb.no` group or included in the [admin list](https://github.com/statisticsnorway/platform-dev/blob/43b8620bc3628d5f30a6598755a05078a4a715c9/flux/staging-bip-app/dapla/dapla-pseudo-service/dapla-pseudo-service.yaml#L245) for the service in staging.
+
 ## How to submit changes
 
 Open a [pull request] to submit changes to this project.
