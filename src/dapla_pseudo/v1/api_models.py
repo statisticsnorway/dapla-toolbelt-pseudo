@@ -39,7 +39,7 @@ class Field(APIModel):
     """
 
     pattern: str
-    mapping: t.Optional[str] = None
+    mapping: str | None = None
 
 
 class PseudoKeyset(APIModel):
@@ -81,9 +81,9 @@ class KeyWrapper(BaseModel):
     """Hold information about a key, such as ID and keyset information."""
 
     key_id: str = ""
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
-    def __init__(self, key: t.Optional[str | PseudoKeyset] = None, **kwargs: t.Any):
+    def __init__(self, key: str | PseudoKeyset | None = None, **kwargs: t.Any) -> None:
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
@@ -111,7 +111,7 @@ class KeyWrapper(BaseModel):
             self.key_id = key.get_key_id()
             self.keyset = key
 
-    def keyset_list(self) -> t.Optional[list[PseudoKeyset]]:
+    def keyset_list(self) -> list[PseudoKeyset] | None:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]
 
@@ -142,8 +142,8 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
-    snapshot_date: t.Optional[date] = None
-    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
+    snapshot_date: date | None = None
+    strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
@@ -156,7 +156,7 @@ class FF31KeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'FF31' function."""
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
-    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
+    strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
 
 
 class RedactArgs(PseudoFunctionArgs):
@@ -210,7 +210,7 @@ class PseudoRule(APIModel):
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
     """
 
-    name: t.Optional[str] = None
+    name: str | None = None
     pattern: str
     func: PseudoFunction
 
@@ -228,7 +228,7 @@ class PseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
 
 class DepseudoFieldRequest(APIModel):
@@ -237,7 +237,7 @@ class DepseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
 
 class RepseudoFieldRequest(APIModel):
@@ -247,33 +247,33 @@ class RepseudoFieldRequest(APIModel):
     target_pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    source_keyset: t.Optional[PseudoKeyset] = None
-    target_keyset: t.Optional[PseudoKeyset] = None
+    source_keyset: PseudoKeyset | None = None
+    target_keyset: PseudoKeyset | None = None
 
 
 class PseudoConfig(APIModel):
     """PseudoConfig is a container for rules and keysets."""
 
     rules: list[PseudoRule]
-    keysets: t.Optional[list[PseudoKeyset]] = None
+    keysets: list[PseudoKeyset] | None = None
 
 
 class PseudonymizeFileRequest(APIModel):
     """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None
 
 
 class DepseudonymizeFileRequest(APIModel):
     """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None
 
 
 class RepseudonymizeFileRequest(APIModel):
@@ -281,6 +281,6 @@ class RepseudonymizeFileRequest(APIModel):
 
     source_pseudo_config: PseudoConfig
     target_pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None

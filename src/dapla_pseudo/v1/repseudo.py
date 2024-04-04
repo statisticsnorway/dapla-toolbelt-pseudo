@@ -5,7 +5,6 @@ import typing as t
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
-from typing import Optional
 
 import pandas as pd
 import polars as pl
@@ -90,8 +89,8 @@ class Repseudonymize:
 
         def __init__(
             self,
-            source_rules: t.Optional[list[PseudoRule]] = None,
-            target_rules: t.Optional[list[PseudoRule]] = None,
+            source_rules: list[PseudoRule] | None = None,
+            target_rules: list[PseudoRule] | None = None,
         ) -> None:
             """Initialize the class."""
             if source_rules is None or target_rules is None:
@@ -107,8 +106,8 @@ class Repseudonymize:
                 Repseudonymize._Repseudonymizer.source_rules.extend(source_rules)
                 Repseudonymize._Repseudonymizer.target_rules.extend(target_rules)
 
-            self._source_pseudo_keyset: Optional[PseudoKeyset | str] = None
-            self._target_pseudo_keyset: Optional[PseudoKeyset | str] = None
+            self._source_pseudo_keyset: PseudoKeyset | str | None = None
+            self._target_pseudo_keyset: PseudoKeyset | str | None = None
             self._timeout: int
             self._pseudo_client: PseudoClient = PseudoClient(
                 pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
@@ -123,8 +122,8 @@ class Repseudonymize:
 
         def run(
             self,
-            custom_source_keyset: Optional[PseudoKeyset | str] = None,
-            custom_target_keyset: Optional[PseudoKeyset | str] = None,
+            custom_source_keyset: PseudoKeyset | str | None = None,
+            custom_target_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
@@ -252,7 +251,7 @@ class Repseudonymize:
                         target_rule.func,
                     )
                     for (source_rule, target_rule) in zip(
-                        self.source_rules, self.target_rules
+                        self.source_rules, self.target_rules, strict=False
                     )
                 ]
                 # Wait for the futures to finish, then add each field to pseudonymized_field map
@@ -270,7 +269,7 @@ class Repseudonymize:
             )
 
     class _RepseudoFuncSelectorSource(_RuleConstructor):
-        def __init__(self, fields: list[str]):
+        def __init__(self, fields: list[str]) -> None:
             dataset_type: t.Literal["dataframe", "file"] = (
                 "dataframe"
                 if isinstance(Repseudonymize.dataset, pl.DataFrame)
@@ -281,8 +280,8 @@ class Repseudonymize:
 
         def from_stable_id(
             self,
-            sid_snapshot_date: t.Optional[str | date] = None,
-            custom_key: t.Optional[PredefinedKeys | str] = None,
+            sid_snapshot_date: str | date | None = None,
+            custom_key: PredefinedKeys | str | None = None,
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
             """Claim that the selected fields were mapped to Stable ID, then pseudonymized with PAPIS-compatible encryption.
 
@@ -301,7 +300,7 @@ class Repseudonymize:
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
         def from_default_encryption(
-            self, custom_key: t.Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
             """Claim that the selected fields were pseudonymized with default encryption.
 
@@ -316,7 +315,7 @@ class Repseudonymize:
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
         def from_papis_compatible_encryption(
-            self, custom_key: t.Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
             """Claim that the selected fields were pseudonymized with PAPIS-compatible encryption.
 
@@ -338,7 +337,7 @@ class Repseudonymize:
             return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
 
     class _RepseudoFuncSelectorTarget(_RuleConstructor):
-        def __init__(self, fields: list[str], source_rules: list[PseudoRule]):
+        def __init__(self, fields: list[str], source_rules: list[PseudoRule]) -> None:
             self.source_rules = source_rules
 
             dataset_type: t.Literal["dataframe", "file"] = (
@@ -350,8 +349,8 @@ class Repseudonymize:
 
         def to_stable_id(
             self,
-            sid_snapshot_date: t.Optional[str | date] = None,
-            custom_key: t.Optional[PredefinedKeys | str] = None,
+            sid_snapshot_date: str | date | None = None,
+            custom_key: PredefinedKeys | str | None = None,
         ) -> "Repseudonymize._Repseudonymizer":
             """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
 
@@ -372,7 +371,7 @@ class Repseudonymize:
             return Repseudonymize._Repseudonymizer(self.source_rules, rules)
 
         def to_default_encryption(
-            self, custom_key: t.Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Repseudonymize._Repseudonymizer":
             """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -387,7 +386,7 @@ class Repseudonymize:
             return Repseudonymize._Repseudonymizer(self.source_rules, rules)
 
         def to_papis_compatible_encryption(
-            self, custom_key: t.Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Repseudonymize._Repseudonymizer":
             """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 

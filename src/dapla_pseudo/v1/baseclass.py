@@ -22,8 +22,8 @@ class _RuleConstructor:
 
     def _map_to_stable_id_and_pseudonymize(
         self,
-        sid_snapshot_date: t.Optional[str | date] = None,
-        custom_key: t.Optional[PredefinedKeys | str] = None,
+        sid_snapshot_date: str | date | None = None,
+        custom_key: PredefinedKeys | str | None = None,
     ) -> list[PseudoRule]:
         kwargs = (
             MapSidKeywordArgs(
@@ -39,7 +39,7 @@ class _RuleConstructor:
         return self._rule_constructor(pseudo_func)
 
     def _with_daead_encryption(
-        self, custom_key: t.Optional[PredefinedKeys | str] = None
+        self, custom_key: PredefinedKeys | str | None = None
     ) -> list[PseudoRule]:
         kwargs = (
             DaeadKeywordArgs(key_id=custom_key) if custom_key else DaeadKeywordArgs()
@@ -50,7 +50,7 @@ class _RuleConstructor:
         return self._rule_constructor(pseudo_func)
 
     def _with_ff31_encryption(
-        self, custom_key: t.Optional[PredefinedKeys | str] = None
+        self, custom_key: PredefinedKeys | str | None = None
     ) -> list[PseudoRule]:
         kwargs = FF31KeywordArgs(key_id=custom_key) if custom_key else FF31KeywordArgs()
         pseudo_func = PseudoFunction(
