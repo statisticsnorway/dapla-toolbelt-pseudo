@@ -159,17 +159,11 @@ class FF31KeywordArgs(PseudoFunctionArgs):
     strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
 
 
-class RedactArgs(PseudoFunctionArgs):
+class RedactKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'redact' function."""
 
-    replacement_string: str
-
-    def __str__(self) -> str:
-        """Overload the parent class. The redact function is expected as an arg, not kwarg.
-
-        I.e. 'redact(<replacement_string>)'
-        """
-        return self.replacement_string
+    placeholder: t.Optional[str] = None
+    regex: t.Optional[str] = None
 
 
 class PseudoFunction(BaseModel):
@@ -183,7 +177,7 @@ class PseudoFunction(BaseModel):
     """
 
     function_type: PseudoFunctionTypes
-    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
+    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
