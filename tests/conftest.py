@@ -86,25 +86,8 @@ def df_personer_fnr_ff31_encrypted() -> pl.DataFrame:
 
 
 @pytest.fixture
-def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
-    CSV_FILE = (
-        "tests/data/personer_pseudonymized_default_encryption_ssb_common_key_2.csv"
-    )
-    return pl.read_csv(
-        CSV_FILE,
-        schema={
-            "fnr": pl.String,
-            "fornavn": pl.String,
-            "etternavn": pl.String,
-            "kjonn": pl.String,
-            "fodselsdato": pl.String,
-        },
-    )
-
-
-@pytest.fixture
-def df_personer_pseudo_stable_id() -> pl.DataFrame:
-    JSON_FILE = "tests/data/person_3_sid_deid.json"
+def df_personer_daead_encrypted_ssb_common_key_1() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_pseudonymized_daead_ssb_common_key_1.json"
     return pl.read_json(
         JSON_FILE,
         schema={
@@ -118,8 +101,23 @@ def df_personer_pseudo_stable_id() -> pl.DataFrame:
 
 
 @pytest.fixture
-def df_personer_depseudo_stable_id() -> pl.DataFrame:
-    JSON_FILE = "tests/data/person_3_sid.json"
+def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_pseudonymized_daead_ssb_common_key_2.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest.fixture
+def df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_pseudonymized_sid_daead_ssb_common_key_2.json"
     return pl.read_json(
         JSON_FILE,
         schema={
