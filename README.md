@@ -202,7 +202,6 @@ df = (
     .run()                                         # Apply pseudonymization to the selected field
     .to_polars()                                            # Get the result as a polars dataframe
 )
-pseudonymize(file_path="./data/personer.json", fields=["fnr", "fornavn"], key="ssb-common-key-1")
 
 # Pseudonymize a local file using a custom keyset:
 import json
@@ -234,8 +233,7 @@ df = (
 ### Depseudonymize
 
 The "Depseudonymize" functions are almost exactly the same as when pseudonymizing.
-The only difference being the lack of a "with_stable_id()"-function.
-This is to say, that you cannot map from Stable ID *back to* FNR as of Jan 2023.
+User can map from Stable ID *back to* FNR.
 
 ```python
 from dapla_pseudo import Depseudonymize
@@ -262,18 +260,48 @@ result_df = (
     .run()                                         # Apply depseudonymization to the selected fields
     .to_polars()                                   # Get the result as a polars dataframe
 )
+
+# Example: Depseudonymize Fnr field with SID mapping
+result_df = (
+    Depseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fnr")                              # Select fnr field to depseudonymize
+    .with_stable_id()                              # Select the depseudonymization method (SID mapping) to apply
+    .run()                                         # Apply depseudonymization to the selected fields
+    .to_polars()                                   # Get the result as a polars dataframe
+)
+
 ```
 
 
 _Note that depseudonymization requires elevated access privileges._
 
 ### Repseudonymize
+Repseudonymize can either 1) Change the algorithm used to pseudonymize, and/or 2)
+change the key used in pseudonymization, while keeping the algorithm.
 
 ```python
-
-## TODO
+# Example: Repseudonymize from PAPIS-compatible encryption to Stable ID
+result_df = (
+    Repseudonymize.from_polars(df)                 # Specify what dataframe to use
+    .on_fields("fnr")                              # Select the field to pseudonymize
+    .from_papis_compatible_encryption()            # Select the pseudonymization algorithm previously used
+    .to_stable_id()                                # Select the new pseudonymization rule
+    .run()                                         # Apply pseudonymization to the selected field
+    .to_polars()                                   # Get the result as a polars dataframe
+)
 ```
 
+```python
+# Example: Repseudonymize with the same algorithm, but with a different key
+result_df = (
+    Repseudonymize.from_polars(df)                     # Specify what dataframe to use
+    .on_fields("fnr")                                  # Select the field to pseudonymize
+    .from_papis_compatible_encryption()                # Select the pseudonymization algorithm previously used
+    .to_papis_compatible_encryption(key_id="some-key") # Select the new pseudonymization rule
+    .run()                                             # Apply pseudonymization to the selected field
+    .to_polars()                                       # Get the result as a polars dataframe
+)
+```
 ### Datadoc
 
 Datadoc metadata is gathered while pseudonymizing, and can be seen like so:

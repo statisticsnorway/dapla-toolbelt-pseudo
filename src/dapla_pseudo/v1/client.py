@@ -13,11 +13,12 @@ from ulid import ULID
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.v1.api_models import DepseudoFieldRequest
 from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoFieldRequest
 from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.api_models import RepseudoFieldRequest
 from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
 
 
@@ -105,24 +106,12 @@ class PseudoClient:
     def _post_to_field_endpoint(
         self,
         path: str,
-        field_name: str,
-        values: list[str],
-        pseudo_func: t.Optional[PseudoFunction],
+        pseudo_field_request: (
+            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+        ),
         timeout: int,
-        keyset: t.Optional[PseudoKeyset] = None,
         stream: bool = False,
     ) -> requests.Response:
-        request: dict[str, t.Any] = {
-            "request": {
-                "name": field_name,
-                "values": values,
-                "pseudoFunc": str(pseudo_func),
-            }
-        }
-        if keyset:
-            print(keyset.model_dump(by_alias=True))
-            request["request"]["keyset"] = keyset.model_dump(by_alias=True)
-
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
             headers={
@@ -130,7 +119,7 @@ class PseudoClient:
                 "Content-Type": Mimetypes.JSON.value,
                 "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
-            json=request,
+            json={"request": pseudo_field_request.model_dump_json(by_alias=True)},
             stream=stream,
             timeout=timeout,
         )
