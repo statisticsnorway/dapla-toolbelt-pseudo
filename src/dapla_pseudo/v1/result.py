@@ -67,14 +67,13 @@ class Result:
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
-                pseudo_variable = self._datadoc_from_raw_metadata_fields(
-                    file_metadata.datadoc
+                pseudo_variables = list(
+                    PseudoVariable.model_validate(item)
+                    for item in file_metadata.datadoc
                 )
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationMetadata(
-                        pseudo_variables=(
-                            [pseudo_variable] if pseudo_variable is not None else []
-                        )
+                        pseudo_variables=pseudo_variables
                     )
                 )
 

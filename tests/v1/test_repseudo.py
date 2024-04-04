@@ -153,13 +153,13 @@ def test_builder_repseudo_function_selector_with_sid(
     )
 
 
-@patch(f"{PKG}.pseudo_operation_file")
+@patch(f"{PKG}.pseudo_operation_dataset")
 def test_builder_file_default(
-    patched_pseudo_operation_file: MagicMock, personer_pseudonymized_file_path: str
+    patched_pseudo_operation_dataset: MagicMock, personer_pseudonymized_file_path: str
 ) -> None:
     mock_pseudo_file_response = Mock()
     mock_pseudo_file_response.data = File(file_handle=Mock(), content_type=Mock())
-    patched_pseudo_operation_file.return_value = mock_pseudo_file_response
+    patched_pseudo_operation_dataset.return_value = mock_pseudo_file_response
 
     Repseudonymize.from_file(personer_pseudonymized_file_path).on_fields(
         "fornavn"
@@ -186,19 +186,18 @@ def test_builder_file_default(
         compression=None,
     )
     file_dataset = t.cast(File, Repseudonymize.dataset)
-    patched_pseudo_operation_file.assert_called_once_with(
-        file_handle=file_dataset.file_handle,
+    patched_pseudo_operation_dataset.assert_called_once_with(
+        dataset_ref=file_dataset,
         pseudo_operation_request=repseudonymize_request,
-        input_content_type=Mimetypes.JSON,
     )
 
 
-@patch(f"{PKG}.pseudo_operation_file")
+@patch(f"{PKG}.pseudo_operation_dataset")
 def test_builder_file_hierarchical(
-    patched_pseudo_operation_file: MagicMock,
+    patched_pseudo_operation_dataset: MagicMock,
     personer_pseudonymized_hierarch_file_path: str,
 ) -> None:
-    patched_pseudo_operation_file.return_value = Mock()
+    patched_pseudo_operation_dataset.return_value = Mock()
     Repseudonymize.from_file(personer_pseudonymized_hierarch_file_path).on_fields(
         "person_info/fnr"
     ).from_default_encryption().to_default_encryption().run()
@@ -223,10 +222,9 @@ def test_builder_file_hierarchical(
         compression=None,
     )
     file_dataset = t.cast(File, Repseudonymize.dataset)
-    patched_pseudo_operation_file.assert_called_once_with(
-        file_handle=file_dataset.file_handle,
+    patched_pseudo_operation_dataset.assert_called_once_with(
+        dataset_ref=file_dataset,
         pseudo_operation_request=repseudonymize_request,
-        input_content_type=Mimetypes.JSON,
     )
 
 
