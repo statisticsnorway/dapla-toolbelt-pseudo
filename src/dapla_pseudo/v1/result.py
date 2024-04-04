@@ -68,7 +68,8 @@ class Result:
                     "metrics": file_metadata.metrics,
                 }
                 pseudo_variables = list(
-                    PseudoVariable.model_validate(item) for item in file_metadata.datadoc
+                    PseudoVariable.model_validate(item)
+                    for item in file_metadata.datadoc
                 )
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationMetadata(
