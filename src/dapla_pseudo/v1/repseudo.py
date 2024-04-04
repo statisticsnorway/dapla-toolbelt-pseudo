@@ -28,7 +28,7 @@ from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
 from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
-from dapla_pseudo.v1.pseudo_commons import pseudo_operation_file
+from dapla_pseudo.v1.pseudo_commons import pseudo_operation_dataset
 from dapla_pseudo.v1.pseudo_commons import pseudonymize_operation_field
 from dapla_pseudo.v1.result import Result
 
@@ -186,10 +186,9 @@ class Repseudonymize:
                 compression=None,
             )
 
-            pseudo_response: PseudoFileResponse = pseudo_operation_file(
-                file_handle=file.file_handle,
+            pseudo_response: PseudoFileResponse = pseudo_operation_dataset(
+                dataset_ref=file,
                 pseudo_operation_request=pseudonymize_request,
-                input_content_type=file.content_type,
             )
 
             return Result(pseudo_response=pseudo_response)

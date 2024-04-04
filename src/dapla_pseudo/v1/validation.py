@@ -10,6 +10,7 @@ import pandas as pd
 import polars as pl
 import requests
 
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.client import _client
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
@@ -114,7 +115,7 @@ class Validator:
             response: requests.Response = _client()._post_to_sid_endpoint(
                 "sid/lookup/batch",
                 self._dataframe[self._field].to_list(),
-                sid_snapshot_date,
+                convert_to_date(sid_snapshot_date),
                 stream=True,
             )
             # The response content is received as a buffered byte stream from the server.

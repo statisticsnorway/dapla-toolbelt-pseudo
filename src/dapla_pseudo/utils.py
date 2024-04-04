@@ -33,7 +33,10 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
 
 
 def convert_to_date(sid_snapshot_date: date | str | None) -> date | None:
-    """Converts the SID version date to the 'date' type."""
+    """Converts the SID version date to the 'date' type, if it is a string.
+
+    If None, simply passes the None through the function.
+    """
     if isinstance(sid_snapshot_date, str):
         try:
             return date.fromisoformat(sid_snapshot_date)

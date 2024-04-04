@@ -131,7 +131,7 @@ class PseudoClient:
         self,
         path: str,
         values: list[str],
-        sid_snapshot_date: str | date | None = None,
+        sid_snapshot_date: date | None = None,
         stream: bool = False,
     ) -> requests.Response:
         request: dict[str, t.Collection[str]] = {"fnrList": values}
