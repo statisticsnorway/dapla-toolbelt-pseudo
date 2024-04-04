@@ -24,7 +24,7 @@ from dapla_pseudo.v1.api_models import PseudoConfig
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudoRule
-from dapla_pseudo.v1.api_models import RedactArgs
+from dapla_pseudo.v1.api_models import RedactKeywordArgs
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.depseudo import Depseudonymize
 from dapla_pseudo.v1.pseudo_commons import File
@@ -299,7 +299,7 @@ def test_builder_pseudo_function_selector_redact(
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.REDACT,
-        kwargs=RedactArgs(placeholder="test"),
+        kwargs=RedactKeywordArgs(placeholder="test"),
     )
     Depseudonymize.from_polars(df_personer).on_fields("fnr").with_custom_function(
         pseudo_func

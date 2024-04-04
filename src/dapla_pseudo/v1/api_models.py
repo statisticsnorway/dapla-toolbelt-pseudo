@@ -159,7 +159,7 @@ class FF31KeywordArgs(PseudoFunctionArgs):
     strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
 
 
-class RedactArgs(PseudoFunctionArgs):
+class RedactKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'redact' function."""
 
     placeholder: t.Optional[str] = None
@@ -177,7 +177,7 @@ class PseudoFunction(BaseModel):
     """
 
     function_type: PseudoFunctionTypes
-    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
+    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
