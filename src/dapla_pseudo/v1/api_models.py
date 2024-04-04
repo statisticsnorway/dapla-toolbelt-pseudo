@@ -162,8 +162,8 @@ class FF31KeywordArgs(PseudoFunctionArgs):
 class RedactKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'redact' function."""
 
-    placeholder: t.Optional[str] = None
-    regex: t.Optional[str] = None
+    placeholder: str | None = None
+    regex: str | None = None
 
 
 class PseudoFunction(BaseModel):
