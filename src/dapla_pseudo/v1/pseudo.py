@@ -4,7 +4,6 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
-from typing import Optional
 
 import pandas as pd
 import polars as pl
@@ -95,10 +94,10 @@ class Pseudonymize:
     class _Pseudonymizer:
         """Select one or multiple fields to be pseudonymized."""
 
-        def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
+        def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
             self._rules: list[PseudoRule] = [] if rules is None else rules
-            self._pseudo_keyset: Optional[PseudoKeyset | str] = None
+            self._pseudo_keyset: PseudoKeyset | str | None = None
             self._timeout: int = TIMEOUT_DEFAULT
             self._pseudo_client: PseudoClient = PseudoClient(
                 pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
@@ -115,7 +114,7 @@ class Pseudonymize:
 
         def run(
             self,
-            custom_keyset: Optional[PseudoKeyset | str] = None,
+            custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
@@ -239,15 +238,15 @@ class Pseudonymize:
 
     class _PseudoFuncSelector:
         def __init__(
-            self, fields: list[str], rules: Optional[list[PseudoRule]] = None
+            self, fields: list[str], rules: list[PseudoRule] | None = None
         ) -> None:
             self._fields = fields
             self._existing_rules = [] if rules is None else rules
 
         def with_stable_id(
             self,
-            sid_snapshot_date: Optional[str | date] = None,
-            custom_key: Optional[PredefinedKeys | str] = None,
+            sid_snapshot_date: str | date | None = None,
+            custom_key: PredefinedKeys | str | None = None,
         ) -> "Pseudonymize._Pseudonymizer":
             """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
 
@@ -276,7 +275,7 @@ class Pseudonymize:
             return self._rule_constructor(function)
 
         def with_default_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Pseudonymize._Pseudonymizer":
             """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -298,7 +297,7 @@ class Pseudonymize:
             return self._rule_constructor(function)
 
         def with_papis_compatible_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Pseudonymize._Pseudonymizer":
             """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 

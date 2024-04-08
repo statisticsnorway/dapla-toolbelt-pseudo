@@ -44,7 +44,7 @@ furo = ">=2021.11.12"
 mypy = ">=0.930"
 pre-commit = ">=2.16.0"
 pre-commit-hooks = ">=4.1.0"
-ruff = ">=0.0.284"
+ruff = ">=0.3.1"
 pytest = ">=6.2.5"
 sphinx = ">=6.2.1"
 sphinx-autobuild = ">=2021.3.14"
@@ -72,6 +72,7 @@ tests = ["tests", "*/tests"]
 [tool.coverage.run]
 branch = true
 source = ["dapla_pseudo", "tests"]
+relative_files = true
 
 [tool.coverage.report]
 show_missing = true
@@ -104,11 +105,21 @@ ignore_missing_imports = true
 force-exclude = true  # Apply excludes to pre-commit
 show-fixes = true
 src = ["src", "tests"]
-target-version = "py39"  # Minimum Python version supported
+target-version = "py310"  # Minimum Python version supported
+include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
+extend-exclude = [
+    "__pycache__",
+    "old",
+    ".ipynb_checkpoints",
+    "noxfile.py",
+    "docs/conf.py",
+]
 
 # Ruff rules may be customized as desired: https://docs.astral.sh/ruff/rules/
+[tool.ruff.lint]
 select = [
     "A",    # prevent using keywords that clobber python builtins
+    "ANN",  # check type annotations
     "B",    # bugbear: security warnings
     "D",    # documentation
     "E",    # pycodestyle
@@ -120,32 +131,27 @@ select = [
 ]
 ignore = [
     "ANN101", # Supress missing-type-self.
+    "ANN102", # Supress missing-type-cls.
+    "ANN202", # Don't require return type annotation for private functions.
+    "ANN401", # Allow type annotation with type Any.
     "D100",   # Supress undocumented-public-module. Only doc of public api required.
     "E402",   # Supress module-import-not-at-top-of-file, needed in jupyter notebooks.
     "E501",   # Supress line-too-long warnings: trust black's judgement on this one.
 ]
-include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
-extend-exclude = [
-    "__pycache__",
-    "old",
-    ".ipynb_checkpoints",
-    "noxfile.py",
-    "docs/conf.py",
-]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 force-single-line = true
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 15
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"  # You can also use "numpy".
 
-[tool.ruff.pep8-naming]
+[tool.ruff.lint.pep8-naming]
 classmethod-decorators = ["classmethod", "validator", "root_validator", "pydantic.validator"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "*/__init__.py" = ["F401"]
 "**/tests/*" = [
     # asserts are encouraged in pytest
@@ -153,8 +159,10 @@ classmethod-decorators = ["classmethod", "validator", "root_validator", "pydanti
     # return annotations don't add value for test functions
     "ANN201",
     # docstrings are overkill for test functions
-    "D103",
     "D100",
+    "D101",
+    "D102",
+    "D103",
 ]
 "tests/integration/*" = ["F401", "F811"]
 

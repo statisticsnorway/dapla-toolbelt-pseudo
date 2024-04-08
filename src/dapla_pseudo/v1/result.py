@@ -196,7 +196,7 @@ class Result:
     def _datadoc_from_raw_metadata_fields(
         self,
         raw_metadata: list[dict[str, Any]],
-    ) -> t.Optional[PseudoVariable]:
+    ) -> PseudoVariable | None:
         if len(raw_metadata) == 0:
             return None
         elif len(raw_metadata) > 1:

@@ -5,7 +5,6 @@ from collections.abc import Sequence
 from datetime import date
 from pathlib import Path
 from typing import Any
-from typing import Optional
 
 import pandas as pd
 import polars as pl
@@ -78,7 +77,7 @@ class Validator:
     class _FieldSelector:
         """Select a field to be validated."""
 
-        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame):
+        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame) -> None:
             """Initialize the class."""
             self._dataframe: pl.DataFrame
             if isinstance(dataframe, pd.DataFrame):
@@ -102,7 +101,7 @@ class Validator:
             self._field: str = field
 
         def validate_map_to_stable_id(
-            self, sid_snapshot_date: Optional[str | date] = None
+            self, sid_snapshot_date: str | date | None = None
         ) -> Result:
             """Checks if all the selected fields can be mapped to a stable ID.
 

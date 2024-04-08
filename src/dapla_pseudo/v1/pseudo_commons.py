@@ -58,7 +58,7 @@ def get_file_data_from_dataset(
     Returns:
         tuple[BinaryFileDecl, Mimetypes]: A tuple of (file handle, content type)
     """
-    file_handle: t.Optional[BinaryFileDecl] = None
+    file_handle: BinaryFileDecl | None = None
     match dataset:
         case str() | Path():
             # File path
@@ -145,7 +145,7 @@ class RawPseudoMetadata:
     logs: list[str]
     metrics: list[str]
     datadoc: list[dict[str, t.Any]]
-    field_name: t.Optional[str] = None
+    field_name: str | None = None
 
 
 @dataclass
