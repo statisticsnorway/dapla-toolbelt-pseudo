@@ -5,12 +5,12 @@ from collections.abc import Sequence
 from datetime import date
 from pathlib import Path
 from typing import Any
-from typing import Optional
 
 import pandas as pd
 import polars as pl
 import requests
 
+from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.client import _client
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
@@ -77,7 +77,7 @@ class Validator:
     class _FieldSelector:
         """Select a field to be validated."""
 
-        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame):
+        def __init__(self, dataframe: pd.DataFrame | pl.DataFrame) -> None:
             """Initialize the class."""
             self._dataframe: pl.DataFrame
             if isinstance(dataframe, pd.DataFrame):
@@ -101,7 +101,7 @@ class Validator:
             self._field: str = field
 
         def validate_map_to_stable_id(
-            self, sid_snapshot_date: Optional[str | date] = None
+            self, sid_snapshot_date: str | date | None = None
         ) -> Result:
             """Checks if all the selected fields can be mapped to a stable ID.
 
@@ -115,7 +115,7 @@ class Validator:
             response: requests.Response = _client()._post_to_sid_endpoint(
                 "sid/lookup/batch",
                 self._dataframe[self._field].to_list(),
-                sid_snapshot_date,
+                convert_to_date(sid_snapshot_date),
                 stream=True,
             )
             # The response content is received as a buffered byte stream from the server.

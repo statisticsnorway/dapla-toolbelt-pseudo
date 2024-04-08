@@ -6,7 +6,7 @@ from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import KeyWrapper
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
-from dapla_pseudo.v1.models.core import RedactArgs
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 
 TEST_FILE_PATH = "tests/v1/test_files"
 
@@ -70,10 +70,10 @@ def test_pseudo_function() -> None:
 
 
 def test_redact_function() -> None:
-    assert "redact(test)" == str(
+    assert "redact(placeholder=#)" == str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.REDACT,
-            kwargs=RedactArgs(replacement_string="test"),
+            kwargs=RedactKeywordArgs(placeholder="#"),
         )
     )
 

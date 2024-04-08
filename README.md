@@ -116,7 +116,6 @@ A `sid_snapshot_date` can also be specified to validate that the field values ca
 
 ```python
 from dapla_pseudo import Validator
-from dapla_pseudo.utils import convert_to_date
 import polars as pl
 
 file_path="data/personer.csv"
@@ -128,7 +127,7 @@ result = (
     Validator.from_polars(df)
     .on_field("fnr")
     .validate_map_to_stable_id(
-        sid_snapshot_date=convert_to_date("2023-08-29")
+        sid_snapshot_date="2023-08-29"
     )
 )
 # Show metadata about the validation (e.g. which version of the SID catalog was used)

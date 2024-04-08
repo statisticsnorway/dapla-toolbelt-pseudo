@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 
+import polars as pl
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
@@ -37,6 +38,13 @@ class File:
     content_type: Mimetypes
 
 
+@dataclass
+class HierarchicalDataFrame:
+    """HierarchicalDataset holds a hierarchical dataframe."""
+
+    contents: pl.DataFrame
+
+
 class PseudoFunctionArgs(BaseModel):
     """Representation of the possible keyword arguments."""
 
@@ -51,26 +59,6 @@ class PseudoFunctionArgs(BaseModel):
     model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
 
 
-class RedactArgs(PseudoFunctionArgs):
-    """Representation of kwargs for the 'redact' function."""
-
-    replacement_string: str
-
-    def __str__(self) -> str:
-        """Overload the parent class. The redact function is expected as an arg, not kwarg.
-
-        I.e. 'redact(<replacement_string>)'
-        """
-        return self.replacement_string
-
-
-class FF31KeywordArgs(PseudoFunctionArgs):
-    """Representation of kwargs for the 'FF31' function."""
-
-    key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
-    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
-
-
 class MapSidKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'map-sid' function.
 
@@ -83,14 +71,28 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
-    snapshot_date: t.Optional[date] = None
-    strategy: t.Optional[UnknownCharacterStrategy] = UnknownCharacterStrategy.SKIP
+    snapshot_date: date | None = None
+    strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'daead' function."""
 
     key_id: PredefinedKeys | str = PredefinedKeys.SSB_COMMON_KEY_1
+
+
+class FF31KeywordArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'FF31' function."""
+
+    key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
+    strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
+
+
+class RedactKeywordArgs(PseudoFunctionArgs):
+    """Representation of kwargs for the 'redact' function."""
+
+    placeholder: str | None = None
+    regex: str | None = None
 
 
 class PseudoFunction(BaseModel):
@@ -104,7 +106,7 @@ class PseudoFunction(BaseModel):
     """
 
     function_type: PseudoFunctionTypes
-    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactArgs
+    kwargs: DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs
 
     def __str__(self) -> str:
         """Create the function representation as expected by pseudo service."""
@@ -131,7 +133,7 @@ class PseudoRule(APIModel):
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
     """
 
-    name: t.Optional[str] = None
+    name: str | None = None
     pattern: str
     func: PseudoFunction
 
@@ -176,7 +178,7 @@ class PseudoConfig(APIModel):
     """PseudoConfig is a container for rules and keysets."""
 
     rules: list[PseudoRule]
-    keysets: t.Optional[list[PseudoKeyset]] = None
+    keysets: list[PseudoKeyset] | None = None
 
 
 class TargetCompression(APIModel):
@@ -189,9 +191,9 @@ class KeyWrapper(BaseModel):
     """Hold information about a key, such as ID and keyset information."""
 
     key_id: str = ""
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
-    def __init__(self, key: t.Optional[str | PseudoKeyset] = None, **kwargs: t.Any):
+    def __init__(self, key: str | PseudoKeyset | None = None, **kwargs: t.Any) -> None:
         """Determine if a key is either a key reference (aka "common key") or a keyset.
 
         If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
@@ -219,6 +221,6 @@ class KeyWrapper(BaseModel):
             self.key_id = key.get_key_id()
             self.keyset = key
 
-    def keyset_list(self) -> t.Optional[list[PseudoKeyset]]:
+    def keyset_list(self) -> list[PseudoKeyset] | None:
         """Wrap the keyset in a list if it is defined - or return None if it is not."""
         return None if self.keyset is None else [self.keyset]

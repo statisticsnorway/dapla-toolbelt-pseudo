@@ -1,7 +1,6 @@
 """Builder for submitting a pseudonymization request."""
 
 from datetime import date
-from typing import Optional
 
 import pandas as pd
 import polars as pl
@@ -71,10 +70,10 @@ class Depseudonymize:
     class _Depseudonymizer(_BasePseudonymizer):
         """Select one or multiple fields to be pseudonymized."""
 
-        def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
+        def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
             self.rules: list[PseudoRule] = [] if rules is None else rules
-            self._pseudo_keyset: Optional[PseudoKeyset | str] = None
+            self._pseudo_keyset: PseudoKeyset | str | None = None
             super().__init__(
                 pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
                 dataset=Depseudonymize.dataset,
@@ -86,7 +85,7 @@ class Depseudonymize:
 
         def run(
             self,
-            custom_keyset: Optional[PseudoKeyset | str] = None,
+            custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Depseudonymize the dataset.
@@ -107,15 +106,15 @@ class Depseudonymize:
 
     class _DepseudoFuncSelector(_BaseRuleConstructor):
         def __init__(
-            self, fields: list[str], rules: Optional[list[PseudoRule]] = None
+            self, fields: list[str], rules: list[PseudoRule] | None = None
         ) -> None:
             self._fields = fields
             super().__init__(fields, type(Depseudonymize.dataset))
 
         def with_stable_id(
             self,
-            sid_snapshot_date: Optional[str | date] = None,
-            custom_key: Optional[str] = None,
+            sid_snapshot_date: str | date | None = None,
+            custom_key: str | None = None,
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -137,7 +136,7 @@ class Depseudonymize:
             return Depseudonymize._Depseudonymizer(rules)
 
         def with_default_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -152,7 +151,7 @@ class Depseudonymize:
             return Depseudonymize._Depseudonymizer(rules)
 
         def with_papis_compatible_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 

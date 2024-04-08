@@ -57,8 +57,11 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
         return None
 
 
-def convert_to_date(sid_snapshot_date: t.Optional[date | str]) -> t.Optional[date]:
-    """Converts the SID version date to the 'date' type."""
+def convert_to_date(sid_snapshot_date: date | str | None) -> date | None:
+    """Converts the SID version date to the 'date' type, if it is a string.
+
+    If None, simply passes the None through the function.
+    """
     if isinstance(sid_snapshot_date, str):
         try:
             return date.fromisoformat(sid_snapshot_date)
@@ -85,9 +88,9 @@ def build_pseudo_field_request(
     pseudo_operation: PseudoOperation,
     dataframe: pl.DataFrame,
     rules: list[PseudoRule],  # "source rules" if repseudo
-    custom_keyset: t.Optional[PseudoKeyset | str] = None,
-    target_custom_keyset: t.Optional[PseudoKeyset | str] = None,  # used in repseudo
-    target_rules: t.Optional[list[PseudoRule]] = None,  # used in repseudo)
+    custom_keyset: PseudoKeyset | str | None = None,
+    target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
+    target_rules: list[PseudoRule] | None = None,  # used in repseudo)
 ) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
     """Builds a FieldRequest object."""
     match pseudo_operation:
@@ -122,18 +125,20 @@ def build_pseudo_field_request(
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,
                     )
-                    for source_rule, target_rule in zip(rules, target_rules)
+                    for source_rule, target_rule in zip(
+                        rules, target_rules, strict=False
+                    )
                 ]
             else:
                 raise ValueError("Found no target rules")
 
 
-def build_pseudo_file_request(
+def build_pseudo_dataset_request(
     pseudo_operation: PseudoOperation,
     rules: list[PseudoRule],  # "source rules" if repseudo
-    custom_keyset: t.Optional[PseudoKeyset | str] = None,
-    target_custom_keyset: t.Optional[PseudoKeyset | str] = None,  # used in repseudo
-    target_rules: t.Optional[list[PseudoRule]] = None,  # used in repseudo)
+    custom_keyset: PseudoKeyset | str | None = None,
+    target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
+    target_rules: list[PseudoRule] | None = None,  # used in repseudo)
 ) -> PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest:
     """Builds a file request object."""
     match pseudo_operation:
@@ -193,7 +198,7 @@ def get_file_data_from_dataset(
     Returns:
         tuple[BinaryFileDecl, Mimetypes]: A tuple of (file handle, content type)
     """
-    file_handle: t.Optional[BinaryFileDecl] = None
+    file_handle: BinaryFileDecl | None = None
     match dataset:
         case str() | Path():
             # File path

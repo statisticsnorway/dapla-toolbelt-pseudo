@@ -24,9 +24,9 @@ class PseudoClient:
 
     def __init__(
         self,
-        pseudo_service_url: t.Optional[str] = None,
-        auth_token: t.Optional[str] = None,
-    ):
+        pseudo_service_url: str | None = None,
+        auth_token: str | None = None,
+    ) -> None:
         """Use a default url for dapla-pseudo-service if not explicitly set."""
         self.pseudo_service_url = (
             "http://dapla-pseudo-service.dapla.svc.cluster.local"
@@ -123,7 +123,7 @@ class PseudoClient:
         self,
         path: str,
         values: list[str],
-        sid_snapshot_date: t.Optional[str | date] = None,
+        sid_snapshot_date: date | None = None,
         stream: bool = False,
     ) -> requests.Response:
         request: dict[str, t.Collection[str]] = {"fnrList": values}

@@ -27,7 +27,7 @@ from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
-from dapla_pseudo.v1.models.core import RedactArgs
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.result import Result
 
 PKG = "dapla_pseudo.v1.depseudo"
@@ -143,14 +143,14 @@ def test_builder_depseudo_function_selector_with_sid(
     )
 
 
-@patch(f"{PKG}.pseudo_operation_file")
+@patch(f"{PKG}.pseudo_operation_dataset")
 def test_builder_file_default(
-    patched_pseudo_operation_file: MagicMock, personer_pseudonymized_file_path: str
+    patched_pseudo_operation_dataset: MagicMock, personer_pseudonymized_file_path: str
 ) -> None:
     mock_pseudo_file_response = Mock()
     mock_pseudo_file_response.data = File(file_handle=Mock(), content_type=Mock())
     print(type(mock_pseudo_file_response.data))
-    patched_pseudo_operation_file.return_value = mock_pseudo_file_response
+    patched_pseudo_operation_dataset.return_value = mock_pseudo_file_response
 
     Depseudonymize.from_file(personer_pseudonymized_file_path).on_fields(
         "fornavn"
@@ -175,19 +175,18 @@ def test_builder_file_default(
         compression=None,
     )
     file_dataset = t.cast(File, Depseudonymize.dataset)
-    patched_pseudo_operation_file.assert_called_once_with(
-        file_handle=file_dataset.file_handle,
+    patched_pseudo_operation_dataset.assert_called_once_with(
+        dataset_ref=file_dataset,
         pseudo_operation_request=depseudonymize_request,
-        input_content_type=Mimetypes.JSON,
     )
 
 
-@patch(f"{PKG}.pseudo_operation_file")
+@patch(f"{PKG}.pseudo_operation_dataset")
 def test_builder_file_hierarchical(
-    patched_pseudo_operation_file: MagicMock,
+    patched_pseudo_operation_dataset: MagicMock,
     personer_pseudonymized_hierarch_file_path: str,
 ) -> None:
-    patched_pseudo_operation_file.return_value = Mock()
+    patched_pseudo_operation_dataset.return_value = Mock()
     Depseudonymize.from_file(personer_pseudonymized_hierarch_file_path).on_fields(
         "person_info/fnr"
     ).with_default_encryption().run()
@@ -211,10 +210,9 @@ def test_builder_file_hierarchical(
         compression=None,
     )
     file_dataset = t.cast(File, Depseudonymize.dataset)
-    patched_pseudo_operation_file.assert_called_once_with(
-        file_handle=file_dataset.file_handle,
+    patched_pseudo_operation_dataset.assert_called_once_with(
+        dataset_ref=file_dataset,
         pseudo_operation_request=depseudonymize_request,
-        input_content_type=Mimetypes.JSON,
     )
 
 
@@ -301,7 +299,7 @@ def test_builder_pseudo_function_selector_redact(
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.REDACT,
-        kwargs=RedactArgs(replacement_string="test"),
+        kwargs=RedactKeywordArgs(placeholder="test"),
     )
     Depseudonymize.from_polars(df_personer).on_fields("fnr").with_custom_function(
         pseudo_func

@@ -10,7 +10,6 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
-from typing import Optional
 
 import polars as pl
 import requests
@@ -19,9 +18,10 @@ from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
+from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.utils import build_pseudo_dataset_request
 from dapla_pseudo.utils import build_pseudo_field_request
-from dapla_pseudo.utils import build_pseudo_file_request
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.client import _extract_name
@@ -37,6 +37,7 @@ from dapla_pseudo.v1.models.api import RepseudoFileRequest
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import File
+from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import MapSidKeywordArgs
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
@@ -56,7 +57,9 @@ class _BasePseudonymizer:
     """
 
     def __init__(
-        self, pseudo_operation: PseudoOperation, dataset: File | pl.DataFrame
+        self,
+        pseudo_operation: PseudoOperation,
+        dataset: File | pl.DataFrame | HierarchicalDataFrame,
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
@@ -70,9 +73,9 @@ class _BasePseudonymizer:
         self,
         rules: list[PseudoRule],  # "source rules" if repseudo
         timeout: int,
-        custom_keyset: Optional[PseudoKeyset | str] = None,
-        target_custom_keyset: Optional[PseudoKeyset | str] = None,  # used in repseudo
-        target_rules: Optional[list[PseudoRule]] = None,  # used in repseudo
+        custom_keyset: PseudoKeyset | str | None = None,
+        target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
+        target_rules: list[PseudoRule] | None = None,  # used in repseudo
     ) -> Result:
         if self._dataset is None:
             raise ValueError("No dataset has been provided.")
@@ -94,14 +97,27 @@ class _BasePseudonymizer:
                 )
                 return self._pseudonymize_field(pseudo_requests, timeout)
             case File():
-                pseudo_request = build_pseudo_file_request(
+                pseudo_request = build_pseudo_dataset_request(
                     self._pseudo_operation,
                     rules,
                     custom_keyset,
                     target_custom_keyset,
                     target_rules,
                 )
-                return self._pseudonymize_file(self._dataset, pseudo_request, timeout)
+                return self._pseudonymize_dataset(
+                    self._dataset, pseudo_request, timeout
+                )
+            case HierarchicalDataFrame():
+                pseudo_request = build_pseudo_dataset_request(
+                    self._pseudo_operation,
+                    rules,
+                    custom_keyset,
+                    target_custom_keyset,
+                    target_rules,
+                )
+                return self._pseudonymize_dataset(
+                    self._dataset, pseudo_request, timeout
+                )
 
             case _ as invalid_dataset:
                 raise ValueError(
@@ -163,27 +179,36 @@ class _BasePseudonymizer:
             )
         )
 
-    def _pseudonymize_file(
+    def _pseudonymize_dataset(
         self,
-        file: File,
+        dataset: File | pl.DataFrame,
         pseudo_request: PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest,
         timeout: int,
     ) -> Result:
+        file_handle: BinaryFileDecl
         request_spec: FileSpecDecl = (
             None,
             pseudo_request.to_json(),
             str(Mimetypes.JSON),
         )
 
-        file_name = _extract_name(
-            file_handle=file.file_handle, input_content_type=file.content_type
-        )
-
-        data_spec: FileSpecDecl = (
-            file_name,
-            file.file_handle,
-            str(pseudo_request.target_content_type),
-        )
+        match dataset:
+            case File(_ as file_handle, content_type):
+                file_name = _extract_name(
+                    file_handle=file_handle, input_content_type=content_type
+                )
+                data_spec = (
+                    file_name,
+                    file_handle,
+                    str(pseudo_request.target_content_type),
+                )
+            case pl.DataFrame():
+                file_name = "data.json"
+                data_spec = (
+                    file_name,
+                    json.dumps(dataset.to_dicts()),
+                    str(pseudo_request.target_content_type),
+                )
 
         response = self._pseudo_client._post_to_file_endpoint(
             path=f"{self._pseudo_operation.value}/file",
@@ -193,7 +218,8 @@ class _BasePseudonymizer:
             timeout=timeout,
         )
 
-        file.file_handle.close()
+        if file_handle is not None:
+            file_handle.close()
 
         payload = json.loads(response.content.decode("utf-8"))
         pseudo_data = payload["data"]
@@ -225,8 +251,8 @@ class _BaseRuleConstructor:
 
     def _map_to_stable_id_and_pseudonymize(
         self,
-        sid_snapshot_date: Optional[str | date] = None,
-        custom_key: Optional[PredefinedKeys | str] = None,
+        sid_snapshot_date: str | date | None = None,
+        custom_key: PredefinedKeys | str | None = None,
     ) -> list[PseudoRule]:
         kwargs = (
             MapSidKeywordArgs(
@@ -242,7 +268,7 @@ class _BaseRuleConstructor:
         return self._rule_constructor(pseudo_func)
 
     def _with_daead_encryption(
-        self, custom_key: Optional[PredefinedKeys | str] = None
+        self, custom_key: PredefinedKeys | str | None = None
     ) -> list[PseudoRule]:
         kwargs = (
             DaeadKeywordArgs(key_id=custom_key) if custom_key else DaeadKeywordArgs()
@@ -253,7 +279,7 @@ class _BaseRuleConstructor:
         return self._rule_constructor(pseudo_func)
 
     def _with_ff31_encryption(
-        self, custom_key: Optional[PredefinedKeys | str] = None
+        self, custom_key: PredefinedKeys | str | None = None
     ) -> list[PseudoRule]:
         kwargs = FF31KeywordArgs(key_id=custom_key) if custom_key else FF31KeywordArgs()
         pseudo_func = PseudoFunction(

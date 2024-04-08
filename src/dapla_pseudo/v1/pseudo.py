@@ -1,8 +1,7 @@
 """Builder for submitting a pseudonymization request."""
 
-import typing as t
 from datetime import date
-from typing import Optional
+from typing import ClassVar
 
 import pandas as pd
 import polars as pl
@@ -15,6 +14,7 @@ from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
 from dapla_pseudo.v1.models.core import File
+from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -27,19 +27,25 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame
+    dataset: File | pl.DataFrame | HierarchicalDataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        Pseudonymize.dataset = dataset
+        if pl.Struct in dataset.dtypes:
+            Pseudonymize.dataset = HierarchicalDataFrame(dataset)
+        else:
+            Pseudonymize.dataset = dataset
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        Pseudonymize.dataset = dataframe
+        if pl.Struct in dataframe.dtypes:
+            Pseudonymize.dataset = HierarchicalDataFrame(dataframe)
+        else:
+            Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
@@ -72,9 +78,9 @@ class Pseudonymize:
     class _Pseudonymizer(_BasePseudonymizer):
         """Select one or multiple fields to be pseudonymized."""
 
-        rules: t.ClassVar[list[PseudoRule]] = []
+        rules: ClassVar[list[PseudoRule]] = []
 
-        def __init__(self, rules: Optional[list[PseudoRule]] = None) -> None:
+        def __init__(self, rules: list[PseudoRule] | None) -> None:
             """Initialize the class."""
             super().__init__(
                 pseudo_operation=PseudoOperation.PSEUDONYMIZE,
@@ -89,9 +95,13 @@ class Pseudonymize:
             """Specify one or multiple fields to be pseudonymized."""
             return Pseudonymize._PseudoFuncSelector(list(fields))
 
+        def add_rules(self, *rules: PseudoRule) -> "Pseudonymize._Pseudonymizer":
+            """Specify one or more existing pseudonymization rule."""
+            return Pseudonymize._Pseudonymizer(self.rules + list(rules))
+
         def run(
             self,
-            custom_keyset: Optional[PseudoKeyset | str] = None,
+            custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
@@ -115,8 +125,8 @@ class Pseudonymize:
 
         def with_stable_id(
             self,
-            sid_snapshot_date: Optional[str | date] = None,
-            custom_key: Optional[PredefinedKeys | str] = None,
+            sid_snapshot_date: str | date | None = None,
+            custom_key: PredefinedKeys | str | None = None,
         ) -> "Pseudonymize._Pseudonymizer":
             """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
 
@@ -137,7 +147,7 @@ class Pseudonymize:
             return Pseudonymize._Pseudonymizer(rules)
 
         def with_default_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Pseudonymize._Pseudonymizer":
             """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -152,7 +162,7 @@ class Pseudonymize:
             return Pseudonymize._Pseudonymizer(rules)
 
         def with_papis_compatible_encryption(
-            self, custom_key: Optional[PredefinedKeys | str] = None
+            self, custom_key: PredefinedKeys | str | None = None
         ) -> "Pseudonymize._Pseudonymizer":
             """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 

@@ -67,14 +67,13 @@ class Result:
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
-                pseudo_variable = self._datadoc_from_raw_metadata_fields(
-                    file_metadata.datadoc
+                pseudo_variables = list(
+                    PseudoVariable.model_validate(item)
+                    for item in file_metadata.datadoc
                 )
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationMetadata(
-                        pseudo_variables=(
-                            [pseudo_variable] if pseudo_variable is not None else []
-                        )
+                        pseudo_variables=pseudo_variables
                     )
                 )
 
@@ -197,29 +196,9 @@ class Result:
     def _datadoc_from_raw_metadata_fields(
         self,
         raw_metadata: list[dict[str, Any]],
-    ) -> t.Optional[PseudoVariable]:
-        if len(raw_metadata) == 1:  # Only one element in list if NOT using SID-mapping
-            return PseudoVariable.model_validate(raw_metadata[0])
-        elif len(raw_metadata) == 2 and any(
-            "stable_identifier_type" in pseudo_var for pseudo_var in raw_metadata
-        ):  # SID-mapping
-            sid_metadata = next(
-                pseudo_var
-                for pseudo_var in raw_metadata
-                if "stable_identifier_type" in pseudo_var
-            )
-            encrypt_metadata = next(
-                pseudo_var
-                for pseudo_var in raw_metadata
-                if "stable_identifier_type" not in pseudo_var
-            )
-            pseudo_variable = PseudoVariable.model_validate(encrypt_metadata)
-            pseudo_variable.stable_identifier_type = sid_metadata[
-                "stable_identifier_type"
-            ]
-            pseudo_variable.stable_identifier_version = sid_metadata[
-                "stable_identifier_version"
-            ]
-            return pseudo_variable
-        else:
+    ) -> PseudoVariable | None:
+        if len(raw_metadata) == 0:
             return None
+        elif len(raw_metadata) > 1:
+            print(f"Unexpected length of metadata: {len(raw_metadata)}")
+        return PseudoVariable.model_validate(raw_metadata[0])
