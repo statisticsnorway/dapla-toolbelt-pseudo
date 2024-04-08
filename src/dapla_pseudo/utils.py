@@ -57,7 +57,7 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
         return None
 
 
-def convert_to_date(sid_snapshot_date: date | str | None) -> date | None:
+def convert_to_date(sid_snapshot_date: date | str | None = None) -> date | None:
     """Converts the SID version date to the 'date' type, if it is a string.
 
     If None, simply passes the None through the function.

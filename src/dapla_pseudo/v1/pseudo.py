@@ -80,7 +80,7 @@ class Pseudonymize:
 
         rules: ClassVar[list[PseudoRule]] = []
 
-        def __init__(self, rules: list[PseudoRule] | None) -> None:
+        def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
             super().__init__(
                 pseudo_operation=PseudoOperation.PSEUDONYMIZE,

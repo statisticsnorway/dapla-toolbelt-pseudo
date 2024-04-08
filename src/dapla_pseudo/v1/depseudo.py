@@ -1,6 +1,7 @@
 """Builder for submitting a pseudonymization request."""
 
 from datetime import date
+from typing import ClassVar
 
 import pandas as pd
 import polars as pl
@@ -70,18 +71,22 @@ class Depseudonymize:
     class _Depseudonymizer(_BasePseudonymizer):
         """Select one or multiple fields to be pseudonymized."""
 
+        rules: ClassVar[list[PseudoRule]] = []
+
         def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
-            self.rules: list[PseudoRule] = [] if rules is None else rules
-            self._pseudo_keyset: PseudoKeyset | str | None = None
             super().__init__(
                 pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
                 dataset=Depseudonymize.dataset,
             )
+            if rules is None:
+                Depseudonymize._Depseudonymizer.rules = []
+            else:
+                Depseudonymize._Depseudonymizer.rules.extend(rules)
 
         def on_fields(self, *fields: str) -> "Depseudonymize._DepseudoFuncSelector":
             """Specify one or multiple fields to be depseudonymized."""
-            return Depseudonymize._DepseudoFuncSelector(list(fields), self.rules)
+            return Depseudonymize._DepseudoFuncSelector(list(fields))
 
         def run(
             self,
@@ -105,9 +110,7 @@ class Depseudonymize:
             return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
 
     class _DepseudoFuncSelector(_BaseRuleConstructor):
-        def __init__(
-            self, fields: list[str], rules: list[PseudoRule] | None = None
-        ) -> None:
+        def __init__(self, fields: list[str]) -> None:
             self._fields = fields
             super().__init__(fields, type(Depseudonymize.dataset))
 

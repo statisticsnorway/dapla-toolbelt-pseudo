@@ -18,7 +18,6 @@ from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
-from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import build_pseudo_dataset_request
 from dapla_pseudo.utils import build_pseudo_field_request
@@ -116,7 +115,7 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 return self._pseudonymize_dataset(
-                    self._dataset, pseudo_request, timeout
+                    self._dataset.contents, pseudo_request, timeout
                 )
 
             case _ as invalid_dataset:
@@ -185,7 +184,8 @@ class _BasePseudonymizer:
         pseudo_request: PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest,
         timeout: int,
     ) -> Result:
-        file_handle: BinaryFileDecl
+        data_spec: FileSpecDecl
+
         request_spec: FileSpecDecl = (
             None,
             pseudo_request.to_json(),
@@ -193,7 +193,7 @@ class _BasePseudonymizer:
         )
 
         match dataset:
-            case File(_ as file_handle, content_type):
+            case File(file_handle, content_type):
                 file_name = _extract_name(
                     file_handle=file_handle, input_content_type=content_type
                 )
@@ -202,6 +202,15 @@ class _BasePseudonymizer:
                     file_handle,
                     str(pseudo_request.target_content_type),
                 )
+
+                response = self._pseudo_client._post_to_file_endpoint(
+                    path=f"{self._pseudo_operation.value}/file",
+                    request_spec=request_spec,
+                    data_spec=data_spec,
+                    stream=True,
+                    timeout=timeout,
+                )
+                file_handle.close()
             case pl.DataFrame():
                 file_name = "data.json"
                 data_spec = (
@@ -210,16 +219,13 @@ class _BasePseudonymizer:
                     str(pseudo_request.target_content_type),
                 )
 
-        response = self._pseudo_client._post_to_file_endpoint(
-            path=f"{self._pseudo_operation.value}/file",
-            request_spec=request_spec,
-            data_spec=data_spec,
-            stream=True,
-            timeout=timeout,
-        )
-
-        if file_handle is not None:
-            file_handle.close()
+                response = self._pseudo_client._post_to_file_endpoint(
+                    path=f"{self._pseudo_operation.value}/file",
+                    request_spec=request_spec,
+                    data_spec=data_spec,
+                    stream=True,
+                    timeout=timeout,
+                )
 
         payload = json.loads(response.content.decode("utf-8"))
         pseudo_data = payload["data"]
@@ -244,7 +250,9 @@ class _BaseRuleConstructor:
     """Base class for the _PseudoFuncSelector/_DepseudoFuncSelector/_RepseudoFuncSelector builders."""
 
     def __init__(
-        self, fields: list[str], dataset_type: type[pl.DataFrame] | type[File]
+        self,
+        fields: list[str],
+        dataset_type: type[pl.DataFrame] | type[File] | type[HierarchicalDataFrame],
     ) -> None:
         self._fields = fields
         self._dataset_type = dataset_type

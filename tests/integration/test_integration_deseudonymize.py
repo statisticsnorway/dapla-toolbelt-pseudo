@@ -42,4 +42,4 @@ def test_depseudonymize_sid(
         .run()
         .to_polars()
     )
-    assert result.equals(df_personer)
+    assert_frame_equal(result, df_personer)
