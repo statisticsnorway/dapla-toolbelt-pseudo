@@ -230,7 +230,7 @@ class Pseudonymize:
                     raw_metadata_fields.append(raw_metadata)
 
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
-                dataframe = dataframe.update(pseudonymized_df)
+                dataframe = dataframe.update(pseudonymized_df, include_nulls=True)
             return Result(
                 pseudo_response=PseudoFieldResponse(
                     data=dataframe, raw_metadata=raw_metadata_fields
