@@ -1,23 +1,20 @@
-from collections.abc import Generator
-
 import polars as pl
+import pytest
 from polars.testing import assert_frame_equal
 
 from dapla_pseudo import Pseudonymize
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
-from dapla_pseudo.v1.models.core import MapSidKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
-from tests.integration.utils import get_calling_function_name
-from tests.integration.utils import get_expected_datadoc_metadata_container
-from tests.integration.utils import integration_test
-from tests.integration.utils import setup
+from tests.v1.integration.utils import get_calling_function_name
+from tests.v1.integration.utils import get_expected_datadoc_metadata_container
+from tests.v1.integration.utils import integration_test
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_default_encryption(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_fnr_daead_encrypted: pl.DataFrame,
 ) -> None:
@@ -36,9 +33,9 @@ def test_pseudonymize_default_encryption(
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_papis_compatible_encryption(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_fnr_ff31_encrypted: pl.DataFrame,
 ) -> None:
@@ -57,9 +54,9 @@ def test_pseudonymize_papis_compatible_encryption(
     assert_frame_equal(result.to_polars(), df_personer_fnr_ff31_encrypted)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_default_encryption_null(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_fnr_daead_encrypted: pl.DataFrame,
 ) -> None:
@@ -81,9 +78,9 @@ def test_pseudonymize_default_encryption_null(
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_sid(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_sid_fnr: pl.DataFrame,
 ) -> None:
@@ -98,10 +95,9 @@ def test_pseudonymize_sid(
     assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
-def test_pseudonymize_sid_null(
-    setup: Generator[None, None, None], df_personer: pl.DataFrame
-) -> None:
+def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
     expected_result_fnr_df = pl.DataFrame(
         {"fnr": ["jJuuj0i", "ylc9488", "yeLfkaL", None]}
     )
@@ -123,9 +119,9 @@ def test_pseudonymize_sid_null(
     assert_frame_equal(result.to_polars(), expected_result_df)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_hierarchical(
-    setup: Generator[None, None, None],
     df_personer_hierarchical: pl.DataFrame,
     df_personer_hierarchical_pseudonymized: pl.DataFrame,
 ) -> None:
