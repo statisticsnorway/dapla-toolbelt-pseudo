@@ -13,7 +13,8 @@ from pydantic import ValidationError
 from pydantic import field_serializer
 from pydantic import model_serializer
 
-from dapla_pseudo.constants import PredefinedKeys, MapFailureStrategy
+from dapla_pseudo.constants import MapFailureStrategy
+from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.models import APIModel
