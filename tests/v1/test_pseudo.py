@@ -10,6 +10,7 @@ import pytest
 from google.auth.exceptions import DefaultCredentialsError
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import NoFileExtensionError
@@ -259,6 +260,30 @@ def test_builder_pseudo_function_with_sid_snapshot_date_date(
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.MAP_SID,
         kwargs=MapSidKeywordArgs(snapshot_date=date.fromisoformat("2023-05-21")),
+    )
+    req = PseudoFieldRequest(
+        pseudo_func=pseudo_func, name="fnr", values=df_personer["fnr"].to_list()
+    )
+
+    patch_pseudonymize_operation_field.assert_called_once_with(
+        path="pseudonymize/field",
+        pseudo_field_request=req,
+        timeout=TIMEOUT_DEFAULT,
+        pseudo_client=ANY,
+    )
+
+
+@patch(f"{PKG}.pseudonymize_operation_field")
+def test_builder_pseudo_function_with_failure_strategy_null(
+    patch_pseudonymize_operation_field: MagicMock, df_personer: pl.DataFrame
+) -> None:
+    mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
+    Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id(
+        failure_strategy=MapFailureStrategy.RETURN_NULL
+    ).run()
+    pseudo_func = PseudoFunction(
+        function_type=PseudoFunctionTypes.MAP_SID,
+        kwargs=MapSidKeywordArgs(failure_strategy=MapFailureStrategy.RETURN_NULL),
     )
     req = PseudoFieldRequest(
         pseudo_func=pseudo_func, name="fnr", values=df_personer["fnr"].to_list()

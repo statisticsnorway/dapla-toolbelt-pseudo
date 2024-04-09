@@ -52,3 +52,14 @@ class UnknownCharacterStrategy(str, Enum):
     def __str__(self) -> str:
         """Use value for string representation."""
         return str(self.value)
+
+
+class MapFailureStrategy(str, Enum):
+    """UnknownCharacterStrategy defines how encryption/decryption should handle non-alphabet characters."""
+
+    RETURN_NULL = "RETURN_NULL"
+    RETURN_ORIGINAL = "RETURN_ORIGINAL"
+
+    def __str__(self) -> str:
+        """Use value for string representation."""
+        return str(self.value)

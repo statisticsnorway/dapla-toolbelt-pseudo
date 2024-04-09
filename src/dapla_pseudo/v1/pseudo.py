@@ -10,6 +10,7 @@ import polars as pl
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileLikeDatasetDecl
@@ -229,7 +230,7 @@ class Pseudonymize:
                     raw_metadata_fields.append(raw_metadata)
 
                 pseudonymized_df = pl.DataFrame(pseudonymized_field)
-                dataframe = dataframe.update(pseudonymized_df)
+                dataframe = dataframe.update(pseudonymized_df, include_nulls=True)
             return Result(
                 pseudo_response=PseudoFieldResponse(
                     data=dataframe, raw_metadata=raw_metadata_fields
@@ -247,6 +248,7 @@ class Pseudonymize:
             self,
             sid_snapshot_date: str | date | None = None,
             custom_key: PredefinedKeys | str | None = None,
+            failure_strategy: MapFailureStrategy | None = None,
         ) -> "Pseudonymize._Pseudonymizer":
             """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
 
@@ -257,6 +259,7 @@ class Pseudonymize:
                     Latest if unspecified. Format: YYYY-MM-DD
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+                failure_strategy (Optional[MapFailureStrategy], optional): defines how to handle mapping failures
 
             Returns:
                 Self: The object configured to be mapped to stable ID
@@ -265,9 +268,13 @@ class Pseudonymize:
                 MapSidKeywordArgs(
                     key_id=custom_key,
                     snapshot_date=convert_to_date(sid_snapshot_date),
+                    failure_strategy=failure_strategy,
                 )
                 if custom_key
-                else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+                else MapSidKeywordArgs(
+                    snapshot_date=convert_to_date(sid_snapshot_date),
+                    failure_strategy=failure_strategy,
+                )
             )
             function = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs

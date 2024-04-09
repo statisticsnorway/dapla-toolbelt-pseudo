@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from pydantic import field_serializer
 from pydantic import model_serializer
 
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
@@ -139,11 +140,13 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
             If not specified, will choose the latest version.
             The format is: YYYY-MM-DD, e.g. 2021-05-21
         strategy: defines how encryption/decryption should handle non-alphabet characters
+        failure_strategy: defines how to handle mapping failures
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     snapshot_date: date | None = None
     strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
+    failure_strategy: MapFailureStrategy | None = None
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
