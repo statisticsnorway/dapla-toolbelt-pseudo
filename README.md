@@ -74,6 +74,29 @@ field is a valid Norwegian personal identification number (fnr, dnr), the recomm
 the function `with_stable_id()` to convert the identification number to a stable ID (SID) prior to pseudonymization.
 In that case, the pseudonymization algorithm is FPE (Format Preserving Encryption).
 
+> [!IMPORTANT]
+> FPE requires minimum two bytes/characters to perform encryption and minimum four bytes in case of Unicode.
+
+If a field cannot be converted using the function `with_stable_id()` the default behaviour is to use the original value
+as input to the FPE encryption function. However, this behaviour can be changed by supplying a `failure_strategy` like
+this:
+
+```python
+from dapla_pseudo import Pseudonymize
+from dapla_pseudo.constants import MapFailureStrategy
+
+# Example: Single field sid mapping and pseudonymization (FPE), unmatching SIDs will return Null
+result_df = (
+    Pseudonymize.from_polars(df)
+    .on_fields("fnr")
+    .with_stable_id(failure_strategy=MapFailureStrategy.RETURN_NULL)
+    .run()
+    .to_polars()
+)
+```
+
+
+### Reading dataframes
 
 Note that you may also use a Pandas DataFrame as an input or output, by exchanging `from_polars` with `from_pandas`
 and `to_polars` with `to_pandas`. However, Pandas is much less performant, so take special care especially if your
