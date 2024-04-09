@@ -19,7 +19,7 @@ class PseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
 
 class DepseudoFieldRequest(APIModel):
@@ -28,7 +28,7 @@ class DepseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    keyset: t.Optional[PseudoKeyset] = None
+    keyset: PseudoKeyset | None = None
 
 
 class RepseudoFieldRequest(APIModel):
@@ -38,26 +38,26 @@ class RepseudoFieldRequest(APIModel):
     target_pseudo_func: PseudoFunction
     name: str
     values: list[str]
-    source_keyset: t.Optional[PseudoKeyset] = None
-    target_keyset: t.Optional[PseudoKeyset] = None
+    source_keyset: PseudoKeyset | None = None
+    target_keyset: PseudoKeyset | None = None
 
 
 class PseudoFileRequest(APIModel):
     """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None
 
 
 class DepseudoFileRequest(APIModel):
     """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
 
     pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None
 
 
 class RepseudoFileRequest(APIModel):
@@ -65,9 +65,9 @@ class RepseudoFileRequest(APIModel):
 
     source_pseudo_config: PseudoConfig
     target_pseudo_config: PseudoConfig
-    target_uri: t.Optional[str] = None
+    target_uri: str | None = None
     target_content_type: Mimetypes
-    compression: t.Optional[TargetCompression] = None
+    compression: TargetCompression | None = None
 
 
 @dataclass
@@ -77,7 +77,7 @@ class RawPseudoMetadata:
     logs: list[str]
     metrics: list[str]
     datadoc: list[dict[str, t.Any]]
-    field_name: t.Optional[str] = None
+    field_name: str | None = None
 
 
 @dataclass
