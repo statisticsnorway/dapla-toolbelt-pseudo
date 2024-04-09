@@ -271,7 +271,10 @@ class Pseudonymize:
                     failure_strategy=failure_strategy,
                 )
                 if custom_key
-                else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+                else MapSidKeywordArgs(
+                    snapshot_date=convert_to_date(sid_snapshot_date),
+                    failure_strategy=failure_strategy,
+                )
             )
             function = PseudoFunction(
                 function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs

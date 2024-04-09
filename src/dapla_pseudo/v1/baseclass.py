@@ -1,6 +1,7 @@
 import typing as t
 from datetime import date
 
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import convert_to_date
@@ -24,14 +25,19 @@ class _RuleConstructor:
         self,
         sid_snapshot_date: str | date | None = None,
         custom_key: PredefinedKeys | str | None = None,
+        failure_strategy: MapFailureStrategy | None = None,
     ) -> list[PseudoRule]:
         kwargs = (
             MapSidKeywordArgs(
                 key_id=custom_key,
                 snapshot_date=convert_to_date(sid_snapshot_date),
+                failure_strategy=failure_strategy,
             )
             if custom_key
-            else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+            else MapSidKeywordArgs(
+                snapshot_date=convert_to_date(sid_snapshot_date),
+                failure_strategy=failure_strategy,
+            )
         )
         pseudo_func = PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs

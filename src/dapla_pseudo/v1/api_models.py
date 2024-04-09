@@ -146,7 +146,7 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     snapshot_date: date | None = None
     strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
-    failure_strategy: MapFailureStrategy | None = MapFailureStrategy.RETURN_ORIGINAL
+    failure_strategy: MapFailureStrategy | None = None
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
