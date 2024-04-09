@@ -248,7 +248,7 @@ class Pseudonymize:
             self,
             sid_snapshot_date: str | date | None = None,
             custom_key: PredefinedKeys | str | None = None,
-            failure_strategy: MapFailureStrategy = MapFailureStrategy.RETURN_ORIGINAL,
+            failure_strategy: MapFailureStrategy | None = None,
         ) -> "Pseudonymize._Pseudonymizer":
             """Map the selected fields to Stable ID, then pseudonymize with a PAPIS-compatible encryption.
 
