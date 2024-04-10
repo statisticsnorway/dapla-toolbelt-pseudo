@@ -262,7 +262,7 @@ class Depseudonymize:
                 MapSidKeywordArgs(
                     key_id=custom_key,
                     snapshot_date=convert_to_date(sid_snapshot_date),
-                    on_map_failure=(
+                    failure_strategy=(
                         None
                         if on_map_failure is None
                         else MapFailureStrategy(on_map_failure)
@@ -271,7 +271,7 @@ class Depseudonymize:
                 if custom_key
                 else MapSidKeywordArgs(
                     snapshot_date=convert_to_date(sid_snapshot_date),
-                    on_map_failure=(
+                    failure_strategy=(
                         None
                         if on_map_failure is None
                         else MapFailureStrategy(on_map_failure)

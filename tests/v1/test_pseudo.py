@@ -283,7 +283,7 @@ def test_builder_pseudo_function_with_failure_strategy_null(
     ).run()
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.MAP_SID,
-        kwargs=MapSidKeywordArgs(on_map_failure=MapFailureStrategy.RETURN_NULL),
+        kwargs=MapSidKeywordArgs(failure_strategy=MapFailureStrategy.RETURN_NULL),
     )
     req = PseudoFieldRequest(
         pseudo_func=pseudo_func, name="fnr", values=df_personer["fnr"].to_list()
