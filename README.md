@@ -78,18 +78,17 @@ In that case, the pseudonymization algorithm is FPE (Format Preserving Encryptio
 > FPE requires minimum two bytes/characters to perform encryption and minimum four bytes in case of Unicode.
 
 If a field cannot be converted using the function `with_stable_id()` the default behaviour is to use the original value
-as input to the FPE encryption function. However, this behaviour can be changed by supplying a `failure_strategy` like
-this:
+as input to the FPE encryption function. However, this behaviour can be changed by supplying a `on_map_failure` argument
+like this:
 
 ```python
 from dapla_pseudo import Pseudonymize
-from dapla_pseudo.constants import MapFailureStrategy
 
 # Example: Single field sid mapping and pseudonymization (FPE), unmatching SIDs will return Null
 result_df = (
     Pseudonymize.from_polars(df)
     .on_fields("fnr")
-    .with_stable_id(failure_strategy=MapFailureStrategy.RETURN_NULL)
+    .with_stable_id(on_map_failure="RETURN_NULL")
     .run()
     .to_polars()
 )

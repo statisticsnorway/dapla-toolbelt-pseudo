@@ -279,7 +279,7 @@ def test_builder_pseudo_function_with_failure_strategy_null(
 ) -> None:
     mock_return_pseudonymize_operation_field(patch_pseudonymize_operation_field)
     Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id(
-        failure_strategy=MapFailureStrategy.RETURN_NULL
+        on_map_failure="RETURN_NULL"
     ).run()
     pseudo_func = PseudoFunction(
         function_type=PseudoFunctionTypes.MAP_SID,

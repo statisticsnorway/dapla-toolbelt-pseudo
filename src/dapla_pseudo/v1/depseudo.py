@@ -241,7 +241,7 @@ class Depseudonymize:
             self,
             sid_snapshot_date: str | date | None = None,
             custom_key: str | None = None,
-            failure_strategy: MapFailureStrategy | None = None,
+            on_map_failure: MapFailureStrategy | str | None = None,
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -253,7 +253,7 @@ class Depseudonymize:
                     Latest if unspecified. Format: YYYY-MM-DD
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
-                failure_strategy (Optional[MapFailureStrategy], optional): defines how to handle mapping failures
+                on_map_failure (Optional[MapFailureStrategy], optional): defines how to handle mapping failures
 
             Returns:
                 Self: The object configured to be mapped to fnr
@@ -262,12 +262,12 @@ class Depseudonymize:
                 MapSidKeywordArgs(
                     key_id=custom_key,
                     snapshot_date=convert_to_date(sid_snapshot_date),
-                    failure_strategy=failure_strategy,
+                    on_map_failure=on_map_failure,
                 )
                 if custom_key
                 else MapSidKeywordArgs(
                     snapshot_date=convert_to_date(sid_snapshot_date),
-                    failure_strategy=failure_strategy,
+                    on_map_failure=on_map_failure,
                 )
             )
             function = PseudoFunction(

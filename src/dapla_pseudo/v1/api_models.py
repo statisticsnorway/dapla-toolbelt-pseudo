@@ -140,13 +140,13 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
             If not specified, will choose the latest version.
             The format is: YYYY-MM-DD, e.g. 2021-05-21
         strategy: defines how encryption/decryption should handle non-alphabet characters
-        failure_strategy: defines how to handle mapping failures
+        on_map_failure: defines how to handle mapping failures
     """
 
     key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
     snapshot_date: date | None = None
     strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
-    failure_strategy: MapFailureStrategy | None = None
+    on_map_failure: MapFailureStrategy | None = None
 
 
 class DaeadKeywordArgs(PseudoFunctionArgs):
