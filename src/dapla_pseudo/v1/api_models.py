@@ -259,7 +259,10 @@ class PseudoRule(APIModel):
     @classmethod
     def from_json(cls, data: str) -> t.Any:
         """Deserialise the json-formatted pseudo rule to Python model."""
-        return super().model_validate(eval(data))
+        if isinstance(data, str):
+            return super().model_validate(json.loads(data))
+        else:
+            return super().model_validate(data)
 
 
 class PseudoFieldRequest(APIModel):
