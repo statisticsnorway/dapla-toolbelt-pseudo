@@ -108,7 +108,9 @@ def test_serialize_function_with_extra_kwargs() -> None:
 
 
 def test_deserialize_function_with_extra_kwargs() -> None:
-    assert PseudoFunction.model_validate("ff31(keyId=papis-common-key-1,strategy=skip)") == (
+    assert PseudoFunction.model_validate(
+        "ff31(keyId=papis-common-key-1,strategy=skip)"
+    ) == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),
