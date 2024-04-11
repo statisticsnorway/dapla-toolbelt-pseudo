@@ -211,8 +211,10 @@ class PseudoFunction(BaseModel):
             pseudo_function_type: PseudoFunctionTypes = PseudoFunctionTypes[
                 func.upper()
             ]
-            args_dict: dict[str, str] = dict(
-                list(map(lambda v: v.split("="), args.split(",")))
+            args_dict: dict[str, str] | None = (
+                dict(list(map(lambda v: v.split("="), args.split(","))))
+                if len(args) > 0
+                else None
             )
             return {
                 "function_type": pseudo_function_type,
@@ -223,17 +225,33 @@ class PseudoFunction(BaseModel):
 
     @classmethod
     def _resolve_args(
-        cls, pseudo_function_type: PseudoFunctionTypes, args: dict[str, str]
+        cls, pseudo_function_type: PseudoFunctionTypes, args: dict[str, str] | None
     ) -> DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs:
         match pseudo_function_type:
             case PseudoFunctionTypes.DAEAD:
-                return DaeadKeywordArgs.model_validate(args)
+                return (
+                    DaeadKeywordArgs()
+                    if args is None
+                    else DaeadKeywordArgs.model_validate(args)
+                )
             case PseudoFunctionTypes.REDACT:
-                return RedactKeywordArgs.model_validate(args)
+                return (
+                    RedactKeywordArgs()
+                    if args is None
+                    else RedactKeywordArgs.model_validate(args)
+                )
             case PseudoFunctionTypes.FF31:
-                return FF31KeywordArgs.model_validate(args)
+                return (
+                    FF31KeywordArgs()
+                    if args is None
+                    else FF31KeywordArgs.model_validate(args)
+                )
             case PseudoFunctionTypes.MAP_SID:
-                return MapSidKeywordArgs.model_validate(args)
+                return (
+                    MapSidKeywordArgs()
+                    if args is None
+                    else MapSidKeywordArgs.model_validate(args)
+                )
 
 
 class PseudoRule(APIModel):

@@ -1,6 +1,7 @@
 import json
 
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
@@ -79,6 +80,14 @@ def test_deserialize_daead_function() -> None:
     )
 
 
+def test_deserialize_empty_daead_function() -> None:
+    assert PseudoFunction.model_validate("daead()") == (
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        )
+    )
+
+
 def test_serialize_redact_function() -> None:
     assert str(
         PseudoFunction(
@@ -121,11 +130,26 @@ def test_deserialize_function_with_extra_kwargs() -> None:
 
 def test_deserialize_pseudo_rule() -> None:
     assert PseudoRule.from_json(
-        '{"name":"my-fule","pattern":"**/identifiers/*","func":"ff31('
-        'keyId=papis-common-key-1,strategy=skip)"}'
+        '{"name":"my-rule","pattern":"**/identifiers/*","func":"ff31('
+        'keyId=papis-common-key-1,strategy=redact)"}'
     ) == (
         PseudoRule(
-            name="my-fule",
+            name="my-rule",
+            func=PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31,
+                kwargs=FF31KeywordArgs(strategy=UnknownCharacterStrategy.REDACT),
+            ),
+            pattern="**/identifiers/*",
+        )
+    )
+
+
+def test_deserialize_pseudo_rule_with_defaults() -> None:
+    assert PseudoRule.from_json(
+        '{"name":"my-rule","pattern":"**/identifiers/*","func":"ff31()"}'
+    ) == (
+        PseudoRule(
+            name="my-rule",
             func=PseudoFunction(
                 function_type=PseudoFunctionTypes.FF31,
                 kwargs=FF31KeywordArgs(),
