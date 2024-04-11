@@ -61,16 +61,35 @@ def test_key_wrapper_with_keyset_json() -> None:
     assert key_wrapper.keyset == PseudoKeyset.model_validate(custom_keyset_dict)
 
 
-def test_pseudo_function() -> None:
-    assert "daead(keyId=ssb-common-key-1)" == str(
+def test_serialize_daead_function() -> None:
+    assert (
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ).model_dump()
+        == "daead(keyId=ssb-common-key-1)"
+    )
+
+
+def test_deserialize_daead_function() -> None:
+    assert PseudoFunction.model_validate("daead(keyId=ssb-common-key-1)") == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         )
     )
 
 
-def test_redact_function() -> None:
-    assert "redact(placeholder=#)" == str(
+def test_serialize_redact_function() -> None:
+    assert (
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder="#"),
+        ).model_dump()
+        == "redact(placeholder=#)"
+    )
+
+
+def test_deserialize_redact_function() -> None:
+    assert PseudoFunction.model_validate("redact(placeholder=#)") == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.REDACT,
             kwargs=RedactKeywordArgs(placeholder="#"),
@@ -78,8 +97,18 @@ def test_redact_function() -> None:
     )
 
 
-def test_pseudo_function_with_extra_kwargs() -> None:
-    assert "ff31(keyId=papis-common-key-1,strategy=skip)" == str(
+def test_serialize_function_with_extra_kwargs() -> None:
+    assert (
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.FF31,
+            kwargs=FF31KeywordArgs(),
+        ).model_dump()
+        == "ff31(keyId=papis-common-key-1,strategy=skip)"
+    )
+
+
+def test_deserialize_function_with_extra_kwargs() -> None:
+    assert PseudoFunction.model_validate("ff31(keyId=papis-common-key-1,strategy=skip)") == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),

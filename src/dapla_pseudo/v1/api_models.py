@@ -12,6 +12,7 @@ from pydantic import FieldSerializationInfo
 from pydantic import ValidationError
 from pydantic import field_serializer
 from pydantic import model_serializer
+from pydantic import model_validator
 
 from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
@@ -190,6 +191,43 @@ class PseudoFunction(BaseModel):
     def serialize_model(self) -> str:
         """Serialize the function as expected by the pseudo service."""
         return f"{self.function_type}({self.kwargs})"
+
+    @model_validator(mode="before")
+    @classmethod
+    def deserialize_model(cls, data: str | dict) -> dict:
+        """Deserialise the json-formatted pseudo function to Python model."""
+        if isinstance(data, str):
+            func: str
+            args: str
+            func, args = (
+                data.replace(" ", "").replace("(", " ").replace(")", "").split(" ")
+            )
+            pseudo_function_type: PseudoFunctionTypes = PseudoFunctionTypes[
+                func.upper()
+            ]
+            args_dict: dict[str, str] = dict(
+                list(map(lambda v: v.split("="), args.split(",")))
+            )
+            return {
+                "function_type": pseudo_function_type,
+                "kwargs": cls._resolve_args(pseudo_function_type, args_dict),
+            }
+        else:
+            return data
+
+    @classmethod
+    def _resolve_args(
+        cls, pseudo_function_type: PseudoFunctionTypes, args: dict[str, str]
+    ) -> DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs:
+        match pseudo_function_type:
+            case PseudoFunctionTypes.DAEAD:
+                return DaeadKeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.REDACT:
+                return RedactKeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.FF31:
+                return FF31KeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.MAP_SID:
+                return MapSidKeywordArgs.model_validate(args)
 
 
 class PseudoRule(APIModel):
