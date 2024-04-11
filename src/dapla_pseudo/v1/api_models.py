@@ -194,7 +194,7 @@ class PseudoFunction(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def deserialize_model(cls, data: str | dict) -> dict:
+    def deserialize_model(cls, data: str | dict[str, t.Any]) -> dict[str, t.Any]:
         """Deserialise the json-formatted pseudo function to Python model."""
         if isinstance(data, str):
             func: str
@@ -257,7 +257,7 @@ class PseudoRule(APIModel):
         return str(func)
 
     @classmethod
-    def from_json(cls, data: str) -> t.Any:
+    def from_json(cls, data: str | dict[str, t.Any]) -> t.Any:
         """Deserialise the json-formatted pseudo rule to Python model."""
         if isinstance(data, str):
             return super().model_validate(json.loads(data))

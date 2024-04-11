@@ -66,8 +66,8 @@ def test_serialize_daead_function() -> None:
     assert (
         PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
-        ).model_dump()
-        == "daead(keyId=ssb-common-key-1)"
+        ).__str__()
+        == 'daead(keyId=ssb-common-key-1)'
     )
 
 
@@ -84,7 +84,7 @@ def test_serialize_redact_function() -> None:
         PseudoFunction(
             function_type=PseudoFunctionTypes.REDACT,
             kwargs=RedactKeywordArgs(placeholder="#"),
-        ).model_dump()
+        ).__str__()
         == "redact(placeholder=#)"
     )
 
@@ -103,7 +103,7 @@ def test_serialize_function_with_extra_kwargs() -> None:
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),
-        ).model_dump()
+        ).__str__()
         == "ff31(keyId=papis-common-key-1,strategy=skip)"
     )
 
