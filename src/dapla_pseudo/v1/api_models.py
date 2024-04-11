@@ -12,6 +12,7 @@ from pydantic import FieldSerializationInfo
 from pydantic import ValidationError
 from pydantic import field_serializer
 from pydantic import model_serializer
+from pydantic import model_validator
 
 from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
@@ -191,6 +192,49 @@ class PseudoFunction(BaseModel):
         """Serialize the function as expected by the pseudo service."""
         return f"{self.function_type}({self.kwargs})"
 
+    @model_validator(mode="before")
+    @classmethod
+    def deserialize_model(cls, data: str | dict[str, t.Any]) -> dict[str, t.Any]:
+        """Deserialize the shorthand string representation of a pseudo function to Python model.
+
+        This function parses the serialized version of a function like e.g. 'redact(placeholder=#)'
+        by splitting the function name (fun) from the arguments (args), and then constructing a
+        dict out of the args. Finally, the proper function type and kwargs are inferred from the
+        PseudoFunctionTypes enum.
+        """
+        if isinstance(data, str):
+            func: str
+            args: str
+            func, args = (
+                data.replace(" ", "").replace("(", " ").replace(")", "").split(" ")
+            )
+            pseudo_function_type: PseudoFunctionTypes = PseudoFunctionTypes[
+                func.upper()
+            ]
+            args_dict: dict[str, str] = dict(
+                list(map(lambda v: v.split("="), args.split(",")))
+            )
+            return {
+                "function_type": pseudo_function_type,
+                "kwargs": cls._resolve_args(pseudo_function_type, args_dict),
+            }
+        else:
+            return data
+
+    @classmethod
+    def _resolve_args(
+        cls, pseudo_function_type: PseudoFunctionTypes, args: dict[str, str]
+    ) -> DaeadKeywordArgs | FF31KeywordArgs | MapSidKeywordArgs | RedactKeywordArgs:
+        match pseudo_function_type:
+            case PseudoFunctionTypes.DAEAD:
+                return DaeadKeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.REDACT:
+                return RedactKeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.FF31:
+                return FF31KeywordArgs.model_validate(args)
+            case PseudoFunctionTypes.MAP_SID:
+                return MapSidKeywordArgs.model_validate(args)
+
 
 class PseudoRule(APIModel):
     """A ``PseudoRule`` defines a pattern, a transformation function, and optionally a friendly name of the rule.
@@ -217,6 +261,14 @@ class PseudoRule(APIModel):
     ) -> str:
         """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
+
+    @classmethod
+    def from_json(cls, data: str | dict[str, t.Any]) -> t.Any:
+        """Deserialise the json-formatted pseudo rule to Python model."""
+        if isinstance(data, str):
+            return super().model_validate(json.loads(data))
+        else:
+            return super().model_validate(data)
 
 
 class PseudoFieldRequest(APIModel):

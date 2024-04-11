@@ -6,6 +6,7 @@ from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.api_models import RedactKeywordArgs
 
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -61,16 +62,35 @@ def test_key_wrapper_with_keyset_json() -> None:
     assert key_wrapper.keyset == PseudoKeyset.model_validate(custom_keyset_dict)
 
 
-def test_pseudo_function() -> None:
-    assert "daead(keyId=ssb-common-key-1)" == str(
+def test_serialize_daead_function() -> None:
+    assert str(
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        )
+        == "daead(keyId=ssb-common-key-1)"
+    )
+
+
+def test_deserialize_daead_function() -> None:
+    assert PseudoFunction.model_validate("daead(keyId=ssb-common-key-1)") == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         )
     )
 
 
-def test_redact_function() -> None:
-    assert "redact(placeholder=#)" == str(
+def test_serialize_redact_function() -> None:
+    assert str(
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder="#"),
+        )
+        == "redact(placeholder=#)"
+    )
+
+
+def test_deserialize_redact_function() -> None:
+    assert PseudoFunction.model_validate("redact(placeholder=#)") == (
         PseudoFunction(
             function_type=PseudoFunctionTypes.REDACT,
             kwargs=RedactKeywordArgs(placeholder="#"),
@@ -78,10 +98,38 @@ def test_redact_function() -> None:
     )
 
 
-def test_pseudo_function_with_extra_kwargs() -> None:
-    assert "ff31(keyId=papis-common-key-1,strategy=skip)" == str(
+def test_serialize_function_with_extra_kwargs() -> None:
+    assert str(
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),
+        )
+        == "ff31(keyId=papis-common-key-1,strategy=skip)"
+    )
+
+
+def test_deserialize_function_with_extra_kwargs() -> None:
+    assert PseudoFunction.model_validate(
+        "ff31(keyId=papis-common-key-1,strategy=skip)"
+    ) == (
+        PseudoFunction(
+            function_type=PseudoFunctionTypes.FF31,
+            kwargs=FF31KeywordArgs(),
+        )
+    )
+
+
+def test_deserialize_pseudo_rule() -> None:
+    assert PseudoRule.from_json(
+        '{"name":"my-fule","pattern":"**/identifiers/*","func":"ff31('
+        'keyId=papis-common-key-1,strategy=skip)"}'
+    ) == (
+        PseudoRule(
+            name="my-fule",
+            func=PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31,
+                kwargs=FF31KeywordArgs(),
+            ),
+            pattern="**/identifiers/*",
         )
     )
