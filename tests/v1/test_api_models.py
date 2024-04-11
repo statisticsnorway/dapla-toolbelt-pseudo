@@ -5,6 +5,7 @@ from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.v1.api_models import DaeadKeywordArgs
 from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
+from dapla_pseudo.v1.api_models import MapSidKeywordArgs
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
 from dapla_pseudo.v1.api_models import PseudoRule
@@ -153,6 +154,21 @@ def test_deserialize_pseudo_rule_with_defaults() -> None:
             func=PseudoFunction(
                 function_type=PseudoFunctionTypes.FF31,
                 kwargs=FF31KeywordArgs(),
+            ),
+            pattern="**/identifiers/*",
+        )
+    )
+
+
+def test_deserialize_map_sid_pseudo_rule_with_defaults() -> None:
+    assert PseudoRule.from_json(
+        '{"name":"my-rule","pattern":"**/identifiers/*","func":"map-sid-ff31()"}'
+    ) == (
+        PseudoRule(
+            name="my-rule",
+            func=PseudoFunction(
+                function_type=PseudoFunctionTypes.MAP_SID,
+                kwargs=MapSidKeywordArgs(),
             ),
             pattern="**/identifiers/*",
         )

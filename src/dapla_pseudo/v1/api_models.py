@@ -208,9 +208,7 @@ class PseudoFunction(BaseModel):
             func, args = (
                 data.replace(" ", "").replace("(", " ").replace(")", "").split(" ")
             )
-            pseudo_function_type: PseudoFunctionTypes = PseudoFunctionTypes[
-                func.upper()
-            ]
+            pseudo_function_type: PseudoFunctionTypes = PseudoFunctionTypes(func)
             args_dict: dict[str, str] | None = (
                 dict(list(map(lambda v: v.split("="), args.split(","))))
                 if len(args) > 0
