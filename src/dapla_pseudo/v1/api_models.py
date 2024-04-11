@@ -195,7 +195,13 @@ class PseudoFunction(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def deserialize_model(cls, data: str | dict[str, t.Any]) -> dict[str, t.Any]:
-        """Deserialise the json-formatted pseudo function to Python model."""
+        """Deserialize the shorthand string representation of a pseudo function to Python model.
+
+        This function parses the serialized version of a function like e.g. 'redact(placeholder=#)'
+        by splitting the function name (fun) from the arguments (args), and then constructing a
+        dict out of the args. Finally, the proper function type and kwargs are inferred from the
+        PseudoFunctionTypes enum.
+        """
         if isinstance(data, str):
             func: str
             args: str
