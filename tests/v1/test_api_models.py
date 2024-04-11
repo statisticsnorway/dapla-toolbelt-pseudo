@@ -67,7 +67,7 @@ def test_serialize_daead_function() -> None:
         PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ).__str__()
-        == 'daead(keyId=ssb-common-key-1)'
+        == "daead(keyId=ssb-common-key-1)"
     )
 
 
