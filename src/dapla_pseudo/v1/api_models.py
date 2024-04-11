@@ -256,6 +256,11 @@ class PseudoRule(APIModel):
         """Explicit serialization of the 'func' field to coerce to string before serializing PseudoRule."""
         return str(func)
 
+    @classmethod
+    def from_json(cls, data: str) -> t.Any:
+        """Deserialise the json-formatted pseudo rule to Python model."""
+        return super().model_validate(eval(data))
+
 
 class PseudoFieldRequest(APIModel):
     """Model of the pseudo field request sent to the service."""

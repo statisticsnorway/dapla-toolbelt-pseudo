@@ -6,6 +6,7 @@ from dapla_pseudo.v1.api_models import FF31KeywordArgs
 from dapla_pseudo.v1.api_models import KeyWrapper
 from dapla_pseudo.v1.api_models import PseudoFunction
 from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.api_models import RedactKeywordArgs
 
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -114,5 +115,21 @@ def test_deserialize_function_with_extra_kwargs() -> None:
         PseudoFunction(
             function_type=PseudoFunctionTypes.FF31,
             kwargs=FF31KeywordArgs(),
+        )
+    )
+
+
+def test_deserialize_pseudo_rule() -> None:
+    assert PseudoRule.from_json(
+        "{'name': 'my-fule', 'pattern': '**/identifiers/*', 'func': 'ff31("
+        "keyId=papis-common-key-1,strategy=skip)'}"
+    ) == (
+        PseudoRule(
+            name="my-fule",
+            func=PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31,
+                kwargs=FF31KeywordArgs(),
+            ),
+            pattern="**/identifiers/*",
         )
     )

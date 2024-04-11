@@ -22,6 +22,7 @@ __version__ = version("dapla_toolbelt_pseudo")
 
 from dapla_pseudo.v1.api_models import Field
 from dapla_pseudo.v1.api_models import PseudoKeyset
+from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.depseudo import Depseudonymize
 from dapla_pseudo.v1.pseudo import Pseudonymize
