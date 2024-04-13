@@ -34,7 +34,7 @@ def test_pseudonymize_default_encryption(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(exclude_none=True)
     assert result.to_polars().equals(expected_result_df)
 
 
@@ -63,7 +63,7 @@ def test_pseudonymize_papis_compatible_encryption(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(exclude_none=True)
     assert result.to_polars().equals(expected_result_df)
 
 

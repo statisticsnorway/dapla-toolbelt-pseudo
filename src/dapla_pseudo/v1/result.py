@@ -191,7 +191,7 @@ class Result:
         Returns:
             str: A JSON-formattted string representing the datadoc metadata.
         """
-        return self._datadoc.model_dump_json()
+        return self._datadoc.model_dump_json(exclude_none=True)
 
     def _datadoc_from_raw_metadata_fields(
         self,
