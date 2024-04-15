@@ -133,7 +133,7 @@ class Pseudonymize:
             if Pseudonymize.dataset is None:
                 raise ValueError("No dataset has been provided.")
 
-            if self._rules == []:
+            if not self._rules:
                 raise ValueError(
                     "No fields have been provided. Use the 'on_fields' or the 'add_rules' method."
                 )

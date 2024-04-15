@@ -201,7 +201,7 @@ def pseudo_operation_dataset(
             path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
             request_spec=request_spec,
             data_spec=data_spec,
-            stream=False,
+            stream=True,
         )
     else:
         file = t.cast(File, dataset_ref)
