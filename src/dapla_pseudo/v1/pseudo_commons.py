@@ -192,9 +192,10 @@ def pseudo_operation_dataset(
 
     if type(dataset_ref) is pl.DataFrame:
         file_name = "data.json"
+        file_handle = io.StringIO(json.dumps(dataset_ref.to_dicts()))
         data_spec = (
             file_name,
-            json.dumps(dataset_ref.to_dicts()),
+            file_handle,
             str(pseudo_operation_request.target_content_type),
         )
         response = _client()._post_to_file_endpoint(
@@ -203,6 +204,7 @@ def pseudo_operation_dataset(
             data_spec=data_spec,
             stream=True,
         )
+
     else:
         file = t.cast(File, dataset_ref)
         with file.file_handle as file_handle:
