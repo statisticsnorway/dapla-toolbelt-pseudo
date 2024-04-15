@@ -1,8 +1,8 @@
 import polars as pl
 import pytest
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Validator
-from tests.v1.integration.utils import integration_test
 
 
 @pytest.mark.usefixtures("setup")

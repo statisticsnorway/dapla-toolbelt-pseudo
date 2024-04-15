@@ -1,9 +1,9 @@
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Repseudonymize
-from tests.v1.integration.utils import integration_test
 
 
 @pytest.mark.usefixtures("setup")

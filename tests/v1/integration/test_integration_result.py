@@ -7,9 +7,9 @@ import polars as pl
 import pytest
 from pandas.testing import assert_frame_equal as pd_assert_frame_equal
 from polars.testing import assert_frame_equal as pl_assert_frame_equal
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
-from tests.v1.integration.utils import integration_test
 
 
 @pytest.mark.usefixtures("setup")
@@ -62,4 +62,4 @@ def test_pseudonymize_input_output_funcs(
             pd_assert_frame_equal(df_pandas, df_pandas_personer_fnr_daead_encrypted)
         case "polars":
             df_polars = result.to_polars()
-            pl_assert_frame_equal(df_personer_fnr_daead_encrypted, df_polars)
+            pl_assert_frame_equal(df_polars, df_personer_fnr_daead_encrypted)

@@ -3,5 +3,6 @@
         "tests"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "ruff.path" : ["/Users/michael/work/dapla-toolbelt-pseudo/.venv/bin/ruff"]
 }

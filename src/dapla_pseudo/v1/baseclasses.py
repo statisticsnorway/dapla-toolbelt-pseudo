@@ -46,14 +46,7 @@ from dapla_pseudo.v1.result import Result
 
 
 class _BasePseudonymizer:
-    """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders.
-
-    The constructor of this class takes parameters that are NOT changed during
-    the course of a 'Pseudonymizer' builder, i.e. through the 'on_fields()' method.
-
-    The remainder of the parameters are passed to
-    :meth:`~baseclasses._BasePseudonymizer._execute_pseudo_operation`.
-    """
+    """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders."""
 
     def __init__(
         self,
@@ -84,6 +77,7 @@ class _BasePseudonymizer:
                 "No fields have been provided. Use the 'on_fields' method."
             )
 
+        pseudo_response: PseudoFileResponse | PseudoFieldResponse
         match self._dataset:  # Differentiate between file and DataFrame
             case pl.DataFrame():
                 pseudo_requests = build_pseudo_field_request(
@@ -94,7 +88,7 @@ class _BasePseudonymizer:
                     target_custom_keyset,
                     target_rules,
                 )
-                return self._pseudonymize_field(pseudo_requests, timeout)
+                pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
             case File():
                 pseudo_request = build_pseudo_dataset_request(
                     self._pseudo_operation,
@@ -103,9 +97,7 @@ class _BasePseudonymizer:
                     target_custom_keyset,
                     target_rules,
                 )
-                return self._pseudonymize_dataset(
-                    self._dataset, pseudo_request, timeout
-                )
+                pseudo_response = self._pseudonymize_dataset(pseudo_request, timeout)
             case HierarchicalDataFrame():
                 pseudo_request = build_pseudo_dataset_request(
                     self._pseudo_operation,
@@ -114,14 +106,13 @@ class _BasePseudonymizer:
                     target_custom_keyset,
                     target_rules,
                 )
-                return self._pseudonymize_dataset(
-                    self._dataset.contents, pseudo_request, timeout
-                )
+                pseudo_response = self._pseudonymize_dataset(pseudo_request, timeout)
 
             case _ as invalid_dataset:
                 raise ValueError(
                     f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                 )
+        return Result(pseudo_response=pseudo_response)
 
     def _pseudonymize_field(
         self,
@@ -129,7 +120,7 @@ class _BasePseudonymizer:
             PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
         ],
         timeout: int,
-    ) -> Result:
+    ) -> PseudoFieldResponse:
         """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
         The pseudonymization is performed in parallel. After the parallel processing is finished,
@@ -157,7 +148,7 @@ class _BasePseudonymizer:
 
             return request.name, pl.Series(data), metadata
 
-        # type narrowing isn't carried over from previous function
+        # type narrowing isn't carried over from caller function
         assert isinstance(self._dataset, pl.DataFrame)
         # Execute the pseudonymization API calls in parallel
         with ThreadPoolExecutor() as executor:
@@ -166,24 +157,21 @@ class _BasePseudonymizer:
                 executor.submit(pseudonymize_field_runner, request)
                 for request in pseudo_requests
             ]
-            # Wait for the futures to finish, then add each field to pseudonymized_field map
+
             for future in as_completed(futures):
                 field_name, data, raw_metadata = future.result()
                 self._dataset = self._dataset.with_columns(data.alias(field_name))
                 raw_metadata_fields.append(raw_metadata)
 
-        return Result(
-            pseudo_response=PseudoFieldResponse(
+            return PseudoFieldResponse(
                 data=self._dataset, raw_metadata=raw_metadata_fields
             )
-        )
 
     def _pseudonymize_dataset(
         self,
-        dataset: File | pl.DataFrame,
         pseudo_request: PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest,
         timeout: int,
-    ) -> Result:
+    ) -> PseudoFileResponse:
         data_spec: FileSpecDecl
 
         request_spec: FileSpecDecl = (
@@ -192,7 +180,7 @@ class _BasePseudonymizer:
             str(Mimetypes.JSON),
         )
 
-        match dataset:
+        match self._dataset:
             case File(file_handle, content_type):
                 file_name = _extract_name(
                     file_handle=file_handle, input_content_type=content_type
@@ -211,7 +199,7 @@ class _BasePseudonymizer:
                     timeout=timeout,
                 )
                 file_handle.close()
-            case pl.DataFrame():
+            case HierarchicalDataFrame(dataset):
                 file_name = "data.json"
                 data_spec = (
                     file_name,
@@ -235,14 +223,12 @@ class _BasePseudonymizer:
             datadoc=payload["datadoc_metadata"]["pseudo_variables"],
         )
 
-        return Result(
-            PseudoFileResponse(
-                data=pseudo_data,
-                raw_metadata=metadata,
-                content_type=Mimetypes.JSON,
-                streamed=True,
-                file_name=file_name,
-            )
+        return PseudoFileResponse(
+            data=pseudo_data,
+            raw_metadata=metadata,
+            content_type=Mimetypes.JSON,
+            streamed=True,
+            file_name=file_name,
         )
 
 
