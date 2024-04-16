@@ -105,6 +105,8 @@ def get_file_data_from_dataset(
 
     if isinstance(file_handle, GCSFile):
         file_size = file_handle.size
+    elif isinstance(file_handle, io.BytesIO):
+        file_size = file_handle.getbuffer().nbytes
     else:
         file_size = os.fstat(file_handle.fileno()).st_size
 
