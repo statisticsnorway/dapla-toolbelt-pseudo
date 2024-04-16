@@ -29,6 +29,7 @@ class Mimetypes(str, Enum):
 
     JSON = "application/json"
     CSV = "text/csv"
+    ZIP = "text/zip"
 
 
 class Field(APIModel):
