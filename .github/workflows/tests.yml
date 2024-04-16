@@ -139,10 +139,10 @@ jobs:
 
       # Need to fix coverage source paths for SonarCloud scanning in GitHub actions.
       # Replace root path with /github/workspace (mounted in docker container).
-      - name: Override coverage source paths for SonarCloud
-        run: |
-          sed -i "s/<source><\/source>/<source>\/github\/workspace<\/source>/g" coverage.xml
-          sed -i "s/<source>tests/<source>\/github\/workspace\/tests/g" coverage.xml
+      # - name: Override coverage source paths for SonarCloud
+      #  run: |
+      #    sed -i "s/<source><\/source>/<source>\/github\/workspace<\/source>/g" coverage.xml
+      #    sed -i "s/<source>tests/<source>\/github\/workspace\/tests/g" coverage.xml
 
       - name: SonarCloud Scan
         env:
