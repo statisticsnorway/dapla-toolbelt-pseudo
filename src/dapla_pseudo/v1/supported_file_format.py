@@ -20,6 +20,7 @@ class SupportedOutputFileFormat(Enum):
     Note that this does NOT describe the valid file extensions of _input_ data when reading from a file.
     """
 
+    ZIP = "zip"
     CSV = "csv"
     JSON = "json"
     XML = "xml"
