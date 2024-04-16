@@ -88,6 +88,7 @@ def get_file_data_from_dataset(
                 zip_file.writestr("data.json", json.dumps(df.to_dicts()))
                 zip_file.filename = "data.zip"
             file_handle.seek(0)
+            return file_handle, Mimetypes.ZIP
 
         case io.BufferedReader():
             # File handle
@@ -105,8 +106,6 @@ def get_file_data_from_dataset(
 
     if isinstance(file_handle, GCSFile):
         file_size = file_handle.size
-    elif isinstance(file_handle, io.BytesIO):
-        file_size = file_handle.getbuffer().nbytes
     else:
         file_size = os.fstat(file_handle.fileno()).st_size
 
