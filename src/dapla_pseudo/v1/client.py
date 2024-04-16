@@ -162,6 +162,9 @@ def _extract_name(file_handle: t.BinaryIO, input_content_type: Mimetypes) -> str
     if not name.endswith(".json") and input_content_type is Mimetypes.JSON:
         name = f"{name}.json"  # Pseudo service expects a file extension
 
+    if not name.endswith(".zip") and input_content_type is Mimetypes.ZIP:
+        name = f"{name}.zip"  # Pseudo service expects a file extension
+
     if "/" in name:
         name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
 
