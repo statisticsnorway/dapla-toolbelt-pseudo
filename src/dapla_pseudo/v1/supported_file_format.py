@@ -37,6 +37,7 @@ class SupportedOutputFileFormat(Enum):
 FORMAT_TO_MIMETYPE_FUNCTION = {
     SupportedOutputFileFormat.CSV: "text/csv",
     SupportedOutputFileFormat.JSON: "application/json",
+    SupportedOutputFileFormat.ZIP: "application/zip",
 }
 
 
