@@ -204,7 +204,7 @@ result_df = (
 #### Pseudonymize using custom keys/keysets
 
 ```python
-from dapla_pseudo import pseudonymize
+from dapla_pseudo import Pseudonymize, PseudoKeyset
 
 # Pseudonymize fields in a local file using the default key:
 df = (
@@ -247,6 +247,49 @@ df = (
     .on_fields("fornavn")
     .with_default_encryption(custom_key="1234567890") # Note that the custom key has to be the same as "primaryKeyId" in the custom keyset
     .run(custom_keyset=custom_keyset)
+    .to_polars()
+)
+```
+#### Pseudonymize using custom rules
+
+Instead of declaring the pseudonymization rules via the Pseudonymize functions, one can define the rules manually.
+This can be done via the `PseudoRule` class like this:
+
+```python
+from dapla_pseudo import Pseudonymize, PseudoRule
+
+rule_json = {
+    'name': 'my-fule',
+     'pattern': '**/identifiers/*',
+     'func': 'redact(placeholder=#)' # This is a shorthand representation of the redact function
+}
+
+rule = PseudoRule.from_json(rule_json)
+
+df = (
+    Pseudonymize.from_polars(df)
+    .add_rules(rule) # Add one or more pseudonymization rules
+    .run()
+    .to_polars()
+)
+```
+
+Pseudonymization rules can also be read from file. This is especially handy when there are several rules, or if you
+prefer to store and maintain pseudonymization rules externally. For example:
+
+```python
+from dapla_pseudo import PseudoRule
+import json
+
+with open("pseudo-rules.json", 'r') as rules_file:
+    rules_json = json.load(rules_file)
+
+pseudo_rules = [PseudoRule.from_json(rule) for rule in rules_json]
+
+df = (
+    Pseudonymize.from_polars(df)
+    .add_rules(pseudo_rules)
+    .run()
     .to_polars()
 )
 ```
