@@ -1,11 +1,13 @@
 from unittest.mock import Mock
 
+import polars as pl
 import pytest
 from gcsfs.core import GCSFile
 
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.v1.api_models import Mimetypes
 from dapla_pseudo.v1.pseudo_commons import get_content_type_from_file
+from dapla_pseudo.v1.pseudo_commons import get_file_data_from_dataset
 
 PKG = "dapla_pseudo.v1.builder_pseudo"
 TEST_FILE_PATH = "tests/v1/test_files"
@@ -31,3 +33,9 @@ def test_get_content_type_from_file_unsupported_mimetype() -> None:
     file_handle = open(f"{TEST_FILE_PATH}/test.xml", mode="rb")
     with pytest.raises(MimetypeNotSupportedError):
         get_content_type_from_file(file_handle)
+
+
+def test_get_file_data_from_polars_dataset() -> None:
+    df = pl.DataFrame()
+    _, mime_type = get_file_data_from_dataset(df)
+    assert mime_type.name == "ZIP"
