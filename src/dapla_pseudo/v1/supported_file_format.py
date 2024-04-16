@@ -58,6 +58,10 @@ def read_to_pandas_df(
             return pd.read_xml(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
             return pd.read_parquet(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.ZIP:
+            raise ValueError(
+                f"Unsupported file format for Pandas: '{supported_format}'."
+            )
 
 
 def read_to_polars_df(
@@ -75,9 +79,9 @@ def read_to_polars_df(
             return pl.read_json(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
             return pl.read_parquet(df_dataset, **kwargs)
-        case SupportedOutputFileFormat.XML:
+        case SupportedOutputFileFormat.XML | SupportedOutputFileFormat.ZIP:
             raise ValueError(
-                "Unsupported file format for Polars: 'XML'. Use Pandas instead."
+                f"Unsupported file format for Polars: '{supported_format}'."
             )
 
 

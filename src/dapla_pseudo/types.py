@@ -12,11 +12,7 @@ from dapla_pseudo.v1.api_models import Field
 
 FieldDecl: TypeAlias = str | dict[str, str] | Field
 BinaryFileDecl: TypeAlias = (
-    io.BufferedReader
-    | fsspec.spec.AbstractBufferedFile
-    | gcsfs.core.GCSFile
-    | io.BytesIO
-    | io.StringIO
+    io.BufferedReader | fsspec.spec.AbstractBufferedFile | gcsfs.core.GCSFile
 )
 
 DatasetDecl: TypeAlias = pd.DataFrame | BinaryFileDecl | str | Path
