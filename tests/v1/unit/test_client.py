@@ -16,8 +16,10 @@ from dapla_pseudo.v1.models.core import PseudoKeyset
 
 PKG = "dapla_pseudo.v1.client"
 
+import pytest_cases
 
-@pytest.fixture
+
+@pytest_cases.fixture()
 def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"

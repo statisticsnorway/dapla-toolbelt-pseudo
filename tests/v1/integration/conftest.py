@@ -2,10 +2,10 @@ import os
 import subprocess
 from collections.abc import Generator
 
-import pytest
+import pytest_cases
 
 
-@pytest.fixture()
+@pytest_cases.fixture()
 def setup() -> Generator[None, None, None]:
     os.environ["PSEUDO_SERVICE_URL"] = (
         "https://dapla-pseudo-service.staging-bip-app.ssb.no"

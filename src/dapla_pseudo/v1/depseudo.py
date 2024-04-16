@@ -102,9 +102,6 @@ class Depseudonymize:
                     or a string matching one of the keys in `dapla_pseudo.constants.PredefinedKeys`. the Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
-            Raises:
-                ValueError: If no dataset has been provided, no fields have been provided, or the dataset is of an unsupported type.
-
             Returns:
                 Result: The depseudonymized dataset and the associated metadata.
             """

@@ -6,7 +6,7 @@ from dapla_pseudo.v1.models.core import MapSidKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def pseudo_func_sid() -> PseudoFunction:
     """PseudoFunction fixture for DAEAD."""
     return PseudoFunction(
@@ -14,7 +14,7 @@ def pseudo_func_sid() -> PseudoFunction:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def pseudo_func_daead() -> PseudoFunction:
     """PseudoFunction fixture for DAEAD."""
     return PseudoFunction(

@@ -86,6 +86,7 @@ warn_unreachable = true
 pretty = true
 show_column_numbers = true
 show_error_context = true
+disallow_untyped_decorators = false
 
 [[tool.mypy.overrides]]
 # Allow missing type hints in third-party libraries without type information.
@@ -99,13 +100,16 @@ module = [
     "typeguard",
     "puremagic",
     "google.*",
-    "google.oauth2"
+    "google.oauth2",
+    "pytest_cases",
+    "pytest_mock"
 ]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "dapla_pseudo.tests.*"
 disallow_untyped_defs = true
+
 
 [tool.ruff]
 force-exclude = true  # Apply excludes to pre-commit

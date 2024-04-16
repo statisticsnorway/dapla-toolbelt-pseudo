@@ -117,9 +117,6 @@ class Repseudonymize:
                 target_custom_keyset (PseudoKeyset, optional): The target pseudonymization keyset to use. Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
-            Raises:
-                ValueError: If no dataset has been provided, no fields have been provided, or the dataset is of an unsupported type.
-
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """

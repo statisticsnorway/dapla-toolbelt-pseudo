@@ -8,7 +8,7 @@ from dapla_pseudo.v1.models.core import File
 from dapla_pseudo.v1.models.core import Mimetypes
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer.json"
     return pl.read_json(
@@ -23,7 +23,7 @@ def df_personer() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_pandas() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer.json"
     return pd.read_json(
@@ -38,34 +38,34 @@ def df_personer_pandas() -> pd.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def personer_file() -> File:
     JSON_FILE = "tests/data/personer.json"
     file_handle = open(JSON_FILE, mode="rb")
     return File(file_handle, content_type=Mimetypes.JSON)
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def personer_hierarch_file_path() -> str:
     return "tests/data/personer_hierarchical.json"
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def personer_pseudonymized_hierarch_file_path() -> str:
     return "tests/data/personer_hierarchical_pseudonymized.json"
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def personer_file_path() -> str:
     return "tests/data/personer.json"
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def personer_pseudonymized_file_path() -> str:
     return "tests/data/personer_pseudonymized_default_encryption.json"
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_hierarchical() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_hierarchical.json"
     return pl.read_json(
@@ -84,7 +84,7 @@ def df_personer_hierarchical() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_hierarchical_pseudonymized() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_hierarchical_pseudonymized.json"
     return pl.read_json(
@@ -103,7 +103,7 @@ def df_personer_hierarchical_pseudonymized() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
     return pl.read_json(
@@ -118,7 +118,7 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_fnr_ff31_encrypted() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_papis_compatible_encryption.json"
     return pl.read_json(
@@ -133,7 +133,7 @@ def df_personer_fnr_ff31_encrypted() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_daead_encrypted_ssb_common_key_1() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_daead_ssb_common_key_1.json"
     return pl.read_json(
@@ -148,7 +148,7 @@ def df_personer_daead_encrypted_ssb_common_key_1() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_daead_ssb_common_key_2.json"
     return pl.read_json(
@@ -163,7 +163,7 @@ def df_personer_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_sid_daead_ssb_common_key_2.json"
     return pl.read_json(
@@ -178,7 +178,7 @@ def df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2() -> pl.DataFr
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
     return pd.read_json(
@@ -193,7 +193,7 @@ def df_pandas_personer_fnr_daead_encrypted() -> pd.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def df_personer_sid_fnr() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_sid_fnr.json"
     return pl.read_json(
@@ -208,7 +208,7 @@ def df_personer_sid_fnr() -> pl.DataFrame:
     )
 
 
-@pytest_cases.fixture
+@pytest_cases.fixture()
 def single_field_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
