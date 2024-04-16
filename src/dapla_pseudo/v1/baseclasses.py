@@ -15,6 +15,7 @@ import polars as pl
 import requests
 
 from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
@@ -247,14 +248,22 @@ class _BaseRuleConstructor:
         self,
         sid_snapshot_date: str | date | None = None,
         custom_key: PredefinedKeys | str | None = None,
+        on_map_failure: MapFailureStrategy | str | None = None,
     ) -> list[PseudoRule]:
+        failure_strategy = (
+            None if on_map_failure is None else MapFailureStrategy(on_map_failure)
+        )
         kwargs = (
             MapSidKeywordArgs(
                 key_id=custom_key,
                 snapshot_date=convert_to_date(sid_snapshot_date),
+                failure_strategy=failure_strategy,
             )
             if custom_key
-            else MapSidKeywordArgs(snapshot_date=convert_to_date(sid_snapshot_date))
+            else MapSidKeywordArgs(
+                snapshot_date=convert_to_date(sid_snapshot_date),
+                failure_strategy=failure_strategy,
+            )
         )
         pseudo_func = PseudoFunction(
             function_type=PseudoFunctionTypes.MAP_SID, kwargs=kwargs

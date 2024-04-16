@@ -7,6 +7,7 @@ import pandas as pd
 import polars as pl
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
+from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileLikeDatasetDecl
@@ -118,6 +119,7 @@ class Depseudonymize:
             self,
             sid_snapshot_date: str | date | None = None,
             custom_key: str | None = None,
+            on_map_failure: MapFailureStrategy | str | None = None,
         ) -> "Depseudonymize._Depseudonymizer":
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
@@ -129,12 +131,13 @@ class Depseudonymize:
                     Latest if unspecified. Format: YYYY-MM-DD
                 custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
+                on_map_failure (Optional[MapFailureStrategy], optional): defines how to handle mapping failures
 
             Returns:
                 Self: The object configured to be mapped to fnr
             """
             rules = super()._map_to_stable_id_and_pseudonymize(
-                sid_snapshot_date, custom_key
+                sid_snapshot_date, custom_key, on_map_failure
             )
             return Depseudonymize._Depseudonymizer(rules)
 
