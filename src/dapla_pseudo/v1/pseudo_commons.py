@@ -194,15 +194,15 @@ def pseudo_operation_dataset(
         import zipfile
 
         file_name = "data.zip"
-        file_handle = io.BytesIO()
+        zip_buffer = io.BytesIO()
         with zipfile.ZipFile(
-            file_handle, "a", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+            zip_buffer, "a", compression=zipfile.ZIP_DEFLATED, compresslevel=9
         ) as zip_file:
             zip_file.writestr("data.json", json.dumps(dataset_ref.to_dicts()))
-
+        zip_buffer.seek(0)
         data_spec = (
             file_name,
-            file_handle,
+            zip_buffer,
             str(pseudo_operation_request.target_content_type),
         )
         response = _client()._post_to_file_endpoint(
