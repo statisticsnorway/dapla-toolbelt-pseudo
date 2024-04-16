@@ -11,7 +11,7 @@ from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
 
-TEST_FILE_PATH = "tests/v1/test_files"
+TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
 custom_keyset_dict = {

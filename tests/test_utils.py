@@ -16,7 +16,7 @@ from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
-TEST_FILE_PATH = "tests/v1/test_files"
+TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
 def test_find_multipart_obj() -> None:

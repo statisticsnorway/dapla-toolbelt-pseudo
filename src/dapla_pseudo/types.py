@@ -2,13 +2,18 @@
 
 import io
 from pathlib import Path
+from typing import TypeAlias
 
 import fsspec
 import gcsfs
 import pandas as pd
 
-BinaryFileDecl = (
-    io.BufferedReader | fsspec.spec.AbstractBufferedFile | gcsfs.core.GCSFile
+FieldDecl: TypeAlias = str | dict[str, str]
+BinaryFileDecl: TypeAlias = (
+    io.BufferedReader
+    | fsspec.spec.AbstractBufferedFile
+    | gcsfs.core.GCSFile
+    | io.BytesIO
 )
 
 DatasetDecl = pd.DataFrame | BinaryFileDecl | str | Path

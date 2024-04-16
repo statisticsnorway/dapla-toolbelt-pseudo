@@ -1,8 +1,10 @@
 """Utility functions for Dapla Pseudo."""
 
 import io
+import json
 import os
 import typing as t
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -182,7 +184,7 @@ def build_pseudo_dataset_request(
 
 
 def get_file_data_from_dataset(
-    dataset: FileLikeDatasetDecl,
+    dataset: FileLikeDatasetDecl | pl.DataFrame,
 ) -> tuple[BinaryFileDecl, Mimetypes]:
     """Converts the given dataset to a file handle and content type.
 
@@ -217,6 +219,17 @@ def get_file_data_from_dataset(
                 file_handle = open(dataset, "rb")
 
             file_handle.seek(0)
+
+        # Convert Polars dataframe to a zipped archive with json data
+        case pl.DataFrame() as df:
+            file_handle = io.BytesIO()
+            with zipfile.ZipFile(
+                file_handle, "a", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+            ) as zip_file:
+                zip_file.writestr("data.json", json.dumps(df.to_dicts()))
+                zip_file.filename = "data.zip"
+            file_handle.seek(0)
+            return file_handle, Mimetypes.ZIP
 
         case io.BufferedReader():
             # File handle

@@ -20,6 +20,7 @@ class SupportedOutputFileFormat(Enum):
     Note that this does NOT describe the valid file extensions of _input_ data when reading from a file.
     """
 
+    ZIP = "zip"
     CSV = "csv"
     JSON = "json"
     XML = "xml"
@@ -36,6 +37,7 @@ class SupportedOutputFileFormat(Enum):
 FORMAT_TO_MIMETYPE_FUNCTION = {
     SupportedOutputFileFormat.CSV: "text/csv",
     SupportedOutputFileFormat.JSON: "application/json",
+    SupportedOutputFileFormat.ZIP: "application/zip",
 }
 
 
@@ -56,6 +58,10 @@ def read_to_pandas_df(
             return pd.read_xml(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
             return pd.read_parquet(df_dataset, **kwargs)
+        case SupportedOutputFileFormat.ZIP:
+            raise ValueError(
+                f"Unsupported file format for Pandas: '{supported_format}'."
+            )
 
 
 def read_to_polars_df(
@@ -73,9 +79,9 @@ def read_to_polars_df(
             return pl.read_json(df_dataset, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
             return pl.read_parquet(df_dataset, **kwargs)
-        case SupportedOutputFileFormat.XML:
+        case SupportedOutputFileFormat.XML | SupportedOutputFileFormat.ZIP:
             raise ValueError(
-                "Unsupported file format for Polars: 'XML'. Use Pandas instead."
+                f"Unsupported file format for Polars: '{supported_format}'."
             )
 
 

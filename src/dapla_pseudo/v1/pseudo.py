@@ -15,7 +15,6 @@ from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
 from dapla_pseudo.v1.models.core import File
-from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -28,14 +27,16 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame | HierarchicalDataFrame
+    dataset: File | pl.DataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         if pl.Struct in dataset.dtypes:
-            Pseudonymize.dataset = HierarchicalDataFrame(dataset)
+            # Hierachial dataset must be processed as a file
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
         else:
             Pseudonymize.dataset = dataset
         return Pseudonymize._Pseudonymizer()
@@ -44,7 +45,9 @@ class Pseudonymize:
     def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
         if pl.Struct in dataframe.dtypes:
-            Pseudonymize.dataset = HierarchicalDataFrame(dataframe)
+            # Hierachial dataset must be processed as a file
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
         else:
             Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()

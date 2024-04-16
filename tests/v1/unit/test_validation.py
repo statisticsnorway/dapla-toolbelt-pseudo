@@ -12,7 +12,7 @@ from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.validation import Validator
 
 PKG = "dapla_pseudo.v1.validation"
-TEST_FILE_PATH = "tests/v1/test_files"
+TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
 @pytest.fixture()
