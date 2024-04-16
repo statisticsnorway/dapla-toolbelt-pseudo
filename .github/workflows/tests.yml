@@ -40,9 +40,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: ${{ matrix.python }}
+          cache: "pip" # caching pip dependencies
 
       - name: Install Poetry
         run: |
@@ -108,9 +109,10 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up Python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: "3.12"
+          cache: "pip" # caching pip dependencies
 
       - name: Install Poetry
         run: |
@@ -137,18 +139,17 @@ jobs:
         run: |
           nox --session=coverage -- xml
 
-      - name: Clean the workspace
-        uses: docker://alpine
-        with:
-          args: /bin/sh -c "find \"${GITHUB_WORKSPACE}\" -mindepth 1 ! -name . -prune -exec rm -rf {} +"
-
-
       # Need to fix coverage source paths for SonarCloud scanning in GitHub actions.
       # Replace root path with /github/workspace (mounted in docker container).
       - name: Override coverage source paths for SonarCloud
         run: |
           sed -i "s/<source><\/source>/<source>\/github\/workspace<\/source>/g" coverage.xml
           sed -i "s/<source>tests/<source>\/github\/workspace\/tests/g" coverage.xml
+
+      - name: Clean the workspace
+        uses: docker://alpine
+        with:
+          args: /bin/sh -c "find \"${GITHUB_WORKSPACE}\" -mindepth 1 ! -name . -prune -exec rm -rf {} +"
 
       - name: SonarCloud Scan
         env:
