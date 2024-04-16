@@ -78,7 +78,9 @@ def test_pseudonymize_default_encryption_null(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(
+        exclude_none=True
+    )
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
 
 
@@ -95,7 +97,9 @@ def test_pseudonymize_sid(
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(
+        exclude_none=True
+    )
     assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
 
 
@@ -119,7 +123,9 @@ def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(
+        exclude_none=True
+    )
     assert_frame_equal(result.to_polars(), expected_result_df)
 
 
@@ -143,5 +149,7 @@ def test_pseudonymize_hierarchical(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json()
+    assert result.datadoc == expected_metadata_container.model_dump_json(
+        exclude_none=True
+    )
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_pseudonymized)

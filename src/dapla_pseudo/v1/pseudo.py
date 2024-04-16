@@ -96,7 +96,7 @@ class Pseudonymize:
             """Specify one or multiple fields to be pseudonymized."""
             return Pseudonymize._PseudoFuncSelector(list(fields))
 
-        def add_rules(self, rules: list[PseudoRule]) -> "Pseudonymize._Pseudonymizer":
+        def add_rules(self, *rules: PseudoRule) -> "Pseudonymize._Pseudonymizer":
             """Specify one or more existing pseudonymization rule."""
             return Pseudonymize._Pseudonymizer(self.rules + list(rules))
 

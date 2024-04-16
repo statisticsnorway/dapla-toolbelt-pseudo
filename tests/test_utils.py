@@ -3,12 +3,15 @@ from unittest.mock import Mock
 
 import pytest
 from gcsfs.core import GCSFile
+from google.auth.exceptions import DefaultCredentialsError
 
+from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import find_multipart_obj
 from dapla_pseudo.utils import get_content_type_from_file
+from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
@@ -79,3 +82,35 @@ def test_get_content_type_from_file_unsupported_mimetype() -> None:
     file_handle = open(f"{TEST_FILE_PATH}/test.xml", mode="rb")
     with pytest.raises(MimetypeNotSupportedError):
         get_content_type_from_file(file_handle)
+
+
+def test_builder_from_file_not_a_file() -> None:
+    path = f"{TEST_FILE_PATH}/not/a/file.json"
+    with pytest.raises(FileNotFoundError):
+        get_file_data_from_dataset(path)
+
+
+def test_builder_from_file_no_file_extension() -> None:
+    path = f"{TEST_FILE_PATH}/file_no_extension"
+
+    with pytest.raises(NoFileExtensionError):
+        get_file_data_from_dataset(path)
+
+
+def test_builder_from_file_empty_file() -> None:
+    path = f"{TEST_FILE_PATH}/empty_file"
+
+    with pytest.raises(FileInvalidError):
+        get_file_data_from_dataset(path)
+
+
+@pytest.mark.parametrize("file_format", Mimetypes.__members__.keys())
+def test_builder_from_file(file_format: str) -> None:
+    # Test reading all supported file extensions
+    get_file_data_from_dataset(f"{TEST_FILE_PATH}/test.{file_format.lower()}")
+
+
+def test_builder_from_invalid_gcs_file() -> None:
+    invalid_gcs_path = "gs://invalid/path.json"
+    with pytest.raises((FileNotFoundError, DefaultCredentialsError)):
+        get_file_data_from_dataset(invalid_gcs_path)
