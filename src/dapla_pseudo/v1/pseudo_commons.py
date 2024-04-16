@@ -191,8 +191,15 @@ def pseudo_operation_dataset(
     data_spec: FileSpecDecl
 
     if type(dataset_ref) is pl.DataFrame:
-        file_name = "data.json"
-        file_handle = io.StringIO(json.dumps(dataset_ref.to_dicts()))
+        import zlib
+
+        file_name = "data.zip"
+        file_handle = io.BytesIO(
+            zlib.compress(
+                json.dumps(dataset_ref.to_dicts()).encode("utf-8"),
+                level=zlib.Z_BEST_COMPRESSION,
+            )
+        )
         data_spec = (
             file_name,
             file_handle,

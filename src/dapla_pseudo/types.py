@@ -15,6 +15,7 @@ BinaryFileDecl: TypeAlias = (
     io.BufferedReader
     | fsspec.spec.AbstractBufferedFile
     | gcsfs.core.GCSFile
+    | io.BytesIO
     | io.StringIO
 )
 
