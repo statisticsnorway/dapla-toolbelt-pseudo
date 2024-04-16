@@ -28,7 +28,6 @@ from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
 from dapla_pseudo.v1.api_models import PseudoRule
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.pseudo_commons import File
-from dapla_pseudo.v1.pseudo_commons import HierarchicalDataFrame
 from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
 from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
 from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
@@ -44,14 +43,16 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame | HierarchicalDataFrame
+    dataset: File | pl.DataFrame
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         if pl.Struct in dataset.dtypes:
-            Pseudonymize.dataset = HierarchicalDataFrame(dataset)
+            # Hierachial dataset must be processed as a file
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
         else:
             Pseudonymize.dataset = dataset
         return Pseudonymize._Pseudonymizer()
@@ -60,7 +61,9 @@ class Pseudonymize:
     def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
         if pl.Struct in dataframe.dtypes:
-            Pseudonymize.dataset = HierarchicalDataFrame(dataframe)
+            # Hierachial dataset must be processed as a file
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
         else:
             Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
@@ -133,7 +136,7 @@ class Pseudonymize:
             if Pseudonymize.dataset is None:
                 raise ValueError("No dataset has been provided.")
 
-            if self._rules == []:
+            if not self._rules:
                 raise ValueError(
                     "No fields have been provided. Use the 'on_fields' or the 'add_rules' method."
                 )
@@ -147,14 +150,12 @@ class Pseudonymize:
                     return self._pseudonymize_dataframe(Pseudonymize.dataset)
                 case pl.DataFrame():
                     return self._pseudonymize_field(Pseudonymize.dataset)
-                case HierarchicalDataFrame():
-                    return self._pseudonymize_dataframe(Pseudonymize.dataset.contents)
                 case _ as invalid_dataset:
                     raise ValueError(
                         f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                     )
 
-        def _pseudonymize_dataframe(self, dataframe: File | pl.DataFrame) -> Result:
+        def _pseudonymize_dataframe(self, dataframe: File) -> Result:
             """Pseudonymize the entire dataframe."""
             pseudonymize_request = PseudonymizeFileRequest(
                 pseudo_config=PseudoConfig(

@@ -4,6 +4,7 @@ import io
 import json
 import os
 import typing as t
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -42,7 +43,7 @@ class File:
 
 
 def get_file_data_from_dataset(
-    dataset: FileLikeDatasetDecl,
+    dataset: FileLikeDatasetDecl | pl.DataFrame,
 ) -> tuple[BinaryFileDecl, Mimetypes]:
     """Converts the given dataset to a file handle and content type.
 
@@ -77,6 +78,17 @@ def get_file_data_from_dataset(
                 file_handle = open(dataset, "rb")
 
             file_handle.seek(0)
+
+        # Convert Polars dataframe to a zipped archive with json data
+        case pl.DataFrame() as df:
+            file_handle = io.BytesIO()
+            with zipfile.ZipFile(
+                file_handle, "a", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+            ) as zip_file:
+                zip_file.writestr("data.json", json.dumps(df.to_dicts()))
+                zip_file.filename = "data.zip"
+            file_handle.seek(0)
+            return file_handle, Mimetypes.ZIP
 
         case io.BufferedReader():
             # File handle
@@ -132,13 +144,6 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
 
 
 @dataclass
-class HierarchicalDataFrame:
-    """HierarchicalDataset holds a hierarchical dataframe."""
-
-    contents: pl.DataFrame
-
-
-@dataclass
 class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
 
@@ -168,7 +173,7 @@ class PseudoFileResponse:
 
 
 def pseudo_operation_dataset(
-    dataset_ref: File | pl.DataFrame,
+    dataset_ref: File,
     pseudo_operation_request: (
         PseudonymizeFileRequest | DepseudonymizeFileRequest | RepseudonymizeFileRequest
     ),
@@ -176,7 +181,7 @@ def pseudo_operation_dataset(
     """Calls pseudonymization API for an entire dataset (file handle or dataframe) and returns the pseudonymized data and metadata.
 
     Args:
-        dataset_ref: A file handle or a dataframe representing the data to be pseudonymized
+        dataset_ref: A file handle representing the data to be pseudonymized
         pseudo_operation_request: An object representing the data and how it should be pseudonymized
 
     Returns:
@@ -190,37 +195,22 @@ def pseudo_operation_dataset(
     file_name: str
     data_spec: FileSpecDecl
 
-    if type(dataset_ref) is pl.DataFrame:
-        file_name = "data.json"
+    with dataset_ref.file_handle as file_handle:
+        file_name = _extract_name(
+            file_handle=file_handle, input_content_type=dataset_ref.content_type
+        )
         data_spec = (
             file_name,
-            json.dumps(dataset_ref.to_dicts()),
+            file_handle,
             str(pseudo_operation_request.target_content_type),
         )
+        # Post to file endpoint must be within the 'with' block to keep the file_handle open
         response = _client()._post_to_file_endpoint(
             path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
             request_spec=request_spec,
             data_spec=data_spec,
-            stream=False,
+            stream=True,
         )
-    else:
-        file = t.cast(File, dataset_ref)
-        with file.file_handle as file_handle:
-            file_name = _extract_name(
-                file_handle=file_handle, input_content_type=file.content_type
-            )
-            data_spec = (
-                file_name,
-                file_handle,
-                str(pseudo_operation_request.target_content_type),
-            )
-            # Post to file endpoint must be within the 'with' block to keep the file_handle open
-            response = _client()._post_to_file_endpoint(
-                path=PseudoClient.pseudo_op_to_endpoint[type(pseudo_operation_request)],
-                request_spec=request_spec,
-                data_spec=data_spec,
-                stream=True,
-            )
 
     payload = json.loads(response.content.decode("utf-8"))
     pseudo_data = payload["data"]

@@ -28,6 +28,7 @@ class Mimetypes(str, Enum):
     """
 
     JSON = "application/json"
+    ZIP = "application/zip"
     CSV = "text/csv"
 
 
