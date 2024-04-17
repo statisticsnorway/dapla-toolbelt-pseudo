@@ -16,7 +16,6 @@ from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.models.api import PseudoFileRequest
 from dapla_pseudo.v1.models.api import PseudoFileResponse
 from dapla_pseudo.v1.models.core import File
-from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoFunction
@@ -39,7 +38,7 @@ PKG = "dapla_pseudo.v1.baseclasses"
 )
 def test_execute_pseudo_operation_field(
     pseudo_op: PseudoOperation,
-    dataset: pl.DataFrame | File | HierarchicalDataFrame,
+    dataset: pl.DataFrame | File,
     mocker: MockerFixture,
 ) -> None:
     """Purpose: Ensure that supported dataset types are handled and actually perform pseudonymization."""
@@ -67,8 +66,6 @@ def test_execute_pseudo_operation_field(
         case pl.DataFrame():
             mock_pseudo_field.assert_called_once()
         case File():
-            mock_pseudo_dataset.assert_called_once()
-        case HierarchicalDataFrame():
             mock_pseudo_dataset.assert_called_once()
 
 

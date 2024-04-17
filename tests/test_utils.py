@@ -1,6 +1,7 @@
 from datetime import date
 from unittest.mock import Mock
 
+import polars as pl
 import pytest
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
@@ -84,20 +85,20 @@ def test_get_content_type_from_file_unsupported_mimetype() -> None:
         get_content_type_from_file(file_handle)
 
 
-def test_builder_from_file_not_a_file() -> None:
+def test_get_file_data_from_file_not_a_file() -> None:
     path = f"{TEST_FILE_PATH}/not/a/file.json"
     with pytest.raises(FileNotFoundError):
         get_file_data_from_dataset(path)
 
 
-def test_builder_from_file_no_file_extension() -> None:
+def test_get_file_data_from_file_no_file_extension() -> None:
     path = f"{TEST_FILE_PATH}/file_no_extension"
 
     with pytest.raises(NoFileExtensionError):
         get_file_data_from_dataset(path)
 
 
-def test_builder_from_file_empty_file() -> None:
+def test_get_file_data_from_file_empty_file() -> None:
     path = f"{TEST_FILE_PATH}/empty_file"
 
     with pytest.raises(FileInvalidError):
@@ -105,12 +106,18 @@ def test_builder_from_file_empty_file() -> None:
 
 
 @pytest.mark.parametrize("file_format", Mimetypes.__members__.keys())
-def test_builder_from_file(file_format: str) -> None:
+def test_get_file_data_from_file(file_format: str) -> None:
     # Test reading all supported file extensions
     get_file_data_from_dataset(f"{TEST_FILE_PATH}/test.{file_format.lower()}")
 
 
-def test_builder_from_invalid_gcs_file() -> None:
+def test_get_file_data_from_invalid_gcs_file() -> None:
     invalid_gcs_path = "gs://invalid/path.json"
     with pytest.raises((FileNotFoundError, DefaultCredentialsError)):
         get_file_data_from_dataset(invalid_gcs_path)
+
+
+def test_get_file_data_from_polars_dataset() -> None:
+    df = pl.DataFrame()
+    _, mime_type = get_file_data_from_dataset(df)
+    assert mime_type.name == "ZIP"

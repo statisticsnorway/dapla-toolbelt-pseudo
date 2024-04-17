@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 
-import polars as pl
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
@@ -40,13 +39,6 @@ class File:
 
     file_handle: BinaryFileDecl
     content_type: Mimetypes
-
-
-@dataclass
-class HierarchicalDataFrame:
-    """HierarchicalDataset holds a hierarchical dataframe."""
-
-    contents: pl.DataFrame
 
 
 class PseudoFunctionArgs(BaseModel):

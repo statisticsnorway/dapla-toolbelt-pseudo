@@ -10,6 +10,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
+from typing import cast
 
 import polars as pl
 import requests
@@ -37,7 +38,6 @@ from dapla_pseudo.v1.models.api import RepseudoFileRequest
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import File
-from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import MapSidKeywordArgs
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
@@ -50,9 +50,7 @@ class _BasePseudonymizer:
     """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders."""
 
     def __init__(
-        self,
-        pseudo_operation: PseudoOperation,
-        dataset: File | pl.DataFrame | HierarchicalDataFrame,
+        self, pseudo_operation: PseudoOperation, dataset: File | pl.DataFrame
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
@@ -99,16 +97,6 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_dataset(pseudo_request, timeout)
-            case HierarchicalDataFrame():
-                pseudo_request = build_pseudo_dataset_request(
-                    self._pseudo_operation,
-                    rules,
-                    custom_keyset,
-                    target_custom_keyset,
-                    target_rules,
-                )
-                pseudo_response = self._pseudonymize_dataset(pseudo_request, timeout)
-
             case _ as invalid_dataset:
                 raise ValueError(
                     f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
@@ -173,48 +161,32 @@ class _BasePseudonymizer:
         pseudo_request: PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest,
         timeout: int,
     ) -> PseudoFileResponse:
-        data_spec: FileSpecDecl
-
+        self._dataset = cast(File, self._dataset)
+        file_handle = self._dataset.file_handle
+        content_type = self._dataset.content_type
         request_spec: FileSpecDecl = (
             None,
             pseudo_request.to_json(),
             str(Mimetypes.JSON),
         )
 
-        match self._dataset:
-            case File(file_handle, content_type):
-                file_name = _extract_name(
-                    file_handle=file_handle, input_content_type=content_type
-                )
-                data_spec = (
-                    file_name,
-                    file_handle,
-                    str(pseudo_request.target_content_type),
-                )
+        file_name = _extract_name(
+            file_handle=file_handle, input_content_type=content_type
+        )
+        data_spec = (
+            file_name,
+            file_handle,
+            str(pseudo_request.target_content_type),
+        )
 
-                response = self._pseudo_client._post_to_file_endpoint(
-                    path=f"{self._pseudo_operation.value}/file",
-                    request_spec=request_spec,
-                    data_spec=data_spec,
-                    stream=True,
-                    timeout=timeout,
-                )
-                file_handle.close()
-            case HierarchicalDataFrame(dataset):
-                file_name = "data.json"
-                data_spec = (
-                    file_name,
-                    json.dumps(dataset.to_dicts()),
-                    str(pseudo_request.target_content_type),
-                )
-
-                response = self._pseudo_client._post_to_file_endpoint(
-                    path=f"{self._pseudo_operation.value}/file",
-                    request_spec=request_spec,
-                    data_spec=data_spec,
-                    stream=True,
-                    timeout=timeout,
-                )
+        response = self._pseudo_client._post_to_file_endpoint(
+            path=f"{self._pseudo_operation.value}/file",
+            request_spec=request_spec,
+            data_spec=data_spec,
+            stream=True,
+            timeout=timeout,
+        )
+        file_handle.close()
 
         payload = json.loads(response.content.decode("utf-8"))
         pseudo_data = payload["data"]
@@ -239,7 +211,7 @@ class _BaseRuleConstructor:
     def __init__(
         self,
         fields: list[str],
-        dataset_type: type[pl.DataFrame] | type[File] | type[HierarchicalDataFrame],
+        dataset_type: type[pl.DataFrame] | type[File],
     ) -> None:
         self._fields = fields
         self._dataset_type = dataset_type

@@ -8,15 +8,14 @@ from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import File
-from dapla_pseudo.v1.models.core import HierarchicalDataFrame
 from dapla_pseudo.v1.models.core import MapSidKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 
 
-@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File, HierarchicalDataFrame])
+@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File])
 def test_map_to_stable_id_and_pseudonymize(
-    dataset_type: type[pl.DataFrame] | type[File] | type[HierarchicalDataFrame],
+    dataset_type: type[pl.DataFrame] | type[File],
 ) -> None:
     """Purpose: Test that the rules are constructed as expected."""
     base = _BaseRuleConstructor(fields=["fnr", "fnr_2"], dataset_type=dataset_type)
@@ -47,9 +46,9 @@ def test_map_to_stable_id_and_pseudonymize(
         assert rules == expected_rules
 
 
-@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File, HierarchicalDataFrame])
+@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File])
 def test_with_daead_encryption(
-    dataset_type: type[pl.DataFrame] | type[File] | type[HierarchicalDataFrame],
+    dataset_type: type[pl.DataFrame] | type[File],
 ) -> None:
     """Purpose: Test that the rules are constructed as expected."""
     base = _BaseRuleConstructor(fields=["fnr", "fnr_2"], dataset_type=dataset_type)
@@ -76,9 +75,9 @@ def test_with_daead_encryption(
         assert rules == expected_rules
 
 
-@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File, HierarchicalDataFrame])
+@pytest_cases.parametrize("dataset_type", [pl.DataFrame, File])
 def test_with_ff31_encryption(
-    dataset_type: type[pl.DataFrame] | type[File] | type[HierarchicalDataFrame],
+    dataset_type: type[pl.DataFrame] | type[File],
 ) -> None:
     """Purpose: Test that the rules are constructed as expected."""
     base = _BaseRuleConstructor(fields=["fnr", "fnr_2"], dataset_type=dataset_type)
