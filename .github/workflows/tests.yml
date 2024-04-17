@@ -146,11 +146,6 @@ jobs:
           sed -i "s/<source><\/source>/<source>\/github\/workspace<\/source>/g" coverage.xml
           sed -i "s/<source>tests/<source>\/github\/workspace\/tests/g" coverage.xml
 
-      - name: Clean the workspace
-        uses: docker://alpine
-        with:
-          args: /bin/sh -c "find \"${GITHUB_WORKSPACE}\" -mindepth 1 ! -name . -prune -exec rm -rf {} +"
-
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
