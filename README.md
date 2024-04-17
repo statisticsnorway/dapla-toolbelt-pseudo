@@ -268,7 +268,7 @@ rule = PseudoRule.from_json(rule_json)
 
 df = (
     Pseudonymize.from_polars(df)
-    .add_rules(rule) # Add one or more pseudonymization rules
+    .add_rules([rule]) # Add to pseudonymization rules
     .run()
     .to_polars()
 )

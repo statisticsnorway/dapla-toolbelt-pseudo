@@ -6,6 +6,7 @@ from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import KeyWrapper
 from dapla_pseudo.v1.models.core import MapSidKeywordArgs
+from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -171,5 +172,28 @@ def test_deserialize_map_sid_pseudo_rule_with_defaults() -> None:
                 kwargs=MapSidKeywordArgs(),
             ),
             pattern="**/identifiers/*",
+        )
+    )
+
+
+def test_deserialize_pseudo_config_with_redact_function() -> None:
+    assert PseudoConfig(
+        rules=[
+            PseudoRule.from_json(
+                '{"name":"my-rule","pattern":"foo*","func":"redact(placeholder=#)"}'
+            )
+        ]
+    ) == (
+        PseudoConfig(
+            rules=[
+                PseudoRule(
+                    name="my-rule",
+                    pattern="foo*",
+                    func=PseudoFunction(
+                        function_type=PseudoFunctionTypes.REDACT,
+                        kwargs=RedactKeywordArgs(placeholder="#"),
+                    ),
+                )
+            ]
         )
     )
