@@ -1,19 +1,18 @@
-from collections.abc import Generator
-
 import polars as pl
+import pytest
+from polars.testing import assert_frame_equal
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Repseudonymize
-from tests.integration.utils import integration_test
-from tests.integration.utils import setup
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_repseudonymize_from_default_encryption_to_fpe(
-    setup: Generator[None, None, None],
     df_personer_fnr_ff31_encrypted: pl.DataFrame,
     df_personer_fnr_daead_encrypted: pl.DataFrame,
 ) -> None:
-    result_df = (
+    result = (
         Repseudonymize.from_polars(df_personer_fnr_daead_encrypted)
         .on_fields("fnr")
         .from_default_encryption()
@@ -21,13 +20,12 @@ def test_repseudonymize_from_default_encryption_to_fpe(
         .run()
         .to_polars()
     )
+    assert_frame_equal(result, df_personer_fnr_ff31_encrypted)
 
-    assert result_df.equals(df_personer_fnr_ff31_encrypted)
 
-
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_repseudonymize_change_keys(
-    setup: Generator[None, None, None],
     df_personer_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_1: pl.DataFrame,
 ) -> None:
@@ -39,13 +37,12 @@ def test_repseudonymize_change_keys(
         .run()
         .to_polars()
     )
+    assert_frame_equal(result, df_personer_daead_encrypted_ssb_common_key_2)
 
-    assert result.equals(df_personer_daead_encrypted_ssb_common_key_2)
 
-
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_repseudonymize_from_sid_to_daead(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_1: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_2: pl.DataFrame,
@@ -64,5 +61,4 @@ def test_repseudonymize_from_sid_to_daead(
         .run()
         .to_polars()
     )
-
-    assert result.equals(df_personer_daead_encrypted_ssb_common_key_1)
+    assert_frame_equal(result, df_personer_daead_encrypted_ssb_common_key_1)

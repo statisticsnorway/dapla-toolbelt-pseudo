@@ -1,13 +1,13 @@
-"""This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
-
 import json
 import typing as t
+from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 
 from humps import camelize
 from pydantic import BaseModel
 from pydantic import ConfigDict
+from pydantic import Field
 from pydantic import FieldSerializationInfo
 from pydantic import ValidationError
 from pydantic import field_serializer
@@ -19,6 +19,7 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.models import APIModel
+from dapla_pseudo.types import BinaryFileDecl
 
 
 class Mimetypes(str, Enum):
@@ -32,91 +33,12 @@ class Mimetypes(str, Enum):
     CSV = "text/csv"
 
 
-class Field(APIModel):
-    """Field represents a targeted piece of data within a dataset or record.
+@dataclass
+class File:
+    """'File' represents a file to be pseudonymized."""
 
-    Parameters:
-        pattern: field name or expression (e.g. a glob)
-        mapping: If defined, denotes a mapping transformation that should be applied before the operation in question,
-            e.g. "sid", meaning the field should be transformed to Stabil ID before being pseudonymized.
-    """
-
-    pattern: str
-    mapping: str | None = None
-
-
-class PseudoKeyset(APIModel):
-    """PseudoKeyset represents a wrapped data encryption key (WDEK).
-
-    Example structure, represented as JSON:
-    {"encrypted_keyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
-    "keyset_info": {
-    "primaryKeyId": 1234567890,
-    "keyInfo": [
-    {
-    "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
-    "status": "ENABLED",
-    "keyId": 1234567890,
-    "outputPrefixType": "TINK"
-    }
-    ]
-    },
-    "kek_uri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
-    }
-    """
-
-    encrypted_keyset: str
-    keyset_info: dict[str, t.Any]
-    kek_uri: str
-
-    def get_key_id(self) -> str:
-        """ID of the keyset."""
-        return str(self.keyset_info["primaryKeyId"])
-
-
-class TargetCompression(APIModel):
-    """TargetCompression denotes if and how results from the API should be compressed and password encrypted."""
-
-    password: str
-
-
-class KeyWrapper(BaseModel):
-    """Hold information about a key, such as ID and keyset information."""
-
-    key_id: str = ""
-    keyset: PseudoKeyset | None = None
-
-    def __init__(self, key: str | PseudoKeyset | None = None, **kwargs: t.Any) -> None:
-        """Determine if a key is either a key reference (aka "common key") or a keyset.
-
-        If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
-
-        :param key: either a key reference (as string) or a PseudoKeyset
-        """
-        super().__init__(**kwargs)
-        if isinstance(key, str):
-            try:  # Attempt to parse the key as a JSON-string matching the PseudoKeyset model
-                pseudo_keyset = PseudoKeyset.model_validate(json.loads(key))
-                self.key_id = pseudo_keyset.get_key_id()
-                self.keyset = pseudo_keyset
-                return
-            except (ValidationError, json.JSONDecodeError):
-                pass
-
-            # Else, attempt to parse the key as one of the predefined keys
-            if key in PredefinedKeys.__members__.values():
-                self.key_id = key
-                self.keyset = None
-            else:
-                raise ValueError(f"Key '{key}' is not a valid key reference or keyset")
-        # Or we have an already parsed PseudoKeyset
-        elif isinstance(key, PseudoKeyset):
-            self.key_id = key.get_key_id()
-            self.keyset = key
-
-    def keyset_list(self) -> list[PseudoKeyset] | None:
-        """Wrap the keyset in a list if it is defined - or return None if it is not."""
-        return None if self.keyset is None else [self.keyset]
+    file_handle: BinaryFileDecl
+    content_type: Mimetypes
 
 
 class PseudoFunctionArgs(BaseModel):
@@ -145,7 +67,7 @@ class MapSidKeywordArgs(PseudoFunctionArgs):
         failure_strategy: defines how to handle mapping failures
     """
 
-    key_id: PredefinedKeys | str = PredefinedKeys.PAPIS_COMMON_KEY_1
+    key_id: PredefinedKeys | str = Field(default=PredefinedKeys.PAPIS_COMMON_KEY_1)
     snapshot_date: date | None = None
     strategy: UnknownCharacterStrategy | None = UnknownCharacterStrategy.SKIP
     failure_strategy: MapFailureStrategy | None = None
@@ -288,33 +210,33 @@ class PseudoRule(APIModel):
             return super().model_validate(data)
 
 
-class PseudoFieldRequest(APIModel):
-    """Model of the pseudo field request sent to the service."""
+class PseudoKeyset(APIModel):
+    """PseudoKeyset represents a wrapped data encryption key (WDEK).
 
-    pseudo_func: PseudoFunction
-    name: str
-    values: list[str]
-    keyset: PseudoKeyset | None = None
+    Example structure, represented as JSON:
+    {"encrypted_keyset": "CiQAp91NBhLdknX3j9jF6vwhdyURaqcT9/M/iczV7fLn...8XYFKwxiwMtCzDT6QGzCCCM=",
+    "keyset_info": {
+    "primaryKeyId": 1234567890,
+    "keyInfo": [
+    {
+    "typeUrl": "type.googleapis.com/google.crypto.tink.AesSivKey",
+    "status": "ENABLED",
+    "keyId": 1234567890,
+    "outputPrefixType": "TINK"
+    }
+    ]
+    },
+    "kek_uri": "gcp-kms://projects/some-project-id/locations/europe-north1/keyRings/some-keyring/cryptoKeys/some-kek-1"
+    }
+    """
 
+    encrypted_keyset: str
+    keyset_info: dict[str, t.Any]
+    kek_uri: str
 
-class DepseudoFieldRequest(APIModel):
-    """Model of the depseudo field request sent to the service."""
-
-    pseudo_func: PseudoFunction
-    name: str
-    values: list[str]
-    keyset: PseudoKeyset | None = None
-
-
-class RepseudoFieldRequest(APIModel):
-    """Model of the repseudo field request sent to the service."""
-
-    source_pseudo_func: PseudoFunction
-    target_pseudo_func: PseudoFunction
-    name: str
-    values: list[str]
-    source_keyset: PseudoKeyset | None = None
-    target_keyset: PseudoKeyset | None = None
+    def get_key_id(self) -> str:
+        """ID of the keyset."""
+        return str(self.keyset_info["primaryKeyId"])
 
 
 class PseudoConfig(APIModel):
@@ -324,29 +246,46 @@ class PseudoConfig(APIModel):
     keysets: list[PseudoKeyset] | None = None
 
 
-class PseudonymizeFileRequest(APIModel):
-    """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
+class TargetCompression(APIModel):
+    """TargetCompression denotes if and how results from the API should be compressed and password encrypted."""
 
-    pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
+    password: str
 
 
-class DepseudonymizeFileRequest(APIModel):
-    """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
+class KeyWrapper(BaseModel):
+    """Hold information about a key, such as ID and keyset information."""
 
-    pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
+    key_id: str = ""
+    keyset: PseudoKeyset | None = None
 
+    def __init__(self, key: str | PseudoKeyset | None = None, **kwargs: t.Any) -> None:
+        """Determine if a key is either a key reference (aka "common key") or a keyset.
 
-class RepseudonymizeFileRequest(APIModel):
-    """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
+        If it is a key reference, treat this as the key's ID, else retrieve the key's ID from the keyset data structure.
 
-    source_pseudo_config: PseudoConfig
-    target_pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
+        :param key: either a key reference (as string) or a PseudoKeyset
+        """
+        super().__init__(**kwargs)
+        if isinstance(key, str):
+            try:  # Attempt to parse the key as a JSON-string matching the PseudoKeyset model
+                pseudo_keyset = PseudoKeyset.model_validate(json.loads(key))
+                self.key_id = pseudo_keyset.get_key_id()
+                self.keyset = pseudo_keyset
+                return
+            except (ValidationError, json.JSONDecodeError):
+                pass
+
+            # Else, attempt to parse the key as one of the predefined keys
+            if key in PredefinedKeys.__members__.values():
+                self.key_id = key
+                self.keyset = None
+            else:
+                raise ValueError(f"Key '{key}' is not a valid key reference or keyset")
+        # Or we have an already parsed PseudoKeyset
+        elif isinstance(key, PseudoKeyset):
+            self.key_id = key.get_key_id()
+            self.keyset = key
+
+    def keyset_list(self) -> list[PseudoKeyset] | None:
+        """Wrap the keyset in a list if it is defined - or return None if it is not."""
+        return None if self.keyset is None else [self.keyset]

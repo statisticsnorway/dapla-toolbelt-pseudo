@@ -36,6 +36,8 @@ pyarrow = ">=14.0.2, <15"
 typeguard = ">=2.13.3"
 
 [tool.poetry.group.dev.dependencies]
+pytest-cases = ">=3.8.5"
+pytest-mock = ">=3.14"
 pygments = ">=2.10.0"
 black = { extras = ["jupyter"], version = ">=23.1.0" }
 coverage = { extras = ["toml"], version = ">=6.2" }
@@ -84,6 +86,7 @@ warn_unreachable = true
 pretty = true
 show_column_numbers = true
 show_error_context = true
+disallow_untyped_decorators = false
 
 [[tool.mypy.overrides]]
 # Allow missing type hints in third-party libraries without type information.
@@ -97,9 +100,16 @@ module = [
     "typeguard",
     "puremagic",
     "google.*",
-    "google.oauth2"
+    "google.oauth2",
+    "pytest_cases",
+    "pytest_mock"
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "dapla_pseudo.tests.*"
+disallow_untyped_defs = true
+
 
 [tool.ruff]
 force-exclude = true  # Apply excludes to pre-commit
@@ -153,7 +163,7 @@ classmethod-decorators = ["classmethod", "validator", "root_validator", "pydanti
 
 [tool.ruff.lint.per-file-ignores]
 "*/__init__.py" = ["F401"]
-"**/tests/*" = [
+"**/tests/**" = [
     # asserts are encouraged in pytest
     "S101",
     # return annotations don't add value for test functions
@@ -164,7 +174,6 @@ classmethod-decorators = ["classmethod", "validator", "root_validator", "pydanti
     "D102",
     "D103",
 ]
-"tests/integration/*" = ["F401", "F811"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

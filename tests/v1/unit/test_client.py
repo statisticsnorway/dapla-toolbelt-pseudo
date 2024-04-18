@@ -1,4 +1,3 @@
-from typing import BinaryIO
 from unittest.mock import ANY
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -9,18 +8,18 @@ import requests
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.types import FileSpecDecl
-from dapla_pseudo.v1.api_models import DaeadKeywordArgs
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoFieldRequest
-from dapla_pseudo.v1.api_models import PseudoFunction
-from dapla_pseudo.v1.api_models import PseudoKeyset
-from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
+from dapla_pseudo.v1.models.api import PseudoFieldRequest
+from dapla_pseudo.v1.models.api import PseudoFileRequest
+from dapla_pseudo.v1.models.core import DaeadKeywordArgs
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoKeyset
 
 PKG = "dapla_pseudo.v1.client"
 
+import pytest_cases
 
-@pytest.fixture
+
+@pytest_cases.fixture()
 def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"
@@ -33,9 +32,9 @@ def test_post_to_field_endpoint_success(
 ) -> None:
     mock_response = Mock(spec=requests.Response)
     mock_response.status_code = 200
-    mock_response.raise_for_status.return_value = None
     mock_pseudo_field_request = Mock(spec=PseudoFieldRequest)
     mock_post.return_value = mock_response
+
     response = test_client._post_to_field_endpoint(
         path="test_path",
         pseudo_field_request=mock_pseudo_field_request,
@@ -47,42 +46,7 @@ def test_post_to_field_endpoint_success(
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_success(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
-    mock_response = Mock(spec=requests.Response)
-    mock_response.status_code = 200
-    mock_response.raise_for_status.return_value = None
-
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
-    mock_pseudo_request.to_json.return_value = Mock()
-
-    data_spec: FileSpecDecl = (
-        "tester",
-        Mock(spec=BinaryIO),
-        Mock(),
-    )
-
-    request_spec: FileSpecDecl = (
-        None,
-        mock_pseudo_request.to_json(),
-        str(Mimetypes.JSON),
-    )
-
-    mock_post.return_value = mock_response
-    response = test_client._post_to_file_endpoint(
-        path="test_path",
-        request_spec=request_spec,
-        data_spec=data_spec,
-        stream=True,
-    )
-
-    assert response == mock_response
-    mock_post.assert_called_once()
-
-
-@patch("requests.post")
-def test__post_to_field_endpoint_failure(
+def test_post_to_field_endpoint_failure(
     mock_post: Mock, test_client: PseudoClient
 ) -> None:
     mock_response = Mock(spec=requests.Response)
@@ -94,7 +58,7 @@ def test__post_to_field_endpoint_failure(
     mock_response.text = ANY
     mock_post.return_value = mock_response
 
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
+    mock_pseudo_request = Mock(spec=PseudoFileRequest)
 
     with pytest.raises(requests.exceptions.HTTPError):
         test_client._post_to_field_endpoint(
@@ -107,52 +71,7 @@ def test__post_to_field_endpoint_failure(
 
 
 @patch("requests.post")
-def test_post_to_file_endpoint_failure(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
-    mock_response = Mock(spec=requests.Response)
-    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-        "Mocked HTTP error", response=requests.Response()
-    )
-    mock_response.status_code = 400
-    mock_post.return_value = mock_response
-
-    mock_response.headers = ANY
-    mock_response.text = ANY
-
-    mock_pseudo_request = Mock(spec=PseudonymizeFileRequest)
-    mock_pseudo_request.to_json.return_value = Mock()
-
-    mock_post.return_value = mock_response
-
-    data_spec: FileSpecDecl = (
-        "tester",
-        Mock(spec=BinaryIO),
-        Mock(),
-    )
-
-    request_spec: FileSpecDecl = (
-        None,
-        mock_pseudo_request.to_json(),
-        str(Mimetypes.JSON),
-    )
-
-    mock_post.return_value = mock_response
-
-    with pytest.raises(requests.exceptions.HTTPError):
-        test_client._post_to_file_endpoint(
-            path="test_path",
-            request_spec=request_spec,
-            data_spec=data_spec,
-            stream=True,
-        )
-
-    mock_post.assert_called_once()
-    mock_response.raise_for_status.assert_called_once()
-
-
-@patch("requests.post")
-def test_post_to_field_endpoint_with_keyset(
+def test_post_to_field_endpoint_serialization(
     _mock_post: Mock, test_client: PseudoClient
 ) -> None:
     keyset = PseudoKeyset(

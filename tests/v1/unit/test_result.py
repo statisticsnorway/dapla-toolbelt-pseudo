@@ -4,16 +4,16 @@ from pathlib import Path
 
 import pandas as pd
 import polars as pl
-import pytest
+from pytest_cases import fixture
 
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.pseudo_commons import PseudoFieldResponse
-from dapla_pseudo.v1.pseudo_commons import PseudoFileResponse
-from dapla_pseudo.v1.pseudo_commons import RawPseudoMetadata
+from dapla_pseudo.v1.models.api import PseudoFieldResponse
+from dapla_pseudo.v1.models.api import PseudoFileResponse
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
+from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.result import Result
 
 
-@pytest.fixture()
+@fixture()
 def pseudo_file_response() -> PseudoFileResponse:
     fd = open("tests/data/personer.json")
     data = json.loads(fd.read())

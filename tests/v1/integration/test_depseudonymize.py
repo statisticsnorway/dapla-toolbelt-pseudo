@@ -1,15 +1,14 @@
-from collections.abc import Generator
-
 import polars as pl
+import pytest
+from polars.testing import assert_frame_equal
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Depseudonymize
-from tests.integration.utils import integration_test
-from tests.integration.utils import setup
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_depseudonymize_default_encryption(
-    setup: Generator[None, None, None],
     df_personer: pl.DataFrame,
     df_personer_fnr_daead_encrypted: pl.DataFrame,
 ) -> None:
@@ -20,12 +19,13 @@ def test_depseudonymize_default_encryption(
         .run()
         .to_polars()
     )
-    assert result.equals(df_personer)
+
+    assert_frame_equal(result, df_personer)
 
 
+@pytest.mark.usefixtures("setup")
 @integration_test()
 def test_depseudonymize_sid(
-    setup: Generator[None, None, None],
     df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer: pl.DataFrame,
 ) -> None:
@@ -40,4 +40,4 @@ def test_depseudonymize_sid(
         .run()
         .to_polars()
     )
-    assert result.equals(df_personer)
+    assert_frame_equal(result, df_personer)

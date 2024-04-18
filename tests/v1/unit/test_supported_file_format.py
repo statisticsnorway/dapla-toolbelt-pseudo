@@ -13,7 +13,7 @@ from dapla_pseudo.v1.supported_file_format import write_from_df
 from dapla_pseudo.v1.supported_file_format import write_from_dicts
 
 PKG = "dapla_pseudo.v1.supported_file_format"
-TEST_FILE_PATH = "tests/v1/test_files"
+TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
 def test_get_pandas_function_name_unsupported_format() -> None:

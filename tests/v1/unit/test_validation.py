@@ -6,16 +6,17 @@ from unittest.mock import patch
 import pandas as pd
 import polars as pl
 import pytest
+import pytest_cases
 
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.validation import Validator
 
 PKG = "dapla_pseudo.v1.validation"
-TEST_FILE_PATH = "tests/v1/test_files"
+TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
-@pytest.fixture()
+@pytest_cases.fixture()
 def sid_lookup_missing_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -23,7 +24,7 @@ def sid_lookup_missing_response() -> MagicMock:
     return mock_response
 
 
-@pytest.fixture()
+@pytest_cases.fixture()
 def sid_lookup_empty_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200

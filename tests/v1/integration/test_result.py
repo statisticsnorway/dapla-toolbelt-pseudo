@@ -1,17 +1,18 @@
 import json
 import typing as t
-from collections.abc import Generator
 from pathlib import Path
 
 import pandas as pd
 import polars as pl
 import pytest
+from pandas.testing import assert_frame_equal as pd_assert_frame_equal
+from polars.testing import assert_frame_equal as pl_assert_frame_equal
+from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
-from tests.integration.utils import integration_test
-from tests.integration.utils import setup
 
 
+@pytest.mark.usefixtures("setup")
 @pytest.mark.parametrize(
     "output_func",
     [("file"), ("pandas"), ("polars")],
@@ -22,7 +23,6 @@ from tests.integration.utils import setup
 )
 @integration_test()
 def test_pseudonymize_input_output_funcs(
-    setup: Generator[None, None, None],
     input_func: t.Literal["file", "pandas", "polars"],
     output_func: t.Literal["file", "pandas", "polars"],
     tmp_path: Path,
@@ -34,7 +34,7 @@ def test_pseudonymize_input_output_funcs(
 ) -> None:
     """This test runs several times, once for every combination of the possible input and output datatypes.
 
-    It is intended to end-to-end-test for the conversion between data types, e.g. Polars DataFrame -> File.
+    It is intended to test for the conversion between data types, e.g. Polars DataFrame -> File.
     """
     match input_func:
         case "file":
@@ -59,7 +59,7 @@ def test_pseudonymize_input_output_funcs(
             assert expected == actual
         case "pandas":
             df_pandas = result.to_pandas()
-            assert df_pandas_personer_fnr_daead_encrypted.equals(df_pandas)
+            pd_assert_frame_equal(df_pandas, df_pandas_personer_fnr_daead_encrypted)
         case "polars":
             df_polars = result.to_polars()
-            assert df_personer_fnr_daead_encrypted.equals(df_polars)
+            pl_assert_frame_equal(df_polars, df_personer_fnr_daead_encrypted)

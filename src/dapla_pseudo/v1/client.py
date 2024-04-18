@@ -13,23 +13,14 @@ from ulid import ULID
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.types import FileSpecDecl
-from dapla_pseudo.v1.api_models import DepseudoFieldRequest
-from dapla_pseudo.v1.api_models import DepseudonymizeFileRequest
-from dapla_pseudo.v1.api_models import Mimetypes
-from dapla_pseudo.v1.api_models import PseudoFieldRequest
-from dapla_pseudo.v1.api_models import PseudonymizeFileRequest
-from dapla_pseudo.v1.api_models import RepseudoFieldRequest
-from dapla_pseudo.v1.api_models import RepseudonymizeFileRequest
+from dapla_pseudo.v1.models.api import DepseudoFieldRequest
+from dapla_pseudo.v1.models.api import PseudoFieldRequest
+from dapla_pseudo.v1.models.api import RepseudoFieldRequest
+from dapla_pseudo.v1.models.core import Mimetypes
 
 
 class PseudoClient:
     """Client for interacting with the Dapla Pseudo Service REST API."""
-
-    pseudo_op_to_endpoint: t.ClassVar[dict[type, str]] = {
-        PseudonymizeFileRequest: "pseudonymize/file",
-        DepseudonymizeFileRequest: "depseudonymize/file",
-        RepseudonymizeFileRequest: "repseudonymize/file",
-    }
 
     def __init__(
         self,
@@ -81,6 +72,7 @@ class PseudoClient:
         request_spec: FileSpecDecl,
         data_spec: FileSpecDecl,
         stream: bool,
+        timeout: int,
     ) -> requests.Response:
         """POST to a file endpoint in the Pseudo Service.
 
@@ -97,7 +89,7 @@ class PseudoClient:
             },
             files={"data": data_spec, "request": request_spec},
             stream=stream,
-            timeout=TIMEOUT_DEFAULT,
+            timeout=timeout,
         )
 
         PseudoClient._handle_response_error(response)
