@@ -42,13 +42,13 @@ def test_execute_pseudo_operation_field(
     mocker: MockerFixture,
 ) -> None:
     """Purpose: Ensure that supported dataset types are handled and actually perform pseudonymization."""
-    mocker.patch(f"{PKG}.build_pseudo_dataset_request", return_value=Mock())
+    mocker.patch(f"{PKG}.build_pseudo_file_request", return_value=Mock())
     mocker.patch(f"{PKG}.build_pseudo_field_request", return_value=Mock())
     mock_pseudo_field = mocker.patch(
         f"{PKG}._BasePseudonymizer._pseudonymize_field", return_value=Mock()
     )
-    mock_pseudo_dataset = mocker.patch(
-        f"{PKG}._BasePseudonymizer._pseudonymize_dataset", return_value=Mock()
+    mock_pseudo_file = mocker.patch(
+        f"{PKG}._BasePseudonymizer._pseudonymize_file", return_value=Mock()
     )
 
     base = _BasePseudonymizer(pseudo_operation=pseudo_op, dataset=dataset)
@@ -66,7 +66,7 @@ def test_execute_pseudo_operation_field(
         case pl.DataFrame():
             mock_pseudo_field.assert_called_once()
         case File():
-            mock_pseudo_dataset.assert_called_once()
+            mock_pseudo_file.assert_called_once()
 
 
 def test_pseudonymize_field(
@@ -175,7 +175,7 @@ def test_pseudonymize_dataset(
         pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=personer_file
     )
 
-    response = base._pseudonymize_dataset(req, timeout=ANY)
+    response = base._pseudonymize_file(req, timeout=ANY)
     metadata = response.raw_metadata
     assert isinstance(response, PseudoFileResponse)
     assert metadata.datadoc == expected_json["datadoc_metadata"]["pseudo_variables"]  # type: ignore[index]

@@ -135,7 +135,7 @@ def build_pseudo_field_request(
                 raise ValueError("Found no target rules")
 
 
-def build_pseudo_dataset_request(
+def build_pseudo_file_request(
     pseudo_operation: PseudoOperation,
     rules: list[PseudoRule],  # "source rules" if repseudo
     custom_keyset: PseudoKeyset | str | None = None,
