@@ -21,8 +21,8 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileSpecDecl
-from dapla_pseudo.utils import build_pseudo_dataset_request
 from dapla_pseudo.utils import build_pseudo_field_request
+from dapla_pseudo.utils import build_pseudo_file_request
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.client import _extract_name
@@ -89,14 +89,14 @@ class _BasePseudonymizer:
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
             case File():
-                pseudo_request = build_pseudo_dataset_request(
+                pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
                     rules,
                     custom_keyset,
                     target_custom_keyset,
                     target_rules,
                 )
-                pseudo_response = self._pseudonymize_dataset(pseudo_request, timeout)
+                pseudo_response = self._pseudonymize_file(pseudo_request, timeout)
             case _ as invalid_dataset:
                 raise ValueError(
                     f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
@@ -156,7 +156,7 @@ class _BasePseudonymizer:
                 data=self._dataset, raw_metadata=raw_metadata_fields
             )
 
-    def _pseudonymize_dataset(
+    def _pseudonymize_file(
         self,
         pseudo_request: PseudoFileRequest | DepseudoFileRequest | RepseudoFileRequest,
         timeout: int,
