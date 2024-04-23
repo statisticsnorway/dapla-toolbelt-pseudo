@@ -172,7 +172,9 @@ def test_traverse_dataframe_dict() -> None:
     # Test updating the column, which "should" also update the original dataframe_dict
     matched_fields[0].update_col("values", ["#", "#", "#"])
     modified_df = pl.read_json(StringIO(json.dumps(dataframe_dict)))
-    print(modified_df)
+    # Check that the original dataframe_dict has been changed
+    assert modified_df["identifiers"][0]["fnr"] == "#"
+
 
 
 def test_build_pseudo_field_request() -> None:
