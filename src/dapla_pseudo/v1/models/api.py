@@ -22,7 +22,8 @@ class FieldMatch(APIModel):
     rule: PseudoRule
 
     def update_col(self, key: str, data: list[str]) -> None:
-        self.col[key] = data
+        """Update the values in the matched column."""
+        self.col.update({key: data})
 
 
 class PseudoFieldRequest(APIModel):

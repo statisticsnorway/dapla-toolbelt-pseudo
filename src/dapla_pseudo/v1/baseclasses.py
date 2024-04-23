@@ -9,9 +9,9 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
-from io import StringIO
 from datetime import date
-from typing import cast, Any
+from io import StringIO
+from typing import cast
 
 import polars as pl
 import requests
@@ -90,7 +90,9 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
-                pseudo_response.data = pl.read_json(StringIO(json.dumps(self._mutable_dict)))
+                pseudo_response.data = pl.read_json(
+                    StringIO(json.dumps(self._mutable_dict))
+                )
             case File():
                 pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
@@ -136,7 +138,7 @@ class _BasePseudonymizer:
                 metrics=payload["metrics"],
                 datadoc=payload["datadoc_metadata"]["pseudo_variables"],
             )
-            request.col['values'] = payload['data']
+            request.col["values"] = payload["data"]
             return request.name, metadata
 
         # Execute the pseudonymization API calls in parallel
@@ -149,7 +151,7 @@ class _BasePseudonymizer:
 
             for future in as_completed(futures):
                 field_name, raw_metadata = future.result()
-                #self._mutable_dict =
+                # self._mutable_dict =
                 raw_metadata_fields.append(raw_metadata)
 
             return PseudoFieldResponse(

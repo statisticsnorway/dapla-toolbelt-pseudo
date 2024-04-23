@@ -104,10 +104,10 @@ def build_pseudo_field_request(
                 PseudoFieldRequest(
                     pseudo_func=field.rule.func,
                     name=field.path,
-                    values=field.col['values'],
+                    values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                     on_response=field.update_col,
-                    col=field.col
+                    col=field.col,
                 )
                 for field in matched_fields
             ]
@@ -116,14 +116,14 @@ def build_pseudo_field_request(
                 DepseudoFieldRequest(
                     pseudo_func=field.rule.func,
                     name=field.path,
-                    values=field.col['values'],
+                    values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
                 for field in matched_fields
             ]
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
-                '''
+                """
                 return [
                     RepseudoFieldRequest(
                         source_pseudo_func=source_rule.func,
@@ -136,7 +136,7 @@ def build_pseudo_field_request(
                         rules, target_rules, strict=False
                     )
                 ]
-                '''
+                """
                 return []
             else:
                 raise ValueError("Found no target rules")
@@ -306,9 +306,7 @@ def _traverse_dataframe_dict(
                 accumulator, col["values"], rules, f"{prefix}/{name}"
             )
         else:
-            name = f"{prefix}/{col['name']}".lstrip('/')
+            name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if fnmatch.fnmatchcase(name, r.pattern)):
-                accumulator.append(
-                    FieldMatch(path=name, col=col, rule=rule)
-                )
+                accumulator.append(FieldMatch(path=name, col=col, rule=rule))
     return accumulator
