@@ -9,8 +9,9 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
+from io import StringIO
 from datetime import date
-from typing import cast
+from typing import cast, Any
 
 import polars as pl
 import requests
@@ -79,15 +80,17 @@ class _BasePseudonymizer:
         pseudo_response: PseudoFileResponse | PseudoFieldResponse
         match self._dataset:  # Differentiate between file and DataFrame
             case pl.DataFrame():
+                self._mutable_dict = json.loads(self._dataset.write_json())
                 pseudo_requests = build_pseudo_field_request(
                     self._pseudo_operation,
-                    self._dataset,
+                    self._mutable_dict,
                     rules,
                     custom_keyset,
                     target_custom_keyset,
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
+                pseudo_response.data = pl.read_json(StringIO(json.dumps(self._mutable_dict)))
             case File():
                 pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
@@ -118,7 +121,7 @@ class _BasePseudonymizer:
 
         def pseudonymize_field_runner(
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, pl.Series, RawPseudoMetadata]:
+        ) -> tuple[str, RawPseudoMetadata]:
             """Function that performs the pseudonymization on a Polars Series."""
             response: requests.Response = self._pseudo_client._post_to_field_endpoint(
                 f"{self._pseudo_operation.value}/field",
@@ -127,18 +130,15 @@ class _BasePseudonymizer:
                 stream=True,
             )
             payload = json.loads(response.content.decode("utf-8"))
-            data = payload["data"]
             metadata = RawPseudoMetadata(
                 field_name=request.name,
                 logs=payload["logs"],
                 metrics=payload["metrics"],
                 datadoc=payload["datadoc_metadata"]["pseudo_variables"],
             )
+            request.col['values'] = payload['data']
+            return request.name, metadata
 
-            return request.name, pl.Series(data), metadata
-
-        # type narrowing isn't carried over from caller function
-        assert isinstance(self._dataset, pl.DataFrame)
         # Execute the pseudonymization API calls in parallel
         with ThreadPoolExecutor() as executor:
             raw_metadata_fields: list[RawPseudoMetadata] = []
@@ -148,8 +148,8 @@ class _BasePseudonymizer:
             ]
 
             for future in as_completed(futures):
-                field_name, data, raw_metadata = future.result()
-                self._dataset = self._dataset.with_columns(data.alias(field_name))
+                field_name, raw_metadata = future.result()
+                #self._mutable_dict =
                 raw_metadata_fields.append(raw_metadata)
 
             return PseudoFieldResponse(

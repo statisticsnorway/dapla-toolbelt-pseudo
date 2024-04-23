@@ -10,7 +10,19 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
+from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import TargetCompression
+
+
+class FieldMatch(APIModel):
+    """Model of the pseudo field request sent to the service."""
+
+    path: str
+    col: dict[str, t.Any]
+    rule: PseudoRule
+
+    def update_col(self, key: str, data: list[str]) -> None:
+        self.col[key] = data
 
 
 class PseudoFieldRequest(APIModel):
@@ -19,7 +31,9 @@ class PseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     values: list[str]
+    col: dict[str, t.Any]
     keyset: PseudoKeyset | None = None
+    on_response: t.Callable[[str, list[str]], None] | None = None
 
 
 class DepseudoFieldRequest(APIModel):
@@ -29,6 +43,7 @@ class DepseudoFieldRequest(APIModel):
     name: str
     values: list[str]
     keyset: PseudoKeyset | None = None
+    on_response: t.Callable[[str, list[str]], None] | None = None
 
 
 class RepseudoFieldRequest(APIModel):
@@ -40,6 +55,7 @@ class RepseudoFieldRequest(APIModel):
     values: list[str]
     source_keyset: PseudoKeyset | None = None
     target_keyset: PseudoKeyset | None = None
+    on_response: t.Callable[[str, list[str]], None] | None = None
 
 
 class PseudoFileRequest(APIModel):

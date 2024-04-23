@@ -3,18 +3,26 @@ from unittest.mock import Mock
 
 import polars as pl
 import pytest
+import json
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
 
+from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.exceptions import NoFileExtensionError
+from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import find_multipart_obj
 from dapla_pseudo.utils import get_content_type_from_file
 from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.utils import get_file_format_from_file_name
+from dapla_pseudo.v1.models.api import PseudoFieldRequest, FieldMatch
 from dapla_pseudo.v1.models.core import Mimetypes
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
 TEST_FILE_PATH = "tests/v1/unit/test_files"
@@ -121,3 +129,34 @@ def test_get_file_data_from_polars_dataset() -> None:
     df = pl.DataFrame()
     _, mime_type = get_file_data_from_dataset(df)
     assert mime_type.name == "ZIP"
+
+
+def test_build_pseudo_field_request() -> None:
+    data = [{"foo": "bar", "struct": {"foo": "baz"}}]
+    df = pl.DataFrame(data)
+    df_dict = json.loads(df.write_json())
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"*foo","func":"redact(placeholder=#)"}'
+        )
+    ]
+    requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df_dict, rules)
+
+    assert requests == [
+        PseudoFieldRequest(
+            pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.REDACT,
+                kwargs=RedactKeywordArgs(placeholder="#"),
+            ),
+            name="/foo",
+            values=["bar"],
+        ),
+        PseudoFieldRequest(
+            pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.REDACT,
+                kwargs=RedactKeywordArgs(placeholder="#"),
+            ),
+            name="/struct/foo",
+            values=["baz"],
+        ),
+    ]
