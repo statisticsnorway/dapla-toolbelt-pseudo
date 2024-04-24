@@ -1,6 +1,5 @@
 """Utility functions for Dapla Pseudo."""
 
-import fnmatch
 import io
 import json
 import os
@@ -23,7 +22,6 @@ from dapla_pseudo.types import BinaryFileDecl
 from dapla_pseudo.types import FileLikeDatasetDecl
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import DepseudoFileRequest
-from dapla_pseudo.v1.models.api import FieldMatch
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFileRequest
 from dapla_pseudo.v1.models.api import RepseudoFieldRequest
@@ -33,6 +31,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
@@ -90,14 +89,15 @@ def get_file_format_from_file_name(file_path: str | Path) -> SupportedOutputFile
 
 def build_pseudo_field_request(
     pseudo_operation: PseudoOperation,
-    dataframe_dict: dict[str, t.Any],
+    mutable_df: MutableDataFrame,
     rules: list[PseudoRule],  # "source rules" if repseudo
     custom_keyset: PseudoKeyset | str | None = None,
     target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
     target_rules: list[PseudoRule] | None = None,  # used in repseudo)
 ) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
     """Builds a FieldRequest object."""
-    matched_fields = _traverse_dataframe_dict([], dataframe_dict["columns"], rules)
+    mutable_df.match_rules(rules)
+    matched_fields = mutable_df.get_matched_fields()
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
             return [
@@ -106,8 +106,6 @@ def build_pseudo_field_request(
                     name=field.path,
                     values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
-                    on_response=field.update_col,
-                    col=field.col,
                 )
                 for field in matched_fields
             ]
@@ -123,21 +121,19 @@ def build_pseudo_field_request(
             ]
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
-                """
                 return [
                     RepseudoFieldRequest(
-                        source_pseudo_func=source_rule.func,
+                        source_pseudo_func=field.rule.func,
                         target_pseudo_func=target_rule.func,
-                        name=source_rule.pattern,
+                        name=field.path,
+                        values=field.col["values"],
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,
                     )
-                    for source_rule, target_rule in zip(
-                        rules, target_rules, strict=False
+                    for field, target_rule in zip(
+                        matched_fields, target_rules, strict=False
                     )
                 ]
-                """
-                return []
             else:
                 raise ValueError("Found no target rules")
 
@@ -289,24 +285,3 @@ def get_content_type_from_file(file_handle: BinaryFileDecl) -> Mimetypes:
         ) from None
 
     return content_type
-
-
-def _traverse_dataframe_dict(
-    accumulator: list[FieldMatch],
-    items: list[dict[str, t.Any]],
-    rules: list[PseudoRule],
-    prefix: str = "",
-) -> list[FieldMatch]:
-    for col in items:
-        if col is None:
-            pass
-        elif isinstance(col["datatype"], dict):
-            name = "[]" if col["name"] == "" else col["name"]
-            return _traverse_dataframe_dict(
-                accumulator, col["values"], rules, f"{prefix}/{name}"
-            )
-        else:
-            name = f"{prefix}/{col['name']}".lstrip("/")
-            if any((rule := r) for r in rules if fnmatch.fnmatchcase(name, r.pattern)):
-                accumulator.append(FieldMatch(path=name, col=col, rule=rule))
-    return accumulator

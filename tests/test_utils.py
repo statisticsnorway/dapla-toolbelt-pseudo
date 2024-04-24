@@ -1,6 +1,4 @@
-import json
 from datetime import date
-from io import StringIO
 from unittest.mock import Mock
 
 import polars as pl
@@ -13,7 +11,6 @@ from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.exceptions import FileInvalidError
 from dapla_pseudo.exceptions import MimetypeNotSupportedError
 from dapla_pseudo.exceptions import NoFileExtensionError
-from dapla_pseudo.utils import _traverse_dataframe_dict
 from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import find_multipart_obj
@@ -25,6 +22,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
+from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
 TEST_FILE_PATH = "tests/v1/unit/test_files"
@@ -133,60 +131,17 @@ def test_get_file_data_from_polars_dataset() -> None:
     assert mime_type.name == "ZIP"
 
 
-def test_traverse_dataframe_dict() -> None:
-    data = [
-        {
-            "identifiers": {"fnr": "11854898347", "dnr": "02099510504"},
-            "names": [
-                {"type": "nickname", "value": "matta"},
-                {"type": "prefix", "value": "Sir"},
-            ],
-            "fornavn": "Mathias",
-        },
-        {
-            "identifiers": {"fnr": "06097048531"},
-            "fornavn": "Gunnar",
-        },
-        {
-            "identifiers": {"fnr": "02812289295"},
-            "fnr": "02812289295",
-            "fornavn": "Kristoffer",
-        },
-    ]
-    rules = [
-        PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"*fnr","func":"redact(placeholder=#)"}'
-        )
-    ]
-    df = pl.DataFrame(data)
-    dataframe_dict = json.loads(df.write_json())
-    matched_fields = _traverse_dataframe_dict([], dataframe_dict["columns"], rules)
-    assert len(matched_fields) == 1
-    assert matched_fields[0].path == "identifiers/fnr"
-    assert matched_fields[0].col["name"] == "fnr"
-    assert matched_fields[0].col["values"] == [
-        "11854898347",
-        "06097048531",
-        "02812289295",
-    ]
-    # Test updating the column, which "should" also update the original dataframe_dict
-    matched_fields[0].update_col("values", ["#", "#", "#"])
-    modified_df = pl.read_json(StringIO(json.dumps(dataframe_dict)))
-    # Check that the original dataframe_dict has been changed
-    assert modified_df["identifiers"][0]["fnr"] == "#"
-
-
-
 def test_build_pseudo_field_request() -> None:
     data = [{"foo": "bar", "struct": {"foo": "baz"}}]
     df = pl.DataFrame(data)
-    df_dict = json.loads(df.write_json())
     rules = [
         PseudoRule.from_json(
             '{"name":"my-rule","pattern":"*foo","func":"redact(placeholder=#)"}'
         )
     ]
-    requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df_dict, rules)
+    requests = build_pseudo_field_request(
+        PseudoOperation.PSEUDONYMIZE, MutableDataFrame(df), rules
+    )
 
     assert requests == [
         PseudoFieldRequest(
@@ -194,7 +149,7 @@ def test_build_pseudo_field_request() -> None:
                 function_type=PseudoFunctionTypes.REDACT,
                 kwargs=RedactKeywordArgs(placeholder="#"),
             ),
-            name="/foo",
+            name="foo",
             values=["bar"],
         ),
         PseudoFieldRequest(
@@ -202,7 +157,7 @@ def test_build_pseudo_field_request() -> None:
                 function_type=PseudoFunctionTypes.REDACT,
                 kwargs=RedactKeywordArgs(placeholder="#"),
             ),
-            name="/struct/foo",
+            name="struct/foo",
             values=["baz"],
         ),
     ]
