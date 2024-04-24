@@ -102,7 +102,7 @@ def build_pseudo_field_request(
         case PseudoOperation.PSEUDONYMIZE:
             return [
                 PseudoFieldRequest(
-                    pseudo_func=field.rule.func,
+                    pseudo_func=field.func,
                     name=field.path,
                     values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
@@ -112,7 +112,7 @@ def build_pseudo_field_request(
         case PseudoOperation.DEPSEUDONYMIZE:
             return [
                 DepseudoFieldRequest(
-                    pseudo_func=field.rule.func,
+                    pseudo_func=field.func,
                     name=field.path,
                     values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
@@ -123,7 +123,7 @@ def build_pseudo_field_request(
             if target_rules is not None:
                 return [
                     RepseudoFieldRequest(
-                        source_pseudo_func=field.rule.func,
+                        source_pseudo_func=field.func,
                         target_pseudo_func=target_rule.func,
                         name=field.path,
                         values=field.col["values"],

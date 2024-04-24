@@ -5,7 +5,7 @@ from io import BytesIO
 import orjson
 import polars as pl
 
-from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.models.core import PseudoFunction, PseudoRule
 
 
 class FieldMatch:
@@ -15,12 +15,12 @@ class FieldMatch:
         self,
         path: str,
         col: dict[str, t.Any],
-        rule: PseudoRule,
+        func: PseudoFunction,
     ) -> None:
         """Initialize the class."""
         self.path = path
         self.col = col
-        self.rule = rule
+        self.func = func
 
     def update_col(self, key: str, data: list[str]) -> None:
         """Update the values in the matched column."""
@@ -76,5 +76,5 @@ def _traverse_dataframe_dict(
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if fnmatch.fnmatchcase(name, r.pattern)):
-                match.append(FieldMatch(path=name, col=col, rule=rule))
+                match.append(FieldMatch(path=name, col=col, func=rule.func))
     return match
