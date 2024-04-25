@@ -32,6 +32,7 @@ ssb-datadoc-model = ">=5.0.0"
 cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
 pyarrow = ">=14.0.2, <15"
 orjson = "^3.10.1"
+wcmatch = "^8.5.1"
 
 [tool.poetry.group.test.dependencies]
 typeguard = ">=2.13.3"

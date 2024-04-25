@@ -1,9 +1,9 @@
-import fnmatch
 import typing as t
 from io import BytesIO
 
 import orjson
 import polars as pl
+from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -76,6 +76,10 @@ def _traverse_dataframe_dict(
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
-            if any((rule := r) for r in rules if fnmatch.fnmatchcase(name, r.pattern)):
+            if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
                 match.append(FieldMatch(path=name, col=col, func=rule.func))
     return match
+
+
+def _glob_matches(name: str, rule: str) -> bool:
+    return glob.globmatch(name, rule, flags=glob.GLOBSTAR)
