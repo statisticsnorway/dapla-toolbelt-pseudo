@@ -131,12 +131,55 @@ def test_get_file_data_from_polars_dataset() -> None:
     assert mime_type.name == "ZIP"
 
 
-def test_build_pseudo_field_request() -> None:
+def test_build_pseudo_field_request_works() -> None:
     data = [{"foo": "bar", "struct": {"foo": "baz"}}]
     df = MutableDataFrame(pl.DataFrame(data))
     rules = [
         PseudoRule.from_json(
             '{"name":"my-rule","pattern":"*foo","func":"redact(placeholder=#)"}'
+        )
+    ]
+    requests = build_pseudo_field_request(
+        PseudoOperation.PSEUDONYMIZE, df, rules
+    )
+
+
+def test_build_pseudo_field_request_doesnt_work() -> None:
+    data = [
+        {
+            "identifiers": {
+                "fnr": "11854898347",
+                "dnr": "02099510504"
+            },
+            "fornavn": "Mathias",
+            "etternavn": "Holm",
+            "kjonn": "M",
+            "fodselsdato": "020995"
+        },
+        {
+            "identifiers": {
+                "fnr": "06097048531"
+            },
+            "fornavn": "Gunnar",
+            "etternavn": "Jørgensen",
+            "kjonn": "M",
+            "fodselsdato": "060970"
+        },
+        {
+            "identifiers": {
+                "fnr": "02812289295"
+            },
+            "fnr": "02812289295",
+            "fornavn": "Kristoffer",
+            "etternavn": "Pedersen",
+            "kjonn": "M",
+            "fodselsdato": "180999"
+        }
+    ]
+    df = MutableDataFrame(pl.DataFrame(data))
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"fnr","func":"redact(placeholder=#)"}'
         )
     ]
     requests = build_pseudo_field_request(
