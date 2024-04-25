@@ -18,7 +18,7 @@ class PseudoFieldRequest(APIModel):
 
     pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    values: list[str | None]
     keyset: PseudoKeyset | None = None
 
 
@@ -27,7 +27,7 @@ class DepseudoFieldRequest(APIModel):
 
     pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    values: list[str | None]
     keyset: PseudoKeyset | None = None
 
 
@@ -37,7 +37,7 @@ class RepseudoFieldRequest(APIModel):
     source_pseudo_func: PseudoFunction
     target_pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    values: list[str | None]
     source_keyset: PseudoKeyset | None = None
     target_keyset: PseudoKeyset | None = None
 
