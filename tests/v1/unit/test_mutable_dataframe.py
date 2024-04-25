@@ -39,7 +39,7 @@ def test_traverse_dataframe_dict() -> None:
     ]
     rules = [
         PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"*fnr","func":"redact(placeholder=#)"}'
+            '{"name":"my-rule","pattern":"**/fnr","func":"redact(placeholder=#)"}'
         )
     ]
     df = MutableDataFrame(pl.DataFrame(data))

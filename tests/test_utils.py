@@ -139,7 +139,7 @@ def test_build_pseudo_field_request_doesnt_work() -> None:
     df = MutableDataFrame(pl.DataFrame(data))
     rules = [
         PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"*foo","func":"redact(placeholder=#)"}'
+            '{"name":"my-rule","pattern":"**/foo","func":"redact(placeholder=#)"}'
         )
     ]
     requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
