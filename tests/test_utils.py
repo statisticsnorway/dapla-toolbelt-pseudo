@@ -134,7 +134,7 @@ def test_get_file_data_from_polars_dataset() -> None:
 def test_build_pseudo_field_request_doesnt_work() -> None:
     data = [
         {"foo": "bar", "struct": {"foo": "baz"}},
-        {"foo": "bad", "struct": {"foo": None}}
+        {"foo": "bad", "struct": {"foo": None}},
     ]
     df = MutableDataFrame(pl.DataFrame(data))
     rules = [
@@ -142,9 +142,7 @@ def test_build_pseudo_field_request_doesnt_work() -> None:
             '{"name":"my-rule","pattern":"*foo","func":"redact(placeholder=#)"}'
         )
     ]
-    requests = build_pseudo_field_request(
-        PseudoOperation.PSEUDONYMIZE, df, rules
-    )
+    requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
 
     assert requests == [
         PseudoFieldRequest(

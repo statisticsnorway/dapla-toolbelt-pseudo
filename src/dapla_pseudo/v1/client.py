@@ -111,11 +111,7 @@ class PseudoClient:
                 "Content-Type": Mimetypes.JSON.value,
                 "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
-            json={
-                "request": pseudo_field_request.model_dump_json(
-                    by_alias=True, exclude={"col", "on_response"}
-                )
-            },
+            json={"request": pseudo_field_request.model_dump_json(by_alias=True)},
             stream=stream,
             timeout=timeout,
         )

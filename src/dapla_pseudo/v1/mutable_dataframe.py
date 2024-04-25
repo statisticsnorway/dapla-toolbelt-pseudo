@@ -5,7 +5,8 @@ from io import BytesIO
 import orjson
 import polars as pl
 
-from dapla_pseudo.v1.models.core import PseudoFunction, PseudoRule
+from dapla_pseudo.v1.models.core import PseudoFunction
+from dapla_pseudo.v1.models.core import PseudoRule
 
 
 class FieldMatch:
