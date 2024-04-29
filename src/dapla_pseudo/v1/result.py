@@ -17,7 +17,6 @@ from datadoc_model.model import PseudoVariable
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.models.api import PseudoFileResponse
-from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import write_from_df
 from dapla_pseudo.v1.supported_file_format import write_from_dicts
@@ -38,7 +37,6 @@ class Result:
                 self._pseudo_data = dataframe
 
                 datadoc_fields: list[PseudoVariable] = []
-                aggregated_metrics: dict[str, list[str]] = {"logs": [], "metrics": []}
 
                 for field_metadata in raw_metadata:
                     pseudo_variable = self._datadoc_from_raw_metadata_fields(
@@ -55,10 +53,7 @@ class Result:
                         "logs": field_metadata.logs,
                         "metrics": field_metadata.metrics,
                     }
-                    # Aggregate metrics
-                    aggregate_metrics(field_metadata, aggregated_metrics)
 
-                self._metadata["AGGREGATED"] = aggregated_metrics
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationMetadata(
                         pseudo_variables=datadoc_fields
@@ -66,10 +61,10 @@ class Result:
                 )
 
             case PseudoFileResponse(
-                data, file_metadata, _content_type, _file_name, _streamed
+                data, file_metadata, _content_type, file_name, _streamed
             ):
                 self._pseudo_data = data
-                self._metadata["AGGREGATED"] = {
+                self._metadata[file_name] = {
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
@@ -190,15 +185,20 @@ class Result:
         """
         return self._metadata
 
-    def get_metadata(self, field: str = "AGGREGATED") -> str | Any:
-        """Returns the pseudonymization metadata as a dictionary.
+    @property
+    def metadata_aggregated(self) -> dict[str, Any]:
+        """Returns the aggregated metadata as a dictionary.
 
         Returns:
             Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
             where the keys are field names and the values are corresponding pseudo field metadata.
             If no metadata is set, returns an empty dictionary.
         """
-        return self._metadata[field]
+        aggregated_metrics: dict[str, list[str]] = {"logs": [], "metrics": []}
+        for key in self._metadata.keys():
+            field_metadata = self._metadata[key]
+            aggregate_metrics(field_metadata, aggregated_metrics)
+        return aggregated_metrics
 
     @property
     def datadoc(self) -> str:
@@ -221,13 +221,13 @@ class Result:
 
 
 def aggregate_metrics(
-    field_metadata: RawPseudoMetadata, aggregated_metrics: dict[str, list[Any]]
-) -> dict[str, list[Any]]:
+    field_metadata: dict[str, list[Any]], aggregated_metrics: dict[str, list[Any]]
+) -> None:
     """Aggregates logs and metrics. Each unique metric is summarized."""
     # Logs are simply appended
-    aggregated_metrics["logs"].extend(field_metadata.logs)
+    aggregated_metrics["logs"].extend(field_metadata["logs"])
     # Count each unique metric
-    for field_metric in field_metadata.metrics:
+    for field_metric in field_metadata["metrics"]:
         for key, value in field_metric.items():
             # See if metric already exists in the aggregated dict
             # next(iter(it)) takes the first key from the metric dict,
@@ -244,5 +244,3 @@ def aggregate_metrics(
                 item[key] = counter
             else:
                 aggregated_metrics["metrics"].append({key: value})
-
-    return aggregated_metrics

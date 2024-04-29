@@ -95,18 +95,20 @@ def test_result_from_file_to_file(
 
 def test_aggregate_metrics() -> None:
     aggregated_metrics: dict[str, list[Any]] = {"logs": [], "metrics": []}
-    field_metadata: RawPseudoMetadata = RawPseudoMetadata(
-        logs=["Some log"], metrics=[{"METRIC_1": 1}], datadoc=[]
-    )
-    result = aggregate_metrics(field_metadata, aggregated_metrics)
-    assert result == {"logs": ["Some log"], "metrics": [{"METRIC_1": 1}]}
-    result = aggregate_metrics(field_metadata, aggregated_metrics)
-    assert result == {"logs": ["Some log", "Some log"], "metrics": [{"METRIC_1": 2}]}
-    field_metadata = RawPseudoMetadata(
-        logs=["Some other log"], metrics=[{"METRIC_2": 3}], datadoc=[]
-    )
-    result = aggregate_metrics(field_metadata, aggregated_metrics)
-    assert result == {
+    field_metadata: dict[str, list[Any]] = {
+        "logs": ["Some log"],
+        "metrics": [{"METRIC_1": 1}],
+    }
+    aggregate_metrics(field_metadata, aggregated_metrics)
+    assert aggregated_metrics == {"logs": ["Some log"], "metrics": [{"METRIC_1": 1}]}
+    aggregate_metrics(field_metadata, aggregated_metrics)
+    assert aggregated_metrics == {
+        "logs": ["Some log", "Some log"],
+        "metrics": [{"METRIC_1": 2}],
+    }
+    field_metadata = {"logs": ["Some other log"], "metrics": [{"METRIC_2": 3}]}
+    aggregate_metrics(field_metadata, aggregated_metrics)
+    assert aggregated_metrics == {
         "logs": ["Some log", "Some log", "Some other log"],
         "metrics": [{"METRIC_1": 2}, {"METRIC_2": 3}],
     }
