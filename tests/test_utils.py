@@ -151,6 +151,7 @@ def test_build_pseudo_field_request_doesnt_work() -> None:
                 kwargs=RedactKeywordArgs(placeholder="#"),
             ),
             name="foo",
+            pattern="**/foo",
             values=["bar", "bad"],
         ),
         PseudoFieldRequest(
@@ -159,6 +160,7 @@ def test_build_pseudo_field_request_doesnt_work() -> None:
                 kwargs=RedactKeywordArgs(placeholder="#"),
             ),
             name="struct/foo",
+            pattern="**/foo",
             values=["baz", None],
         ),
     ]

@@ -104,6 +104,7 @@ def build_pseudo_field_request(
                 PseudoFieldRequest(
                     pseudo_func=field.func,
                     name=field.path,
+                    pattern=field.pattern,
                     values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
@@ -114,6 +115,7 @@ def build_pseudo_field_request(
                 DepseudoFieldRequest(
                     pseudo_func=field.func,
                     name=field.path,
+                    pattern=field.pattern,
                     values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
@@ -126,6 +128,7 @@ def build_pseudo_field_request(
                         source_pseudo_func=field.func,
                         target_pseudo_func=target_rule.func,
                         name=field.path,
+                        pattern=field.pattern,
                         values=field.col["values"],
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,

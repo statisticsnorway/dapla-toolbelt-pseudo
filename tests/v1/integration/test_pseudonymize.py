@@ -140,7 +140,7 @@ def test_pseudonymize_hierarchical(
         func=PseudoFunction(
             function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
         ),
-        pattern="person_info/fnr",
+        pattern="**/person_info/fnr",
     )
     result = Pseudonymize.from_polars(df_personer_hierarchical).add_rules(rule).run()
 

@@ -15,11 +15,13 @@ class FieldMatch:
     def __init__(
         self,
         path: str,
+        pattern: str,
         col: dict[str, t.Any],
         func: PseudoFunction,
     ) -> None:
         """Initialize the class."""
         self.path = path
+        self.pattern = pattern
         self.col = col
         self.func = func
 
@@ -77,7 +79,9 @@ def _traverse_dataframe_dict(
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                match.append(FieldMatch(path=name, col=col, func=rule.func))
+                match.append(
+                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
+                )
     return match
 
 
