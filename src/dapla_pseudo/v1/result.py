@@ -1,9 +1,9 @@
 """Common API models for builder packages."""
 
-import typing as t
 from io import BufferedWriter
 from pathlib import Path
 from typing import Any
+from typing import cast
 
 import pandas as pd
 import polars as pl
@@ -17,6 +17,7 @@ from datadoc_model.model import PseudoVariable
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.models.api import PseudoFileResponse
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import write_from_df
 from dapla_pseudo.v1.supported_file_format import write_from_dicts
@@ -30,13 +31,14 @@ class Result:
         pseudo_response: PseudoFieldResponse | PseudoFileResponse,
     ) -> None:
         """Initialise a PseudonymizationResult."""
-        self._pseudo_data: pl.DataFrame | list[dict[str, t.Any]]
+        self._pseudo_data: pl.DataFrame | list[dict[str, Any]]
         self._metadata: dict[str, dict[str, list[Any]]] = {}
         match pseudo_response:
             case PseudoFieldResponse(dataframe, raw_metadata):
                 self._pseudo_data = dataframe
 
                 datadoc_fields: list[PseudoVariable] = []
+                aggregated_metrics: dict[str, list[str]] = {"logs": [], "metrics": []}
 
                 for field_metadata in raw_metadata:
                     pseudo_variable = self._datadoc_from_raw_metadata_fields(
@@ -48,11 +50,15 @@ class Result:
                     if field_metadata.field_name is None:
                         field_metadata.field_name = "unknown_field"
 
+                    # Add metadata per field
                     self._metadata[field_metadata.field_name] = {
                         "logs": field_metadata.logs,
                         "metrics": field_metadata.metrics,
                     }
+                    # Aggregate metrics
+                    aggregate_metrics(field_metadata, aggregated_metrics)
 
+                self._metadata["AGGREGATED"] = aggregated_metrics
                 self._datadoc = MetadataContainer(
                     pseudonymization=PseudonymizationMetadata(
                         pseudo_variables=datadoc_fields
@@ -60,10 +66,10 @@ class Result:
                 )
 
             case PseudoFileResponse(
-                data, file_metadata, _content_type, file_name, _streamed
+                data, file_metadata, _content_type, _file_name, _streamed
             ):
                 self._pseudo_data = data
-                self._metadata[file_name] = {
+                self._metadata["AGGREGATED"] = {
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
@@ -77,7 +83,7 @@ class Result:
                     )
                 )
 
-    def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
+    def to_polars(self, **kwargs: Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.
 
         Args:
@@ -101,7 +107,7 @@ class Result:
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
 
-    def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
+    def to_pandas(self, **kwargs: Any) -> pd.DataFrame:
         """Output pseudonymized data as a Pandas DataFrame.
 
         Args:
@@ -122,7 +128,7 @@ class Result:
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
-    def to_file(self, file_path: str, **kwargs: t.Any) -> None:
+    def to_file(self, file_path: str, **kwargs: Any) -> None:
         """Write pseudonymized data to a file, with the metadata being written to the same folder.
 
         Args:
@@ -154,7 +160,7 @@ class Result:
             datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
 
-        file_handle = t.cast(
+        file_handle = cast(
             BufferedWriter, file_handle
         )  # file handle is always BufferedWriter when opening with "wb"
 
@@ -184,6 +190,16 @@ class Result:
         """
         return self._metadata
 
+    def get_metadata(self, field: str = "AGGREGATED") -> str | Any:
+        """Returns the pseudonymization metadata as a dictionary.
+
+        Returns:
+            Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
+            where the keys are field names and the values are corresponding pseudo field metadata.
+            If no metadata is set, returns an empty dictionary.
+        """
+        return self._metadata[field]
+
     @property
     def datadoc(self) -> str:
         """Returns the pseudonymization metadata as a dictionary.
@@ -202,3 +218,31 @@ class Result:
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
         return PseudoVariable.model_validate(raw_metadata[0])
+
+
+def aggregate_metrics(
+    field_metadata: RawPseudoMetadata, aggregated_metrics: dict[str, list[Any]]
+) -> dict[str, list[Any]]:
+    """Aggregates logs and metrics. Each unique metric is summarized."""
+    # Logs are simply appended
+    aggregated_metrics["logs"].extend(field_metadata.logs)
+    # Count each unique metric
+    for field_metric in field_metadata.metrics:
+        for key, value in field_metric.items():
+            # See if metric already exists in the aggregated dict
+            # next(iter(it)) takes the first key from the metric dict,
+            # since there is always just one key, e.g. {"METRIC_1": 1}
+            if next(
+                (
+                    (item := it)
+                    for it in aggregated_metrics["metrics"]
+                    if key == next(iter(it))
+                ),
+                None,
+            ):
+                counter = int(item[key]) + int(value)
+                item[key] = counter
+            else:
+                aggregated_metrics["metrics"].append({key: value})
+
+    return aggregated_metrics

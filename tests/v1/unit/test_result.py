@@ -1,6 +1,7 @@
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import polars as pl
@@ -11,6 +12,7 @@ from dapla_pseudo.v1.models.api import PseudoFileResponse
 from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.result import Result
+from dapla_pseudo.v1.result import aggregate_metrics
 
 
 @fixture()
@@ -89,3 +91,22 @@ def test_result_from_file_to_file(
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
     result.to_file(str(tmp_path / f"file_to_file.{file_extension}"))
+
+
+def test_aggregate_metrics() -> None:
+    aggregated_metrics: dict[str, list[Any]] = {"logs": [], "metrics": []}
+    field_metadata: RawPseudoMetadata = RawPseudoMetadata(
+        logs=["Some log"], metrics=[{"METRIC_1": 1}], datadoc=[]
+    )
+    result = aggregate_metrics(field_metadata, aggregated_metrics)
+    assert result == {"logs": ["Some log"], "metrics": [{"METRIC_1": 1}]}
+    result = aggregate_metrics(field_metadata, aggregated_metrics)
+    assert result == {"logs": ["Some log", "Some log"], "metrics": [{"METRIC_1": 2}]}
+    field_metadata = RawPseudoMetadata(
+        logs=["Some other log"], metrics=[{"METRIC_2": 3}], datadoc=[]
+    )
+    result = aggregate_metrics(field_metadata, aggregated_metrics)
+    assert result == {
+        "logs": ["Some log", "Some log", "Some other log"],
+        "metrics": [{"METRIC_1": 2}, {"METRIC_2": 3}],
+    }
