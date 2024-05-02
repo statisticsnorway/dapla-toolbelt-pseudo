@@ -93,22 +93,52 @@ def test_result_from_file_to_file(
     result.to_file(str(tmp_path / f"file_to_file.{file_extension}"))
 
 
-def test_aggregate_metrics() -> None:
-    aggregated_metrics: dict[str, list[Any]] = {"logs": [], "metrics": []}
-    field_metadata: dict[str, list[Any]] = {
-        "logs": ["Some log"],
-        "metrics": [{"METRIC_1": 1}],
+def test_aggregate_single_metric() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        }
     }
-    aggregate_metrics(field_metadata, aggregated_metrics)
-    assert aggregated_metrics == {"logs": ["Some log"], "metrics": [{"METRIC_1": 1}]}
-    aggregate_metrics(field_metadata, aggregated_metrics)
+    aggregated_metrics = aggregate_metrics(field_metadata)
+    assert aggregated_metrics == {"logs": ["Some log"], "metrics": {"METRIC_1": 1}}
+
+
+def test_aggregate_same_metrics() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field-1:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        },
+        "field-2:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 2}],
+        },
+    }
+    aggregated_metrics = aggregate_metrics(field_metadata)
     assert aggregated_metrics == {
         "logs": ["Some log", "Some log"],
-        "metrics": [{"METRIC_1": 2}],
+        "metrics": {"METRIC_1": 3},
     }
-    field_metadata = {"logs": ["Some other log"], "metrics": [{"METRIC_2": 3}]}
-    aggregate_metrics(field_metadata, aggregated_metrics)
+
+
+def test_aggregate_mixed_metrics() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field-1:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 2}],
+        },
+        "field-2:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        },
+        "field-3:": {
+            "logs": ["Some other log"],
+            "metrics": [{"METRIC_2": 3}],
+        },
+    }
+    aggregated_metrics = aggregate_metrics(field_metadata)
     assert aggregated_metrics == {
         "logs": ["Some log", "Some log", "Some other log"],
-        "metrics": [{"METRIC_1": 2}, {"METRIC_2": 3}],
+        "metrics": {"METRIC_1": 3, "METRIC_2": 3},
     }

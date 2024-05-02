@@ -1,5 +1,6 @@
 """Common API models for builder packages."""
 
+from collections import Counter
 from io import BufferedWriter
 from pathlib import Path
 from typing import Any
@@ -194,11 +195,7 @@ class Result:
             where the keys are field names and the values are corresponding pseudo field metadata.
             If no metadata is set, returns an empty dictionary.
         """
-        aggregated_metrics: dict[str, list[str]] = {"logs": [], "metrics": []}
-        for key in self._metadata.keys():
-            field_metadata = self._metadata[key]
-            aggregate_metrics(field_metadata, aggregated_metrics)
-        return aggregated_metrics
+        return aggregate_metrics(self._metadata)
 
     @property
     def datadoc(self) -> str:
@@ -220,27 +217,22 @@ class Result:
         return PseudoVariable.model_validate(raw_metadata[0])
 
 
-def aggregate_metrics(
-    field_metadata: dict[str, list[Any]], aggregated_metrics: dict[str, list[Any]]
-) -> None:
+def aggregate_metrics(metadata: dict[str, dict[str, list[Any]]]) -> dict[str, Any]:
     """Aggregates logs and metrics. Each unique metric is summarized."""
-    # Logs are simply appended
-    aggregated_metrics["logs"].extend(field_metadata["logs"])
-    # Count each unique metric
-    for field_metric in field_metadata["metrics"]:
-        for key, value in field_metric.items():
-            # See if metric already exists in the aggregated dict
-            # next(iter(it)) takes the first key from the metric dict,
-            # since there is always just one key, e.g. {"METRIC_1": 1}
-            if next(
-                (
-                    (item := it)
-                    for it in aggregated_metrics["metrics"]
-                    if key == next(iter(it))
-                ),
-                None,
-            ):
-                counter = int(item[key]) + int(value)
-                item[key] = counter
-            else:
-                aggregated_metrics["metrics"].append({key: value})
+    logs: list[str] = []
+    metrics: Counter[str] = Counter()
+    for field_metadata in metadata.values():
+        for metadata_field, metadata_value in field_metadata.items():
+            match metadata_field:
+                case "logs":
+                    # Logs are simply appended
+                    logs.extend(metadata_value)
+                case "metrics":
+                    # Count each unique metric
+                    metadata_value = cast(list[dict[str, int]], metadata_value)
+                    # Metrics is represented by a list of dicts, e.g. [{"METRIC_1": 1}, {"METRIC_2": 1}]
+                    for metric in metadata_value:
+                        # Each dict has a single entry, e.g. {"METRIC_1": 1}, so take the first one
+                        key, value = next(iter(metric.items()))
+                        metrics.update({key: value})
+    return {"logs": logs, "metrics": dict(metrics)}
