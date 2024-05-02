@@ -49,14 +49,18 @@ class MutableDataFrame:
 
     def __init__(self, dataframe: pl.DataFrame) -> None:
         """Initialize the class."""
+        print("Start initialising MutableDataFrame")
         self.dataframe_dict = orjson.loads(dataframe.write_json())
         self.matched_fields: list[FieldMatch] = []
+        print("End initialising MutableDataFrame")
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
+        print("Start traversing")
         self.matched_fields = _traverse_dataframe_dict(
             [], self.dataframe_dict["columns"], rules
         )
+        print("End traversing")
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
