@@ -9,6 +9,19 @@ from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 
 
+def _ensure_normalized(pattern: str) -> str:
+    """Normalize the pattern.
+
+    Ensure that the pattern always starts with a '/' or '*' to be compatible with the
+    pattern matching that is used in pseudo-service.
+    """
+    return (
+        pattern
+        if (pattern.startswith("/") or pattern.startswith("*"))
+        else "/" + pattern
+    )
+
+
 class FieldMatch:
     """Represents a reference to a matching column in the dataframe."""
 
@@ -21,7 +34,7 @@ class FieldMatch:
     ) -> None:
         """Initialize the class."""
         self.path = path
-        self.pattern = pattern
+        self.pattern = _ensure_normalized(pattern)
         self.col = col
         self.func = func
 

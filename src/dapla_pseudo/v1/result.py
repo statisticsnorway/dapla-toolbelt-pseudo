@@ -176,8 +176,7 @@ class Result:
 
     @property
     def metadata_details(self) -> dict[str, Any]:
-        """Returns the pseudonymization metadata as a dictionary, for each field that has
-        been processed.
+        """Returns the pseudonymization metadata as a dictionary, for each field that has been processed.
 
         Returns:
             Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,

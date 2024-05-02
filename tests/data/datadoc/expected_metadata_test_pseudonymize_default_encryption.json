@@ -8,7 +8,7 @@
       {
         "short_name": "fnr",
         "data_element_path": "fnr",
-        "data_element_pattern": "**",
+        "data_element_pattern": "/fnr",
         "stable_identifier_type": null,
         "stable_identifier_version": null,
         "encryption_algorithm": "TINK-DAEAD",

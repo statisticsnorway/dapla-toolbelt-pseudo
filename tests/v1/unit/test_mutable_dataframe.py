@@ -8,6 +8,7 @@ from dapla_pseudo.v1.mutable_dataframe import _glob_matches
 def test_rule_matching() -> None:
     assert _glob_matches("fnr", "**fnr")
     assert _glob_matches("fnr", "fnr")
+    assert _glob_matches("fnr", "fnr*")
     assert _glob_matches("identifier/fnr", "*/fnr")
     assert not _glob_matches("some/identifier/fnr", "*/fnr")
     assert _glob_matches("some/identifier/fnr", "**/fnr")

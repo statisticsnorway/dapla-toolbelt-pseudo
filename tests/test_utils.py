@@ -131,7 +131,7 @@ def test_get_file_data_from_polars_dataset() -> None:
     assert mime_type.name == "ZIP"
 
 
-def test_build_pseudo_field_request_doesnt_work() -> None:
+def test_build_pseudo_field_request() -> None:
     data = [
         {"foo": "bar", "struct": {"foo": "baz"}},
         {"foo": "bad", "struct": {"foo": None}},
