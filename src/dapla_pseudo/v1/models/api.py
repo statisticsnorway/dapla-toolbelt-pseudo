@@ -18,7 +18,8 @@ class PseudoFieldRequest(APIModel):
 
     pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    pattern: str
+    values: list[str | None]
     keyset: PseudoKeyset | None = None
 
 
@@ -27,7 +28,8 @@ class DepseudoFieldRequest(APIModel):
 
     pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    pattern: str
+    values: list[str | None]
     keyset: PseudoKeyset | None = None
 
 
@@ -37,7 +39,8 @@ class RepseudoFieldRequest(APIModel):
     source_pseudo_func: PseudoFunction
     target_pseudo_func: PseudoFunction
     name: str
-    values: list[str]
+    pattern: str
+    values: list[str | None]
     source_keyset: PseudoKeyset | None = None
     target_keyset: PseudoKeyset | None = None
 
@@ -75,7 +78,7 @@ class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
 
     logs: list[str]
-    metrics: list[str]
+    metrics: list[dict[str, t.Any]]
     datadoc: list[dict[str, t.Any]]
     field_name: str | None = None
 

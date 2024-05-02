@@ -31,6 +31,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
@@ -88,47 +89,52 @@ def get_file_format_from_file_name(file_path: str | Path) -> SupportedOutputFile
 
 def build_pseudo_field_request(
     pseudo_operation: PseudoOperation,
-    dataframe: pl.DataFrame,
+    mutable_df: MutableDataFrame,
     rules: list[PseudoRule],  # "source rules" if repseudo
     custom_keyset: PseudoKeyset | str | None = None,
     target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
     target_rules: list[PseudoRule] | None = None,  # used in repseudo)
 ) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
     """Builds a FieldRequest object."""
+    mutable_df.match_rules(rules)
+    matched_fields = mutable_df.get_matched_fields()
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
             return [
                 PseudoFieldRequest(
-                    pseudo_func=rule.func,
-                    name=rule.pattern,
-                    values=dataframe[rule.pattern].to_list(),
+                    pseudo_func=field.func,
+                    name=field.path,
+                    pattern=field.pattern,
+                    values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
-                for rule in rules
+                for field in matched_fields
             ]
         case PseudoOperation.DEPSEUDONYMIZE:
             return [
                 DepseudoFieldRequest(
-                    pseudo_func=rule.func,
-                    name=rule.pattern,
-                    values=dataframe[rule.pattern].to_list(),
+                    pseudo_func=field.func,
+                    name=field.path,
+                    pattern=field.pattern,
+                    values=field.col["values"],
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
-                for rule in rules
+                for field in matched_fields
             ]
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
                 return [
                     RepseudoFieldRequest(
-                        source_pseudo_func=source_rule.func,
+                        source_pseudo_func=field.func,
                         target_pseudo_func=target_rule.func,
-                        name=source_rule.pattern,
-                        values=dataframe[source_rule.pattern].to_list(),
+                        name=field.path,
+                        pattern=field.pattern,
+                        values=field.col["values"],
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,
                     )
-                    for source_rule, target_rule in zip(
-                        rules, target_rules, strict=False
+                    for field, target_rule in zip(
+                        matched_fields, target_rules, strict=False
                     )
                 ]
             else:

@@ -32,24 +32,13 @@ class Pseudonymize:
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
-        dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        if pl.Struct in dataset.dtypes:
-            # Hierachial dataset must be processed as a file
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
-            Pseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Pseudonymize.dataset = dataset
+        Pseudonymize.dataset = pl.from_pandas(dataframe)
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        if pl.Struct in dataframe.dtypes:
-            # Hierachial dataset must be processed as a file
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
-            Pseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Pseudonymize.dataset = dataframe
+        Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
