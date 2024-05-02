@@ -175,8 +175,9 @@ class Result:
         datadoc_file_handle.close()
 
     @property
-    def metadata(self) -> dict[str, Any]:
-        """Returns the pseudonymization metadata as a dictionary.
+    def metadata_details(self) -> dict[str, Any]:
+        """Returns the pseudonymization metadata as a dictionary, for each field that has
+        been processed.
 
         Returns:
             Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
@@ -186,8 +187,8 @@ class Result:
         return self._metadata
 
     @property
-    def metadata_aggregated(self) -> dict[str, Any]:
-        """Returns the aggregated metadata as a dictionary.
+    def metadata(self) -> dict[str, Any]:
+        """Returns the aggregated metadata for all fields as a dictionary.
 
         Returns:
             Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
