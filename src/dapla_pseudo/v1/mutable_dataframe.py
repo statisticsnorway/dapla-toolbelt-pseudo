@@ -7,7 +7,6 @@ from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
-from concurrent.futures import ThreadPoolExecutor
 
 
 def _ensure_normalized(pattern: str) -> str:
@@ -78,42 +77,35 @@ class MutableDataFrame:
 
 
 def _traverse_dataframe_dict(
-    accumulator: t.List[FieldMatch],
-    items: t.List[t.Dict[str, t.Any]],
-    rules: t.List[PseudoRule],
+    accumulator: list[FieldMatch],
+    items: list[dict[str, t.Any]],
+    rules: list[PseudoRule],
     prefix: str = "",
-    executor: ThreadPoolExecutor = None,
-) -> t.List[FieldMatch]:
-    match: t.List[FieldMatch] = []
+    memo: t.Optional[t.Dict[str, t.List[FieldMatch]]] = None,
+) -> list[FieldMatch]:
+    match: list[FieldMatch] = []
+    memo = memo or {}  # Initialize memoization cache if not provided
+    if prefix in memo:
+        print(f"prefix {prefix} already computed")
+        return memo[prefix]
 
-    # Create a ThreadPoolExecutor if not provided
-    if executor is None:
-        with ThreadPoolExecutor() as default_executor:
-            return _traverse_dataframe_dict(accumulator, items, rules, prefix, default_executor)
-
-    futures = []
     for col in items:
         if col is None:
             pass
-        elif isinstance(col["datatype"], dict):
+        elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
-            future = executor.submit(
-                _traverse_dataframe_dict,
-                accumulator,
-                col["values"],
-                rules,
-                f"{prefix}/{name}",
-                executor
+            match.extend(
+                _traverse_dataframe_dict(
+                    accumulator, col["values"], rules, f"{prefix}/{name}", memo
+                )
             )
-            futures.append(future)
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
                 match.append(
                     FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
                 )
-    for future in futures:
-        match.extend(future.result())
+    memo[prefix] = match
     return match
 
 
