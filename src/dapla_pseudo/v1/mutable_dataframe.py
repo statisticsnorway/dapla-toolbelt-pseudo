@@ -7,6 +7,7 @@ from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
+from concurrent.futures import ThreadPoolExecutor
 
 
 def _ensure_normalized(pattern: str) -> str:
@@ -83,22 +84,29 @@ def _traverse_dataframe_dict(
     prefix: str = "",
 ) -> list[FieldMatch]:
     match: list[FieldMatch] = []
-    for col in items:
-        if col is None:
-            pass
-        elif isinstance(col["datatype"], dict):
-            name = "[]" if col["name"] == "" else col["name"]
-            match.extend(
-                _traverse_dataframe_dict(
-                    accumulator, col["values"], rules, f"{prefix}/{name}"
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        for col in items:
+            if col is None:
+                pass
+            elif isinstance(col["datatype"], dict):
+                name = "[]" if col["name"] == "" else col["name"]
+                future = executor.submit(
+                    _traverse_dataframe_dict,
+                    accumulator,
+                    col["values"],
+                    rules,
+                    f"{prefix}/{name}"
                 )
-            )
-        else:
-            name = f"{prefix}/{col['name']}".lstrip("/")
-            if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                match.append(
-                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
-                )
+                futures.append(future)
+            else:
+                name = f"{prefix}/{col['name']}".lstrip("/")
+                if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
+                    match.append(
+                        FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
+                    )
+        for future in futures:
+            match.extend(future.result())
     return match
 
 
