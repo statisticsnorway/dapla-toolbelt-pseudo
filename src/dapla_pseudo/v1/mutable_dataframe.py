@@ -78,35 +78,42 @@ class MutableDataFrame:
 
 
 def _traverse_dataframe_dict(
-    accumulator: list[FieldMatch],
-    items: list[dict[str, t.Any]],
-    rules: list[PseudoRule],
+    accumulator: t.List[FieldMatch],
+    items: t.List[t.Dict[str, t.Any]],
+    rules: t.List[PseudoRule],
     prefix: str = "",
-) -> list[FieldMatch]:
-    match: list[FieldMatch] = []
-    with ThreadPoolExecutor() as executor:
-        futures = []
-        for col in items:
-            if col is None:
-                pass
-            elif isinstance(col["datatype"], dict):
-                name = "[]" if col["name"] == "" else col["name"]
-                future = executor.submit(
-                    _traverse_dataframe_dict,
-                    accumulator,
-                    col["values"],
-                    rules,
-                    f"{prefix}/{name}"
+    executor: ThreadPoolExecutor = None,
+) -> t.List[FieldMatch]:
+    match: t.List[FieldMatch] = []
+
+    # Create a ThreadPoolExecutor if not provided
+    if executor is None:
+        with ThreadPoolExecutor() as default_executor:
+            return _traverse_dataframe_dict(accumulator, items, rules, prefix, default_executor)
+
+    futures = []
+    for col in items:
+        if col is None:
+            pass
+        elif isinstance(col["datatype"], dict):
+            name = "[]" if col["name"] == "" else col["name"]
+            future = executor.submit(
+                _traverse_dataframe_dict,
+                accumulator,
+                col["values"],
+                rules,
+                f"{prefix}/{name}",
+                executor
+            )
+            futures.append(future)
+        else:
+            name = f"{prefix}/{col['name']}".lstrip("/")
+            if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
+                match.append(
+                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
                 )
-                futures.append(future)
-            else:
-                name = f"{prefix}/{col['name']}".lstrip("/")
-                if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                    match.append(
-                        FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
-                    )
-        for future in futures:
-            match.extend(future.result())
+    for future in futures:
+        match.extend(future.result())
     return match
 
 
