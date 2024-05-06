@@ -1,9 +1,10 @@
 """Common API models for builder packages."""
 
-import typing as t
+from collections import Counter
 from io import BufferedWriter
 from pathlib import Path
 from typing import Any
+from typing import cast
 
 import pandas as pd
 import polars as pl
@@ -30,7 +31,7 @@ class Result:
         pseudo_response: PseudoFieldResponse | PseudoFileResponse,
     ) -> None:
         """Initialise a PseudonymizationResult."""
-        self._pseudo_data: pl.DataFrame | list[dict[str, t.Any]]
+        self._pseudo_data: pl.DataFrame | list[dict[str, Any]]
         self._metadata: dict[str, dict[str, list[Any]]] = {}
         match pseudo_response:
             case PseudoFieldResponse(dataframe, raw_metadata):
@@ -48,6 +49,7 @@ class Result:
                     if field_metadata.field_name is None:
                         field_metadata.field_name = "unknown_field"
 
+                    # Add metadata per field
                     self._metadata[field_metadata.field_name] = {
                         "logs": field_metadata.logs,
                         "metrics": field_metadata.metrics,
@@ -77,7 +79,7 @@ class Result:
                     )
                 )
 
-    def to_polars(self, **kwargs: t.Any) -> pl.DataFrame:
+    def to_polars(self, **kwargs: Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.
 
         Args:
@@ -101,7 +103,7 @@ class Result:
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
 
-    def to_pandas(self, **kwargs: t.Any) -> pd.DataFrame:
+    def to_pandas(self, **kwargs: Any) -> pd.DataFrame:
         """Output pseudonymized data as a Pandas DataFrame.
 
         Args:
@@ -122,7 +124,7 @@ class Result:
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
-    def to_file(self, file_path: str, **kwargs: t.Any) -> None:
+    def to_file(self, file_path: str, **kwargs: Any) -> None:
         """Write pseudonymized data to a file, with the metadata being written to the same folder.
 
         Args:
@@ -154,7 +156,7 @@ class Result:
             datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
 
-        file_handle = t.cast(
+        file_handle = cast(
             BufferedWriter, file_handle
         )  # file handle is always BufferedWriter when opening with "wb"
 
@@ -174,8 +176,8 @@ class Result:
         datadoc_file_handle.close()
 
     @property
-    def metadata(self) -> dict[str, Any]:
-        """Returns the pseudonymization metadata as a dictionary.
+    def metadata_details(self) -> dict[str, Any]:
+        """Returns the pseudonymization metadata as a dictionary, for each field that has been processed.
 
         Returns:
             Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
@@ -183,6 +185,17 @@ class Result:
             If no metadata is set, returns an empty dictionary.
         """
         return self._metadata
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        """Returns the aggregated metadata for all fields as a dictionary.
+
+        Returns:
+            Optional[dict[str, str]]: A dictionary containing the pseudonymization metadata,
+            where the keys are field names and the values are corresponding pseudo field metadata.
+            If no metadata is set, returns an empty dictionary.
+        """
+        return aggregate_metrics(self._metadata)
 
     @property
     def datadoc(self) -> str:
@@ -202,3 +215,24 @@ class Result:
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
         return PseudoVariable.model_validate(raw_metadata[0])
+
+
+def aggregate_metrics(metadata: dict[str, dict[str, list[Any]]]) -> dict[str, Any]:
+    """Aggregates logs and metrics. Each unique metric is summarized."""
+    logs: list[str] = []
+    metrics: Counter[str] = Counter()
+    for field_metadata in metadata.values():
+        for metadata_field, metadata_value in field_metadata.items():
+            match metadata_field:
+                case "logs":
+                    # Logs are simply appended
+                    logs.extend(metadata_value)
+                case "metrics":
+                    # Count each unique metric
+                    metadata_value = cast(list[dict[str, int]], metadata_value)
+                    # Metrics is represented by a list of dicts, e.g. [{"METRIC_1": 1}, {"METRIC_2": 1}]
+                    for metric in metadata_value:
+                        # Each dict has a single entry, e.g. {"METRIC_1": 1}, so take the first one
+                        key, value = next(iter(metric.items()))
+                        metrics.update({key: value})
+    return {"logs": logs, "metrics": dict(metrics)}

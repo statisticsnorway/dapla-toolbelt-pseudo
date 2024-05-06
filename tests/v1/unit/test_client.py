@@ -83,7 +83,7 @@ def test_post_to_field_endpoint_serialization(
         function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
     )
     pseudo_field_request = PseudoFieldRequest(
-        pseudo_func=pseudo_func, name="", values=[], keyset=keyset
+        pseudo_func=pseudo_func, name="", pattern="", values=[], keyset=keyset
     )
 
     test_client._post_to_field_endpoint(

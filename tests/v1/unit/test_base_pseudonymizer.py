@@ -79,7 +79,10 @@ def test_pseudonymize_field(
     Only tests for 'PseudoFieldRequest', not depseudo/repseudo as the deserialization is agnostic to the type of request.
     """
     sid_req = PseudoFieldRequest(
-        pseudo_func=pseudo_func_sid, name="fnr", values=list(df_personer["fnr"])
+        pseudo_func=pseudo_func_sid,
+        name="fnr",
+        pattern="fnr*",
+        values=list(df_personer["fnr"]),
     )
 
     expected_json = {
@@ -91,7 +94,7 @@ def test_pseudonymize_field(
                 {
                     "short_name": "fnr",
                     "data_element_path": "fnr",
-                    "data_element_pattern": "**",
+                    "data_element_pattern": "fnr*",
                     "stable_identifier_type": "FREG_SNR",
                     "stable_identifier_version": "2023-08-31",
                     "encryption_algorithm": "TINK-FPE",

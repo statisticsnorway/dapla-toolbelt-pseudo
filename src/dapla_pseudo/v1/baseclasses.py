@@ -43,6 +43,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.result import Result
 
 
@@ -58,7 +59,16 @@ class _BasePseudonymizer:
             pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
             auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
         )
-        self._dataset = dataset
+        self._dataset: File | MutableDataFrame
+        match dataset:  # Differentiate between file and DataFrame
+            case pl.DataFrame():
+                self._dataset = MutableDataFrame(dataset)
+            case File():
+                self._dataset = dataset
+            case _ as invalid_dataset:
+                raise ValueError(
+                    f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
+                )
 
     def _execute_pseudo_operation(
         self,
@@ -78,7 +88,7 @@ class _BasePseudonymizer:
 
         pseudo_response: PseudoFileResponse | PseudoFieldResponse
         match self._dataset:  # Differentiate between file and DataFrame
-            case pl.DataFrame():
+            case MutableDataFrame():
                 pseudo_requests = build_pseudo_field_request(
                     self._pseudo_operation,
                     self._dataset,
@@ -88,6 +98,7 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
+                pseudo_response.data = self._dataset.to_polars()
             case File():
                 pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
@@ -118,7 +129,7 @@ class _BasePseudonymizer:
 
         def pseudonymize_field_runner(
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, pl.Series, RawPseudoMetadata]:
+        ) -> tuple[str, list[str], RawPseudoMetadata]:
             """Function that performs the pseudonymization on a Polars Series."""
             response: requests.Response = self._pseudo_client._post_to_field_endpoint(
                 f"{self._pseudo_operation.value}/field",
@@ -135,10 +146,10 @@ class _BasePseudonymizer:
                 datadoc=payload["datadoc_metadata"]["pseudo_variables"],
             )
 
-            return request.name, pl.Series(data), metadata
+            return request.name, data, metadata
 
         # type narrowing isn't carried over from caller function
-        assert isinstance(self._dataset, pl.DataFrame)
+        assert isinstance(self._dataset, MutableDataFrame)
         # Execute the pseudonymization API calls in parallel
         with ThreadPoolExecutor() as executor:
             raw_metadata_fields: list[RawPseudoMetadata] = []
@@ -149,11 +160,11 @@ class _BasePseudonymizer:
 
             for future in as_completed(futures):
                 field_name, data, raw_metadata = future.result()
-                self._dataset = self._dataset.with_columns(data.alias(field_name))
+                self._dataset.update(field_name, data)
                 raw_metadata_fields.append(raw_metadata)
 
             return PseudoFieldResponse(
-                data=self._dataset, raw_metadata=raw_metadata_fields
+                data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
             )
 
     def _pseudonymize_file(

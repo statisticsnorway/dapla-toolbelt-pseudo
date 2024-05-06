@@ -1,6 +1,7 @@
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import polars as pl
@@ -11,6 +12,7 @@ from dapla_pseudo.v1.models.api import PseudoFileResponse
 from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.result import Result
+from dapla_pseudo.v1.result import aggregate_metrics
 
 
 @fixture()
@@ -89,3 +91,54 @@ def test_result_from_file_to_file(
     result = Result(pseudo_response=pseudo_file_response)
     file_extension = pseudo_file_response.content_type.name.lower()
     result.to_file(str(tmp_path / f"file_to_file.{file_extension}"))
+
+
+def test_aggregate_single_metric() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        }
+    }
+    aggregated_metrics = aggregate_metrics(field_metadata)
+    assert aggregated_metrics == {"logs": ["Some log"], "metrics": {"METRIC_1": 1}}
+
+
+def test_aggregate_same_metrics() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field-1:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        },
+        "field-2:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 2}],
+        },
+    }
+    aggregated_metrics = aggregate_metrics(field_metadata)
+    assert aggregated_metrics == {
+        "logs": ["Some log", "Some log"],
+        "metrics": {"METRIC_1": 3},
+    }
+
+
+def test_aggregate_mixed_metrics() -> None:
+    field_metadata: dict[str, dict[str, list[Any]]] = {
+        "field-1:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 2}],
+        },
+        "field-2:": {
+            "logs": ["Some log"],
+            "metrics": [{"METRIC_1": 1}],
+        },
+        "field-3:": {
+            "logs": ["Some other log"],
+            "metrics": [{"METRIC_2": 3}],
+        },
+    }
+    aggregated_metrics = aggregate_metrics(field_metadata)
+    assert aggregated_metrics == {
+        "logs": ["Some log", "Some log", "Some other log"],
+        "metrics": {"METRIC_1": 3, "METRIC_2": 3},
+    }

@@ -48,7 +48,7 @@ def test_validate_with_full_response(
         .validate_map_to_stable_id()
     )
     validation_df = validation_result.to_pandas()
-    validation_metadata = validation_result.metadata
+    validation_metadata = validation_result.metadata_details
 
     patched_post_to_sid_endpoint.assert_called_once_with(
         "sid/lookup/batch",
@@ -76,7 +76,7 @@ def test_validate_with_empty_response(
         .validate_map_to_stable_id(sid_snapshot_date=convert_to_date("2023-08-31"))
     )
     validation_df = validation_result.to_pandas()
-    validation_metadata = validation_result.metadata
+    validation_metadata = validation_result.metadata_details
 
     patched_post_to_sid_endpoint.assert_called_once_with(
         "sid/lookup/batch",
