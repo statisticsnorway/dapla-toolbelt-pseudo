@@ -1,5 +1,5 @@
+import asyncio
 import typing as t
-from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
 import orjson
@@ -58,7 +58,7 @@ class MutableDataFrame:
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         print("Start traversing")
-        self.matched_fields = list(_traverse_dataframe_dict(
+        self.matched_fields = asyncio.run( _traverse_dataframe_dict(
             [], self.dataframe_dict["columns"], rules
         ))
         print("End traversing")
@@ -77,26 +77,30 @@ class MutableDataFrame:
         return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
 
 
-def _traverse_dataframe_dict(
+async def _traverse_dataframe_dict(
     accumulator: list[FieldMatch],
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
-) -> t.Generator[FieldMatch, None, None]:
+) -> list[FieldMatch]:
+    match: list[FieldMatch] = []
     for col in items:
         if col is None:
             pass
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
-            yield from (
-                _traverse_dataframe_dict(
+            match.extend(
+                await _traverse_dataframe_dict(
                     accumulator, col["values"], rules, f"{prefix}/{name}"
                 )
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                yield FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
+                match.append(
+                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
+                )
+    return match
 
 
 def _glob_matches(name: str, rule: str) -> bool:
