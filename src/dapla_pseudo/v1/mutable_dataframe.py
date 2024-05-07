@@ -114,6 +114,7 @@ def _traverse_dataframe_dict(
         futures = [executor.submit(traverse, col) for col in items]
         print(f"Running {len(futures)} futures in parallel")
         for future in as_completed(futures):
+            print("Future completed")
             yield from future.result()
 
 
