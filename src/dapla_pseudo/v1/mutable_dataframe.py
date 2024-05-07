@@ -52,18 +52,14 @@ class MutableDataFrame:
 
     def __init__(self, dataframe: pl.DataFrame) -> None:
         """Initialize the class."""
-        print("Start initialising MutableDataFrame")
         self.dataframe_dict = orjson.loads(dataframe.write_json())
         self.matched_fields: list[FieldMatch] = []
-        print("End initialising MutableDataFrame")
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
-        print("Start traversing")
         self.matched_fields = list(
             _traverse_dataframe_dict([], self.dataframe_dict["columns"], rules)
         )
-        print("End traversing")
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
@@ -93,6 +89,7 @@ def _traverse_dataframe_dict(
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
+                # Only parallelize the first iteration
                 accumulator, col["values"], rules, f"{prefix}/{name}", parallelize=False
             )
         else:
@@ -112,9 +109,7 @@ def _traverse_dataframe_dict(
             )
     else:
         futures = [executor.submit(traverse, col) for col in items]
-        print(f"Running {len(futures)} futures in parallel")
         for future in as_completed(futures):
-            print("Future completed")
             yield from future.result()
 
 
