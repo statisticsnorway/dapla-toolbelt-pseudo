@@ -90,7 +90,11 @@ def _traverse_dataframe_dict(
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
                 # Only parallelize the first iteration
-                accumulator, col["values"], rules, f"{prefix}/{name}", parallelize=False
+                accumulator,
+                col["values"],
+                rules,
+                f"{prefix}/{name}",
+                parallelize=False,
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
