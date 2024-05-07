@@ -1,4 +1,5 @@
 import typing as t
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
 import orjson
@@ -57,9 +58,9 @@ class MutableDataFrame:
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         print("Start traversing")
-        self.matched_fields = _traverse_dataframe_dict(
+        self.matched_fields = list(_traverse_dataframe_dict(
             [], self.dataframe_dict["columns"], rules
-        )
+        ))
         print("End traversing")
 
     def get_matched_fields(self) -> list[FieldMatch]:
@@ -81,32 +82,21 @@ def _traverse_dataframe_dict(
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
-    memo: t.Optional[t.Dict[str, t.List[FieldMatch]]] = None,
-) -> list[FieldMatch]:
-    match: list[FieldMatch] = []
-    memo = memo or {}  # Initialize memoization cache if not provided
-    if prefix in memo:
-        print(f"prefix {prefix} already computed")
-        return memo[prefix]
-
+) -> t.Generator[FieldMatch, None, None]:
     for col in items:
         if col is None:
             pass
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
-            match.extend(
+            yield from (
                 _traverse_dataframe_dict(
-                    accumulator, col["values"], rules, f"{prefix}/{name}", memo
+                    accumulator, col["values"], rules, f"{prefix}/{name}"
                 )
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                match.append(
-                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
-                )
-    memo[prefix] = match
-    return match
+                yield FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
 
 
 def _glob_matches(name: str, rule: str) -> bool:
