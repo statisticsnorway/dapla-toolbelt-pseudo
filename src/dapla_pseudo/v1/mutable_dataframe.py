@@ -85,7 +85,7 @@ def _traverse_dataframe_dict(
     rules: list[PseudoRule],
     prefix: str = "",
     executor: Executor | None = None,
-    parallelize: bool = True,
+    parallelize: bool = False,
 ) -> t.Generator[FieldMatch, None, None]:
     def traverse(col: dict[str, t.Any]) -> t.Generator[FieldMatch, None, None]:
         if col is None:
