@@ -61,11 +61,10 @@ class MutableDataFrame:
         try:
             loop = asyncio.get_running_loop()
             print('Async event loop already running. Adding coroutine to the event loop.')
-            task = loop.run_until_complete(_traverse_dataframe_dict(
+            self.matched_fields = loop.run_until_complete(_traverse_dataframe_dict(
                 [], self.dataframe_dict["columns"], rules
             ))
-            task.add_done_callback(lambda t: print("End traversing"))
-            self.matched_fields = task.result()
+            print("End traversing")
         except RuntimeError:  # 'RuntimeError: There is no current event loop...'
             self.matched_fields = asyncio.run(_traverse_dataframe_dict(
                 [], self.dataframe_dict["columns"], rules
