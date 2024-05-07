@@ -1,4 +1,3 @@
-import asyncio
 import typing as t
 from io import BytesIO
 
@@ -58,18 +57,10 @@ class MutableDataFrame:
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         print("Start traversing")
-        try:
-            loop = asyncio.get_event_loop()
-            print('Async event loop already running. Adding coroutine to the event loop.')
-            future = asyncio.run_coroutine_threadsafe(_traverse_dataframe_dict(
-                [], self.dataframe_dict["columns"], rules
-            ), loop)
-            future.add_done_callback(lambda t: print("End traversing"))
-            self.matched_fields = future.result()
-        except RuntimeError:  # 'RuntimeError: There is no current event loop...'
-            self.matched_fields = asyncio.run(_traverse_dataframe_dict(
-                [], self.dataframe_dict["columns"], rules
-            ))
+        self.matched_fields = list(_traverse_dataframe_dict(
+            [], self.dataframe_dict["columns"], rules
+        ))
+        print("End traversing")
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
@@ -85,30 +76,26 @@ class MutableDataFrame:
         return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
 
 
-async def _traverse_dataframe_dict(
+def _traverse_dataframe_dict(
     accumulator: list[FieldMatch],
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
-) -> list[FieldMatch]:
-    match: list[FieldMatch] = []
+) -> t.Generator[FieldMatch, None, None]:
     for col in items:
         if col is None:
             pass
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
-            match.extend(
-                await _traverse_dataframe_dict(
+            yield from (
+                _traverse_dataframe_dict(
                     accumulator, col["values"], rules, f"{prefix}/{name}"
                 )
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                match.append(
-                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
-                )
-    return match
+                yield FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
 
 
 def _glob_matches(name: str, rule: str) -> bool:
