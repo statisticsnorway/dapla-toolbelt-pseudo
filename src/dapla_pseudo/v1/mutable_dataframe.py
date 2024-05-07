@@ -1,4 +1,7 @@
 import typing as t
+from concurrent.futures import Executor
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from io import BytesIO
 
 import orjson
@@ -81,14 +84,16 @@ def _traverse_dataframe_dict(
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
+    executor: Executor | None = None,
+    parallelize: bool = True,
 ) -> t.Generator[FieldMatch, None, None]:
-    for col in items:
+    def traverse(col: dict[str, t.Any]) -> t.Generator[FieldMatch, None, None]:
         if col is None:
             pass
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
-                accumulator, col["values"], rules, f"{prefix}/{name}"
+                accumulator, col["values"], rules, f"{prefix}/{name}", parallelize=False
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
@@ -96,6 +101,21 @@ def _traverse_dataframe_dict(
                 yield FieldMatch(
                     path=name, col=col, func=rule.func, pattern=rule.pattern
                 )
+
+    if not parallelize:
+        for col in items:
+            yield from traverse(col)
+    elif executor is None:
+        with ThreadPoolExecutor() as executor:
+            yield from _traverse_dataframe_dict(
+                accumulator, items, rules, prefix, executor
+            )
+    else:
+        futures = [executor.submit(traverse, col) for col in items]
+        print(f"Running {len(futures)} futures in parallel")
+        for future in as_completed(futures):
+            print("Future completed")
+            yield from future.result()
 
 
 def _glob_matches(name: str, rule: str) -> bool:
