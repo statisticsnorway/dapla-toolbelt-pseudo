@@ -59,12 +59,13 @@ class MutableDataFrame:
         """Create references to all the columns that matches the given pseudo rules."""
         print("Start traversing")
         try:
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             print('Async event loop already running. Adding coroutine to the event loop.')
-            self.matched_fields = loop.run_until_complete(_traverse_dataframe_dict(
+            future = asyncio.run_coroutine_threadsafe(_traverse_dataframe_dict(
                 [], self.dataframe_dict["columns"], rules
-            ))
-            print("End traversing")
+            ), loop)
+            future.add_done_callback(lambda t: print("End traversing"))
+            self.matched_fields = future.result()
         except RuntimeError:  # 'RuntimeError: There is no current event loop...'
             self.matched_fields = asyncio.run(_traverse_dataframe_dict(
                 [], self.dataframe_dict["columns"], rules
