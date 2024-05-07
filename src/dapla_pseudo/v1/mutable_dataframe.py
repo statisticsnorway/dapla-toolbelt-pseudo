@@ -7,7 +7,7 @@ from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, Executor
 
 
 def _ensure_normalized(pattern: str) -> str:
@@ -82,6 +82,7 @@ def _traverse_dataframe_dict(
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
+    executor: t.Optional[Executor] = None,
 ) -> t.Generator[FieldMatch, None, None]:
     def traverse(col: dict[str, t.Any]) -> t.Generator[FieldMatch, None, None]:
         if col is None:
@@ -89,14 +90,17 @@ def _traverse_dataframe_dict(
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
-                accumulator, col["values"], rules, f"{prefix}/{name}"
+                accumulator, col["values"], rules, f"{prefix}/{name}", executor
             )
         else:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
                 yield FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
 
-    with ThreadPoolExecutor() as executor:
+    if executor is None:
+        with ThreadPoolExecutor() as executor:
+            yield from _traverse_dataframe_dict(accumulator, items, rules, prefix, executor)
+    else:
         futures = [executor.submit(traverse, col) for col in items]
         for future in as_completed(futures):
             yield from future.result()
