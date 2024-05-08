@@ -64,6 +64,8 @@ class MutableDataFrame:
         # was not able to group all values with a given path. This will be the case for
         # list of dicts.
         self.matched_fields_metrics = dict(counter)
+        print(f"Match field metrics: {self.matched_fields_metrics}")
+
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
