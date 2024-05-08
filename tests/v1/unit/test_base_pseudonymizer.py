@@ -12,7 +12,6 @@ from pytest_mock import MockerFixture
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
-from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.models.api import PseudoFileRequest
 from dapla_pseudo.v1.models.api import PseudoFileResponse
 from dapla_pseudo.v1.models.core import File
@@ -118,9 +117,7 @@ def test_pseudonymize_field(
         pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=df_personer
     )
 
-    response = base._pseudonymize_field([sid_req], timeout=ANY)
-    metadata = response.raw_metadata[0]
-    assert isinstance(response, PseudoFieldResponse)
+    data, metadata = base._pseudonymize_field(sid_req, timeout=ANY)
     assert metadata.datadoc == expected_json["datadoc_metadata"]["pseudo_variables"]  # type: ignore[index]
     assert metadata.logs == expected_json["logs"]
     assert metadata.metrics == expected_json["metrics"]

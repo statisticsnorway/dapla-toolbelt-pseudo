@@ -45,7 +45,7 @@ def test_traverse_dataframe_dict() -> None:
     ]
     df = MutableDataFrame(pl.DataFrame(data))
     df.match_rules(rules)
-    matched_fields = df.get_matched_fields()
+    matched_fields = list(df.match_rules(rules))
     assert len(matched_fields) == 2
     assert matched_fields[0].path == "identifiers/fnr"
     assert matched_fields[1].path == "fnr"
@@ -56,8 +56,8 @@ def test_traverse_dataframe_dict() -> None:
         "02812289295",
     ]
     # Test updating the columns in the MutableDataFrame
-    df.update("identifiers/fnr", ["#", "#", "#"])
-    df.update("fnr", ["#", "#", "#"])
+    df.update(matched_fields[0], ["#", "#", "#"])
+    df.update(matched_fields[1], ["#", "#", "#"])
     modified_df = df.to_polars()
     print(modified_df)
     # Check that the original dataframe_dict has been changed

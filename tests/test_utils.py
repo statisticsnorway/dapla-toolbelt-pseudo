@@ -142,7 +142,10 @@ def test_build_pseudo_field_request() -> None:
             '{"name":"my-rule","pattern":"**/foo","func":"redact(placeholder=#)"}'
         )
     ]
-    requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
+    requests = [
+        build_pseudo_field_request(match, PseudoOperation.PSEUDONYMIZE)
+        for match in df.match_rules(rules)
+    ]
 
     assert requests == [
         PseudoFieldRequest(
