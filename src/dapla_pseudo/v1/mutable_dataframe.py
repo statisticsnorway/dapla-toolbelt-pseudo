@@ -52,6 +52,7 @@ class MutableDataFrame:
         """Initialize the class."""
         self.dataframe_dict = orjson.loads(dataframe.write_json())
         self.matched_fields: list[FieldMatch] = []
+        self.matched_fields_metrics: dict[str, int] | None = None
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
@@ -59,7 +60,10 @@ class MutableDataFrame:
         self.matched_fields = list(
             _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
         )
-        print(f"Match rules result: {dict(counter)}")
+        # The Counter contains unique field names. A count > 1 means that the traverse
+        # was not able to group all values with a given path. This will be the case for
+        # list of dicts.
+        self.matched_fields_metrics = dict(counter)
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
@@ -94,10 +98,8 @@ def _traverse_dataframe_dict(
             )
         elif len(col["values"]) > 0:
             name = f"{prefix}/{col['name']}".lstrip("/")
-            metrics.update({name: 1})
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                if len(col["values"]) == 1:
-                    print(f"Only 1 value for {name}")
+                metrics.update({name: 1})
                 yield FieldMatch(
                     path=name, col=col, func=rule.func, pattern=rule.pattern
                 )
