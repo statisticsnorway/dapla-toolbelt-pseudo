@@ -1,4 +1,5 @@
 import typing as t
+from collections import Counter
 from io import BytesIO
 
 import orjson
@@ -54,9 +55,11 @@ class MutableDataFrame:
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
+        counter: Counter[str] = Counter()
         self.matched_fields = list(
-            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules)
+            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
         )
+        print(f"Match rules result: {dict(counter)}")
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
@@ -75,21 +78,26 @@ class MutableDataFrame:
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
+    metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
     for col in items:
         if col is None:
-            continue
+            pass
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
                 col["values"],
                 rules,
+                metrics,
                 f"{prefix}/{name}",
             )
         elif len(col["values"]) > 0:
             name = f"{prefix}/{col['name']}".lstrip("/")
+            metrics.update({name: 1})
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
+                if len(col["values"]) == 1:
+                    print(f"Only 1 value for {name}")
                 yield FieldMatch(
                     path=name, col=col, func=rule.func, pattern=rule.pattern
                 )
