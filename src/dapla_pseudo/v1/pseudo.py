@@ -30,15 +30,43 @@ class Pseudonymize:
     dataset: File | pl.DataFrame
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
-        """Initialize a pseudonymization request from a pandas DataFrame."""
-        Pseudonymize.dataset = pl.from_pandas(dataframe)
+    def from_pandas(
+        dataframe: pd.DataFrame, run_as_file: bool = False
+    ) -> "Pseudonymize._Pseudonymizer":
+        """Initialize a pseudonymization request from a Pandas DataFrame.
+
+        Args:
+            dataframe: A Pandas DataFrame
+            run_as_file: Force the dataset to be pseudonymized as a single file.
+
+        Returns:
+            _Pseudonymizer: An instance of the _Pseudonymizer class.
+        """
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Pseudonymize.dataset = pl.from_pandas(dataframe)
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
-        """Initialize a pseudonymization request from a polars DataFrame."""
-        Pseudonymize.dataset = dataframe
+    def from_polars(
+        dataframe: pl.DataFrame, run_as_file: bool = False
+    ) -> "Pseudonymize._Pseudonymizer":
+        """Initialize a pseudonymization request from a Polars DataFrame.
+
+        Args:
+            dataframe: A Polars DataFrame
+            run_as_file: Force the dataset to be pseudonymized as a single file.
+
+        Returns:
+            _Pseudonymizer: An instance of the _Pseudonymizer class.
+        """
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Pseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
@@ -83,13 +111,6 @@ class Pseudonymize:
                 Pseudonymize._Pseudonymizer.rules = []
             else:
                 Pseudonymize._Pseudonymizer.rules.extend(rules)
-
-        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
-            """Force the dataset to be pseudonymized as a single file."""
-            if isinstance(self._dataset, pl.DataFrame):
-                file_handle, content_type = get_file_data_from_dataset(self._dataset)
-                Pseudonymize.dataset = File(file_handle, content_type)
-            return self
 
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":
             """Specify one or multiple fields to be pseudonymized."""

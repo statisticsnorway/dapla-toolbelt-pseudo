@@ -30,16 +30,28 @@ class Depseudonymize:
     dataset: File | pl.DataFrame
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "Depseudonymize._Depseudonymizer":
+    def from_pandas(
+        dataframe: pd.DataFrame, run_as_file: bool = False
+    ) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        Depseudonymize.dataset = dataset
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Depseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Depseudonymize.dataset = dataset
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame, run_as_file: bool = False
+    ) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a polars DataFrame."""
-        Depseudonymize.dataset = dataframe
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Depseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Depseudonymize.dataset = dataframe
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
