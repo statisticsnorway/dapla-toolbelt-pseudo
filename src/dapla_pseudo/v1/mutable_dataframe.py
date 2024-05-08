@@ -66,7 +66,6 @@ class MutableDataFrame:
         self.matched_fields_metrics = dict(counter)
         print(f"Match field metrics: {self.matched_fields_metrics}")
 
-
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
         return self.matched_fields
