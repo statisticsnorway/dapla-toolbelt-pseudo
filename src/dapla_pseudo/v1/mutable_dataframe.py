@@ -1,7 +1,4 @@
 import typing as t
-from concurrent.futures import Executor
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from io import BytesIO
 
 import orjson
@@ -58,7 +55,7 @@ class MutableDataFrame:
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         self.matched_fields = list(
-            _traverse_dataframe_dict([], self.dataframe_dict["columns"], rules)
+            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules)
         )
 
     def get_matched_fields(self) -> list[FieldMatch]:
@@ -76,25 +73,19 @@ class MutableDataFrame:
 
 
 def _traverse_dataframe_dict(
-    accumulator: list[FieldMatch],
     items: list[dict[str, t.Any]],
     rules: list[PseudoRule],
     prefix: str = "",
-    executor: Executor | None = None,
-    parallelize: bool = True,
 ) -> t.Generator[FieldMatch, None, None]:
-    def traverse(col: dict[str, t.Any]) -> t.Generator[FieldMatch, None, None]:
+    for col in items:
         if col is None:
-            pass
+            continue
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
-                # Only parallelize the first iteration
-                accumulator,
                 col["values"],
                 rules,
                 f"{prefix}/{name}",
-                parallelize=False,
             )
         elif len(col["values"]) > 0:
             name = f"{prefix}/{col['name']}".lstrip("/")
@@ -102,19 +93,6 @@ def _traverse_dataframe_dict(
                 yield FieldMatch(
                     path=name, col=col, func=rule.func, pattern=rule.pattern
                 )
-
-    if not parallelize:
-        for col in items:
-            yield from traverse(col)
-    elif executor is None:
-        with ThreadPoolExecutor() as executor:
-            yield from _traverse_dataframe_dict(
-                accumulator, items, rules, prefix, executor
-            )
-    else:
-        futures = [executor.submit(traverse, col) for col in items]
-        for future in as_completed(futures):
-            yield from future.result()
 
 
 def _glob_matches(name: str, rule: str) -> bool:
