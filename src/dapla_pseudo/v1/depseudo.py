@@ -85,6 +85,11 @@ class Depseudonymize:
             else:
                 Depseudonymize._Depseudonymizer.rules.extend(rules)
 
+        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
+            """Force the dataset to be depseudonymized as a single file."""
+            self._run_as_file_transfer()
+            return self
+
         def on_fields(self, *fields: str) -> "Depseudonymize._DepseudoFuncSelector":
             """Specify one or multiple fields to be depseudonymized."""
             return Depseudonymize._DepseudoFuncSelector(list(fields))

@@ -24,6 +24,7 @@ from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import build_pseudo_file_request
 from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.client import _extract_name
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
@@ -69,6 +70,11 @@ class _BasePseudonymizer:
                 raise ValueError(
                     f"Unsupported data type: {type(invalid_dataset)}. Should only be DataFrame or file-like type."
                 )
+
+    def _run_as_file_transfer(self) -> None:
+        if isinstance(self._dataset, pl.DataFrame):
+            file_handle, content_type = get_file_data_from_dataset(self._dataset)
+            self._dataset = File(file_handle, content_type)
 
     def _execute_pseudo_operation(
         self,

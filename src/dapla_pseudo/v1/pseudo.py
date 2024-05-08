@@ -84,6 +84,11 @@ class Pseudonymize:
             else:
                 Pseudonymize._Pseudonymizer.rules.extend(rules)
 
+        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
+            """Force the dataset to be pseudonymized as a single file."""
+            self._run_as_file_transfer()
+            return self
+
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":
             """Specify one or multiple fields to be pseudonymized."""
             return Pseudonymize._PseudoFuncSelector(list(fields))

@@ -98,6 +98,11 @@ class Repseudonymize:
                 dataset=Repseudonymize.dataset,
             )
 
+        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
+            """Force the dataset to be repseudonymized as a single file."""
+            self._run_as_file_transfer()
+            return self
+
         def on_fields(
             self, *fields: str
         ) -> "Repseudonymize._RepseudoFuncSelectorSource":
