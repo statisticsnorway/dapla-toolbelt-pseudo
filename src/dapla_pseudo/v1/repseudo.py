@@ -98,7 +98,7 @@ class Repseudonymize:
                 dataset=Repseudonymize.dataset,
             )
 
-        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
+        def run_as_file_transfer(self) -> "Repseudonymize._Repseudonymizer":
             """Force the dataset to be repseudonymized as a single file."""
             self._run_as_file_transfer()
             return self

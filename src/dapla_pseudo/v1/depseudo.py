@@ -85,7 +85,7 @@ class Depseudonymize:
             else:
                 Depseudonymize._Depseudonymizer.rules.extend(rules)
 
-        def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
+        def run_as_file_transfer(self) -> "Depseudonymize._Depseudonymizer":
             """Force the dataset to be depseudonymized as a single file."""
             self._run_as_file_transfer()
             return self
