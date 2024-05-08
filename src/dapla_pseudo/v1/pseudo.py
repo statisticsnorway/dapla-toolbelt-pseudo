@@ -86,7 +86,9 @@ class Pseudonymize:
 
         def run_as_file_transfer(self) -> "Pseudonymize._Pseudonymizer":
             """Force the dataset to be pseudonymized as a single file."""
-            self._run_as_file_transfer()
+            if isinstance(self._dataset, pl.DataFrame):
+                file_handle, content_type = get_file_data_from_dataset(self._dataset)
+                Pseudonymize.dataset = File(file_handle, content_type)
             return self
 
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":

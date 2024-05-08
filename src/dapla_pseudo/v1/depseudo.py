@@ -87,7 +87,9 @@ class Depseudonymize:
 
         def run_as_file_transfer(self) -> "Depseudonymize._Depseudonymizer":
             """Force the dataset to be depseudonymized as a single file."""
-            self._run_as_file_transfer()
+            if isinstance(self._dataset, pl.DataFrame):
+                file_handle, content_type = get_file_data_from_dataset(self._dataset)
+                Depseudonymize.dataset = File(file_handle, content_type)
             return self
 
         def on_fields(self, *fields: str) -> "Depseudonymize._DepseudoFuncSelector":
