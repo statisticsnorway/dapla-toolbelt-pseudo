@@ -96,7 +96,7 @@ def _traverse_dataframe_dict(
                 f"{prefix}/{name}",
                 parallelize=False,
             )
-        elif len(col["values"] > 0):
+        elif len(col["values"]) > 0:
             name = f"{prefix}/{col['name']}".lstrip("/")
             if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
                 yield FieldMatch(
