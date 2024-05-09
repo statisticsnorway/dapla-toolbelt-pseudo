@@ -80,14 +80,14 @@ class MutableDataFrame:
 
 
 def _traverse_dataframe_dict(
-    items: list[dict[str, t.Any]],
+    items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
     metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
     for col in items:
         if col is None:
-            pass
+            continue
         elif isinstance(col.get("datatype"), dict):
             name = "[]" if col["name"] == "" else col["name"]
             yield from _traverse_dataframe_dict(
