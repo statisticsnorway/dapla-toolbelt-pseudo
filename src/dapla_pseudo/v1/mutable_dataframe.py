@@ -1,5 +1,5 @@
 import typing as t
-from collections import Counter
+from collections import Counter, deque
 from io import BytesIO
 
 import orjson
@@ -59,7 +59,7 @@ class MutableDataFrame:
         """Create references to all the columns that matches the given pseudo rules."""
         counter: Counter[str] = Counter()
         self.matched_fields = list(
-            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules)
+            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
         )
         # The Counter contains unique field names. A count > 1 means that the traverse
         # was not able to group all values with a given path. This will be the case for
@@ -83,21 +83,23 @@ class MutableDataFrame:
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
+    metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
-    stack = [(items, prefix)]
-    while stack:
-        current_items, current_prefix = stack.pop()
+    queue = deque([(items, prefix)])
+    while queue:
+        current_items, current_prefix = queue.popleft()
         for col in current_items:
             if col is None:
                 continue
             elif isinstance(col.get("datatype"), dict):
                 name = "[]" if col["name"] == "" else col["name"]
-                stack.append((col["values"], f"{current_prefix}/{name}"))
+                queue.append((col["values"], f"{current_prefix}/{name}"))
             elif len(col["values"]) > 0:
                 name = f"{current_prefix}/{col['name']}".lstrip("/")
                 for rule in rules:
                     if _glob_matches(name, rule.pattern):
+                        metrics.update({name: 1})
                         yield FieldMatch(
                             path=name, col=col, func=rule.func, pattern=rule.pattern
                         )
