@@ -80,6 +80,7 @@ class MutableDataFrame:
         """Convert to Polars DataFrame."""
         return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
 
+
 @jit(forceobj=True, looplift=True)
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
@@ -87,15 +88,15 @@ def _traverse_dataframe_dict(
     metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
-    queue = deque([(items, prefix)])
-    while queue:
-        current_items, current_prefix = queue.popleft()
+    stack = [(items, prefix)]
+    while stack:
+        current_items, current_prefix = stack.pop()
         for col in current_items:
             if col is None:
                 continue
             elif isinstance(col.get("datatype"), dict):
                 name = "[]" if col["name"] == "" else col["name"]
-                queue.append((col["values"], f"{current_prefix}/{name}"))
+                stack.append((col["values"], f"{current_prefix}/{name}"))
             elif len(col["values"]) > 0:
                 name = f"{current_prefix}/{col['name']}".lstrip("/")
                 for rule in rules:
@@ -107,5 +108,6 @@ def _traverse_dataframe_dict(
                         break
 
 
+@jit(forceobj=True, looplift=True)
 def _glob_matches(name: str, rule: str) -> bool:
     return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR)
