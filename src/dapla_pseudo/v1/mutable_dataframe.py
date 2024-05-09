@@ -4,6 +4,7 @@ from io import BytesIO
 
 import orjson
 import polars as pl
+from numba import jit
 from wcmatch import glob
 
 
@@ -79,7 +80,7 @@ class MutableDataFrame:
         """Convert to Polars DataFrame."""
         return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
 
-
+@jit(forceobj=True, looplift=True)
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
