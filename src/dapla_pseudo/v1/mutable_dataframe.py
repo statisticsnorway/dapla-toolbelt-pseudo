@@ -6,6 +6,7 @@ import orjson
 import polars as pl
 from wcmatch import glob
 
+
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 
@@ -58,7 +59,7 @@ class MutableDataFrame:
         """Create references to all the columns that matches the given pseudo rules."""
         counter: Counter[str] = Counter()
         self.matched_fields = list(
-            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
+            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules)
         )
         # The Counter contains unique field names. A count > 1 means that the traverse
         # was not able to group all values with a given path. This will be the case for
@@ -82,27 +83,25 @@ class MutableDataFrame:
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
-    metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
-    for col in items:
-        if col is None:
-            continue
-        elif isinstance(col.get("datatype"), dict):
-            name = "[]" if col["name"] == "" else col["name"]
-            yield from _traverse_dataframe_dict(
-                col["values"],
-                rules,
-                metrics,
-                f"{prefix}/{name}",
-            )
-        elif len(col["values"]) > 0:
-            name = f"{prefix}/{col['name']}".lstrip("/")
-            if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                metrics.update({name: 1})
-                yield FieldMatch(
-                    path=name, col=col, func=rule.func, pattern=rule.pattern
-                )
+    stack = [(items, prefix)]
+    while stack:
+        current_items, current_prefix = stack.pop()
+        for col in current_items:
+            if col is None:
+                continue
+            elif isinstance(col.get("datatype"), dict):
+                name = "[]" if col["name"] == "" else col["name"]
+                stack.append((col["values"], f"{current_prefix}/{name}"))
+            elif len(col["values"]) > 0:
+                name = f"{current_prefix}/{col['name']}".lstrip("/")
+                for rule in rules:
+                    if _glob_matches(name, rule.pattern):
+                        yield FieldMatch(
+                            path=name, col=col, func=rule.func, pattern=rule.pattern
+                        )
+                        break
 
 
 def _glob_matches(name: str, rule: str) -> bool:

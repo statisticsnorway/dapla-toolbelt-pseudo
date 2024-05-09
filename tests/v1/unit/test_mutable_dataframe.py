@@ -48,10 +48,10 @@ def test_traverse_dataframe_dict() -> None:
     df.match_rules(rules)
     matched_fields = df.get_matched_fields()
     assert len(matched_fields) == 2
-    assert matched_fields[0].path == "identifiers/fnr"
-    assert matched_fields[1].path == "fnr"
-    assert matched_fields[0].col["name"] == "fnr"
-    assert matched_fields[0].col["values"] == [
+    assert matched_fields[1].path == "identifiers/fnr"
+    assert matched_fields[0].path == "fnr"
+    assert matched_fields[1].col["name"] == "fnr"
+    assert matched_fields[1].col["values"] == [
         "11854898347",
         "06097048531",
         "02812289295",
@@ -93,9 +93,9 @@ def test_traverse_list_of_struct() -> None:
     assert len(matched_fields) == 2
     assert matched_fields[0].path == "identifiers/[]/value"
     assert matched_fields[0].col["name"] == "value"
-    assert matched_fields[0].col["values"] == ["11854898347"]
+    assert matched_fields[0].col["values"] == ["06097048531"]
     assert matched_fields[1].path == "identifiers/[]/value"
     assert matched_fields[1].col["name"] == "value"
-    assert matched_fields[1].col["values"] == ["06097048531"]
+    assert matched_fields[1].col["values"] == ["11854898347"]
     # Ideally, we should get just one, with the following valued
     # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
