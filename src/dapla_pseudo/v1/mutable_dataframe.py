@@ -1,3 +1,4 @@
+import re
 import typing as t
 from collections import Counter
 from functools import lru_cache
@@ -88,18 +89,23 @@ def _traverse_dataframe_dict(
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
     stack = [(items, prefix)]
+    strip_array_index = re.compile(r"\[\d*]")
     while stack:
         current_items, current_prefix = stack.pop()
         for index, col in enumerate(current_items):
             if col is None:
                 continue
             elif isinstance(col.get("datatype"), dict):
-                next_prefix = f"{current_prefix}[{index}]" if col["name"] == "" else f"{current_prefix}/{col['name']}"
+                next_prefix = (
+                    f"{current_prefix}[{index}]"
+                    if col["name"] == ""
+                    else f"{current_prefix}/{col['name']}"
+                )
                 stack.append((col["values"], next_prefix))
             elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
                 name = f"{current_prefix}/{col['name']}".lstrip("/")
                 for rule in rules:
-                    if _glob_matches(name, rule.pattern):
+                    if _glob_matches(strip_array_index.sub("", name), rule.pattern):
                         metrics.update({name: 1})
                         yield FieldMatch(
                             path=name, col=col, func=rule.func, pattern=rule.pattern

@@ -1,7 +1,6 @@
 """Utility functions for Dapla Pseudo."""
 
 import io
-import orjson
 import os
 import typing as t
 import zipfile
@@ -9,6 +8,7 @@ from datetime import date
 from pathlib import Path
 
 import fsspec
+import orjson
 import polars as pl
 from dapla import FileClient
 from gcsfs.core import GCSFile
