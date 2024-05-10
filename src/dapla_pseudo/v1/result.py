@@ -38,12 +38,14 @@ class Result:
                 self._pseudo_data = dataframe
 
                 datadoc_fields: list[PseudoVariable] = []
+                datadoc_paths: list[str | None] = []
 
                 for field_metadata in raw_metadata:
                     pseudo_variable = self._datadoc_from_raw_metadata_fields(
                         field_metadata.datadoc
                     )
-                    if pseudo_variable is not None:
+                    if pseudo_variable is not None and pseudo_variable.data_element_path not in datadoc_paths:
+                        datadoc_paths.append(pseudo_variable.data_element_path)
                         datadoc_fields.append(pseudo_variable)
 
                     if field_metadata.field_name is None:

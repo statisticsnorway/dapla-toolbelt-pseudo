@@ -81,7 +81,7 @@ def test_traverse_list_of_struct() -> None:
     ]
     rules = [
         PseudoRule.from_json(
-            '{"name":"nick-rule","pattern":"identifiers/[]/value","func":"redact(placeholder=#)"}'
+            '{"name":"nick-rule","pattern":"**/value","func":"redact(placeholder=#)"}'
         )
     ]
     df = MutableDataFrame(pl.DataFrame(data))
@@ -91,10 +91,10 @@ def test_traverse_list_of_struct() -> None:
     # This shows the lack of support for matching on list of dicts
     # We get two matched_fields instead of one
     assert len(matched_fields) == 2
-    assert matched_fields[0].path == "identifiers/[]/value"
+    assert matched_fields[0].path == "identifiers[1]/value"
     assert matched_fields[0].col["name"] == "value"
     assert matched_fields[0].col["values"] == ["06097048531"]
-    assert matched_fields[1].path == "identifiers/[]/value"
+    assert matched_fields[1].path == "identifiers[0]/value"
     assert matched_fields[1].col["name"] == "value"
     assert matched_fields[1].col["values"] == ["11854898347"]
     # Ideally, we should get just one, with the following valued

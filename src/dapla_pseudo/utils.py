@@ -1,7 +1,7 @@
 """Utility functions for Dapla Pseudo."""
 
 import io
-import json
+import orjson
 import os
 import typing as t
 import zipfile
@@ -232,7 +232,7 @@ def get_file_data_from_dataset(
             with zipfile.ZipFile(
                 file_handle, "a", compression=zipfile.ZIP_DEFLATED, compresslevel=9
             ) as zip_file:
-                zip_file.writestr("data.json", json.dumps(df.to_dicts()))
+                zip_file.writestr("data.json", orjson.dumps(df.to_dicts()))
                 zip_file.filename = "data.zip"
             file_handle.seek(0)
             return file_handle, Mimetypes.ZIP

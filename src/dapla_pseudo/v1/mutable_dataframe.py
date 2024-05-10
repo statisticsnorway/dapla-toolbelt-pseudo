@@ -43,7 +43,6 @@ class FieldMatch:
     def update_col(self, key: str, data: list[str]) -> None:
         """Update the values in the matched column."""
         self.col.update({key: data})
-        #self.col[key] = data
 
 
 class MutableDataFrame:
@@ -52,7 +51,7 @@ class MutableDataFrame:
     def __init__(self, dataframe: pl.DataFrame) -> None:
         """Initialize the class."""
         self.dataframe = dataframe
-        self.dataframe_dict = []
+        self.dataframe_dict: t.Any = None
         self.matched_fields: list[FieldMatch] = []
         self.matched_fields_metrics: dict[str, int] | None = None
 
@@ -91,12 +90,12 @@ def _traverse_dataframe_dict(
     stack = [(items, prefix)]
     while stack:
         current_items, current_prefix = stack.pop()
-        for col in current_items:
+        for index, col in enumerate(current_items):
             if col is None:
                 continue
             elif isinstance(col.get("datatype"), dict):
-                name = "[]" if col["name"] == "" else col["name"]
-                stack.append((col["values"], f"{current_prefix}/{name}"))
+                next_prefix = f"{current_prefix}[{index}]" if col["name"] == "" else f"{current_prefix}/{col['name']}"
+                stack.append((col["values"], next_prefix))
             elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
                 name = f"{current_prefix}/{col['name']}".lstrip("/")
                 for rule in rules:
