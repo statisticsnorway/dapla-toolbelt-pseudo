@@ -97,7 +97,7 @@ def _traverse_dataframe_dict(
             elif isinstance(col.get("datatype"), dict):
                 name = "[]" if col["name"] == "" else col["name"]
                 stack.append((col["values"], f"{current_prefix}/{name}"))
-            elif len(col["values"]) > 0:
+            elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
                 name = f"{current_prefix}/{col['name']}".lstrip("/")
                 for rule in rules:
                     if _glob_matches(name, rule.pattern):
