@@ -33,7 +33,6 @@ cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
 pyarrow = ">=14.0.2, <15"
 orjson = "^3.10.1"
 wcmatch = "^8.5.1"
-numba = "^0.59.1"
 
 [tool.poetry.group.test.dependencies]
 typeguard = ">=2.13.3"

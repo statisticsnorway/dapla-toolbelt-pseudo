@@ -1,10 +1,10 @@
 import typing as t
 from collections import Counter, deque
+from functools import lru_cache
 from io import BytesIO
 
 import orjson
 import polars as pl
-from numba import jit
 from wcmatch import glob
 
 
@@ -81,7 +81,6 @@ class MutableDataFrame:
         return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
 
 
-@jit(forceobj=True, looplift=True)
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
@@ -108,6 +107,6 @@ def _traverse_dataframe_dict(
                         break
 
 
-@jit(forceobj=True, looplift=True)
+@lru_cache
 def _glob_matches(name: str, rule: str) -> bool:
     return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR)
