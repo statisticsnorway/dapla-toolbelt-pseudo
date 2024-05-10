@@ -1,12 +1,11 @@
 import typing as t
-from collections import Counter, deque
+from collections import Counter
 from functools import lru_cache
 from io import BytesIO
 
 import orjson
 import polars as pl
 from wcmatch import glob
-
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -43,8 +42,8 @@ class FieldMatch:
 
     def update_col(self, key: str, data: list[str]) -> None:
         """Update the values in the matched column."""
-        # self.col.update({key: data})
-        self.col[key] = data
+        self.col.update({key: data})
+        #self.col[key] = data
 
 
 class MutableDataFrame:
@@ -52,13 +51,15 @@ class MutableDataFrame:
 
     def __init__(self, dataframe: pl.DataFrame) -> None:
         """Initialize the class."""
-        self.dataframe_dict = orjson.loads(dataframe.write_json())
+        self.dataframe = dataframe
+        self.dataframe_dict = []
         self.matched_fields: list[FieldMatch] = []
         self.matched_fields_metrics: dict[str, int] | None = None
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         counter: Counter[str] = Counter()
+        self.dataframe_dict = orjson.loads(self.dataframe.write_json())
         self.matched_fields = list(
             _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
         )

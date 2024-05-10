@@ -99,20 +99,3 @@ def test_traverse_list_of_struct() -> None:
     assert matched_fields[1].col["values"] == ["11854898347"]
     # Ideally, we should get just one, with the following valued
     # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
-
-
-def test_play_skatt() -> None:
-    path = "/Users/bjornandre/Downloads/skatt-auto-011.parquet"
-    rules = [
-        PseudoRule.from_json(
-            '{"name":"nick-rule","pattern":"**/*identifikator","func":"redact(placeholder=#)"}'
-        )
-    ]
-    ds = pl.read_parquet(path)
-    df = MutableDataFrame(ds)
-    import time
-    start = time.perf_counter()
-    df.match_rules(rules)
-    end = time.perf_counter()
-    print("Elapsed time = {}s".format((end - start)))
-
