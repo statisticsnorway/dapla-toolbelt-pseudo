@@ -116,4 +116,4 @@ def _traverse_dataframe_dict(
 
 @lru_cache(maxsize=None)
 def _glob_matches(name: str, rule: str) -> bool:
-    return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR)
+    return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR | glob.BRACE)

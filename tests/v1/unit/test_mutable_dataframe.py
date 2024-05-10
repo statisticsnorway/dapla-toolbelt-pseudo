@@ -11,6 +11,8 @@ def test_rule_matching() -> None:
     assert _glob_matches("fnr", "Fnr")
     assert _glob_matches("fnr", "fnr*")
     assert _glob_matches("identifier/fnr", "*/fnr")
+    assert _glob_matches("identifier/fnr", "*/{id,*nr}")
+    assert _glob_matches("identifier/fnr", "*/{dnr,fnr}")
     assert not _glob_matches("some/identifier/fnr", "*/fnr")
     assert _glob_matches("some/identifier/fnr", "**/fnr")
     assert _glob_matches("identifier/fnr", "identifier/fnr")
@@ -99,3 +101,22 @@ def test_traverse_list_of_struct() -> None:
     assert matched_fields[1].col["values"] == ["11854898347"]
     # Ideally, we should get just one, with the following valued
     # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
+
+
+def test_play_skatt() -> None:
+    #path = "/Users/bjornandre/Downloads/skatt-auto-011.parquet"
+    path = "/Users/bjornandre/code/ssb/mod-sirius/dapla-toolbelt-pseudo/part.1.parquet"
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"nick-rule","pattern":"**/*identifikator","func":"redact(placeholder=#)"}'
+        )
+    ]
+    ds = pl.read_parquet(path)
+    df = MutableDataFrame(ds.head(1000))
+    import time
+
+    start = time.perf_counter()
+    df.match_rules(rules)
+    end = time.perf_counter()
+    #print(df.matched_fields_metrics)
+    print(f"Elapsed time = {end - start}s")
