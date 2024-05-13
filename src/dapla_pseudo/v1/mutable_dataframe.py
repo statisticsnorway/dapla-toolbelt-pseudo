@@ -1,4 +1,7 @@
+import re
 import typing as t
+from collections import Counter
+from functools import cache
 from io import BytesIO
 
 import orjson
@@ -7,6 +10,8 @@ from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
+
+ARRAY_INDEX_MATCHER = re.compile(r"\[\d*]")
 
 
 def _ensure_normalized(pattern: str) -> str:
@@ -40,8 +45,7 @@ class FieldMatch:
 
     def update_col(self, key: str, data: list[str]) -> None:
         """Update the values in the matched column."""
-        # self.col.update({key: data})
-        self.col[key] = data
+        self.col.update({key: data})
 
 
 class MutableDataFrame:
@@ -49,14 +53,22 @@ class MutableDataFrame:
 
     def __init__(self, dataframe: pl.DataFrame) -> None:
         """Initialize the class."""
-        self.dataframe_dict = orjson.loads(dataframe.write_json())
+        self.dataframe = dataframe
+        self.dataframe_dict: t.Any = None
         self.matched_fields: list[FieldMatch] = []
+        self.matched_fields_metrics: dict[str, int] | None = None
 
     def match_rules(self, rules: list[PseudoRule]) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
-        self.matched_fields = _traverse_dataframe_dict(
-            [], self.dataframe_dict["columns"], rules
+        counter: Counter[str] = Counter()
+        self.dataframe_dict = orjson.loads(self.dataframe.write_json())
+        self.matched_fields = list(
+            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
         )
+        # The Counter contains unique field names. A count > 1 means that the traverse
+        # was not able to group all values with a given path. This will be the case for
+        # list of dicts.
+        self.matched_fields_metrics = dict(counter)
 
     def get_matched_fields(self) -> list[FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
@@ -69,34 +81,50 @@ class MutableDataFrame:
 
     def to_polars(self) -> pl.DataFrame:
         """Convert to Polars DataFrame."""
-        return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
+        return (
+            pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
+            if self.dataframe_dict
+            else self.dataframe
+        )
 
 
 def _traverse_dataframe_dict(
-    accumulator: list[FieldMatch],
-    items: list[dict[str, t.Any]],
+    items: list[dict[str, t.Any] | None],
     rules: list[PseudoRule],
+    metrics: Counter[str],
     prefix: str = "",
-) -> list[FieldMatch]:
-    match: list[FieldMatch] = []
-    for col in items:
+) -> t.Generator[FieldMatch, None, None]:
+    for index, col in enumerate(items):
         if col is None:
-            pass
-        elif isinstance(col["datatype"], dict):
-            name = "[]" if col["name"] == "" else col["name"]
-            match.extend(
-                _traverse_dataframe_dict(
-                    accumulator, col["values"], rules, f"{prefix}/{name}"
-                )
+            continue
+        elif isinstance(col.get("datatype"), dict):
+            next_prefix = (
+                f"{prefix}[{index}]" if col["name"] == "" else f"{prefix}/{col['name']}"
             )
-        else:
+            yield from _traverse_dataframe_dict(
+                col["values"], rules, metrics, next_prefix
+            )
+        elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
             name = f"{prefix}/{col['name']}".lstrip("/")
-            if any((rule := r) for r in rules if _glob_matches(name, r.pattern)):
-                match.append(
-                    FieldMatch(path=name, col=col, func=rule.func, pattern=rule.pattern)
-                )
-    return match
+            for rule in rules:
+                if _glob_matches(_strip_array_indices(name), rule.pattern):
+                    metrics.update({name: 1})
+                    yield FieldMatch(
+                        path=name, col=col, func=rule.func, pattern=rule.pattern
+                    )
+                    break
+    # print(_glob_matches.cache_info())
 
 
+def _strip_array_indices(name: str) -> str:
+    """Remove array index from the given path, e.g. remove the [1] part of /some/array[1]/struct/element.
+
+    The array index is not used in glob matching anyway, and the result can be cached regardless of the array index
+    """
+    return ARRAY_INDEX_MATCHER.sub("", name)
+
+
+@cache
 def _glob_matches(name: str, rule: str) -> bool:
-    return glob.globmatch(name, rule, flags=glob.GLOBSTAR)
+    """Use glob matching and cache the result."""
+    return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR | glob.BRACE)

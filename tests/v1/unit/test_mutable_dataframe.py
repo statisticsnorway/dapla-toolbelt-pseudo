@@ -8,8 +8,11 @@ from dapla_pseudo.v1.mutable_dataframe import _glob_matches
 def test_rule_matching() -> None:
     assert _glob_matches("fnr", "**fnr")
     assert _glob_matches("fnr", "fnr")
+    assert _glob_matches("fnr", "Fnr")
     assert _glob_matches("fnr", "fnr*")
     assert _glob_matches("identifier/fnr", "*/fnr")
+    assert _glob_matches("identifier/fnr", "*/{id,*nr}")
+    assert _glob_matches("identifier/fnr", "*/{dnr,fnr}")
     assert not _glob_matches("some/identifier/fnr", "*/fnr")
     assert _glob_matches("some/identifier/fnr", "**/fnr")
     assert _glob_matches("identifier/fnr", "identifier/fnr")
@@ -63,3 +66,38 @@ def test_traverse_dataframe_dict() -> None:
     # Check that the original dataframe_dict has been changed
     assert modified_df["fnr"][0] == "#"
     assert modified_df["identifiers"][0]["fnr"] == "#"
+
+
+def test_traverse_list_of_struct() -> None:
+    data = [
+        {
+            "identifiers": [
+                {"type": "fnr", "value": "11854898347"},
+            ],
+        },
+        {
+            "identifiers": [
+                {"type": "fnr", "value": "06097048531"},
+            ],
+        },
+    ]
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"nick-rule","pattern":"**/value","func":"redact(placeholder=#)"}'
+        )
+    ]
+    df = MutableDataFrame(pl.DataFrame(data))
+    df.match_rules(rules)
+    matched_fields = df.get_matched_fields()
+    print(f"Match field metrics: {df.matched_fields_metrics}")
+    # This shows the lack of support for matching on list of dicts
+    # We get two matched_fields instead of one
+    assert len(matched_fields) == 2
+    assert matched_fields[0].path == "identifiers[0]/value"
+    assert matched_fields[0].col["name"] == "value"
+    assert matched_fields[0].col["values"] == ["11854898347"]
+    assert matched_fields[1].path == "identifiers[1]/value"
+    assert matched_fields[1].col["name"] == "value"
+    assert matched_fields[1].col["values"] == ["06097048531"]
+    # Ideally, we should get just one, with the following valued
+    # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]

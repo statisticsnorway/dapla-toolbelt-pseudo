@@ -29,16 +29,28 @@ class Repseudonymize:
     dataset: File | pl.DataFrame
 
     @staticmethod
-    def from_pandas(dataframe: pd.DataFrame) -> "Repseudonymize._Repseudonymizer":
+    def from_pandas(
+        dataframe: pd.DataFrame, run_as_file: bool = False
+    ) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        Repseudonymize.dataset = dataset
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataset)
+            Repseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Repseudonymize.dataset = dataset
         return Repseudonymize._Repseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Repseudonymize._Repseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame, run_as_file: bool = False
+    ) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        Repseudonymize.dataset = dataframe
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            Repseudonymize.dataset = File(file_handle, content_type)
+        else:
+            Repseudonymize.dataset = dataframe
         return Repseudonymize._Repseudonymizer()
 
     @staticmethod
