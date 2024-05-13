@@ -1,7 +1,7 @@
 import re
 import typing as t
 from collections import Counter
-from functools import lru_cache
+from functools import cache
 from io import BytesIO
 
 import orjson
@@ -10,6 +10,8 @@ from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
+
+ARRAY_INDEX_MATCHER = re.compile(r"\[\d*]")
 
 
 def _ensure_normalized(pattern: str) -> str:
@@ -79,7 +81,11 @@ class MutableDataFrame:
 
     def to_polars(self) -> pl.DataFrame:
         """Convert to Polars DataFrame."""
-        return pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
+        return (
+            pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
+            if self.dataframe_dict
+            else self.dataframe
+        )
 
 
 def _traverse_dataframe_dict(
@@ -88,32 +94,37 @@ def _traverse_dataframe_dict(
     metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
-    stack = [(items, prefix)]
-    strip_array_index = re.compile(r"\[\d*]")
-    while stack:
-        current_items, current_prefix = stack.pop()
-        for index, col in enumerate(current_items):
-            if col is None:
-                continue
-            elif isinstance(col.get("datatype"), dict):
-                next_prefix = (
-                    f"{current_prefix}[{index}]"
-                    if col["name"] == ""
-                    else f"{current_prefix}/{col['name']}"
-                )
-                stack.append((col["values"], next_prefix))
-            elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
-                name = f"{current_prefix}/{col['name']}".lstrip("/")
-                for rule in rules:
-                    if _glob_matches(strip_array_index.sub("", name), rule.pattern):
-                        metrics.update({name: 1})
-                        yield FieldMatch(
-                            path=name, col=col, func=rule.func, pattern=rule.pattern
-                        )
-                        break
-    print(_glob_matches.cache_info())
+    for index, col in enumerate(items):
+        if col is None:
+            continue
+        elif isinstance(col.get("datatype"), dict):
+            next_prefix = (
+                f"{prefix}[{index}]" if col["name"] == "" else f"{prefix}/{col['name']}"
+            )
+            yield from _traverse_dataframe_dict(
+                col["values"], rules, metrics, next_prefix
+            )
+        elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
+            name = f"{prefix}/{col['name']}".lstrip("/")
+            for rule in rules:
+                if _glob_matches(_strip_array_indices(name), rule.pattern):
+                    metrics.update({name: 1})
+                    yield FieldMatch(
+                        path=name, col=col, func=rule.func, pattern=rule.pattern
+                    )
+                    break
+    # print(_glob_matches.cache_info())
 
 
-@lru_cache(maxsize=None)
+def _strip_array_indices(name: str) -> str:
+    """Remove array index from the given path, e.g. remove the [1] part of /some/array[1]/struct/element.
+
+    The array index is not used in glob matching anyway, and the result can be cached regardless of the array index
+    """
+    return ARRAY_INDEX_MATCHER.sub("", name)
+
+
+@cache
 def _glob_matches(name: str, rule: str) -> bool:
+    """Use glob matching and cache the result."""
     return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR | glob.BRACE)
