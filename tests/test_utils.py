@@ -18,6 +18,8 @@ from dapla_pseudo.utils import get_content_type_from_file
 from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
+from dapla_pseudo.v1.models.api import RepseudoFieldRequest
+from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -158,6 +160,56 @@ def test_build_pseudo_field_request() -> None:
             pseudo_func=PseudoFunction(
                 function_type=PseudoFunctionTypes.REDACT,
                 kwargs=RedactKeywordArgs(placeholder="#"),
+            ),
+            name="struct/foo",
+            pattern="**/foo",
+            values=["baz", None],
+        ),
+    ]
+
+
+def test_build_repseudo_field_request() -> None:
+    data = [
+        {"foo": "bar", "struct": {"foo": "baz"}},
+        {"foo": "bad", "struct": {"foo": None}},
+    ]
+    df = MutableDataFrame(pl.DataFrame(data))
+    source_rules = [
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","func":"daead(keyId=old-key)"}'
+        )
+    ]
+    target_rules = [
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","func":"daead(keyId=new-key)"}'
+        )
+    ]
+    requests = build_pseudo_field_request(
+        PseudoOperation.REPSEUDONYMIZE, df, source_rules, target_rules=target_rules
+    )
+
+    assert requests == [
+        RepseudoFieldRequest(
+            source_pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD,
+                kwargs=DaeadKeywordArgs(key_id="old-key"),
+            ),
+            target_pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD,
+                kwargs=DaeadKeywordArgs(key_id="new-key"),
+            ),
+            name="foo",
+            pattern="**/foo",
+            values=["bar", "bad"],
+        ),
+        RepseudoFieldRequest(
+            source_pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD,
+                kwargs=DaeadKeywordArgs(key_id="old-key"),
+            ),
+            target_pseudo_func=PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD,
+                kwargs=DaeadKeywordArgs(key_id="new-key"),
             ),
             name="struct/foo",
             pattern="**/foo",

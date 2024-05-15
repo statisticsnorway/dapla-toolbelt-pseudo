@@ -35,13 +35,15 @@ class FieldMatch:
         path: str,
         pattern: str,
         col: dict[str, t.Any],
-        func: PseudoFunction,
+        func: PseudoFunction,  # "source func" if repseudo
+        target_func: PseudoFunction | None,  # "target_func" if repseudo
     ) -> None:
         """Initialize the class."""
         self.path = path
         self.pattern = _ensure_normalized(pattern)
         self.col = col
         self.func = func
+        self.target_func = target_func
 
     def update_col(self, key: str, data: list[str]) -> None:
         """Update the values in the matched column."""
@@ -58,12 +60,18 @@ class MutableDataFrame:
         self.matched_fields: list[FieldMatch] = []
         self.matched_fields_metrics: dict[str, int] | None = None
 
-    def match_rules(self, rules: list[PseudoRule]) -> None:
+    def match_rules(
+        self, rules: list[PseudoRule], target_rules: list[PseudoRule] | None
+    ) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
         counter: Counter[str] = Counter()
         self.dataframe_dict = orjson.loads(self.dataframe.write_json())
         self.matched_fields = list(
-            _traverse_dataframe_dict(self.dataframe_dict["columns"], rules, counter)
+            _traverse_dataframe_dict(
+                self.dataframe_dict["columns"],
+                _combine_rules(rules, target_rules),
+                counter,
+            )
         )
         # The Counter contains unique field names. A count > 1 means that the traverse
         # was not able to group all values with a given path. This will be the case for
@@ -88,9 +96,21 @@ class MutableDataFrame:
         )
 
 
+def _combine_rules(
+    rules: list[PseudoRule], target_rules: list[PseudoRule] | None
+) -> list[tuple[PseudoRule, PseudoRule | None]]:
+    combined: list[tuple[PseudoRule, PseudoRule | None]] = []
+
+    # Zip rules and target_rules together; use None as target if target_rules is undefined
+    for index, rule in enumerate(rules):
+        combined.append((rule, target_rules[index] if target_rules else None))
+
+    return combined
+
+
 def _traverse_dataframe_dict(
     items: list[dict[str, t.Any] | None],
-    rules: list[PseudoRule],
+    rules: list[tuple[PseudoRule, PseudoRule | None]],
     metrics: Counter[str],
     prefix: str = "",
 ) -> t.Generator[FieldMatch, None, None]:
@@ -106,11 +126,15 @@ def _traverse_dataframe_dict(
             )
         elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
             name = f"{prefix}/{col['name']}".lstrip("/")
-            for rule in rules:
+            for rule, target_rule in rules:
                 if _glob_matches(_strip_array_indices(name), rule.pattern):
                     metrics.update({name: 1})
                     yield FieldMatch(
-                        path=name, col=col, func=rule.func, pattern=rule.pattern
+                        path=name,
+                        col=col,
+                        func=rule.func,
+                        target_func=target_rule.func if target_rule else None,
+                        pattern=rule.pattern,
                     )
                     break
     # print(_glob_matches.cache_info())

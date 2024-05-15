@@ -37,7 +37,7 @@ class RepseudoFieldRequest(APIModel):
     """Model of the repseudo field request sent to the service."""
 
     source_pseudo_func: PseudoFunction
-    target_pseudo_func: PseudoFunction
+    target_pseudo_func: PseudoFunction | None
     name: str
     pattern: str
     values: list[str | None]

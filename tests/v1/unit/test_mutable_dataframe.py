@@ -1,5 +1,8 @@
 import polars as pl
 
+from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.v1.models.core import DaeadKeywordArgs
+from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.mutable_dataframe import _glob_matches
@@ -21,7 +24,34 @@ def test_rule_matching() -> None:
     assert not _glob_matches("identifier/fnr", "fnr")
 
 
-def test_traverse_dataframe_dict() -> None:
+def test_match_dataframe_dict_for_repseudo() -> None:
+    data = [{"foo": "bar"}]
+    source_rules = [
+        PseudoRule.from_json(
+            '{"name":"foo-rule","pattern":"**/foo","func":"daead(keyId=old-key)"}'
+        )
+    ]
+    target_rules = [
+        PseudoRule.from_json(
+            '{"name":"foo-rule","pattern":"**/foo","func":"daead(keyId=new-key)"}'
+        )
+    ]
+    df = MutableDataFrame(pl.DataFrame(data))
+    df.match_rules(source_rules, target_rules)
+    matched_fields = df.get_matched_fields()
+    assert len(matched_fields) == 1
+    assert matched_fields[0].path == "foo"
+    assert matched_fields[0].func == PseudoFunction(
+        function_type=PseudoFunctionTypes.DAEAD,
+        kwargs=DaeadKeywordArgs(key_id="old-key"),
+    )
+    assert matched_fields[0].target_func == PseudoFunction(
+        function_type=PseudoFunctionTypes.DAEAD,
+        kwargs=DaeadKeywordArgs(key_id="new-key"),
+    )
+
+
+def test_match_nested_dataframe_dict() -> None:
     data = [
         {
             "identifiers": {"fnr": "11854898347", "dnr": "02099510504"},
@@ -47,7 +77,7 @@ def test_traverse_dataframe_dict() -> None:
         )
     ]
     df = MutableDataFrame(pl.DataFrame(data))
-    df.match_rules(rules)
+    df.match_rules(rules, None)
     matched_fields = df.get_matched_fields()
     assert len(matched_fields) == 2
     assert matched_fields[0].path == "identifiers/fnr"
@@ -87,7 +117,7 @@ def test_traverse_list_of_struct() -> None:
         )
     ]
     df = MutableDataFrame(pl.DataFrame(data))
-    df.match_rules(rules)
+    df.match_rules(rules, None)
     matched_fields = df.get_matched_fields()
     print(f"Match field metrics: {df.matched_fields_metrics}")
     # This shows the lack of support for matching on list of dicts
