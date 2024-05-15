@@ -96,7 +96,7 @@ def build_pseudo_field_request(
     target_rules: list[PseudoRule] | None = None,  # used in repseudo)
 ) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
     """Builds a FieldRequest object."""
-    mutable_df.match_rules(rules)
+    mutable_df.match_rules(rules, target_rules)
     matched_fields = mutable_df.get_matched_fields()
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
@@ -126,16 +126,14 @@ def build_pseudo_field_request(
                 return [
                     RepseudoFieldRequest(
                         source_pseudo_func=field.func,
-                        target_pseudo_func=target_rule.func,
+                        target_pseudo_func=field.target_func,
                         name=field.path,
                         pattern=field.pattern,
                         values=field.col["values"],
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,
                     )
-                    for field, target_rule in zip(
-                        matched_fields, target_rules, strict=False
-                    )
+                    for field in matched_fields
                 ]
             else:
                 raise ValueError("Found no target rules")
