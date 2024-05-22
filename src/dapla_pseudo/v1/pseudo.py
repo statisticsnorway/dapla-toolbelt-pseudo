@@ -42,8 +42,9 @@ class Pseudonymize:
         Returns:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
+        dataset: pl.DataFrame = pl.from_pandas(dataframe)
         if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            file_handle, content_type = get_file_data_from_dataset(dataset)
             Pseudonymize.dataset = File(file_handle, content_type)
         else:
             Pseudonymize.dataset = pl.from_pandas(dataframe)
