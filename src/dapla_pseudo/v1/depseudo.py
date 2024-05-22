@@ -36,7 +36,7 @@ class Depseudonymize:
         """Initialize a depseudonymization request from a pandas DataFrame."""
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
         if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
+            file_handle, content_type = get_file_data_from_dataset(dataset)
             Depseudonymize.dataset = File(file_handle, content_type)
         else:
             Depseudonymize.dataset = dataset
