@@ -120,7 +120,7 @@ def _traverse_dataframe_dict(
 
         # Ignoring mypy error for dict key check in the second condition,
         # since we know the dict exists in the first condition
-        elif isinstance(col.get("datatype"), dict) and "Struct" in col.get("datatype"):  # type: ignore[operator]
+        elif isinstance(col.get("datatype"), dict) and ("Struct" in col.get("datatype") or "List" in col.get("datatype")):  # type: ignore[operator]
             next_prefix = (
                 f"{prefix}[{index}]" if col["name"] == "" else f"{prefix}/{col['name']}"
             )
