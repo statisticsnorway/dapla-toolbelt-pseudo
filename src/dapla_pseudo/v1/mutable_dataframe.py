@@ -117,7 +117,10 @@ def _traverse_dataframe_dict(
     for index, col in enumerate(items):
         if col is None:
             continue
-        elif isinstance(col.get("datatype"), dict):
+
+        # Ignoring mypy error for dict key check in the second condition,
+        # since we know the dict exists in the first condition
+        elif isinstance(col.get("datatype"), dict) and "Struct" in col.get("datatype"):  # type: ignore[operator]
             next_prefix = (
                 f"{prefix}[{index}]" if col["name"] == "" else f"{prefix}/{col['name']}"
             )
