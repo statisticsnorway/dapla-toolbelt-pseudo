@@ -101,7 +101,7 @@ def test_post_to_field_endpoint_serialization(
             "X-Correlation-Id": ANY,
         },
         json=expected_json,
-        stream=True,
+        stream=False,
         timeout=TIMEOUT_DEFAULT,
     )
 

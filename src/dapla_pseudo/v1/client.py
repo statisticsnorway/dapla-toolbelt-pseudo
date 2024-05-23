@@ -102,7 +102,7 @@ class PseudoClient:
             PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
         ),
         timeout: int,
-        stream: bool = True,
+        stream: bool = False,
     ) -> requests.Response:
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
