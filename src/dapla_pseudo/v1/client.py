@@ -71,8 +71,8 @@ class PseudoClient:
         path: str,
         request_spec: FileSpecDecl,
         data_spec: FileSpecDecl,
-        stream: bool,
         timeout: int,
+        stream: bool = True,
     ) -> requests.Response:
         """POST to a file endpoint in the Pseudo Service.
 
@@ -102,7 +102,7 @@ class PseudoClient:
             PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
         ),
         timeout: int,
-        stream: bool = False,
+        stream: bool = True,
     ) -> requests.Response:
         response = requests.post(
             url=f"{self.pseudo_service_url}/{path}",
@@ -111,7 +111,7 @@ class PseudoClient:
                 "Content-Type": Mimetypes.JSON.value,
                 "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
-            json={"request": pseudo_field_request.model_dump_json(by_alias=True)},
+            json={"request": pseudo_field_request.model_dump(by_alias=True)},
             stream=stream,
             timeout=timeout,
         )
@@ -124,7 +124,7 @@ class PseudoClient:
         path: str,
         values: list[str],
         sid_snapshot_date: date | None = None,
-        stream: bool = False,
+        stream: bool = True,
     ) -> requests.Response:
         request: dict[str, t.Collection[str]] = {"fnrList": values}
         response = requests.post(
