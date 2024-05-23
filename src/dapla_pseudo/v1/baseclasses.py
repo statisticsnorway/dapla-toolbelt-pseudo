@@ -194,7 +194,6 @@ class _BasePseudonymizer:
             path=f"{self._pseudo_operation.value}/file",
             request_spec=request_spec,
             data_spec=data_spec,
-            stream=True,
             timeout=timeout,
         )
         file_handle.close()
