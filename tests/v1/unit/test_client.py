@@ -91,7 +91,7 @@ def test_post_to_field_endpoint_serialization(
         pseudo_field_request=pseudo_field_request,
         timeout=TIMEOUT_DEFAULT,
     )
-    expected_json = {"request": pseudo_field_request.model_dump_json(by_alias=True)}
+    expected_json = {"request": pseudo_field_request.model_dump(by_alias=True)}
 
     _mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",
@@ -101,7 +101,7 @@ def test_post_to_field_endpoint_serialization(
             "X-Correlation-Id": ANY,
         },
         json=expected_json,
-        stream=False,
+        stream=True,
         timeout=TIMEOUT_DEFAULT,
     )
 
@@ -130,6 +130,6 @@ def test_successful_post_to_sid_endpoint(
             "X-Correlation-Id": ANY,
         },
         json=expected_json,
-        stream=False,
+        stream=True,
         timeout=TIMEOUT_DEFAULT,
     )
