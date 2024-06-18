@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 
 import polars as pl
@@ -17,22 +16,21 @@ def test_schema_traverser() -> None:
             ],
             "fornavn": "Mathias",
         },
-        {
-            "identifiers": {"fnr": "06097048531"}, "fornavn": "Gunnar"},
+        {"identifiers": {"fnr": "06097048531"}, "fornavn": "Gunnar"},
         {
             "identifiers": {"fnr": "02812289295"},
             "fnr": "02812289295",
             "fornavn": "Kristoffer",
-        }
+        },
     ]
     rules = [
         PseudoRule.from_json(
             {"name": "my-rule", "pattern": "**/fnr", "func": "redact(placeholder=#)"}
         )
     ]
-    
+
     df = pl.DataFrame(data)
-    
+
     assert df.schema == OrderedDict(
         {
             "identifiers": pl.Struct({"fnr": pl.String, "dnr": pl.String}),
@@ -41,15 +39,25 @@ def test_schema_traverser() -> None:
             "fnr": pl.String,
         }
     )
-    
+
     sc = SchemaTraverser(schema=df.schema, rules=rules)
     concrete_rules = sc.match_rules()
-    
+
     assert concrete_rules == [
         PseudoRule.from_json(
-            {"name": "my-rule", "pattern": "**/fnr", "path":"identifiers/fnr", "func": "redact(placeholder=#)"}
+            {
+                "name": "my-rule",
+                "pattern": "**/fnr",
+                "path": "identifiers/fnr",
+                "func": "redact(placeholder=#)",
+            }
         ),
         PseudoRule.from_json(
-            {"name": "my-rule", "pattern": "**/fnr", "path":"fnr", "func": "redact(placeholder=#)"}
-        )
+            {
+                "name": "my-rule",
+                "pattern": "**/fnr",
+                "path": "fnr",
+                "func": "redact(placeholder=#)",
+            }
+        ),
     ]

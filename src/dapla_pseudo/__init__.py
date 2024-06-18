@@ -37,5 +37,5 @@ __all__ = [
     "Validator",
     "PseudoKeyset",
     "PseudoRule",
-    "SchemaTraverser"
+    "SchemaTraverser",
 ]

@@ -2,6 +2,4 @@
 
 from dapla_pseudo.globberator.traverser import SchemaTraverser
 
-__all__ = [
-    "SchemaTraverser"
-]
+__all__ = ["SchemaTraverser"]
