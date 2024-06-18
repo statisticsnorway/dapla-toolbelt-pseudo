@@ -104,10 +104,6 @@ class Pseudonymize:
 
         def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
-            super().__init__(
-                pseudo_operation=PseudoOperation.PSEUDONYMIZE,
-                dataset=Pseudonymize.dataset,
-            )
             if rules is None:
                 Pseudonymize._Pseudonymizer.rules = []
             else:
@@ -128,6 +124,7 @@ class Pseudonymize:
 
         def run(
             self,
+            hierarchical: bool = False,
             custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
@@ -140,6 +137,11 @@ class Pseudonymize:
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """
+            super().__init__(
+                pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+                dataset=Pseudonymize.dataset,
+                hierarchical=hierarchical,
+            )
             return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
 
     class _PseudoFuncSelector(_BaseRuleConstructor):

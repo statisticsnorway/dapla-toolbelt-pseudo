@@ -12,6 +12,7 @@ from concurrent.futures import as_completed
 from datetime import date
 from typing import cast
 
+import msgspec
 import polars as pl
 import requests
 
@@ -51,7 +52,10 @@ class _BasePseudonymizer:
     """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders."""
 
     def __init__(
-        self, pseudo_operation: PseudoOperation, dataset: File | pl.DataFrame
+        self,
+        pseudo_operation: PseudoOperation,
+        dataset: File | pl.DataFrame,
+        hierarchical: bool,
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
@@ -62,7 +66,7 @@ class _BasePseudonymizer:
         self._dataset: File | MutableDataFrame
         match dataset:  # Differentiate between file and DataFrame
             case pl.DataFrame():
-                self._dataset = MutableDataFrame(dataset)
+                self._dataset = MutableDataFrame(dataset, hierarchical)
             case File():
                 self._dataset = dataset
             case _ as invalid_dataset:
@@ -98,7 +102,6 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
-                pseudo_response.data = self._dataset.to_polars()
             case File():
                 pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
@@ -137,7 +140,7 @@ class _BasePseudonymizer:
                 timeout,
                 stream=True,
             )
-            payload = json.loads(response.content.decode("utf-8"))
+            payload = msgspec.json.decode(response.content.decode("utf-8"))
             data = payload["data"]
             metadata = RawPseudoMetadata(
                 field_name=request.name,
@@ -157,15 +160,14 @@ class _BasePseudonymizer:
                 executor.submit(pseudonymize_field_runner, request)
                 for request in pseudo_requests
             ]
-
             for future in as_completed(futures):
                 field_name, data, raw_metadata = future.result()
                 self._dataset.update(field_name, data)
                 raw_metadata_fields.append(raw_metadata)
 
-            return PseudoFieldResponse(
-                data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
-            )
+        return PseudoFieldResponse(
+            data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
+        )
 
     def _pseudonymize_file(
         self,

@@ -1,12 +1,12 @@
 import re
-import typing as t
 from collections import Counter
-from functools import cache
+from collections.abc import Generator
 from io import BytesIO
+from typing import Any
 
+import msgspec
 import orjson
 import polars as pl
-from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -34,7 +34,7 @@ class FieldMatch:
         self,
         path: str,
         pattern: str,
-        col: dict[str, t.Any],
+        col: dict[str, Any] | list[str | int | None],
         func: PseudoFunction,  # "source func" if repseudo
         target_func: PseudoFunction | None,  # "target_func" if repseudo
     ) -> None:
@@ -45,55 +45,85 @@ class FieldMatch:
         self.func = func
         self.target_func = target_func
 
-    def update_col(self, key: str, data: list[str]) -> None:
-        """Update the values in the matched column."""
-        self.col.update({key: data})
+    def get_value(self) -> list[str | int | None]:
+        if isinstance(self.col, list):
+            return self.col
+        else:
+            return self.col["values"]  # type: ignore[no-any-return]
 
 
 class MutableDataFrame:
-    """A dataframe that can change values in-place."""
+    """A DataFrame that can change values in-place.
 
-    def __init__(self, dataframe: pl.DataFrame) -> None:
+    If the DataFrame is hierarchical
+    """
+
+    def __init__(self, dataframe: pl.DataFrame, hierarchical: bool) -> None:
         """Initialize the class."""
-        self.dataframe = dataframe
-        self.dataframe_dict: t.Any = None
-        self.matched_fields: list[FieldMatch] = []
+        self.dataset: pl.DataFrame | dict[str, Any] = dataframe
+        self.matched_fields: dict[str, FieldMatch] = {}
         self.matched_fields_metrics: dict[str, int] | None = None
+        self.hierarchical: bool = hierarchical
 
     def match_rules(
         self, rules: list[PseudoRule], target_rules: list[PseudoRule] | None
     ) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
-        counter: Counter[str] = Counter()
-        self.dataframe_dict = orjson.loads(self.dataframe.write_json())
-        self.matched_fields = list(
-            _traverse_dataframe_dict(
-                self.dataframe_dict["columns"],
-                _combine_rules(rules, target_rules),
-                counter,
-            )
-        )
-        # The Counter contains unique field names. A count > 1 means that the traverse
-        # was not able to group all values with a given path. This will be the case for
-        # list of dicts.
-        self.matched_fields_metrics = dict(counter)
+        if self.hierarchical is False:
+            assert isinstance(self.dataset, pl.DataFrame)
+            self.matched_fields = {
+                str(i): FieldMatch(
+                    path=rule.pattern,
+                    pattern=rule.pattern,
+                    col=list(self.dataset.get_column(rule.pattern)),
+                    func=rule.func,
+                    target_func=target_rule.func if target_rule else None,
+                )
+                for (i, (rule, target_rule)) in enumerate(
+                    _combine_rules(rules, target_rules)
+                )
+            }
+        else:
+            counter: Counter[str] = Counter()
+            self.dataset = msgspec.json.decode(self.dataset.write_json())  # type: ignore[union-attr]
+            assert isinstance(self.dataset, dict)
+            for source_rule, target_rule in _combine_rules(rules, target_rules):
+                if source_rule.path is None:
+                    continue
+                matches = _traverse_dataframe_dict(
+                    self.dataset["columns"],
+                    (source_rule, target_rule),
+                    source_rule.path.split("/"),
+                    counter,
+                )
+                for match in matches:
+                    self.matched_fields[match.path] = match
 
-    def get_matched_fields(self) -> list[FieldMatch]:
+            # The Counter contains unique field names. A count > 1 means that the traverse
+            # was not able to group all values with a given path. This will be the case for
+            # list of dicts.
+            self.matched_fields_metrics = dict(counter)
+
+    def get_matched_fields(self) -> dict[str, FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
         return self.matched_fields
 
-    def update(self, field: str, data: list[str]) -> None:
+    def update(self, path: str, data: list[str]) -> None:
         """Update a column with the given data."""
-        if any((field_match := f) for f in self.matched_fields if field == f.path):
-            field_match.update_col("values", data)
+        if self.hierarchical is False:
+            assert isinstance(self.dataset, pl.DataFrame)
+            self.dataset = self.dataset.with_columns(pl.Series(data).alias(path))
+        elif (field_match := self.matched_fields.get(path)) is not None:
+            assert isinstance(field_match.col, dict)
+            field_match.col.update({"values": data})
 
     def to_polars(self) -> pl.DataFrame:
         """Convert to Polars DataFrame."""
-        return (
-            pl.read_json(BytesIO(orjson.dumps(self.dataframe_dict)))
-            if self.dataframe_dict
-            else self.dataframe
-        )
+        if self.hierarchical is False:
+            assert isinstance(self.dataset, pl.DataFrame)
+            return self.dataset
+        else:
+            return pl.read_json(BytesIO(orjson.dumps(self.dataset)))
 
 
 def _combine_rules(
@@ -109,49 +139,43 @@ def _combine_rules(
 
 
 def _traverse_dataframe_dict(
-    items: list[dict[str, t.Any] | None],
-    rules: list[tuple[PseudoRule, PseudoRule | None]],
+    items: list[dict[str, Any] | None],
+    rules: tuple[PseudoRule, PseudoRule | None],
+    curr_path: list[str],
     metrics: Counter[str],
     prefix: str = "",
-) -> t.Generator[FieldMatch, None, None]:
+) -> Generator[FieldMatch, None, None]:
     for index, col in enumerate(items):
-        if col is None:
+        if col is None or curr_path == []:
             continue
 
-        # Ignoring mypy error for dict key check in the second condition,
-        # since we know the dict exists in the first condition
-        elif isinstance(col.get("datatype"), dict) and ("Struct" in col.get("datatype") or "List" in col.get("datatype")):  # type: ignore[operator]
-            next_prefix = (
-                f"{prefix}[{index}]" if col["name"] == "" else f"{prefix}/{col['name']}"
-            )
+        path_head, *path_tail = curr_path
+        if col["name"] == "":  # is list
+            next_prefix = f"{prefix}[{index}]"
             yield from _traverse_dataframe_dict(
-                col["values"], rules, metrics, next_prefix
+                col["values"],
+                rules=rules,
+                curr_path=curr_path,
+                metrics=metrics,
+                prefix=next_prefix,
             )
-        elif len(col["values"]) > 0 and any(v is not None for v in col["values"]):
-            name = f"{prefix}/{col['name']}".lstrip("/")
-            for rule, target_rule in rules:
-                if _glob_matches(_strip_array_indices(name), rule.pattern):
-                    metrics.update({name: 1})
-                    yield FieldMatch(
-                        path=name,
-                        col=col,
-                        func=rule.func,
-                        target_func=target_rule.func if target_rule else None,
-                        pattern=rule.pattern,
-                    )
-                    break
-    # print(_glob_matches.cache_info())
-
-
-def _strip_array_indices(name: str) -> str:
-    """Remove array index from the given path, e.g. remove the [1] part of /some/array[1]/struct/element.
-
-    The array index is not used in glob matching anyway, and the result can be cached regardless of the array index
-    """
-    return ARRAY_INDEX_MATCHER.sub("", name)
-
-
-@cache
-def _glob_matches(name: str, rule: str) -> bool:
-    """Use glob matching and cache the result."""
-    return glob.globmatch(name.lower(), rule.lower(), flags=glob.GLOBSTAR | glob.BRACE)
+        elif col["name"] == path_head:
+            next_prefix = f"{prefix}/{col['name']}"
+            if path_tail == []:  # matched entire path
+                metrics.update({next_prefix: 1})
+                rule, target_rule = rules
+                yield FieldMatch(
+                    path=next_prefix.lstrip("/"),
+                    col=col,
+                    func=rule.func,
+                    target_func=target_rule.func if target_rule else None,
+                    pattern=rule.pattern,
+                )
+            else:
+                yield from _traverse_dataframe_dict(
+                    col["values"],
+                    rules=rules,
+                    curr_path=path_tail,
+                    metrics=metrics,
+                    prefix=next_prefix,
+                )

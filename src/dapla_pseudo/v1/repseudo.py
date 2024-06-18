@@ -105,11 +105,6 @@ class Repseudonymize:
                 Repseudonymize._Repseudonymizer.source_rules.extend(source_rules)
                 Repseudonymize._Repseudonymizer.target_rules.extend(target_rules)
 
-            super().__init__(
-                pseudo_operation=PseudoOperation.REPSEUDONYMIZE,
-                dataset=Repseudonymize.dataset,
-            )
-
         def on_fields(
             self, *fields: str
         ) -> "Repseudonymize._RepseudoFuncSelectorSource":
@@ -118,6 +113,7 @@ class Repseudonymize:
 
         def run(
             self,
+            hierarchical: bool = False,
             source_custom_keyset: PseudoKeyset | str | None = None,
             target_custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
@@ -132,6 +128,12 @@ class Repseudonymize:
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """
+            super().__init__(
+                pseudo_operation=PseudoOperation.REPSEUDONYMIZE,
+                dataset=Repseudonymize.dataset,
+                hierarchical=hierarchical,
+            )
+
             return super()._execute_pseudo_operation(
                 rules=self.source_rules,
                 target_rules=self.target_rules,

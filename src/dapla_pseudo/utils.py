@@ -105,10 +105,10 @@ def build_pseudo_field_request(
                     pseudo_func=field.func,
                     name=field.path,
                     pattern=field.pattern,
-                    values=field.col["values"],
+                    values=field.get_value(),
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
-                for field in matched_fields
+                for field in matched_fields.values()
             ]
         case PseudoOperation.DEPSEUDONYMIZE:
             return [
@@ -116,10 +116,10 @@ def build_pseudo_field_request(
                     pseudo_func=field.func,
                     name=field.path,
                     pattern=field.pattern,
-                    values=field.col["values"],
+                    values=field.get_value(),
                     keyset=KeyWrapper(custom_keyset).keyset,
                 )
-                for field in matched_fields
+                for field in matched_fields.values()
             ]
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
@@ -129,11 +129,11 @@ def build_pseudo_field_request(
                         target_pseudo_func=field.target_func,
                         name=field.path,
                         pattern=field.pattern,
-                        values=field.col["values"],
+                        values=field.get_value(),
                         source_keyset=KeyWrapper(custom_keyset).keyset,
                         target_keyset=KeyWrapper(target_custom_keyset).keyset,
                     )
-                    for field in matched_fields
+                    for field in matched_fields.values()
                 ]
             else:
                 raise ValueError("Found no target rules")
