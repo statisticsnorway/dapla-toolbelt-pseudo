@@ -100,20 +100,16 @@ def build_pseudo_field_request(
     matched_fields = mutable_df.get_matched_fields()
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
-            l = []
-            for field in matched_fields.values():
-                print(field.path)
-                print(type(field.get_value()))
-                print(field.pattern)
-                print()
-                l.append(PseudoFieldRequest(
+            return [
+                PseudoFieldRequest(
                     pseudo_func=field.func,
                     name=field.path,
                     pattern=field.pattern,
                     values=field.get_value(),
                     keyset=KeyWrapper(custom_keyset).keyset,
-                ))
-            return l
+                )
+                for field in matched_fields.values()
+            ]
         case PseudoOperation.DEPSEUDONYMIZE:
             return [
                 DepseudoFieldRequest(

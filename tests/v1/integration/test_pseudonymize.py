@@ -159,6 +159,7 @@ def test_pseudonymize_hierarchical(
     )
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_pseudonymized)
 
+
 @pytest.mark.usefixtures("setup")
 @integration_test()
 def test_pseudonymize_hierarchical_inner_list(
@@ -183,8 +184,10 @@ def test_pseudonymize_hierarchical_inner_list(
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
-    
+
     assert result.datadoc == expected_metadata_container.model_dump_json(
         exclude_none=True
     )
-    assert_frame_equal(result.to_polars(), df_personer_hierarchical_inner_list_pseudonymized)
+    assert_frame_equal(
+        result.to_polars(), df_personer_hierarchical_inner_list_pseudonymized
+    )

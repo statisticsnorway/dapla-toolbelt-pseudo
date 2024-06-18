@@ -152,6 +152,7 @@ def test_traverse_list_of_struct() -> None:
     # Ideally, we should get just one, with the following valued
     # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
 
+
 def test_traverse_list_inner() -> None:
     data = [
         {
@@ -170,13 +171,13 @@ def test_traverse_list_inner() -> None:
             '{"name":"nick-rule","pattern":"**/values", "path":"identifiers/values", "func":"redact(placeholder=#)"}'
         )
     ]
-    
+
     df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
     df.match_rules(rules, None)
     matched_fields = df.get_matched_fields()
     print(f"Match field metrics: {df.matched_fields_metrics}")
     assert len(matched_fields) == 2
-    
+
     path_1 = "identifiers[0]/values"
     match_1 = matched_fields[path_1]
     assert isinstance(match_1.col, dict)

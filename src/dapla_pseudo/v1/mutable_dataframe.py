@@ -157,7 +157,9 @@ def _traverse_dataframe_dict(
             continue
 
         path_head, *path_tail = curr_path
-        if col["name"] == "" and any(key in col["datatype"] for key in {"Struct", "List", "Array"}):
+        if col["name"] == "" and any(
+            key in col["datatype"] for key in {"Struct", "List", "Array"}
+        ):
             next_prefix = f"{prefix}[{index}]"
             yield from _traverse_dataframe_dict(
                 col["values"],
@@ -171,10 +173,14 @@ def _traverse_dataframe_dict(
             if path_tail == []:  # matched entire path
                 metrics.update({next_prefix: 1})
                 rule, target_rule = rules
-                
-                if "List" in col["datatype"] or "Array" in col["datatype"]: # is pl.List or pl.Array
+
+                if (
+                    "List" in col["datatype"] or "Array" in col["datatype"]
+                ):  # is pl.List or pl.Array
                     ## Special case: inner lists are weird and needs to be wrangled.
                     col = col["values"][0]
+                    if col is None or len(col) == 0:
+                        continue
 
                 yield FieldMatch(
                     path=next_prefix.lstrip("/"),

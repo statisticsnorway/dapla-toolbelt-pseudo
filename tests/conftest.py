@@ -110,6 +110,7 @@ def df_personer_hierarchical_inner_list() -> pl.DataFrame:
         JSON_FILE,
     )
 
+
 @pytest_cases.fixture()
 def df_personer_hierarchical_inner_list_pseudonymized() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_hierarchical_inner_list_pseudonymized.json"
