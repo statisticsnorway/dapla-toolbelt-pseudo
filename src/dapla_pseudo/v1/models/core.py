@@ -185,14 +185,16 @@ class PseudoRule(APIModel):
     matching rule will be applied (thus: rule ordering is important).
 
     Parameters:
-        name: A friendly name of the rule. This is optional, but can be handy for debugging
         pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
+        path: If hierarchical, ``/path/to/thing``, else None
+        name: A friendly name of the rule. This is optional, but can be handy for debugging
     """
 
-    name: str | None = None
     pattern: str
     func: PseudoFunction
+    path: str | None = None
+    name: str | None = None
 
     @field_serializer("func")
     def serialize_func(

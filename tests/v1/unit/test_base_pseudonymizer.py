@@ -51,7 +51,9 @@ def test_execute_pseudo_operation_field(
         f"{PKG}._BasePseudonymizer._pseudonymize_file", return_value=Mock()
     )
 
-    base = _BasePseudonymizer(pseudo_operation=pseudo_op, dataset=dataset)
+    base = _BasePseudonymizer(
+        pseudo_operation=pseudo_op, dataset=dataset, hierarchical=False
+    )
 
     rules = [PseudoRule(name="dummy", pattern="dummy", func=Mock(spec=PseudoFunction))]
     base._execute_pseudo_operation(
@@ -115,7 +117,9 @@ def test_pseudonymize_field(
     )
     mocked_post_to_field.return_value = mocked_response
     base = _BasePseudonymizer(
-        pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=df_personer
+        pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+        dataset=df_personer,
+        hierarchical=False,
     )
 
     response = base._pseudonymize_field([sid_req], timeout=ANY)
@@ -175,7 +179,9 @@ def test_pseudonymize_dataset(
     )
     mocked_post_to_field.return_value = mocked_response
     base = _BasePseudonymizer(
-        pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=personer_file
+        pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+        dataset=personer_file,
+        hierarchical=False,
     )
 
     response = base._pseudonymize_file(req, timeout=ANY)

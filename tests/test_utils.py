@@ -138,14 +138,16 @@ def test_build_pseudo_field_request() -> None:
         {"foo": "bar", "struct": {"foo": "baz"}},
         {"foo": "bad", "struct": {"foo": None}},
     ]
-    df = MutableDataFrame(pl.DataFrame(data))
+    df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
     rules = [
         PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"**/foo","func":"redact(placeholder=#)"}'
-        )
+            '{"name":"my-rule","pattern":"**/foo","path":"foo","func":"redact(placeholder=#)"}'
+        ),
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","path":"struct/foo","func":"redact(placeholder=#)"}'
+        ),
     ]
     requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
-
     assert requests == [
         PseudoFieldRequest(
             pseudo_func=PseudoFunction(
@@ -173,16 +175,22 @@ def test_build_repseudo_field_request() -> None:
         {"foo": "bar", "struct": {"foo": "baz"}},
         {"foo": "bad", "struct": {"foo": None}},
     ]
-    df = MutableDataFrame(pl.DataFrame(data))
+    df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
     source_rules = [
         PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"**/foo","func":"daead(keyId=old-key)"}'
-        )
+            '{"name":"my-rule","pattern":"**/foo","path":"foo","func":"daead(keyId=old-key)"}'
+        ),
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","path":"struct/foo","func":"daead(keyId=old-key)"}'
+        ),
     ]
     target_rules = [
         PseudoRule.from_json(
-            '{"name":"my-rule","pattern":"**/foo","func":"daead(keyId=new-key)"}'
-        )
+            '{"name":"my-rule","pattern":"**/foo","path":"foo","func":"daead(keyId=new-key)"}'
+        ),
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","path":"struct/foo","func":"daead(keyId=new-key)"}'
+        ),
     ]
     requests = build_pseudo_field_request(
         PseudoOperation.REPSEUDONYMIZE, df, source_rules, target_rules=target_rules

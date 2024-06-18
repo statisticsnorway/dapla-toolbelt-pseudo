@@ -38,10 +38,10 @@ class PseudoClient:
     def __auth_token(self) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
             audience = os.environ["PSEUDO_SERVICE_URL"]
-            auth_req = google.auth.transport.requests.Request()
+            auth_req = google.auth.transport.requests.Request()  # type: ignore[no-untyped-call]
             token = t.cast(
                 str,
-                google.oauth2.id_token.fetch_id_token(auth_req, audience),
+                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
             )
             return token
         else:
