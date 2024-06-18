@@ -94,7 +94,9 @@ class MutableDataFrame:
             assert isinstance(self.dataset, dict)
             for source_rule, target_rule in _combine_rules(rules, target_rules):
                 if source_rule.path is None:
-                    continue
+                    raise ValueError(
+                        f"Rule: {source_rule}\n does not have a concrete path, and cannot be used."
+                    )
                 matches = _traverse_dataframe_dict(
                     self.dataset["columns"],
                     (source_rule, target_rule),

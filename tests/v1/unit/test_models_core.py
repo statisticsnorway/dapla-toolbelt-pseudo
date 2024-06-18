@@ -66,9 +66,11 @@ def test_key_wrapper_with_keyset_json() -> None:
 
 
 def test_serialize_daead_function() -> None:
-    assert str(
-        PseudoFunction(
-            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+    assert (
+        str(
+            PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+            )
         )
         == "daead(keyId=ssb-common-key-1)"
     )
@@ -91,10 +93,12 @@ def test_deserialize_empty_daead_function() -> None:
 
 
 def test_serialize_redact_function() -> None:
-    assert str(
-        PseudoFunction(
-            function_type=PseudoFunctionTypes.REDACT,
-            kwargs=RedactKeywordArgs(placeholder="#"),
+    assert (
+        str(
+            PseudoFunction(
+                function_type=PseudoFunctionTypes.REDACT,
+                kwargs=RedactKeywordArgs(placeholder="#"),
+            )
         )
         == "redact(placeholder=#)"
     )
@@ -110,10 +114,12 @@ def test_deserialize_redact_function() -> None:
 
 
 def test_serialize_function_with_extra_kwargs() -> None:
-    assert str(
-        PseudoFunction(
-            function_type=PseudoFunctionTypes.FF31,
-            kwargs=FF31KeywordArgs(),
+    assert (
+        str(
+            PseudoFunction(
+                function_type=PseudoFunctionTypes.FF31,
+                kwargs=FF31KeywordArgs(),
+            )
         )
         == "ff31(keyId=papis-common-key-1,strategy=skip)"
     )

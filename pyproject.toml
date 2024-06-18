@@ -96,20 +96,21 @@ disallow_untyped_decorators = false
 [[tool.mypy.overrides]]
 # Allow missing type hints in third-party libraries without type information.
 module = [
-    "google.auth.exceptions",
-    "gcsfs",
-    "gcsfs.core",
-    "dapla",
-    "fsspec",
-    "fsspec.spec",
-    "typeguard",
-    "puremagic",
-    "google.*",
-    "google.oauth2",
-    "pytest_cases",
-    "pytest_mock"
+    'google.auth.exceptions',
+    'gcsfs',
+    'gcsfs.core',
+    'dapla',
+    'fsspec',
+    'fsspec.spec',
+    'typeguard',
+    'puremagic',
+    'google.*',
+    'google.oauth2',
+    'pytest_cases',
+    'pytest_mock'
 ]
 ignore_missing_imports = true
+disallow_untyped_calls = false
 
 [[tool.mypy.overrides]]
 module = "dapla_pseudo.tests.*"

@@ -216,7 +216,7 @@ def get_file_data_from_dataset(
                         f"No GCS file found or authentication not sufficient for: {dataset}"
                     ) from err
                 except DefaultCredentialsError as err:
-                    raise DefaultCredentialsError(
+                    raise DefaultCredentialsError(  # type: ignore[no-untyped-call]
                         "No Google Authentication found in environment"
                     ) from err
             else:
