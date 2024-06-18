@@ -47,7 +47,7 @@ class FieldMatch:
 
     def get_value(self) -> list[str | int | None]:
         """Get the inner value.
-        
+
         If hierarchical, get the values of the matched column.
         Otherwise, just return the data of the Polars DataFrame.
         """
