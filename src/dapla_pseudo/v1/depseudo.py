@@ -106,6 +106,7 @@ class Depseudonymize:
             """Depseudonymize the dataset.
 
             Args:
+                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
                 custom_keyset (PseudoKeyset | str, optional): The depseudonymization keyset to use.
                     This can either be a PseudoKeyset, a JSON-string matching the fields of PseudoKeyset,
                     or a string matching one of the keys in `dapla_pseudo.constants.PredefinedKeys`. the Defaults to None.

@@ -131,6 +131,7 @@ class Pseudonymize:
             """Pseudonymize the dataset.
 
             Args:
+                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
                 custom_keyset (PseudoKeyset, optional): The pseudonymization keyset to use. Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 

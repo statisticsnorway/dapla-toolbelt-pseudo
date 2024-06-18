@@ -46,6 +46,11 @@ class FieldMatch:
         self.target_func = target_func
 
     def get_value(self) -> list[str | int | None]:
+        """Get the inner value.
+        
+        If hierarchical, get the values of the matched column.
+        Otherwise, just return the data of the Polars DataFrame.
+        """
         if isinstance(self.col, list):
             return self.col
         else:
