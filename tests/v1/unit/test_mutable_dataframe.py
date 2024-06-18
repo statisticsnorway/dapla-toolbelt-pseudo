@@ -151,3 +151,42 @@ def test_traverse_list_of_struct() -> None:
     assert match_2.col["values"] == ["06097048531"]
     # Ideally, we should get just one, with the following valued
     # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
+
+def test_traverse_list_inner() -> None:
+    data = [
+        {
+            "identifiers": [
+                {"type": "fnr", "values": ["11854898347", "99600884572"]},
+            ],
+        },
+        {
+            "identifiers": [
+                {"type": "fnr", "values": ["06097048531", "59900946537"]},
+            ],
+        },
+    ]
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"nick-rule","pattern":"**/values", "path":"identifiers/values", "func":"redact(placeholder=#)"}'
+        )
+    ]
+    
+    df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
+    df.match_rules(rules, None)
+    matched_fields = df.get_matched_fields()
+    print(f"Match field metrics: {df.matched_fields_metrics}")
+    assert len(matched_fields) == 2
+    
+    path_1 = "identifiers[0]/values"
+    match_1 = matched_fields[path_1]
+    assert isinstance(match_1.col, dict)
+    assert match_1.path == path_1
+    assert match_1.col["name"] == ""
+    assert match_1.col["values"] == ["11854898347", "99600884572"]
+
+    path_2 = "identifiers[1]/values"
+    match_2 = matched_fields[path_2]
+    assert isinstance(match_2.col, dict)
+    assert match_2.path == path_2
+    assert match_2.col["name"] == ""
+    assert match_2.col["values"] == ["06097048531", "59900946537"]
