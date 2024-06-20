@@ -1,0 +1,3896 @@
+[
+    {
+        "pattern": "**/personidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "personidentifikator",
+        "name": "personidentifikator"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/livsforsikringsselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/livsforsikringsselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/forsikringsnummer",
+        "func": "redact(placeholder=#)",
+        "path": "bankLaanOgForsikring/forsikring/livsforsikring/forsikringsnummer",
+        "name": "forsikringsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/utbetalerAvSkattepliktigKundeutbytte/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skattepliktigKundeutbytteUtenforVirksomhetPerUtbetaler/utbetalerAvSkattepliktigKundeutbytte/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/skadeforsikringsselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/skadeforsikringsselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/skadenummer",
+        "func": "redact(placeholder=#)",
+        "path": "bankLaanOgForsikring/forsikring/skadeforsikring/skadenummer",
+        "name": "skadenummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/forsikringsselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/forsikringsselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/fondskonto/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/utbetalersOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/forsikring/livrenteIArbeidsforholdOgFortsettelsesforsikring/utbetalersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/skyldigRestskatt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/skyldigRestskatt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/skyldigRestskatt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/skyldigRestskatt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/konto/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/bankensNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/konto/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/identifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/konto/finansinstitusjonidentifikator/identifikator",
+        "name": "hendelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/annenKapitalkostnad/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenKapitalkostnad/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenKapitalkostnad/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenKapitalkostnad/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/bidragsmottakersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/*Foedselsnummer",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/bidragsmottakersFoedselsnummer",
+        "name": "foedselsnummer"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/rapporterendeEnhet/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/underholdsbidragSkyldigOgTilGode/rapporterendeEnhet/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/privatFordringUtenforVirksomhetTilSelskapMv/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/annenGjeld/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenGjeld/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenGjeld/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "bankLaanOgForsikring/annenGjeld/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/fordringshaver",
+        "func": "redact(placeholder=#)",
+        "path": "bankLaanOgForsikring/annenGjeld/fordringshaver",
+        "name": "fordringshaver"
+    },
+    {
+        "pattern": "**/fordringshaveridentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "bankLaanOgForsikring/annenGjeld/fordringshaveridentifikator",
+        "name": "fordringshaveridentifikator"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/bruksenhetsnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomFormuesobjekt/formuesspesifikasjonForFlerboligbygning/useksjonertBoenhet/bruksenhetsnummer",
+        "name": "bruksenhetsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/leietaker/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/utleieformidler/formidlerensNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjekt/utleieformidler/formidlerensOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/leietaker/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/utleieformidler/formidlerensNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomUtleieobjektIUtlandet/utleieformidler/formidlerensOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/poststed/poststedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/postnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/poststed/postnummer",
+        "name": "postnummer"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/vegadresse/adressenavn",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/husnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/vegadresse/adressenummer/husnummer",
+        "name": "husnummer"
+    },
+    {
+        "pattern": "**/bruksenhetsnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/vegadresse/bruksenhetsnummer",
+        "name": "bruksenhetsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/coAdressenavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/adressenavn",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/adressenummer",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/bygning",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/bygning",
+        "name": "bygning"
+    },
+    {
+        "pattern": "**/etasjenummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/etasjenummer",
+        "name": "etasjenummer"
+    },
+    {
+        "pattern": "**/boenhet",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/boenhet",
+        "name": "boenhet"
+    },
+    {
+        "pattern": "**/postboks",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/postboks",
+        "name": "postboks"
+    },
+    {
+        "pattern": "**/postkode",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/postkode",
+        "name": "postkode"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/byEllerStedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/distriktsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/adresseopplysninger/internasjonalAdresse/adressebrukskategori",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eiendommensNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/bruksnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/sergMatrikkelnummer/gaardsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/sergMatrikkelnummer/bruksnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/sergMatrikkelnummer/festenummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/sergMatrikkelnummer/seksjonsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/eiendomsidentifikatorForBoenhetIBoligselskap/boligselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/eiendomsidentifikatorForBoenhetIBoligselskap/boligselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/aksjeboenhetsnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/eiendomsidentifikatorForBoenhetIBoligselskap/enhetsnummerForBoenhetIBoligselskap/aksjeboenhetsnummer",
+        "name": "aksjeboenhetsnummer"
+    },
+    {
+        "pattern": "**/andelsnummer",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/eiendomsidentifikatorForBoenhetIBoligselskap/enhetsnummerForBoenhetIBoligselskap/andelsnummer",
+        "name": "andelsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/boligsameietsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendom/eksternEiendomsidentifikator/boligsameietsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/realisasjonAvFastEiendom/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/realisasjonAvFastEiendom/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/realisasjonAvFastEiendom/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/realisasjonAvFastEiendom/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/nettoLeieinntektEllerUnderskuddFraFastEiendomSomUtleieobjektOverfoertFraEktefelle/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/nettoLeieinntektEllerUnderskuddFraFastEiendomSomUtleieobjektOverfoertFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/nettoLeieinntektEllerUnderskuddFraFastEiendomSomUtleieobjektOverfoertFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/nettoLeieinntektEllerUnderskuddFraFastEiendomSomUtleieobjektOverfoertFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomKaarytelse/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomKaarytelse/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomKaarytelse/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/fastEiendomSomKaarytelse/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/matrikkelnummer/gaardsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/matrikkelnummer/bruksnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/matrikkelnummer/festenummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/matrikkelnummer/seksjonsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/sergMatrikkelnummer/gaardsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/sergMatrikkelnummer/bruksnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/sergMatrikkelnummer/festenummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/{gaardsnummer,bruksnummer,festenummer,seksjonsnummer}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/fasteEiendommer/skogeiendomINorgeSomFormuesobjekt/sergMatrikkelnummer/seksjonsnummer",
+        "name": "matrikkelnumre"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fasteEiendommer/forholdVedFastEiendomKnyttetTilEngangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/forholdVedFastEiendomKnyttetTilEngangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/forholdVedFastEiendomKnyttetTilEngangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fasteEiendommer/forholdVedFastEiendomKnyttetTilEngangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/verdiForAnnetPrivatInnboOgLoesoere/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/verdiForAnnetPrivatInnboOgLoesoere/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/verdiForAnnetPrivatInnboOgLoesoere/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/verdiForAnnetPrivatInnboOgLoesoere/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/fritidsbaatMedSalgsverdiOverSalgsverdigrense/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fritidsbaatMedSalgsverdiOverSalgsverdigrense/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fritidsbaatMedSalgsverdiOverSalgsverdigrense/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/fritidsbaatMedSalgsverdiOverSalgsverdigrense/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/kjoeretoey/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kjoeretoey/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kjoeretoey/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kjoeretoey/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kjoeretoey/fabrikatnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kjennemerke",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/kjoeretoey/kjennemerke",
+        "name": "kjoeretoey"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/kontantbeloep/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kontantbeloep/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kontantbeloep/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kontantbeloep/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/annenFormue/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/annenFormue/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/annenFormue/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/annenFormue/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/annenFormue/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/boligsameietsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligsameie/boligsameietsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/boligselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/andelAvInntektFelleskostnaderFormueOgGjeldIBoligselskap/boligselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/kapitalisertFesteavgift/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalisertFesteavgift/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalisertFesteavgift/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalisertFesteavgift/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/rettighetKnyttetTilSkogeiendom/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/rettighetKnyttetTilSkogeiendom/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/rettighetKnyttetTilSkogeiendom/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/rettighetKnyttetTilSkogeiendom/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "boligOgEiendeler/rettighetKnyttetTilSkogeiendom/leieinntektFraUtleidRettighet/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "boligOgEiendeler/kapitalkostnadOgKapitalinntektFraSkogeiendomUtenforNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalkostnadOgKapitalinntektFraSkogeiendomUtenforNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalkostnadOgKapitalinntektFraSkogeiendomUtenforNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "boligOgEiendeler/kapitalkostnadOgKapitalinntektFraSkogeiendomUtenforNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/arbeidsgiver/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/overskuddAvUtgiftsgodtgjoerelseVedSmusstillegg/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/overskuddAvUtgiftsgodtgjoerelseVedSmusstillegg/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/overskuddAvUtgiftsgodtgjoerelseVedSmusstillegg/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/overskuddAvUtgiftsgodtgjoerelseVedSmusstillegg/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/skattepliktigLoennTilBarnUnder13Aar/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/skattepliktigLoennTilBarnUnder13Aar/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/skattepliktigLoennTilBarnUnder13Aar/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/skattepliktigLoennTilBarnUnder13Aar/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/elektroniskKommunikasjonPerArbeidsgiver/organisasjonsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/loennOgTilsvarendeYtelser/avkortetFordelVedElektroniskKommunikasjon/elektroniskKommunikasjonPerArbeidsgiver/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/pensjonsutbetaler/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonsinntekt/pensjonsutbetaler/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/oppgavegiverPensjonsinnbetalinger/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/individuellPensjonsordning/oppgavegiverPensjonsinnbetalinger/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/pensjonspremie/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonspremie/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonspremie/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/pensjonspremie/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/fagforeningskontingent/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fagforeningskontingent/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fagforeningskontingent/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fagforeningskontingent/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/arbeidsreise/reiseFraAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/arbeidsreise/reiseFraSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/arbeidsreise/reiseTilAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/arbeidsreise/reiseTilSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemInnenforEOeS/reiseFraAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemInnenforEOeS/reiseFraSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemInnenforEOeS/reiseTilAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemInnenforEOeS/reiseTilSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemUtenforEOeS/reiseFraAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemUtenforEOeS/reiseFraSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemUtenforEOeS/reiseTilAdresse",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/{reiseFraAdresse,reiseTilAdresse,reiseFraSted,reiseTilSted}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/reiserIArbeidsforhold/besoeksreiseTilHjemUtenforEOeS/reiseTilSted",
+        "name": "reiseIArbeidsforhold"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/minstefradragOgKostnader/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/minstefradragOgKostnader/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/minstefradragOgKostnader/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/minstefradragOgKostnader/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/minstefradragOgKostnader/kostnad/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/fradragForMerkostnadVedArbeidsoppholdUtenforHjemmet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/fradragForMerkostnadVedArbeidsoppholdUtenforHjemmet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/fradragForMerkostnadVedArbeidsoppholdUtenforHjemmet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/fradragForMerkostnadVedArbeidsoppholdUtenforHjemmet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/arbeidsgiver",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/arbeidssted/arbeidsgiver",
+        "name": "arbeidsgiver"
+    },
+    {
+        "pattern": "**/sted",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/arbeidssted/arbeidsstedsbeliggenhet/sted",
+        "name": "sted"
+    },
+    {
+        "pattern": "**/sted",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/pendleropphold/pendlerbolig/pendlerboligbeliggenhet/sted",
+        "name": "sted"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/arbeidsgiver",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/arbeidsgiver",
+        "name": "arbeidsgiver"
+    },
+    {
+        "pattern": "**/sted",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderYrkesOgTjenestereise/oppholdssted/sted",
+        "name": "sted"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderKjoereoppdrag/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderKjoereoppdrag/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderKjoereoppdrag/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderKjoereoppdrag/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/arbeidsgiver",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/arbeidsoppholdUtenforHjemmet/oppholdUnderKjoereoppdrag/arbeidsgiver",
+        "name": "arbeidsgiver"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/saerskiltFradragForSjoefolk/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/saerskiltFradragForSjoefolk/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/saerskiltFradragForSjoefolk/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/saerskiltFradragForSjoefolk/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/oevrigeMinstefradrag/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/oevrigeMinstefradrag/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/oevrigeMinstefradrag/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/oevrigeMinstefradrag/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/standardfradrag/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/standardfradrag/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/standardfradrag/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/standardfradrag/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntekt/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/fradragForIndividuellSparingTilPensjon/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fradragForIndividuellSparingTilPensjon/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fradragForIndividuellSparingTilPensjon/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/fradragForIndividuellSparingTilPensjon/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/omberegningsresultatForEtterbetaltePensjonerOgTrygdeytelser/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/omberegningsresultatForEtterbetaltePensjonerOgTrygdeytelser/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/omberegningsresultatForEtterbetaltePensjonerOgTrygdeytelser/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/omberegningsresultatForEtterbetaltePensjonerOgTrygdeytelser/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/omsetningAvRaafiskPerSalg/salgsorganisasjonensNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/annenArbeidsinntektFraOmsetningAvRaafisk/omsetningAvRaafiskPerSalg/fartoeyetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/pensjonsutbetaler/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/engangserstatningTilDoedsbo/pensjonsutbetaler/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/grunnlagForSkattleggingVedLoennstrekkPaaSvalbardPerArbeidsgiver/arbeidsgiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "arbeidTrygdOgPensjon/grunnlagForSkattleggingVedLoennstrekkPaaSvalbard/grunnlagForSkattleggingVedLoennstrekkPaaSvalbardPerArbeidsgiver/arbeidsgiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/organisasjonsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/coAdressenavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/adressenavn",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/adressenummer",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/bygning",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/bygning",
+        "name": "bygning"
+    },
+    {
+        "pattern": "**/etasjenummer",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/etasjenummer",
+        "name": "etasjenummer"
+    },
+    {
+        "pattern": "**/boenhet",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/boenhet",
+        "name": "boenhet"
+    },
+    {
+        "pattern": "**/postboks",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/postboks",
+        "name": "postboks"
+    },
+    {
+        "pattern": "**/postkode",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/postkode",
+        "name": "postkode"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/byEllerStedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/distriktsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/oppholdskostnaderVedPassOgStellAvBarn/barnepassvirksomhet/adresse/adressebrukskategori",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/stedForBarnepass/adressetekst",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/stedForBarnepass/poststed/poststedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/postnummer",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/passOgStellAvBarn/kostnaderForMerkjoeringForAaBringeOgHenteBarn/stedForBarnepass/poststed/postnummer",
+        "name": "postnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/barnSomGirRettTilForeldrefradrag/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/norskPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/passOgStellAvBarn/foreldrefradrag/barnSomGirRettTilForeldrefradrag/norskPersonidentifikator",
+        "name": "norskPersonidentifikator"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/passOgStellAvBarn/skattefriStoenadTilBarnetilsyn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/skattefriStoenadTilBarnetilsyn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/skattefriStoenadTilBarnetilsyn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/passOgStellAvBarn/skattefriStoenadTilBarnetilsyn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/saerfradragForEnsligForsoerger/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForEnsligForsoerger/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForEnsligForsoerger/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForEnsligForsoerger/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/saerfradragForLettereNedsattErvervsevne/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForLettereNedsattErvervsevne/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForLettereNedsattErvervsevne/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForLettereNedsattErvervsevne/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/saerfradragForStoreSykdomskostnader/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForStoreSykdomskostnader/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForStoreSykdomskostnader/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragForStoreSykdomskostnader/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "familieOgHelse/saerfradragForStoreSykdomskostnader/sykdomskostnad/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "familieOgHelse/saerfradragOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "familieOgHelse/saerfradragOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/aksjesparekonto/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/organisasjonsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/coAdressenavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/adressenavn",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/adressenummer",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/bygning",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/bygning",
+        "name": "bygning"
+    },
+    {
+        "pattern": "**/etasjenummer",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/etasjenummer",
+        "name": "etasjenummer"
+    },
+    {
+        "pattern": "**/boenhet",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/boenhet",
+        "name": "boenhet"
+    },
+    {
+        "pattern": "**/postboks",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/postboks",
+        "name": "postboks"
+    },
+    {
+        "pattern": "**/postkode",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/postkode",
+        "name": "postkode"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/byEllerStedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/distriktsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "finans/aksjesparekonto/finansinstitusjon/adresse/adressebrukskategori",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjesparekonto/finansprodukt/finansproduktetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/verdipapirfond/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/fondetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/fondetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/oppgavegiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/verdipapirfond/oppgavegiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/kontofoerersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIkkeIAksjonaerregisteret/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/aksjeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIAksjonaerregisteret/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIAksjonaerregisteret/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/aksjeIAksjonaerregisteret/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/obligasjonOgSertifikat/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/rentepapiretsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/kontofoerersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/obligasjonOgSertifikat/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/annetFinansprodukt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/finansproduktetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/kontofoerersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/annetFinansprodukt/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/investeringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/holdingselskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/investeringIOppstartsselskap/holdingselskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/fradragForInvesteringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/fradragForInvesteringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/fradragForInvesteringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/fradragForInvesteringIOppstartsselskap/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/forvaltningskostnader/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/forvaltningskostnader/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/forvaltningskostnader/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/forvaltningskostnader/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/virtuellEiendel/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/navn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/kontonummer",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/kontonummer",
+        "name": "kontonummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/virtuellEiendel/boers/boersnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "finans/tapVedSvindel/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/tapVedSvindel/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/tapVedSvindel/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "finans/tapVedSvindel/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/samletVerdiArvEllerGaveUtenforArbeidsforhold/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/samletVerdiArvEllerGaveUtenforArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/samletVerdiArvEllerGaveUtenforArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/samletVerdiArvEllerGaveUtenforArbeidsforhold/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/organisasjonsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/organisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/coAdressenavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/adressenavn",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/adressenummer",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/bygning",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/bygning",
+        "name": "bygning"
+    },
+    {
+        "pattern": "**/etasjenummer",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/etasjenummer",
+        "name": "etasjenummer"
+    },
+    {
+        "pattern": "**/boenhet",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/boenhet",
+        "name": "boenhet"
+    },
+    {
+        "pattern": "**/postboks",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/postboks",
+        "name": "postboks"
+    },
+    {
+        "pattern": "**/postkode",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/postkode",
+        "name": "postkode"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/byEllerStedsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/distriktsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/adresse*",
+        "func": "redact(placeholder=#)",
+        "path": "gaveOgArv/gaveTilFrivilligOrganisasjon/godkjentGavemottaker/adresse/adressebrukskategori",
+        "name": "adressetekst"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/godkjentInstituttsOrganisasjonsnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/tilskuddTilVitenskapeligForskning/godkjentInstituttsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/fradragForPengetilskudd/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForPengetilskudd/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForPengetilskudd/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForPengetilskudd/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/fradragForGaverTilFrivilligeOrganisasjoner/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForGaverTilFrivilligeOrganisasjoner/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForGaverTilFrivilligeOrganisasjoner/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/fradragForGaverTilFrivilligeOrganisasjoner/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/gavePengestoetteFraNaerFamilieVedUloennetOppdragForEnOrganisasjon/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gavePengestoetteFraNaerFamilieVedUloennetOppdragForEnOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gavePengestoetteFraNaerFamilieVedUloennetOppdragForEnOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/gavePengestoetteFraNaerFamilieVedUloennetOppdragForEnOrganisasjon/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "gaveOgArv/skattefriGevinstFraSpillEllerTiltakArrangertAvMassemedia/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/skattefriGevinstFraSpillEllerTiltakArrangertAvMassemedia/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/skattefriGevinstFraSpillEllerTiltakArrangertAvMassemedia/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "gaveOgArv/skattefriGevinstFraSpillEllerTiltakArrangertAvMassemedia/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/skattebegrensningVedLavAlminneligInntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLavAlminneligInntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLavAlminneligInntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLavAlminneligInntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/skattebegrensningVedLitenSkatteevne/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLitenSkatteevne/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLitenSkatteevne/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattebegrensningVedLitenSkatteevne/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/fremfoertUnderskuddFraTidligereAar/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/fremfoertUnderskuddFraTidligereAar/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/fremfoertUnderskuddFraTidligereAar/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/fremfoertUnderskuddFraTidligereAar/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/annenKapitalinntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenKapitalinntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenKapitalinntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenKapitalinntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "andreForhold/annenKapitalinntekt/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/negativAlminneligInntektOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/negativAlminneligInntektOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/negativAlminneligInntektOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/negativAlminneligInntektOverfoertFraBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/annenInntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenInntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenInntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenInntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenInntekt/arbeidsgiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenInntekt/arbeidsgiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "andreForhold/annenInntekt/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/annenFormueInnenforInntektsgivendeAktivitet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFormueInnenforInntektsgivendeAktivitet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFormueInnenforInntektsgivendeAktivitet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFormueInnenforInntektsgivendeAktivitet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "andreForhold/annenFormueInnenforInntektsgivendeAktivitet/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/kostnadTilVergegodtgjoerelse/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/kostnadTilVergegodtgjoerelse/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/kostnadTilVergegodtgjoerelse/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/kostnadTilVergegodtgjoerelse/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/kostnadTilVergegodtgjoerelse/mottakersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/annenFordring/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFordring/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFordring/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/annenFordring/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/skyldner",
+        "func": "redact(placeholder=#)",
+        "path": "andreForhold/annenFordring/skyldner",
+        "name": "skyldner"
+    },
+    {
+        "pattern": "**/skyldneridentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/annenFordring/skyldneridentifikator",
+        "name": "skyldneridentifikator"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/reduksjonAvGjeldOgGjeldsrenter/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/reduksjonAvGjeldOgGjeldsrenter/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/reduksjonAvGjeldOgGjeldsrenter/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/reduksjonAvGjeldOgGjeldsrenter/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/engangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/engangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/engangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/engangserstatningTilBarn/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/aksjeOgAnnetFinansproduktOmfattetAvUtflyttingsskatt/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/aksjeOgAnnetFinansproduktOmfattetAvUtflyttingsskatt/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/aksjeOgAnnetFinansproduktOmfattetAvUtflyttingsskatt/kontofoerersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/opsjonerIArbeidsforholdOmfattetAvUtflyttingsskatt/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/opsjonerIArbeidsforholdOmfattetAvUtflyttingsskatt/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/andelISelskapMedDeltakerfastsettingOmfattetAvUtflyttingsskatt/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/utflyttingsskatt/andelISelskapMedDeltakerfastsettingOmfattetAvUtflyttingsskatt/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/skattefriTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattefriTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattefriTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattefriTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattefriTilfeldigInntektFraSpillLotteriMv/spilletsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "andreForhold/skattepliktigTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattepliktigTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattepliktigTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattepliktigTilfeldigInntektFraSpillLotteriMv/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "andreForhold/skattepliktigTilfeldigInntektFraSpillLotteriMv/spilletsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/naeringsinntektMv/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMv/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMv/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMv/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/naeringsinntektMvFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMvFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMvFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/naeringsinntektMvFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/oppgavegiver/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiver/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiver/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiver/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiver/oppgavegiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiver/oppgavegiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/jordbruksfradrag/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/jordbruksfradrag/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/jordbruksfradrag/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/jordbruksfradrag/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/driftstidIFiskeOgFangst/fartoeyeiersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/grunnlagForBeregningAvSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLoennsOgHyremottaker/inntektKnyttetTilAktivDeltakelseIFiskeSomLoennsOgHyremottaker/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "naering/saerskiltFradragForFiskereOgFangstfolk/grunnlagForBeregningAvSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLoennsOgHyremottaker/kostnadVedAktivDeltakelseIFiskeSomLoennsOgHyremottaker/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/saerskiltFradragForReindrift/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForReindrift/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForReindrift/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForReindrift/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/saerskiltFradragForSkiferproduksjon/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForSkiferproduksjon/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForSkiferproduksjon/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/saerskiltFradragForSkiferproduksjon/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaering/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaering/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaering/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaering/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaeringFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaeringFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaeringFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/samletGjeldOgFormuesobjekterINaeringFordeltFraEktefelle/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/oppgavegiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/oppgavegiverBarnepassIBarnepasserensHjem/oppgavegiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/ikkeInnrapportertInntektKnyttetTilAktivDeltakelseIFiskeSomLottaker/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/{beskrivelse, *Beskrivelse}",
+        "func": "redact(placeholder=#)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/kostnadVedAktivDeltakelseIFiskeSomLottaker/beskrivelse",
+        "name": "beskrivelse"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/oppdragsgiversNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/oppdragsgiversOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/grunnlagForBeregningAvNaeringsinntektOgSaerskiltFradragForFiskereOgFangstfolkKnyttetTilLottaker/oppdragsgiver/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/formuesspesifikasjonForSkipFiskeOgFangstfartoey/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/formuesspesifikasjonForSkipFiskeOgFangstfartoey/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/formuesspesifikasjonForSkipFiskeOgFangstfartoey/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/formuesspesifikasjonForSkipFiskeOgFangstfartoey/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "naering/annetFradragKnyttetTilNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/annetFradragKnyttetTilNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/annetFradragKnyttetTilNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/annetFradragKnyttetTilNaeringsvirksomhet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "naering/eiendomsskattegrunnlagPerKraftverk/kraftverketsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/kravOmKreditfradrag/kravOmKreditfradragForUtenlandskSkattPrLand/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/kravOmKreditfradrag/kravOmKreditfradragForUtenlandskSkattPrLand/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/kravOmKreditfradrag/kravOmKreditfradragForUtenlandskSkattPrLand/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/kravOmKreditfradrag/kravOmKreditfradragForUtenlandskSkattPrLand/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/grunnlagForKreditfradragFraNaeringsvirksomhetIUtlandet/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/grunnlagForKreditfradragFraNaeringsvirksomhetIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/grunnlagForKreditfradragFraNaeringsvirksomhetIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "metodeForAaUnngaaDobbeltbeskatning/grunnlagForKreditfradragFraNaeringsvirksomhetIUtlandet/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/barnetsPersonidentifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/overfoertFraBarnTilForelder/barnetsPersonidentifikator",
+        "name": "barnetsPersonidentifikator"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/overfoertFraBarnTilForelder/barnetsNavn/fornavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/overfoertFraBarnTilForelder/barnetsNavn/mellomnavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/overfoertFraBarnTilForelder/barnetsNavn/etternavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/selskapetsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{organisasjonsnummer,*Organisasjonsnummer}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/selskapetsOrganisasjonsnummer",
+        "name": "organisasjonsnummer"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "formueOgInntektISelskapMedDeltakerfastsetting/deltakersAndelAvFormueOgInntekt/deltakersAndelIKraftverk/deltakersAndelAvEiendomsskattegrunnlagPerKraftverk/kraftverketsNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/{navn,*navn,*Navn}",
+        "func": "daead(keyId=ssb-common-key-1)",
+        "path": "spesifikasjonAvSkattefradragForKostnaderTilForskningOgUtvikling/forskningOgUtviklingsprosjekt/annenOffentligStoette/utbetalingAvOffentligStoette/utbetalersNavn",
+        "name": "navn"
+    },
+    {
+        "pattern": "**/identifikator",
+        "func": "map-sid-ff31(keyId=papis-common-key-1,strategy=skip)",
+        "path": "identifikator",
+        "name": "hendelse"
+    }
+]
