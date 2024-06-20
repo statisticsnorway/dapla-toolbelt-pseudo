@@ -148,6 +148,7 @@ def build_pseudo_field_request(
                             source_keyset=KeyWrapper(custom_keyset).keyset,
                             target_keyset=KeyWrapper(target_custom_keyset).keyset,
                         )
+                        requests.append(req)
                     except ValidationError as e:
                         raise Exception(
                             f"Path: {field.path}, Values: {field.get_value()}"
