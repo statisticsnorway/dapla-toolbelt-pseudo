@@ -17,6 +17,9 @@ def setup() -> Generator[None, None, None]:
         # Setup step
         # Could not find a way to generate id tokes without a SA to impersonate.
         # Subprocess `glcoud auth` as a temporary workaround
+
+        # Need to disable local file logging to avoid getting gcloud perm error
+        subprocess.run(["gcloud", "config", "set", "core/disable_file_logging", "True"])
         id_token = subprocess.getoutput("gcloud auth print-identity-token")
         os.environ["PSEUDO_SERVICE_AUTH_TOKEN"] = id_token
         yield
