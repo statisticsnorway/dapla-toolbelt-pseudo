@@ -116,9 +116,7 @@ def build_pseudo_field_request(
                     )
                     requests.append(req)
                 except ValidationError as e:
-                    raise Exception(
-                        f"Path: {field.path}, Values: {field.get_value()}"
-                    ) from e
+                    raise Exception(f"Path or column: {field.path}") from e
         case PseudoOperation.DEPSEUDONYMIZE:
             for field in matched_fields.values():
                 try:
@@ -131,9 +129,7 @@ def build_pseudo_field_request(
                     )
                     requests.append(req)
                 except ValidationError as e:
-                    raise Exception(
-                        f"Path: {field.path}, Values: {field.get_value()}"
-                    ) from e
+                    raise Exception(f"Path or column: {field.path}") from e
 
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
@@ -150,9 +146,7 @@ def build_pseudo_field_request(
                         )
                         requests.append(req)
                     except ValidationError as e:
-                        raise Exception(
-                            f"Path: {field.path}, Values: {field.get_value()}"
-                        ) from e
+                        raise Exception(f"Path or column: {field.path}") from e
             else:
                 raise ValueError("Found no target rules")
     return requests
