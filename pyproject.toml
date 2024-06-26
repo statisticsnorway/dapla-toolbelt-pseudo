@@ -67,7 +67,7 @@ nbstripout = ">=0.6.1"
 ipython = ">=8.11.0"
 jupyterlab = ">=4.0.0"
 google-auth = ">= 2.25.2"
-
+austin-dist = ">=3.6.0"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
