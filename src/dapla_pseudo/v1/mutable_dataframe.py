@@ -69,6 +69,7 @@ class MutableDataFrame:
         self.matched_fields: dict[str, FieldMatch] = {}
         self.matched_fields_metrics: dict[str, int] | None = None
         self.hierarchical: bool = hierarchical
+        self.schema = dataframe.schema
 
     def match_rules(
         self, rules: list[PseudoRule], target_rules: list[PseudoRule] | None
@@ -130,7 +131,7 @@ class MutableDataFrame:
             assert isinstance(self.dataset, pl.DataFrame)
             return self.dataset
         else:
-            return pl.read_json(BytesIO(orjson.dumps(self.dataset)))
+            return pl.read_json(BytesIO(orjson.dumps(self.dataset)), schema=self.schema)
 
 
 def _combine_rules(
@@ -152,11 +153,12 @@ def _traverse_dataframe_dict(
     metrics: Counter[str],
     prefix: str = "",
 ) -> Generator[FieldMatch, None, None]:
+
+    path_head, *path_tail = curr_path
     for index, col in enumerate(items):
         if col is None or curr_path == []:
             continue
 
-        path_head, *path_tail = curr_path
         if col["name"] == "" and any(
             key in col["datatype"] for key in {"Struct", "List", "Array"}
         ):
@@ -171,7 +173,6 @@ def _traverse_dataframe_dict(
         elif col["name"] == path_head:
             next_prefix = f"{prefix}/{col['name']}"
             if path_tail == []:  # matched entire path
-                metrics.update({next_prefix: 1})
                 rule, target_rule = rules
 
                 if (
@@ -182,13 +183,15 @@ def _traverse_dataframe_dict(
                     if col is None or len(col) == 0:
                         continue
 
-                yield FieldMatch(
-                    path=next_prefix.lstrip("/"),
-                    col=col,
-                    func=rule.func,
-                    target_func=target_rule.func if target_rule else None,
-                    pattern=rule.pattern,
-                )
+                if not all(v is None for v in col["values"]):
+                    metrics.update({next_prefix: 1})
+                    yield FieldMatch(
+                        path=next_prefix.lstrip("/"),
+                        col=col,
+                        func=rule.func,
+                        target_func=target_rule.func if target_rule else None,
+                        pattern=rule.pattern,
+                    )
             else:
                 yield from _traverse_dataframe_dict(
                     col["values"],
