@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dapla-toolbelt-pseudo"
-version = "2.1.1"
+version = "2.1.2"
 description = "Pseudonymization extensions for Dapla"
 authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
 license = "MIT"
@@ -27,7 +27,7 @@ python-ulid = ">=2.2.0"
 cryptography = ">41.0.0"
 dapla-toolbelt = ">=1.7.0"
 fsspec = ">=2023.5.0"
-polars = ">=0.18.2"
+polars = ">=0.18.2,<1.0"
 pygments = ">2.15.0"
 click = ">=8.0.1"
 ssb-datadoc-model = ">=5.0.0"
