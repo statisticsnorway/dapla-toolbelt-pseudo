@@ -44,6 +44,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.result import Result
 
@@ -134,22 +135,34 @@ class _BasePseudonymizer:
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
         ) -> tuple[str, list[str], RawPseudoMetadata]:
             """Function that performs the pseudonymization on a Polars Series."""
-            response: requests.Response = self._pseudo_client._post_to_field_endpoint(
-                f"{self._pseudo_operation.value}/field",
-                request,
-                timeout,
-                stream=True,
-            )
-            payload = msgspec.json.decode(response.content.decode("utf-8"))
-            data = payload["data"]
-            metadata = RawPseudoMetadata(
-                field_name=request.name,
-                logs=payload["logs"],
-                metrics=payload["metrics"],
-                datadoc=payload["datadoc_metadata"]["pseudo_variables"],
-            )
+            if (
+                type(request) == PseudoFieldRequest
+                and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
+            ):
+                ## If we redact, we do this inside this library
+                ## to avoid making API calls towards Pseudo Service
+                name, data, metadata = _BasePseudonymizer._redact_field(request)
+                return name, data, metadata
 
-            return request.name, data, metadata
+            else:
+                response: requests.Response = (
+                    self._pseudo_client._post_to_field_endpoint(
+                        f"{self._pseudo_operation.value}/field",
+                        request,
+                        timeout,
+                        stream=True,
+                    )
+                )
+                payload = msgspec.json.decode(response.content.decode("utf-8"))
+                data = payload["data"]
+                metadata = RawPseudoMetadata(
+                    field_name=request.name,
+                    logs=payload["logs"],
+                    metrics=payload["metrics"],
+                    datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+                )
+
+                return request.name, data, metadata
 
         # type narrowing isn't carried over from caller function
         assert isinstance(self._dataset, MutableDataFrame)
@@ -215,6 +228,38 @@ class _BasePseudonymizer:
             streamed=True,
             file_name=file_name,
         )
+
+    @staticmethod
+    def _redact_field(
+        request: PseudoFieldRequest,
+    ) -> tuple[str, list[str], RawPseudoMetadata]:
+        kwargs = cast(RedactKeywordArgs, request.pseudo_func.kwargs)
+        if kwargs.placeholder is None:
+            raise ValueError("Placeholder needs to be set for Redact")
+        data = [kwargs.placeholder for _ in request.values]
+        # The above operation could be vectorized using something like Polars,
+        # however - the redact functionality is used mostly teams that use hierarchical
+        # data, i.e. with very small lists. The overhead of
+        # creating a Polars Series is probably not worth it.
+
+        metadata = RawPseudoMetadata(
+            field_name=request.name,
+            logs=[],
+            metrics=[],
+            datadoc=[
+                {
+                    "short_name": request.name.split("/")[-1],
+                    "data_element_path": request.name.replace("/", "."),
+                    "data_element_pattern": request.pattern,
+                    "encryption_algorithm": "REDACT",
+                    "encryption_algorithm_parameters": [
+                        request.pseudo_func.kwargs.model_dump(exclude_none=True)
+                    ],
+                }
+            ],
+        )
+
+        return request.name, data, metadata
 
 
 class _BaseRuleConstructor:
