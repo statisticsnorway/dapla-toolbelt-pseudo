@@ -5,10 +5,9 @@ when using autocomplete-features. The method names should also be more technical
 and descriptive than the user-friendly methods that are exposed.
 """
 
+import asyncio
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from datetime import date
 from typing import cast
 
@@ -167,6 +166,19 @@ class _BasePseudonymizer:
         # type narrowing isn't carried over from caller function
         assert isinstance(self._dataset, MutableDataFrame)
         # Execute the pseudonymization API calls in parallel
+
+        raw_metadata_fields: list[RawPseudoMetadata] = []
+        for field_name, data, raw_metadata in asyncio.run(
+            self._pseudo_client.post_to_field(
+                path=f"{self._pseudo_operation.value}/field",
+                timeout=timeout,
+                pseudo_requests=pseudo_requests,
+            )
+        ):
+            self._dataset.update(field_name, data)
+            raw_metadata_fields.append(raw_metadata)
+
+        """
         with ThreadPoolExecutor() as executor:
             raw_metadata_fields: list[RawPseudoMetadata] = []
             futures = [
@@ -177,6 +189,7 @@ class _BasePseudonymizer:
                 field_name, data, raw_metadata = future.result()
                 self._dataset.update(field_name, data)
                 raw_metadata_fields.append(raw_metadata)
+        """
 
         return PseudoFieldResponse(
             data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
