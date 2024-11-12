@@ -107,7 +107,10 @@ class PseudoClient:
 
         aio_session = ClientSession(connector=TCPConnector(limit=200))
         async with RetryClient(
-            client_session=aio_session, retry_options=ExponentialRetry()
+            client_session=aio_session,
+            retry_options=ExponentialRetry(
+                attempts=5, start_timeout=0.1, max_timeout=30, factor=2
+            ),
         ) as client:
             results = await asyncio.gather(
                 *[
