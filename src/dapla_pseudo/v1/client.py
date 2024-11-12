@@ -58,7 +58,7 @@ class PseudoClient:
                 else str(self.static_auth_token)
             )
 
-    async def post_to_field(
+    async def post_to_field_endpoint(
         self,
         path: str,
         timeout: int,
@@ -133,6 +133,17 @@ class PseudoClient:
                 print(await response.text())
                 response.raise_for_status()
 
+    @staticmethod
+    def _handle_response_error_sync(response: requests.Response) -> None:
+        """Report error messages in response object. For synchronous callers."""
+        match response.status_code:
+            case status if status in range(200, 300):
+                pass
+            case _:
+                print(response.headers)
+                print(response.text)
+                response.raise_for_status()
+
     def _post_to_file_endpoint(
         self,
         path: str,
@@ -159,31 +170,7 @@ class PseudoClient:
             timeout=timeout,
         )
 
-        PseudoClient._handle_response_error(response)
-        return response
-
-    def _post_to_field_endpoint(
-        self,
-        path: str,
-        pseudo_field_request: (
-            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
-        ),
-        timeout: int,
-        stream: bool = False,
-    ) -> requests.Response:
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/{path}",
-            headers={
-                "Authorization": f"Bearer {self.__auth_token()}",
-                "Content-Type": Mimetypes.JSON.value,
-                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-            },
-            json={"request": pseudo_field_request.model_dump(by_alias=True)},
-            stream=stream,
-            timeout=timeout,
-        )
-
-        PseudoClient._handle_response_error(response)
+        PseudoClient._handle_response_error_sync(response)
         return response
 
     def _post_to_sid_endpoint(
@@ -207,7 +194,7 @@ class PseudoClient:
             timeout=TIMEOUT_DEFAULT,  # seconds
         )
 
-        PseudoClient._handle_response_error(response)
+        PseudoClient._handle_response_error_sync(response)
         return response
 
 
