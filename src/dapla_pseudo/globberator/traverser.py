@@ -35,7 +35,7 @@ class SchemaTraverser:
     def write_rules(file_path: str, rules: list[PseudoRule]) -> None:
         """Write rules to file."""
         opener = GCSFileSystem.open if file_path.startswith("gs://") else open
-        with opener(file_path) as rules_file:
+        with opener(file_path, mode="wb") as rules_file:
             rules_file.write(msgspec.json.encode(rules))
 
     def match_rules(self, separator: str = "/") -> list[PseudoRule]:
