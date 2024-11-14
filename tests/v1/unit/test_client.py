@@ -1,78 +1,110 @@
 from unittest.mock import ANY
+from unittest.mock import AsyncMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
+import pytest_asyncio
 import requests
+from aiohttp import ClientResponse
+from aiohttp import ClientResponseError
+from aiohttp import RequestInfo
+from aiohttp_retry.client import _RequestContext
+from pytest_mock import MockerFixture
 
 from dapla_pseudo import PseudoClient
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
-from dapla_pseudo.v1.models.api import PseudoFileRequest
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 
+pytest_plugins = ("pytest_asyncio",)
+
+
 PKG = "dapla_pseudo.v1.client"
 
-import pytest_cases
 
-
-@pytest_cases.fixture()
+@pytest_asyncio.fixture()
 def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"
     return PseudoClient(pseudo_service_url=base_url, auth_token=auth_token)
 
 
-@patch("requests.post")
-def test_post_to_field_endpoint_success(
-    mock_post: Mock, test_client: PseudoClient
+@pytest.mark.asyncio
+async def test_post_to_field_endpoint_success(
+    test_client: PseudoClient, mocker: MockerFixture
 ) -> None:
-    mock_response = Mock(spec=requests.Response)
-    mock_response.status_code = 200
-    mock_pseudo_field_request = Mock(spec=PseudoFieldRequest)
-    mock_post.return_value = mock_response
+    mock_request_context = AsyncMock(spec=_RequestContext)
+    mock_response = AsyncMock(spec=ClientResponse)
+    mock_response.status = 200
 
-    response = test_client._post_to_field_endpoint(
+    mock_response_content = {
+        "data": [1, 2, 3],
+        "logs": ["some-log"],
+        "metrics": ["some-metric"],
+        "datadoc_metadata": {"pseudo_variables": [{"some_var": "some_arg"}]},
+    }
+    mock_response.json.return_value = mock_response_content
+
+    mock_request_context.__aenter__.return_value = mock_response
+
+    mocker.patch(f"{PKG}.RetryClient.post", return_value=mock_request_context)
+
+    mock_pseudo_field_request = Mock(spec=PseudoFieldRequest)
+    mock_pseudo_field_request.name = "magic"
+
+    results = await test_client.post_to_field_endpoint(
         path="test_path",
-        pseudo_field_request=mock_pseudo_field_request,
+        pseudo_requests=[mock_pseudo_field_request],
         timeout=TIMEOUT_DEFAULT,
     )
+    resp_name, resp_data, resp_metadata = results[0]
 
-    assert response == mock_response
-    mock_post.assert_called_once()
+    assert resp_name == mock_pseudo_field_request.name
+    assert resp_data == mock_response_content["data"]
+    assert resp_metadata.logs == mock_response_content["logs"]
+    assert resp_metadata.metrics == mock_response_content["metrics"]
+    assert resp_metadata.datadoc == mock_response_content["datadoc_metadata"]["pseudo_variables"]  # type: ignore[index]
 
 
-@patch("requests.post")
-def test_post_to_field_endpoint_failure(
-    mock_post: Mock, test_client: PseudoClient
+@pytest.mark.asyncio
+async def test_post_to_field_endpoint_failure(
+    test_client: PseudoClient, mocker: MockerFixture
 ) -> None:
-    mock_response = Mock(spec=requests.Response)
-    mock_response.status_code = 400
-    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-        "Mocked HTTP error", response=requests.Response()
+    mock_request_context = AsyncMock(spec=_RequestContext)
+    mock_response = AsyncMock(spec=ClientResponse)
+    mock_response.status = 400
+    mock_response.raise_for_status.side_effect = ClientResponseError(
+        Mock(spec=RequestInfo), Mock(), message="Mocked HTTP error"
     )
-    mock_response.headers = ANY
-    mock_response.text = ANY
-    mock_post.return_value = mock_response
+    mock_response.headers = AsyncMock()
+    mock_response.text = AsyncMock()
 
-    mock_pseudo_request = Mock(spec=PseudoFileRequest)
+    mock_request_context.__aenter__.return_value = mock_response
 
-    with pytest.raises(requests.exceptions.HTTPError):
-        test_client._post_to_field_endpoint(
+    mock_post = mocker.patch(
+        f"{PKG}.RetryClient.post", return_value=mock_request_context
+    )
+
+    mock_pseudo_field_request = Mock(spec=PseudoFieldRequest)
+    mock_pseudo_field_request.name = "magic"
+
+    with pytest.raises(ClientResponseError):
+        await test_client.post_to_field_endpoint(
             path="test_path",
-            pseudo_field_request=mock_pseudo_request,
+            pseudo_requests=[mock_pseudo_field_request],
             timeout=TIMEOUT_DEFAULT,
         )
     mock_post.assert_called_once()
     mock_response.raise_for_status.assert_called_once()
 
 
-@patch("requests.post")
-def test_post_to_field_endpoint_serialization(
-    _mock_post: Mock, test_client: PseudoClient
+@pytest.mark.asyncio
+async def test_post_to_field_endpoint_serialization(
+    test_client: PseudoClient, mocker: MockerFixture
 ) -> None:
     keyset = PseudoKeyset(
         encrypted_keyset="test_enc_keyset",
@@ -86,14 +118,16 @@ def test_post_to_field_endpoint_serialization(
         pseudo_func=pseudo_func, name="", pattern="", values=[], keyset=keyset
     )
 
-    test_client._post_to_field_endpoint(
+    mock_post = mocker.patch(f"{PKG}.RetryClient.post", return_value=AsyncMock())
+
+    await test_client.post_to_field_endpoint(
         path="test_path",
-        pseudo_field_request=pseudo_field_request,
+        pseudo_requests=[pseudo_field_request],
         timeout=TIMEOUT_DEFAULT,
     )
     expected_json = {"request": pseudo_field_request.model_dump(by_alias=True)}
 
-    _mock_post.assert_called_once_with(
+    mock_post.assert_called_once_with(
         url="https://mocked.dapla-pseudo-service/test_path",
         headers={
             "Authorization": "Bearer some-auth-token",
@@ -101,7 +135,6 @@ def test_post_to_field_endpoint_serialization(
             "X-Correlation-Id": ANY,
         },
         json=expected_json,
-        stream=False,
         timeout=TIMEOUT_DEFAULT,
     )
 

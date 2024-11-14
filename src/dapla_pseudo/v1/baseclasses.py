@@ -5,16 +5,13 @@ when using autocomplete-features. The method names should also be more technical
 and descriptive than the user-friendly methods that are exposed.
 """
 
+import asyncio
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from datetime import date
 from typing import cast
 
-import msgspec
 import polars as pl
-import requests
 
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import MapFailureStrategy
@@ -127,56 +124,23 @@ class _BasePseudonymizer:
     ) -> PseudoFieldResponse:
         """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
-        The pseudonymization is performed in parallel. After the parallel processing is finished,
+        The pseudonymization is performed concurrently. After the processing is finished,
         the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
         """
-
-        def pseudonymize_field_runner(
-            request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, list[str], RawPseudoMetadata]:
-            """Function that performs the pseudonymization on a Polars Series."""
-            if (
-                type(request) == PseudoFieldRequest
-                and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
-            ):
-                ## If we redact, we do this inside this library
-                ## to avoid making API calls towards Pseudo Service
-                name, data, metadata = _BasePseudonymizer._redact_field(request)
-                return name, data, metadata
-
-            else:
-                response: requests.Response = (
-                    self._pseudo_client._post_to_field_endpoint(
-                        f"{self._pseudo_operation.value}/field",
-                        request,
-                        timeout,
-                        stream=True,
-                    )
-                )
-                payload = msgspec.json.decode(response.content.decode("utf-8"))
-                data = payload["data"]
-                metadata = RawPseudoMetadata(
-                    field_name=request.name,
-                    logs=payload["logs"],
-                    metrics=payload["metrics"],
-                    datadoc=payload["datadoc_metadata"]["pseudo_variables"],
-                )
-
-                return request.name, data, metadata
-
         # type narrowing isn't carried over from caller function
         assert isinstance(self._dataset, MutableDataFrame)
         # Execute the pseudonymization API calls in parallel
-        with ThreadPoolExecutor() as executor:
-            raw_metadata_fields: list[RawPseudoMetadata] = []
-            futures = [
-                executor.submit(pseudonymize_field_runner, request)
-                for request in pseudo_requests
-            ]
-            for future in as_completed(futures):
-                field_name, data, raw_metadata = future.result()
-                self._dataset.update(field_name, data)
-                raw_metadata_fields.append(raw_metadata)
+
+        raw_metadata_fields: list[RawPseudoMetadata] = []
+        for field_name, data, raw_metadata in asyncio.run(
+            self._pseudo_client.post_to_field_endpoint(
+                path=f"{self._pseudo_operation.value}/field",
+                timeout=timeout,
+                pseudo_requests=pseudo_requests,
+            )
+        ):
+            self._dataset.update(field_name, data)
+            raw_metadata_fields.append(raw_metadata)
 
         return PseudoFieldResponse(
             data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
