@@ -20,6 +20,7 @@ from importlib.metadata import version
 # Ref: https://github.com/python-poetry/poetry/issues/144#issuecomment-1488038660
 __version__ = version("dapla_toolbelt_pseudo")
 
+from dapla_pseudo.globberator.traverser import SchemaTraverser
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.depseudo import Depseudonymize
 from dapla_pseudo.v1.models.core import PseudoKeyset
@@ -36,4 +37,5 @@ __all__ = [
     "Validator",
     "PseudoKeyset",
     "PseudoRule",
+    "SchemaTraverser",
 ]

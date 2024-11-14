@@ -13,6 +13,7 @@ import polars as pl
 from dapla import FileClient
 from gcsfs.core import GCSFile
 from google.auth.exceptions import DefaultCredentialsError
+from pydantic import ValidationError
 
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.exceptions import FileInvalidError
@@ -98,45 +99,57 @@ def build_pseudo_field_request(
     """Builds a FieldRequest object."""
     mutable_df.match_rules(rules, target_rules)
     matched_fields = mutable_df.get_matched_fields()
+    requests: list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest] = (
+        []
+    )
+    req: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
-            return [
-                PseudoFieldRequest(
-                    pseudo_func=field.func,
-                    name=field.path,
-                    pattern=field.pattern,
-                    values=field.col["values"],
-                    keyset=KeyWrapper(custom_keyset).keyset,
-                )
-                for field in matched_fields
-            ]
-        case PseudoOperation.DEPSEUDONYMIZE:
-            return [
-                DepseudoFieldRequest(
-                    pseudo_func=field.func,
-                    name=field.path,
-                    pattern=field.pattern,
-                    values=field.col["values"],
-                    keyset=KeyWrapper(custom_keyset).keyset,
-                )
-                for field in matched_fields
-            ]
-        case PseudoOperation.REPSEUDONYMIZE:
-            if target_rules is not None:
-                return [
-                    RepseudoFieldRequest(
-                        source_pseudo_func=field.func,
-                        target_pseudo_func=field.target_func,
+            for field in matched_fields.values():
+                try:
+                    req = PseudoFieldRequest(
+                        pseudo_func=field.func,
                         name=field.path,
                         pattern=field.pattern,
-                        values=field.col["values"],
-                        source_keyset=KeyWrapper(custom_keyset).keyset,
-                        target_keyset=KeyWrapper(target_custom_keyset).keyset,
+                        values=field.get_value(),
+                        keyset=KeyWrapper(custom_keyset).keyset,
                     )
-                    for field in matched_fields
-                ]
+                    requests.append(req)
+                except ValidationError as e:
+                    raise Exception(f"Path or column: {field.path}") from e
+        case PseudoOperation.DEPSEUDONYMIZE:
+            for field in matched_fields.values():
+                try:
+                    req = DepseudoFieldRequest(
+                        pseudo_func=field.func,
+                        name=field.path,
+                        pattern=field.pattern,
+                        values=field.get_value(),
+                        keyset=KeyWrapper(custom_keyset).keyset,
+                    )
+                    requests.append(req)
+                except ValidationError as e:
+                    raise Exception(f"Path or column: {field.path}") from e
+
+        case PseudoOperation.REPSEUDONYMIZE:
+            if target_rules is not None:
+                for field in matched_fields.values():
+                    try:
+                        req = RepseudoFieldRequest(
+                            source_pseudo_func=field.func,
+                            target_pseudo_func=field.target_func,
+                            name=field.path,
+                            pattern=field.pattern,
+                            values=field.get_value(),
+                            source_keyset=KeyWrapper(custom_keyset).keyset,
+                            target_keyset=KeyWrapper(target_custom_keyset).keyset,
+                        )
+                        requests.append(req)
+                    except ValidationError as e:
+                        raise Exception(f"Path or column: {field.path}") from e
             else:
                 raise ValueError("Found no target rules")
+    return requests
 
 
 def build_pseudo_file_request(
@@ -216,7 +229,7 @@ def get_file_data_from_dataset(
                         f"No GCS file found or authentication not sufficient for: {dataset}"
                     ) from err
                 except DefaultCredentialsError as err:
-                    raise DefaultCredentialsError(
+                    raise DefaultCredentialsError(  # type: ignore[no-untyped-call]
                         "No Google Authentication found in environment"
                     ) from err
             else:

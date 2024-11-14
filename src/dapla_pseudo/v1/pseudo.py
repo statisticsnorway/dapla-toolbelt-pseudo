@@ -104,10 +104,6 @@ class Pseudonymize:
 
         def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
-            super().__init__(
-                pseudo_operation=PseudoOperation.PSEUDONYMIZE,
-                dataset=Pseudonymize.dataset,
-            )
             if rules is None:
                 Pseudonymize._Pseudonymizer.rules = []
             else:
@@ -128,18 +124,25 @@ class Pseudonymize:
 
         def run(
             self,
+            hierarchical: bool = False,
             custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Pseudonymize the dataset.
 
             Args:
+                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
                 custom_keyset (PseudoKeyset, optional): The pseudonymization keyset to use. Defaults to None.
                 timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
             """
+            super().__init__(
+                pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+                dataset=Pseudonymize.dataset,
+                hierarchical=hierarchical,
+            )
             return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
 
     class _PseudoFuncSelector(_BaseRuleConstructor):
