@@ -104,6 +104,41 @@ def df_personer_hierarchical_pseudonymized() -> pl.DataFrame:
 
 
 @pytest_cases.fixture()
+def df_personer_hierarchical_redacted() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_redacted.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "person_info": pl.Struct(
+                [
+                    pl.Field("fnr", dtype=pl.String),
+                    pl.Field("fornavn", dtype=pl.String),
+                    pl.Field("etternavn", dtype=pl.String),
+                ]
+            ),
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest_cases.fixture()
+def df_personer_hierarchical_inner_list() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_inner_list.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
+def df_personer_hierarchical_inner_list_pseudonymized() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_inner_list_pseudonymized.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
 def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
     return pl.read_json(

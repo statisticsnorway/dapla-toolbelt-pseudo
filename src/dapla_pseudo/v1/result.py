@@ -1,7 +1,6 @@
 """Common API models for builder packages."""
 
 from collections import Counter
-from io import BufferedWriter
 from pathlib import Path
 from typing import Any
 from typing import cast
@@ -160,10 +159,6 @@ class Result:
 
             datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
-
-        file_handle = cast(
-            BufferedWriter, file_handle
-        )  # file handle is always BufferedWriter when opening with "wb"
 
         match self._pseudo_data:
             case pl.DataFrame() as df:

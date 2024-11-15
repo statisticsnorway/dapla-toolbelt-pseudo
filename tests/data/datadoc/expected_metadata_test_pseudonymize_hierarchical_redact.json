@@ -1,0 +1,25 @@
+{
+    "document_version": "0.0.1",
+    "datadoc": null,
+    "pseudonymization": {
+        "document_version": "0.1.0",
+        "pseudo_dataset": null,
+        "pseudo_variables": [
+            {
+                "short_name": "fnr",
+                "data_element_path": "person_info.fnr",
+                "data_element_pattern": "**/person_info/fnr",
+                "stable_identifier_type": null,
+                "stable_identifier_version": null,
+                "encryption_algorithm": "REDACT",
+                "encryption_algorithm_parameters": [
+                    {
+                        "placeholder": ":"
+                    }
+                ],
+                "source_variable": null,
+                "source_variable_datatype": null
+            }
+        ]
+    }
+}

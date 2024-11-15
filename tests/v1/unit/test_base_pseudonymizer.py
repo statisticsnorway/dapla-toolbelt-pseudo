@@ -15,6 +15,7 @@ from dapla_pseudo.v1.models.api import PseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.models.api import PseudoFileRequest
 from dapla_pseudo.v1.models.api import PseudoFileResponse
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.models.core import File
 from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
@@ -51,7 +52,9 @@ def test_execute_pseudo_operation_field(
         f"{PKG}._BasePseudonymizer._pseudonymize_file", return_value=Mock()
     )
 
-    base = _BasePseudonymizer(pseudo_operation=pseudo_op, dataset=dataset)
+    base = _BasePseudonymizer(
+        pseudo_operation=pseudo_op, dataset=dataset, hierarchical=False
+    )
 
     rules = [PseudoRule(name="dummy", pattern="dummy", func=Mock(spec=PseudoFunction))]
     base._execute_pseudo_operation(
@@ -85,45 +88,49 @@ def test_pseudonymize_field(
         values=list(df_personer["fnr"]),
     )
 
-    expected_json = {
-        "data": ["jJuuj0i", "ylc9488", "yeLfkaL"],
-        "logs": [],
-        "metrics": [{"MAPPED_SID": 3}],
-        "datadoc_metadata": {
-            "pseudo_variables": [
-                {
-                    "short_name": "fnr",
-                    "data_element_path": "fnr",
-                    "data_element_pattern": "fnr*",
-                    "stable_identifier_type": "FREG_SNR",
-                    "stable_identifier_version": "2023-08-31",
-                    "encryption_algorithm": "TINK-FPE",
-                    "encryption_key_reference": "papis-common-key-1",
-                    "encryption_algorithm_parameters": [
-                        {"keyId": "papis-common-key-1"},
-                        {"strategy": "skip"},
-                    ],
+    mocked_data = ["jJuuj0i", "ylc9488", "yeLfkaL"]
+    mocked_metadata = RawPseudoMetadata(
+        field_name="fnr",
+        logs=[],
+        metrics=[{"MAPPED_SID": 3}],
+        datadoc=[
+            {
+                "datadoc_metadata": {
+                    "pseudo_variables": {
+                        "short_name": "fnr",
+                        "data_element_path": "fnr",
+                        "data_element_pattern": "fnr*",
+                        "stable_identifier_type": "FREG_SNR",
+                        "stable_identifier_version": "2023-08-31",
+                        "encryption_algorithm": "TINK-FPE",
+                        "encryption_key_reference": "papis-common-key-1",
+                        "encryption_algorithm_parameters": [
+                            {"keyId": "papis-common-key-1"},
+                            {"strategy": "skip"},
+                        ],
+                    }
                 }
-            ]
-        },
-    }
-
-    mocked_response = Mock(content=bytes(json.dumps(expected_json), encoding="utf-8"))
-
-    mocked_post_to_field = mocker.patch(
-        "dapla_pseudo.v1.client.PseudoClient._post_to_field_endpoint",
+            }
+        ],
     )
-    mocked_post_to_field.return_value = mocked_response
+
+    mocked_asyncio_run = mocker.patch(
+        "dapla_pseudo.v1.baseclasses.asyncio.run",
+    )
+    mocked_asyncio_run.return_value = [("fnr", mocked_data, mocked_metadata)]
     base = _BasePseudonymizer(
-        pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=df_personer
+        pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+        dataset=df_personer,
+        hierarchical=False,
     )
 
     response = base._pseudonymize_field([sid_req], timeout=ANY)
     metadata = response.raw_metadata[0]
     assert isinstance(response, PseudoFieldResponse)
-    assert metadata.datadoc == expected_json["datadoc_metadata"]["pseudo_variables"]  # type: ignore[index]
-    assert metadata.logs == expected_json["logs"]
-    assert metadata.metrics == expected_json["metrics"]
+
+    assert metadata.datadoc == mocked_metadata.datadoc
+    assert metadata.logs == mocked_metadata.logs
+    assert metadata.metrics == mocked_metadata.metrics
 
 
 def test_pseudonymize_dataset(
@@ -175,7 +182,9 @@ def test_pseudonymize_dataset(
     )
     mocked_post_to_field.return_value = mocked_response
     base = _BasePseudonymizer(
-        pseudo_operation=PseudoOperation.PSEUDONYMIZE, dataset=personer_file
+        pseudo_operation=PseudoOperation.PSEUDONYMIZE,
+        dataset=personer_file,
+        hierarchical=False,
     )
 
     response = base._pseudonymize_file(req, timeout=ANY)

@@ -88,10 +88,6 @@ class Depseudonymize:
 
         def __init__(self, rules: list[PseudoRule] | None = None) -> None:
             """Initialize the class."""
-            super().__init__(
-                pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
-                dataset=Depseudonymize.dataset,
-            )
             if rules is None:
                 Depseudonymize._Depseudonymizer.rules = []
             else:
@@ -103,12 +99,14 @@ class Depseudonymize:
 
         def run(
             self,
+            hierarchical: bool = False,
             custom_keyset: PseudoKeyset | str | None = None,
             timeout: int = TIMEOUT_DEFAULT,
         ) -> Result:
             """Depseudonymize the dataset.
 
             Args:
+                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
                 custom_keyset (PseudoKeyset | str, optional): The depseudonymization keyset to use.
                     This can either be a PseudoKeyset, a JSON-string matching the fields of PseudoKeyset,
                     or a string matching one of the keys in `dapla_pseudo.constants.PredefinedKeys`. the Defaults to None.
@@ -117,6 +115,11 @@ class Depseudonymize:
             Returns:
                 Result: The depseudonymized dataset and the associated metadata.
             """
+            super().__init__(
+                pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
+                dataset=Depseudonymize.dataset,
+                hierarchical=hierarchical,
+            )
             return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
 
     class _DepseudoFuncSelector(_BaseRuleConstructor):

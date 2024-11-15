@@ -5,15 +5,13 @@ when using autocomplete-features. The method names should also be more technical
 and descriptive than the user-friendly methods that are exposed.
 """
 
+import asyncio
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from datetime import date
 from typing import cast
 
 import polars as pl
-import requests
 
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import MapFailureStrategy
@@ -43,6 +41,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.result import Result
 
@@ -51,7 +50,10 @@ class _BasePseudonymizer:
     """Base class for the _Pseudonymizer/_Depseudonymizer/_Repseudonymizer builders."""
 
     def __init__(
-        self, pseudo_operation: PseudoOperation, dataset: File | pl.DataFrame
+        self,
+        pseudo_operation: PseudoOperation,
+        dataset: File | pl.DataFrame,
+        hierarchical: bool,
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
@@ -62,7 +64,7 @@ class _BasePseudonymizer:
         self._dataset: File | MutableDataFrame
         match dataset:  # Differentiate between file and DataFrame
             case pl.DataFrame():
-                self._dataset = MutableDataFrame(dataset)
+                self._dataset = MutableDataFrame(dataset, hierarchical)
             case File():
                 self._dataset = dataset
             case _ as invalid_dataset:
@@ -98,7 +100,6 @@ class _BasePseudonymizer:
                     target_rules,
                 )
                 pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
-                pseudo_response.data = self._dataset.to_polars()
             case File():
                 pseudo_request = build_pseudo_file_request(
                     self._pseudo_operation,
@@ -123,49 +124,27 @@ class _BasePseudonymizer:
     ) -> PseudoFieldResponse:
         """Pseudonymizes the specified fields in the DataFrame using the provided pseudonymization function.
 
-        The pseudonymization is performed in parallel. After the parallel processing is finished,
+        The pseudonymization is performed concurrently. After the processing is finished,
         the pseudonymized fields replace the original fields in the DataFrame stored in `self._dataframe`.
         """
-
-        def pseudonymize_field_runner(
-            request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, list[str], RawPseudoMetadata]:
-            """Function that performs the pseudonymization on a Polars Series."""
-            response: requests.Response = self._pseudo_client._post_to_field_endpoint(
-                f"{self._pseudo_operation.value}/field",
-                request,
-                timeout,
-                stream=True,
-            )
-            payload = json.loads(response.content.decode("utf-8"))
-            data = payload["data"]
-            metadata = RawPseudoMetadata(
-                field_name=request.name,
-                logs=payload["logs"],
-                metrics=payload["metrics"],
-                datadoc=payload["datadoc_metadata"]["pseudo_variables"],
-            )
-
-            return request.name, data, metadata
-
         # type narrowing isn't carried over from caller function
         assert isinstance(self._dataset, MutableDataFrame)
         # Execute the pseudonymization API calls in parallel
-        with ThreadPoolExecutor() as executor:
-            raw_metadata_fields: list[RawPseudoMetadata] = []
-            futures = [
-                executor.submit(pseudonymize_field_runner, request)
-                for request in pseudo_requests
-            ]
 
-            for future in as_completed(futures):
-                field_name, data, raw_metadata = future.result()
-                self._dataset.update(field_name, data)
-                raw_metadata_fields.append(raw_metadata)
-
-            return PseudoFieldResponse(
-                data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
+        raw_metadata_fields: list[RawPseudoMetadata] = []
+        for field_name, data, raw_metadata in asyncio.run(
+            self._pseudo_client.post_to_field_endpoint(
+                path=f"{self._pseudo_operation.value}/field",
+                timeout=timeout,
+                pseudo_requests=pseudo_requests,
             )
+        ):
+            self._dataset.update(field_name, data)
+            raw_metadata_fields.append(raw_metadata)
+
+        return PseudoFieldResponse(
+            data=self._dataset.to_polars(), raw_metadata=raw_metadata_fields
+        )
 
     def _pseudonymize_file(
         self,
@@ -213,6 +192,38 @@ class _BasePseudonymizer:
             streamed=True,
             file_name=file_name,
         )
+
+    @staticmethod
+    def _redact_field(
+        request: PseudoFieldRequest,
+    ) -> tuple[str, list[str], RawPseudoMetadata]:
+        kwargs = cast(RedactKeywordArgs, request.pseudo_func.kwargs)
+        if kwargs.placeholder is None:
+            raise ValueError("Placeholder needs to be set for Redact")
+        data = [kwargs.placeholder for _ in request.values]
+        # The above operation could be vectorized using something like Polars,
+        # however - the redact functionality is used mostly teams that use hierarchical
+        # data, i.e. with very small lists. The overhead of
+        # creating a Polars Series is probably not worth it.
+
+        metadata = RawPseudoMetadata(
+            field_name=request.name,
+            logs=[],
+            metrics=[],
+            datadoc=[
+                {
+                    "short_name": request.name.split("/")[-1],
+                    "data_element_path": request.name.replace("/", "."),
+                    "data_element_pattern": request.pattern,
+                    "encryption_algorithm": "REDACT",
+                    "encryption_algorithm_parameters": [
+                        request.pseudo_func.kwargs.model_dump(exclude_none=True)
+                    ],
+                }
+            ],
+        )
+
+        return request.name, data, metadata
 
 
 class _BaseRuleConstructor:
