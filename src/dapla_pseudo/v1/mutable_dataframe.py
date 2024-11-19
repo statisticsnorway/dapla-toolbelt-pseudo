@@ -1,7 +1,7 @@
 import re
 from collections import Counter
 from collections.abc import Generator
-from io import StringIO
+from io import BytesIO
 from typing import Any
 
 import msgspec
@@ -133,7 +133,7 @@ class MutableDataFrame:
             return self.dataset
         else:
             return pl.DataFrame.deserialize(
-                StringIO(str(orjson.dumps(self.dataset), encoding="utf-8")),
+                BytesIO(orjson.dumps(self.dataset)),
                 format="json",
             )
 
