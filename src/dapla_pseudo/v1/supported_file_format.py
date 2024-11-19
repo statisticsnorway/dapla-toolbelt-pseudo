@@ -95,7 +95,7 @@ def write_from_dicts(
         case SupportedOutputFileFormat.PARQUET:
             df = pl.DataFrame(data)
             # type hints lying
-            df.write_parquet(file_like)  # type: ignore[arg-type]
+            df.write_parquet(file_like)
         case SupportedOutputFileFormat.CSV:
             df = pl.DataFrame(data)
             df.write_csv(file_like)
