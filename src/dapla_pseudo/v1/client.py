@@ -131,6 +131,9 @@ class PseudoClient:
         match response.status:
             case status if status in range(200, 300):
                 pass
+            case status if status == 503:
+                ## Is handled by retry mechanism
+                pass
             case _:
                 print(response.headers)
                 print(await response.text())
