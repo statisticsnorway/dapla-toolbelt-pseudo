@@ -1,7 +1,7 @@
 import re
 from collections import Counter
 from collections.abc import Generator
-from io import BytesIO
+from io import StringIO
 from typing import Any
 
 import msgspec
@@ -91,7 +91,8 @@ class MutableDataFrame:
             }
         else:
             counter: Counter[str] = Counter()
-            self.dataset = msgspec.json.decode(self.dataset.write_json())  # type: ignore[union-attr]
+            assert isinstance(self.dataset, pl.DataFrame)
+            self.dataset = msgspec.json.decode(self.dataset.serialize(format="json"))
             assert isinstance(self.dataset, dict)
             for source_rule, target_rule in _combine_rules(rules, target_rules):
                 if source_rule.path is None:
@@ -131,7 +132,10 @@ class MutableDataFrame:
             assert isinstance(self.dataset, pl.DataFrame)
             return self.dataset
         else:
-            return pl.read_json(BytesIO(orjson.dumps(self.dataset)), schema=self.schema)
+            return pl.DataFrame.deserialize(
+                StringIO(str(orjson.dumps(self.dataset), encoding="utf-8")),
+                format="json",
+            )
 
 
 def _combine_rules(

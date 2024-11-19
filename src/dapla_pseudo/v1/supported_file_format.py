@@ -119,9 +119,8 @@ def write_from_df(
         case SupportedOutputFileFormat.CSV:
             df.write_csv(file=file_like, **kwargs)
         case SupportedOutputFileFormat.JSON:
-            df.write_json(file=file_like, row_oriented=True, **kwargs)
+            df.write_json(file=file_like, **kwargs)
         case SupportedOutputFileFormat.XML:
             df.to_pandas().to_xml(file_like, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
-            # type hints lying
-            df.write_parquet(file_like, **kwargs)  # type: ignore[arg-type]
+            df.write_parquet(file_like, **kwargs)
