@@ -17,8 +17,7 @@ Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 [tool.poetry.dependencies]
 python = ">=3.10, <3.13" # This needs to be pinned in sync with SciPy.
 pydantic = ">=2.0"
-numpy = "^1.26.4"   # A lot of packages don't use numpy 2.0 yet, so constraint is tight.
-                    # this constraint should be loosened after a while.
+numpy = ">=1.26.4"
 pyhumps = ">=3.8.0"
 types-requests = ">=2.28.11"
 pandas-stubs = ">=1.5.3.230304"
