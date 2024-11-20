@@ -31,7 +31,7 @@ pygments = ">2.15.0"
 click = ">=8.0.1"
 ssb-datadoc-model = ">=5.0.0"
 cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
-pyarrow = ">=14.0.2, <15"
+pyarrow = ">=14.0.2"
 orjson = ">=3.10.1"
 wcmatch = ">=8.5.1"
 msgspec = ">=0.18.6"
