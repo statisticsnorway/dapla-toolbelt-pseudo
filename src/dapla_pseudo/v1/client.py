@@ -105,7 +105,7 @@ class PseudoClient:
 
                 return request.name, data, metadata
 
-        aio_session = ClientSession(connector=TCPConnector(limit=200))
+        aio_session = ClientSession(connector=TCPConnector(limit=200), timeout=timeout)
         async with RetryClient(
             client_session=aio_session,
             retry_options=ExponentialRetry(
