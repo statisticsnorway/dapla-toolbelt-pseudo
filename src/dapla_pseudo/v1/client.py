@@ -10,6 +10,7 @@ import google.oauth2.id_token
 import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientSession
+from aiohttp import ClientTimeout
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
@@ -105,7 +106,9 @@ class PseudoClient:
 
                 return request.name, data, metadata
 
-        aio_session = ClientSession(connector=TCPConnector(limit=200), timeout=timeout)
+        aio_session = ClientSession(
+            connector=TCPConnector(limit=200), timeout=ClientTimeout(total=10 * 60)
+        )
         async with RetryClient(
             client_session=aio_session,
             retry_options=ExponentialRetry(
