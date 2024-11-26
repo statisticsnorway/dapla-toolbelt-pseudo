@@ -123,6 +123,22 @@ def df_personer_hierarchical_redacted() -> pl.DataFrame:
 
 
 @pytest_cases.fixture()
+def df_personer_hierarchical_null() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_null.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
+def df_personer_hierarchical_null_pseudonymized() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_null_pseudonymized.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
 def df_personer_hierarchical_inner_list() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_hierarchical_inner_list.json"
     return pl.read_json(

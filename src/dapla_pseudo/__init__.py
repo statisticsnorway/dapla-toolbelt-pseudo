@@ -30,12 +30,12 @@ from dapla_pseudo.v1.repseudo import Repseudonymize
 from dapla_pseudo.v1.validation import Validator
 
 __all__ = [
-    "PseudoClient",
-    "Pseudonymize",
     "Depseudonymize",
-    "Repseudonymize",
-    "Validator",
+    "PseudoClient",
     "PseudoKeyset",
     "PseudoRule",
+    "Pseudonymize",
+    "Repseudonymize",
     "SchemaTraverser",
+    "Validator",
 ]
