@@ -163,6 +163,37 @@ def test_pseudonymize_hierarchical(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
+def test_pseudonymize_hierarchical_null(
+    df_personer_hierarchical_null: pl.DataFrame,
+    df_personer_hierarchical_null_pseudonymized: pl.DataFrame,
+) -> None:
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+    result = (
+        Pseudonymize.from_polars(df_personer_hierarchical_null)
+        .add_rules(rule)
+        .run(hierarchical=True)
+    )
+
+    current_function_name = get_calling_function_name()
+    expected_metadata_container = get_expected_datadoc_metadata_container(
+        current_function_name
+    )
+
+    assert result.datadoc == expected_metadata_container.model_dump_json(
+        exclude_none=True
+    )
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical_null_pseudonymized)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
 def test_pseudonymize_hierarchical_redact(
     df_personer_hierarchical: pl.DataFrame,
     df_personer_hierarchical_redacted: pl.DataFrame,
