@@ -3,10 +3,13 @@
 import asyncio
 import os
 import typing as t
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from datetime import date
 
 import google.auth.transport.requests
 import google.oauth2.id_token
+import msgspec
 import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientSession
@@ -19,7 +22,9 @@ from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
+from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.utils import redact_field
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
 from dapla_pseudo.v1.models.api import RawPseudoMetadata
@@ -84,27 +89,33 @@ class PseudoClient:
             timeout: int,
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
         ) -> tuple[str, list[str], RawPseudoMetadata]:
-            async with client.post(
-                url=f"{self.pseudo_service_url}/{path}",
-                headers={
-                    "Authorization": f"Bearer {self.__auth_token()}",
-                    "Content-Type": Mimetypes.JSON.value,
-                    "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-                },
-                json={"request": request.model_dump(by_alias=True)},
-                timeout=timeout,
-            ) as response:
-                await PseudoClient._handle_response_error(response)
-                response_json = await response.json()
-                data = response_json["data"]
-                metadata = RawPseudoMetadata(
-                    field_name=request.name,
-                    logs=response_json["logs"],
-                    metrics=response_json["metrics"],
-                    datadoc=response_json["datadoc_metadata"]["pseudo_variables"],
-                )
+            if (
+                type(request) is PseudoFieldRequest
+                and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
+            ):
+                return redact_field(request)
+            else:
+                async with client.post(
+                    url=f"{self.pseudo_service_url}/{path}",
+                    headers={
+                        "Authorization": f"Bearer {self.__auth_token()}",
+                        "Content-Type": Mimetypes.JSON.value,
+                        "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+                    },
+                    json={"request": request.model_dump(by_alias=True)},
+                    timeout=timeout,
+                ) as response:
+                    await PseudoClient._handle_response_error(response)
+                    response_json = await response.json()
+                    data = response_json["data"]
+                    metadata = RawPseudoMetadata(
+                        field_name=request.name,
+                        logs=response_json["logs"],
+                        metrics=response_json["metrics"],
+                        datadoc=response_json["datadoc_metadata"]["pseudo_variables"],
+                    )
 
-                return request.name, data, metadata
+                    return request.name, data, metadata
 
         aio_session = ClientSession(
             connector=TCPConnector(limit=200), timeout=ClientTimeout(total=10 * 60)
@@ -123,6 +134,63 @@ class PseudoClient:
             )
 
         return results
+
+    def post_to_field_endpoint_sync(
+        self,
+        path: str,
+        timeout: int,
+        pseudo_requests: list[
+            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+        ],
+    ) -> list[tuple[str, list[str], RawPseudoMetadata]]:
+        """Make requests to the API in a synchronous manner.
+
+        This is needed in case the library is used
+        in an environment where a Jupyter environment already exists, e.g. Jupyter Notebook.
+        """
+
+        def pseudonymize_field_runner(
+            path: str,
+            timeout: int,
+            request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
+        ) -> tuple[str, list[str], RawPseudoMetadata]:
+            if (
+                type(request) is PseudoFieldRequest
+                and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
+            ):
+                return redact_field(request)
+            else:
+                response = requests.post(
+                    url=f"{self.pseudo_service_url}/{path}",
+                    headers={
+                        "Authorization": f"Bearer {self.__auth_token()}",
+                        "Content-Type": Mimetypes.JSON.value,
+                        "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+                    },
+                    json={"request": request.model_dump(by_alias=True)},
+                    timeout=timeout,
+                )
+                payload = msgspec.json.decode(response.content.decode("utf-8"))
+                data = payload["data"]
+                metadata = RawPseudoMetadata(
+                    field_name=request.name,
+                    logs=payload["logs"],
+                    metrics=payload["metrics"],
+                    datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+                )
+
+                return request.name, data, metadata
+
+        pseudo_results = []
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(pseudonymize_field_runner, path, timeout, r)
+                for r in pseudo_requests
+            ]
+            for future in as_completed(futures):
+                pseudo_results.append(future.result())
+
+        return pseudo_results
 
     @staticmethod
     def _generate_new_correlation_id() -> str:
