@@ -103,7 +103,7 @@ def redact_field(
 def asyncio_loop_running() -> bool:
     """Determins whether asyncio has a running event loop."""
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         if loop.is_running():
             return True
         else:
