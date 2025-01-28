@@ -19,6 +19,7 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.utils import asyncio_loop_running
 from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import build_pseudo_file_request
 from dapla_pseudo.utils import convert_to_date
@@ -132,16 +133,7 @@ class _BasePseudonymizer:
 
         raw_metadata_fields: list[RawPseudoMetadata] = []
 
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                loop_running = True
-            else:
-                loop_running = False
-        except RuntimeError:
-            loop_running = False
-
-        if loop_running:
+        if asyncio_loop_running():
             result = self._pseudo_client.post_to_field_endpoint_sync(
                 path=f"{self._pseudo_operation.value}/field",
                 timeout=timeout,

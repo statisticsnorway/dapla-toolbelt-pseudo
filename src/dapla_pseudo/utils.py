@@ -1,5 +1,6 @@
 """Utility functions for Dapla Pseudo."""
 
+import asyncio
 import io
 import os
 import typing as t
@@ -97,6 +98,18 @@ def redact_field(
     )
 
     return request.name, data, metadata
+
+
+def asyncio_loop_running() -> bool:
+    """Determins whether asyncio has a running event loop."""
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            return True
+        else:
+            return False
+    except RuntimeError:
+        return False
 
 
 def convert_to_date(sid_snapshot_date: date | str | None = None) -> date | None:
