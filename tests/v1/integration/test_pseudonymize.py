@@ -3,6 +3,7 @@ import asyncio
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
+from pytest_mock import MockerFixture
 from tests.v1.integration.utils import get_calling_function_name
 from tests.v1.integration.utils import get_expected_datadoc_metadata_container
 from tests.v1.integration.utils import integration_test
@@ -286,3 +287,32 @@ def test_pseudonymize_default_encryption_synchronous(
         exclude_none=True
     )
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_pseudonymize_async_in_sync_env_raises_error(
+    df_personer: pl.DataFrame, mocker: MockerFixture
+) -> None:
+    """Initialize an event loop to simulate running in an environment with a running event loop (e.g. Jupyter Notebook)."""
+
+    async def async_wrapper() -> Result:
+        """Simply presents asyncio with the correct interface in order to run the function in an event loop."""
+        return (
+            Pseudonymize.from_polars(df_personer)
+            .on_fields("fnr")
+            .with_default_encryption()
+            .run()
+        )
+
+    mocker.patch(
+        "dapla_pseudo.v1.baseclasses.asyncio_loop_running",
+        return_value=False,
+    )
+
+    with pytest.raises(RuntimeError) as excinfo:
+        asyncio.run(async_wrapper())
+
+    assert "asyncio.run() cannot be called from a running event loop" in str(
+        excinfo.value
+    )
