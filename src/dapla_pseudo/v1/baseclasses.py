@@ -19,6 +19,7 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.types import FileSpecDecl
+from dapla_pseudo.utils import asyncio_loop_running
 from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import build_pseudo_file_request
 from dapla_pseudo.utils import convert_to_date
@@ -41,7 +42,6 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
-from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.result import Result
 
@@ -132,13 +132,23 @@ class _BasePseudonymizer:
         # Execute the pseudonymization API calls in parallel
 
         raw_metadata_fields: list[RawPseudoMetadata] = []
-        for field_name, data, raw_metadata in asyncio.run(
-            self._pseudo_client.post_to_field_endpoint(
+
+        if asyncio_loop_running():
+            result = self._pseudo_client.post_to_field_endpoint_sync(
                 path=f"{self._pseudo_operation.value}/field",
                 timeout=timeout,
                 pseudo_requests=pseudo_requests,
             )
-        ):
+        else:
+            result = asyncio.run(
+                self._pseudo_client.post_to_field_endpoint(
+                    path=f"{self._pseudo_operation.value}/field",
+                    timeout=timeout,
+                    pseudo_requests=pseudo_requests,
+                )
+            )
+
+        for field_name, data, raw_metadata in result:
             self._dataset.update(field_name, data)
             raw_metadata_fields.append(raw_metadata)
 
@@ -192,38 +202,6 @@ class _BasePseudonymizer:
             streamed=True,
             file_name=file_name,
         )
-
-    @staticmethod
-    def _redact_field(
-        request: PseudoFieldRequest,
-    ) -> tuple[str, list[str], RawPseudoMetadata]:
-        kwargs = cast(RedactKeywordArgs, request.pseudo_func.kwargs)
-        if kwargs.placeholder is None:
-            raise ValueError("Placeholder needs to be set for Redact")
-        data = [kwargs.placeholder for _ in request.values]
-        # The above operation could be vectorized using something like Polars,
-        # however - the redact functionality is used mostly teams that use hierarchical
-        # data, i.e. with very small lists. The overhead of
-        # creating a Polars Series is probably not worth it.
-
-        metadata = RawPseudoMetadata(
-            field_name=request.name,
-            logs=[],
-            metrics=[],
-            datadoc=[
-                {
-                    "short_name": request.name.split("/")[-1],
-                    "data_element_path": request.name.replace("/", "."),
-                    "data_element_pattern": request.pattern,
-                    "encryption_algorithm": "REDACT",
-                    "encryption_algorithm_parameters": [
-                        request.pseudo_func.kwargs.model_dump(exclude_none=True)
-                    ],
-                }
-            ],
-        )
-
-        return request.name, data, metadata
 
 
 class _BaseRuleConstructor:

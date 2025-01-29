@@ -57,6 +57,7 @@ jobs:
         pip install .
         pip install pytest
         pip install pytest_cases
+        pip install pytest_mock
     - name: Integration test
       env:
         PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}

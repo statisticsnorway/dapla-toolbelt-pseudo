@@ -1,5 +1,6 @@
 """Utility functions for Dapla Pseudo."""
 
+import asyncio
 import io
 import os
 import typing as t
@@ -25,6 +26,7 @@ from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import DepseudoFileRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFileRequest
+from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.models.api import RepseudoFieldRequest
 from dapla_pseudo.v1.models.api import RepseudoFileRequest
 from dapla_pseudo.v1.models.core import KeyWrapper
@@ -32,6 +34,7 @@ from dapla_pseudo.v1.models.core import Mimetypes
 from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
+from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import FORMAT_TO_MIMETYPE_FUNCTION
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
@@ -59,6 +62,54 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
         return matching_item[1]
     except StopIteration:
         return None
+
+
+def redact_field(
+    request: PseudoFieldRequest,
+) -> tuple[str, list[str], RawPseudoMetadata]:
+    """Perform the redact operation locally.
+
+    This is in order to avoid making unnecessary requests to the API.
+    """
+    kwargs = t.cast(RedactKeywordArgs, request.pseudo_func.kwargs)
+    if kwargs.placeholder is None:
+        raise ValueError("Placeholder needs to be set for Redact")
+    data = [kwargs.placeholder for _ in request.values]
+    # The above operation could be vectorized using something like Polars,
+    # however - the redact functionality is used mostly teams that use hierarchical
+    # data, i.e. with very small lists. The overhead of
+    # creating a Polars Series is probably not worth it.
+
+    metadata = RawPseudoMetadata(
+        field_name=request.name,
+        logs=[],
+        metrics=[],
+        datadoc=[
+            {
+                "short_name": request.name.split("/")[-1],
+                "data_element_path": request.name.replace("/", "."),
+                "data_element_pattern": request.pattern,
+                "encryption_algorithm": "REDACT",
+                "encryption_algorithm_parameters": [
+                    request.pseudo_func.kwargs.model_dump(exclude_none=True)
+                ],
+            }
+        ],
+    )
+
+    return request.name, data, metadata
+
+
+def asyncio_loop_running() -> bool:
+    """Determins whether asyncio has a running event loop."""
+    try:
+        loop = asyncio.get_running_loop()
+        if loop.is_running():
+            return True
+        else:
+            return False
+    except RuntimeError:
+        return False
 
 
 def convert_to_date(sid_snapshot_date: date | str | None = None) -> date | None:
