@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dapla-toolbelt-pseudo"
-version = "2.2.6"
+version = "2.2.7"
 description = "Pseudonymization extensions for Dapla"
 authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
 license = "MIT"
