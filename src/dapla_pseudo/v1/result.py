@@ -32,6 +32,7 @@ class Result:
         """Initialise a PseudonymizationResult."""
         self._pseudo_data: pl.DataFrame | list[dict[str, Any]]
         self._metadata: dict[str, dict[str, list[Any]]] = {}
+        self._datadoc: MetadataContainer
         match pseudo_response:
             case PseudoFieldResponse(dataframe, raw_metadata):
                 self._pseudo_data = dataframe
@@ -82,6 +83,46 @@ class Result:
                         pseudo_variables=pseudo_variables
                     )
                 )
+
+    def add_previous_metadata(
+        self,
+        prev_metadata: dict[str, dict[str, list[Any]]],
+        prev_datadoc: MetadataContainer,
+    ) -> None:
+        """Add metadata from previous pseudonymization result.
+
+        Args:
+            prev_metadata (dict[str, dict[str, list[Any]]]): Metadata from previous pseudonymization result
+            prev_datadoc (MetadataContainer): Datadoc metadata from previous pseudonymization result
+        """
+        for field_name, field_metadata in prev_metadata.items():
+            if field_name in self._metadata:
+                # Field metadata already present in pseudo result - skipping
+                continue
+
+            self._metadata[field_name] = field_metadata
+
+        if (
+            prev_datadoc.pseudonymization is not None
+            and prev_datadoc.pseudonymization.pseudo_variables is not None
+        ):
+            prev_datadoc_fields = prev_datadoc.pseudonymization.pseudo_variables
+        else:
+            prev_datadoc_fields = []
+
+        if (
+            self._datadoc.pseudonymization is not None
+            and self._datadoc.pseudonymization.pseudo_variables is not None
+        ):
+            datadoc_fields = self._datadoc.pseudonymization.pseudo_variables
+        else:
+            datadoc_fields = []
+
+        self._datadoc = MetadataContainer(
+            pseudonymization=PseudonymizationMetadata(
+                pseudo_variables=prev_datadoc_fields + datadoc_fields
+            )
+        )
 
     def to_polars(self, **kwargs: Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.

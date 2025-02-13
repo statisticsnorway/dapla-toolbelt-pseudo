@@ -10,6 +10,7 @@ from polars.testing import assert_frame_equal as pl_assert_frame_equal
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
+from dapla_pseudo.v1.depseudo import Depseudonymize
 
 
 @pytest.mark.usefixtures("setup")
@@ -63,3 +64,39 @@ def test_pseudonymize_input_output_funcs(
         case "polars":
             df_polars = result.to_polars()
             pl_assert_frame_equal(df_polars, df_personer_fnr_daead_encrypted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_pseudonymize_add_results(
+    df_personer: pl.DataFrame,
+    df_personer_fnr_daead_encrypted: pl.DataFrame,
+) -> None:
+    # create a new column with a pseudonymized FNR
+    df_personer = df_personer.with_columns(
+        df_personer_fnr_daead_encrypted.get_column("fnr").alias("fnr_pseudo")
+    )
+
+    result = (
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_default_encryption()
+        .run()
+    )
+
+    assert result.to_polars().drop("fnr_pseudo").equals(df_personer_fnr_daead_encrypted)
+
+    result_new = (
+        Depseudonymize.from_result(result)
+        .on_fields("fnr_pseudo")
+        .with_default_encryption()
+        .run()
+    )
+
+    assert (
+        result_new._datadoc == result._datadoc
+    )  # Depseudonymization doesn't return Datadoc metadata
+    assert result_new._metadata == {
+        **result._metadata,
+        "fnr_pseudo": result_new._metadata["fnr_pseudo"],
+    }

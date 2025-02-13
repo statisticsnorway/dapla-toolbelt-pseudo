@@ -1,10 +1,12 @@
 """Builder for submitting a pseudonymization request."""
 
 from datetime import date
+from typing import Any
 from typing import ClassVar
 
 import pandas as pd
 import polars as pl
+from datadoc_model.model import MetadataContainer
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy
@@ -28,6 +30,8 @@ class Pseudonymize:
     """
 
     dataset: File | pl.DataFrame
+    prev_metadata: dict[str, dict[str, list[Any]]] | None  # Used in "from_result()"
+    prev_datadoc: MetadataContainer | None  # Used in "from_result()"
 
     @staticmethod
     def from_pandas(
@@ -43,6 +47,8 @@ class Pseudonymize:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
         dataset: pl.DataFrame = pl.from_pandas(dataframe)
+        Pseudonymize.prev_metadata = None
+        Pseudonymize.prev_datadoc = None
         if run_as_file:
             file_handle, content_type = get_file_data_from_dataset(dataset)
             Pseudonymize.dataset = File(file_handle, content_type)
@@ -63,6 +69,8 @@ class Pseudonymize:
         Returns:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
+        Pseudonymize.prev_metadata = None
+        Pseudonymize.prev_datadoc = None
         if run_as_file:
             file_handle, content_type = get_file_data_from_dataset(dataframe)
             Pseudonymize.dataset = File(file_handle, content_type)
@@ -93,8 +101,65 @@ class Pseudonymize:
             local_path = "some_file.csv"
             field_selector = Pseudonymize.from_file(local_path))
         """
+        Pseudonymize.prev_metadata = None
+        Pseudonymize.prev_datadoc = None
+
         file_handle, content_type = get_file_data_from_dataset(dataset)
         Pseudonymize.dataset = File(file_handle, content_type)
+        return Pseudonymize._Pseudonymizer()
+
+    @staticmethod
+    def from_result(
+        result: Result, run_as_file: bool = False
+    ) -> "Pseudonymize._Pseudonymizer":
+        """Initialize a pseudonymization request from a previously computed Result.
+
+        This allows the user to compose results from different pseudonymization operations,
+        (pseudo/depseudo/repseudo), while preserving the metadata as it was a single run.
+        This should not be used for operations of the same pseudo operation,
+        in which case the builder pattern is preserved.
+
+        Args:
+            result: A previously pseudonymized DataFrame
+            run_as_file: Force the dataset to be pseudonymized as a single file.
+
+        Raises:
+            ValueError: If the data structure in the "Result" object is not a DataFrame.
+
+        Returns:
+            _Pseudonymizer: An instance of the _Pseudonymizer class.
+
+        Examples:
+            result = (
+                Pseudonymize
+                    .from_polars(df)
+                    .on_fields("fornavn","etternavn")
+                    .with_default_encryption()
+                    .run()
+                )
+
+            result = (
+                Depseudonymize
+                    .from_result(result)
+                    .on_fields("bolig")
+                    .with_default_encryption()
+                    .run()
+                )
+            result.to_file("gs://ssb-play-obr-data-delt-ledstill-prod/")
+        """
+        Pseudonymize.prev_metadata = result._metadata
+        Pseudonymize.prev_datadoc = result._datadoc
+
+        if run_as_file:
+            file_handle, content_type = get_file_data_from_dataset(result._pseudo_data)
+            Pseudonymize.dataset = File(file_handle, content_type)
+        else:
+            if type(result._pseudo_data) is not pl.DataFrame:
+                raise ValueError(
+                    "Chaining pseudo results can only be done with DataFrames"
+                )
+            Pseudonymize.dataset = result._pseudo_data
+
         return Pseudonymize._Pseudonymizer()
 
     class _Pseudonymizer(_BasePseudonymizer):
@@ -143,7 +208,20 @@ class Pseudonymize:
                 dataset=Pseudonymize.dataset,
                 hierarchical=hierarchical,
             )
-            return super()._execute_pseudo_operation(self.rules, timeout, custom_keyset)
+
+            result = super()._execute_pseudo_operation(
+                self.rules, timeout, custom_keyset
+            )
+            if (
+                Pseudonymize.prev_datadoc is not None
+                and Pseudonymize.prev_metadata is not None
+            ):  # Add metadata from previous Result
+                result.add_previous_metadata(
+                    Pseudonymize.prev_metadata, Pseudonymize.prev_datadoc
+                )
+                return result
+            else:
+                return result
 
     class _PseudoFuncSelector(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:
