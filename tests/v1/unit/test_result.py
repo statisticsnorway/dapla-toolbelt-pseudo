@@ -5,6 +5,9 @@ from typing import Any
 
 import pandas as pd
 import polars as pl
+from datadoc_model.model import MetadataContainer
+from datadoc_model.model import PseudonymizationMetadata
+from datadoc_model.model import PseudoVariable
 from pytest_cases import fixture
 
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
@@ -142,3 +145,132 @@ def test_aggregate_mixed_metrics() -> None:
         "logs": ["Some log", "Some log", "Some other log"],
         "metrics": {"METRIC_1": 3, "METRIC_2": 3},
     }
+
+
+def test_add_results() -> None:
+    data = pl.DataFrame({"fnr": ["jJuuj0i", "ylc9488", "yeLfkaL"]})
+    metadata = RawPseudoMetadata(
+        field_name="fnr",
+        logs=[],
+        metrics=[{"MAPPED_SID": 3}],
+        datadoc=[
+            {
+                "short_name": "fnr",
+                "data_element_path": "fnr",
+                "data_element_pattern": "fnr*",
+                "stable_identifier_type": "FREG_SNR",
+                "stable_identifier_version": "2023-08-31",
+                "encryption_algorithm": "TINK-FPE",
+                "encryption_key_reference": "papis-common-key-1",
+                "encryption_algorithm_parameters": [
+                    {"keyId": "papis-common-key-1"},
+                    {"strategy": "skip"},
+                ],
+            }
+        ],
+    )
+
+    result = Result(PseudoFieldResponse(data, [metadata]))
+
+    new_datadoc = MetadataContainer(
+        pseudonymization=PseudonymizationMetadata(
+            pseudo_variables=[
+                PseudoVariable.model_validate(
+                    {
+                        "short_name": "snr",
+                        "data_element_path": "snr",
+                        "data_element_pattern": "snr*",
+                        "stable_identifier_type": "FREG_SNR",
+                        "stable_identifier_version": "2023-08-31",
+                        "encryption_algorithm": "TINK-FPE",
+                        "encryption_key_reference": "papis-common-key-1",
+                        "encryption_algorithm_parameters": [
+                            {"keyId": "papis-common-key-1"},
+                            {"strategy": "skip"},
+                        ],
+                    }
+                )
+            ]
+        )
+    )
+
+    assert len(result._metadata.keys()) == 1
+    assert len(result._datadoc.pseudonymization.pseudo_variables) == 1  # type: ignore
+
+    result.add_previous_metadata(
+        prev_metadata={
+            "field-1:": {
+                "logs": ["Some log"],
+                "metrics": [{"METRIC_1": 2}],
+            },
+        },
+        prev_datadoc=new_datadoc,
+    )
+
+    assert len(result._metadata.keys()) == 2
+    assert len(result._datadoc.pseudonymization.pseudo_variables) == 2  # type: ignore
+
+
+def test_add_results_duplicates() -> None:
+    """Duplicate variables causes no additional metadata to be generated."""
+    data = pl.DataFrame({"fnr": ["jJuuj0i", "ylc9488", "yeLfkaL"]})
+    metadata = RawPseudoMetadata(
+        field_name="fnr",
+        logs=[],
+        metrics=[{"MAPPED_SID": 3}],
+        datadoc=[
+            {
+                "short_name": "fnr",
+                "data_element_path": "fnr",
+                "data_element_pattern": "fnr*",
+                "stable_identifier_type": "FREG_SNR",
+                "stable_identifier_version": "2023-08-31",
+                "encryption_algorithm": "TINK-FPE",
+                "encryption_key_reference": "papis-common-key-1",
+                "encryption_algorithm_parameters": [
+                    {"keyId": "papis-common-key-1"},
+                    {"strategy": "skip"},
+                ],
+            }
+        ],
+    )
+
+    result = Result(PseudoFieldResponse(data, [metadata]))
+
+    new_datadoc = MetadataContainer(
+        pseudonymization=PseudonymizationMetadata(
+            pseudo_variables=[
+                PseudoVariable.model_validate(
+                    {
+                        "short_name": "fnr",
+                        "data_element_path": "fnr",
+                        "data_element_pattern": "fnr*",
+                        "stable_identifier_type": "FREG_SNR",
+                        "stable_identifier_version": "2023-08-31",
+                        "encryption_algorithm": "TINK-FPE",
+                        "encryption_key_reference": "papis-common-key-1",
+                        "encryption_algorithm_parameters": [
+                            {"keyId": "papis-common-key-1"},
+                            {"strategy": "skip"},
+                        ],
+                    }
+                )
+            ]
+        )
+    )
+
+    assert len(result._metadata.keys()) == 1
+    assert len(result._datadoc.pseudonymization.pseudo_variables) == 1  # type: ignore
+
+    result.add_previous_metadata(
+        prev_metadata={
+            "fnr": {
+                "logs": ["Some log"],
+                "metrics": [{"METRIC_1": 2}],
+            },
+        },
+        prev_datadoc=new_datadoc,
+    )
+
+    assert len(result._metadata.keys()) == 1
+    assert len(result._datadoc.pseudonymization.pseudo_variables) == 1  # type: ignore
