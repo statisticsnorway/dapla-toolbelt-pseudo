@@ -170,6 +170,7 @@ class PseudoClient:
                     json={"request": request.model_dump(by_alias=True)},
                     timeout=timeout,
                 )
+                PseudoClient._handle_response_error_sync(response)
                 payload = msgspec.json.decode(response.content.decode("utf-8"))
                 data = payload["data"]
                 metadata = RawPseudoMetadata(
