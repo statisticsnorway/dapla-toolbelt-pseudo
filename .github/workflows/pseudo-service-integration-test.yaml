@@ -1,7 +1,7 @@
 name: Pseudo service integration test
 
 env:
-  PSEUDO_SERVICE_URL: "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+  PSEUDO_SERVICE_URL: "https://pseudo-service.test.ssb.no"
 
 on:
   push:

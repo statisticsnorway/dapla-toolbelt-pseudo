@@ -20,7 +20,7 @@ lst = ["".join(choice(chars) for _ in range(str_length)) for _ in range(n)]
 
 df = pl.from_dict({"pseudo": lst, "pseudo2": lst, "pseudo3": lst})
 
-os.environ["PSEUDO_SERVICE_URL"] = "https://dapla-pseudo-service.staging-bip-app.ssb.no"
+os.environ["PSEUDO_SERVICE_URL"] = "https://pseudo-service.test.ssb.no"
 subprocess.run(["gcloud", "config", "set", "core/disable_file_logging", "True"])
 id_token = subprocess.getoutput("gcloud auth print-identity-token")
 os.environ["PSEUDO_SERVICE_AUTH_TOKEN"] = id_token
