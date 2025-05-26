@@ -10,9 +10,10 @@ import polars as pl
 from cloudpathlib import GSClient
 from cloudpathlib import GSPath
 from dapla import AuthClient
-from datadoc_model.model import MetadataContainer
-from datadoc_model.model import PseudonymizationMetadata
-from datadoc_model.model import PseudoVariable
+from datadoc_model.all_optional.model import DatadocMetadata
+from datadoc_model.all_optional.model import MetadataContainer
+from datadoc_model.all_optional.model import Pseudonymization
+from datadoc_model.all_optional.model import Variable
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
@@ -37,12 +38,12 @@ class Result:
             case PseudoFieldResponse(dataframe, raw_metadata):
                 self._pseudo_data = dataframe
 
-                datadoc_fields: list[PseudoVariable] = []
+                datadoc_fields: list[Variable] = []
                 datadoc_paths: list[str | None] = []
 
                 for field_metadata in raw_metadata:
-                    pseudo_variable = self._datadoc_from_raw_metadata_fields(
-                        field_metadata.datadoc
+                    pseudo_variable: Variable | None = (
+                        self._datadoc_from_raw_metadata_fields(field_metadata.datadoc)
                     )
                     if (
                         pseudo_variable is not None
@@ -61,8 +62,8 @@ class Result:
                     }
 
                 self._datadoc = MetadataContainer(
-                    pseudonymization=PseudonymizationMetadata(
-                        pseudo_variables=datadoc_fields
+                    datadoc=DatadocMetadata(
+                        document_version="5.0.0", variables=datadoc_fields
                     )
                 )
 
@@ -75,13 +76,14 @@ class Result:
                     "metrics": file_metadata.metrics,
                 }
                 pseudo_variables = list(
-                    PseudoVariable.model_validate(item)
+                    Variable(pseudonymization=Pseudonymization.model_validate(item))
                     for item in file_metadata.datadoc
                 )
                 self._datadoc = MetadataContainer(
-                    pseudonymization=PseudonymizationMetadata(
-                        pseudo_variables=pseudo_variables
-                    )
+                    document_version="1.0.0",
+                    datadoc=DatadocMetadata(
+                        document_version="5.0.0", variables=pseudo_variables
+                    ),
                 )
 
     def to_polars(self, **kwargs: Any) -> pl.DataFrame:
@@ -176,60 +178,6 @@ class Result:
         file_handle.close()
         datadoc_file_handle.close()
 
-    def add_previous_metadata(
-        self,
-        prev_metadata: dict[str, dict[str, list[Any]]],
-        prev_datadoc: MetadataContainer,
-    ) -> None:
-        """Add metadata from previous pseudonymization result.
-
-        Args:
-            prev_metadata (dict[str, dict[str, list[Any]]]): Metadata from previous pseudonymization result
-            prev_datadoc (MetadataContainer): Datadoc metadata from previous pseudonymization result
-        """
-        for field_name, field_metadata in prev_metadata.items():
-            if field_name in self._metadata:
-                # Field metadata already present in pseudo result - skipping
-                continue
-
-            self._metadata[field_name] = field_metadata
-
-        if (
-            self._datadoc.pseudonymization is not None
-            and self._datadoc.pseudonymization.pseudo_variables is not None
-        ):
-            datadoc_fields = self._datadoc.pseudonymization.pseudo_variables
-        else:
-            datadoc_fields = []
-
-        if (
-            prev_datadoc.pseudonymization is not None
-            and prev_datadoc.pseudonymization.pseudo_variables is not None
-        ):
-            prev_datadoc_fields = prev_datadoc.pseudonymization.pseudo_variables
-        else:
-            prev_datadoc_fields = []
-
-        def add_datadoc_pseudo_variables(
-            datadoc_fields: list[PseudoVariable],
-            prev_datadoc_fields: list[PseudoVariable],
-        ) -> list[PseudoVariable]:
-            """Add lists of PseudoVariables, ignoring duplicates, with variables in `datadoc_fields` taking precedence."""
-            return list(
-                {
-                    var.short_name: var
-                    for var in (prev_datadoc_fields + datadoc_fields)
-                }.values()
-            )
-
-        self._datadoc = MetadataContainer(
-            pseudonymization=PseudonymizationMetadata(
-                pseudo_variables=add_datadoc_pseudo_variables(
-                    datadoc_fields, prev_datadoc_fields
-                )
-            )
-        )
-
     @property
     def metadata_details(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary, for each field that has been processed.
@@ -264,12 +212,23 @@ class Result:
     def _datadoc_from_raw_metadata_fields(
         self,
         raw_metadata: list[dict[str, Any]],
-    ) -> PseudoVariable | None:
+    ) -> Variable | None:
         if len(raw_metadata) == 0:
             return None
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
-        return PseudoVariable.model_validate(raw_metadata[0])
+
+        data = raw_metadata[0]
+        variable = Variable(
+            short_name=data["short_name"],
+            data_element_path=data["data_element_path"],
+            pseudonymization=Pseudonymization(
+                encryption_algorithm=data["encryption_algorithm"],
+                encryption_key_reference=data["encryption_key_reference"],
+                encryption_algorithm_parameters=data["encryption_algorithm_parameters"],
+            ),
+        )
+        return Variable.model_validate(variable)
 
 
 def aggregate_metrics(metadata: dict[str, dict[str, list[Any]]]) -> dict[str, Any]:
