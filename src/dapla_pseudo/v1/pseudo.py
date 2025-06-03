@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import pandas as pd
 import polars as pl
-from datadoc_model.model import MetadataContainer
+from datadoc_model.all_optional.model import MetadataContainer
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy

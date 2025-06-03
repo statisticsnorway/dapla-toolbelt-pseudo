@@ -96,12 +96,16 @@ def test_pseudonymize_sid(
     df_personer_sid_fnr: pl.DataFrame,
 ) -> None:
     result = (
-        Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_stable_id(sid_snapshot_date="2023-08-31")
+        .run()
     )
     current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
+    print(f"RESULT DATADOC: {result.datadoc}")
     assert result.datadoc == expected_metadata_container.model_dump_json(
         exclude_none=True
     )

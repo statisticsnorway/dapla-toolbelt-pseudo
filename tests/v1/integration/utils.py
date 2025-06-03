@@ -3,7 +3,7 @@ import json
 import os
 
 import pytest
-from datadoc_model.model import MetadataContainer
+from datadoc_model.all_optional.model import MetadataContainer
 
 
 def integration_test() -> pytest.MarkDecorator:

@@ -218,16 +218,8 @@ class Result:
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
 
-        data = raw_metadata[0]
-        variable = Variable(
-            short_name=data["short_name"],
-            data_element_path=data["data_element_path"],
-            pseudonymization=Pseudonymization(
-                encryption_algorithm=data["encryption_algorithm"],
-                encryption_key_reference=data["encryption_key_reference"],
-                encryption_algorithm_parameters=data["encryption_algorithm_parameters"],
-            ),
-        )
+        print(raw_metadata[0])
+        variable = Variable(**raw_metadata[0])
         return Variable.model_validate(variable)
 
 

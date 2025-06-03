@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 import polars as pl
 import pytest
-from datadoc_model.model import MetadataContainer
-from datadoc_model.model import PseudonymizationMetadata
+from datadoc_model.all_optional.model import DatadocMetadata
+from datadoc_model.all_optional.model import MetadataContainer
 from pandas.testing import assert_frame_equal as pd_assert_frame_equal
 from polars.testing import assert_frame_equal as pl_assert_frame_equal
 from tests.v1.integration.utils import integration_test
@@ -132,15 +132,18 @@ def test_pseudonymize_add_results_repseudo(
         .run()
     )
 
-    new_datadoc_metadata = result._datadoc.pseudonymization.pseudo_variables + [  # type: ignore
+    new_datadoc_metadata = result._datadoc.datadoc.variables + [  # type: ignore
         r
         for r in result_new._datadoc.pseudonymization.pseudo_variables  # type: ignore
         if r.short_name == "fnr_2"
     ]
 
     assert result_new._datadoc == MetadataContainer(
-        pseudonymization=PseudonymizationMetadata(pseudo_variables=new_datadoc_metadata)
+        datadoc=DatadocMetadata(
+            document_version="5.0.0", variables=new_datadoc_metadata
+        )
     )
+
     assert result_new._metadata == {
         **result._metadata,
         "fnr_2": result_new._metadata["fnr_2"],

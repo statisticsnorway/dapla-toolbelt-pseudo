@@ -112,7 +112,7 @@ class PseudoClient:
                         field_name=request.name,
                         logs=response_json["logs"],
                         metrics=response_json["metrics"],
-                        datadoc=response_json["datadoc_metadata"]["pseudo_variables"],
+                        datadoc=response_json["datadoc_metadata"]["variables"],
                     )
 
                     return request.name, data, metadata
@@ -177,7 +177,7 @@ class PseudoClient:
                     field_name=request.name,
                     logs=payload["logs"],
                     metrics=payload["metrics"],
-                    datadoc=payload["datadoc_metadata"]["pseudo_variables"],
+                    datadoc=payload["datadoc_metadata"]["variables"],
                 )
 
                 return request.name, data, metadata
