@@ -205,16 +205,7 @@ class Repseudonymize:
                 target_custom_keyset=target_custom_keyset,
                 timeout=timeout,
             )
-            if (
-                Repseudonymize.prev_datadoc is not None
-                and Repseudonymize.prev_metadata is not None
-            ):  # Add metadata from previous Result
-                result.add_previous_metadata(
-                    Repseudonymize.prev_metadata, Repseudonymize.prev_datadoc
-                )
-                return result
-            else:
-                return result
+            return result
 
     class _RepseudoFuncSelectorSource(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:

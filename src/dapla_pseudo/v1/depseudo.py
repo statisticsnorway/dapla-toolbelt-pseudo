@@ -188,16 +188,7 @@ class Depseudonymize:
             result = super()._execute_pseudo_operation(
                 self.rules, timeout, custom_keyset
             )
-            if (
-                Depseudonymize.prev_datadoc is not None
-                and Depseudonymize.prev_metadata is not None
-            ):  # Add metadata from previous Result
-                result.add_previous_metadata(
-                    Depseudonymize.prev_metadata, Depseudonymize.prev_datadoc
-                )
-                return result
-            else:
-                return result
+            return result
 
     class _DepseudoFuncSelector(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:
