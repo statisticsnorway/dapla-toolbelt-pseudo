@@ -200,6 +200,6 @@ def test_pseudonymize_dataset(
     response = base._pseudonymize_file(req, timeout=ANY)
     metadata = response.raw_metadata
     assert isinstance(response, PseudoFileResponse)
-    assert metadata.datadoc["datadoc"]["variables"] == expected_json["datadoc_metadata"]["datadoc"]["variables"]  # type: ignore[index]
+    assert metadata.datadoc["datadoc"]["variables"] == expected_json["datadoc_metadata"]["datadoc"]["variables"]  # type: ignore[call-overload, index]
     assert metadata.logs == expected_json["logs"]
     assert metadata.metrics == expected_json["metrics"]
