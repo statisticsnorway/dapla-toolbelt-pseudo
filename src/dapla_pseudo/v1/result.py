@@ -63,7 +63,8 @@ class Result:
 
                 self._datadoc = MetadataContainer(
                     datadoc=DatadocMetadata(
-                        document_version="5.0.0", variables=datadoc_fields
+                        document_version="5.0.1",
+                        variables=datadoc_fields,
                     )
                 )
 
@@ -82,7 +83,7 @@ class Result:
                 self._datadoc = MetadataContainer(
                     document_version="1.0.0",
                     datadoc=DatadocMetadata(
-                        document_version="5.0.0", variables=pseudo_variables
+                        document_version="5.0.1", variables=pseudo_variables
                     ),
                 )
 

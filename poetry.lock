@@ -5394,14 +5394,14 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "ssb-datadoc-model"
-version = "7.0.0"
+version = "7.0.1"
 description = "Data Model for use in Statistics Norway's Metadata system"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "ssb_datadoc_model-7.0.0-py3-none-any.whl", hash = "sha256:976e0ced5e28ee2dcb0253a78f9e5353ebec568095473e28d6abf19ef6f3bb6c"},
-    {file = "ssb_datadoc_model-7.0.0.tar.gz", hash = "sha256:ffab532f7ad98331fa6ef5c60d7dcdd2e2adcea9a3adbcf3f02f4fa4b8dba74a"},
+    {file = "ssb_datadoc_model-7.0.1-py3-none-any.whl", hash = "sha256:8495285da6d641855281d018fb5f207464f61227d655ad1e7281569843ace6f0"},
+    {file = "ssb_datadoc_model-7.0.1.tar.gz", hash = "sha256:e01a3097d5d96e7507a52da7c384dffa99ff553d2fdcc5477207f6a94cb38bbc"},
 ]
 
 [package.dependencies]
@@ -6191,4 +6191,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <3.13"
-content-hash = "1e09aed8679ca6fb791921197adb22b486f795bf39420078be5083db34ffaf59"
+content-hash = "41bde6fe2e9b7961a3387fface41508c95fd5440b3686bd90a1e3e6cb0a1905f"
