@@ -76,8 +76,6 @@ class Repseudonymize:
             local_path = "some_file.csv"
             field_selector = Pseudonymize.from_file(local_path))
         """
-        Repseudonymize.prev_metadata = None
-        Repseudonymize.prev_datadoc = None
         file_handle, content_type = get_file_data_from_dataset(dataset)
         Repseudonymize.dataset = File(file_handle, content_type)
         return Repseudonymize._Repseudonymizer()
