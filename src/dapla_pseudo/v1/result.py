@@ -12,7 +12,6 @@ from cloudpathlib import GSPath
 from dapla import AuthClient
 from datadoc_model.all_optional.model import DatadocMetadata
 from datadoc_model.all_optional.model import MetadataContainer
-from datadoc_model.all_optional.model import Pseudonymization
 from datadoc_model.all_optional.model import Variable
 
 from dapla_pseudo.utils import get_file_format_from_file_name
@@ -76,14 +75,17 @@ class Result:
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
-                pseudo_variables = list(
-                    Variable(pseudonymization=Pseudonymization.model_validate(item))
-                    for item in file_metadata.datadoc
+                for item in file_metadata.datadoc:
+                    print(f"SHOULD LOOK LIKE A VARIABLE: {item}")
+
+                variables = list(
+                    Variable.model_validate(item) for item in file_metadata.datadoc
                 )
+
                 self._datadoc = MetadataContainer(
                     document_version="1.0.0",
                     datadoc=DatadocMetadata(
-                        document_version="5.0.1", variables=pseudo_variables
+                        document_version="5.0.1", variables=variables
                     ),
                 )
 
@@ -219,7 +221,6 @@ class Result:
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
 
-        print(raw_metadata[0])
         variable = Variable(**raw_metadata[0])
         return Variable.model_validate(variable)
 

@@ -163,25 +163,22 @@ def test_pseudonymize_dataset(
         "logs": [],
         "metrics": [{"MAPPED_SID": 3}],
         "datadoc_metadata": {
-            "datadoc": {
-                "document_version": "5.0.0",
-                "variables": [
-                    {
-                        "short_name": "fnr",
-                        "data_element_path": "fnr",
-                        "pseudonymization": {
-                            "stable_identifier_type": "FREG_SNR",
-                            "stable_identifier_version": "2023-08-31",
-                            "encryption_algorithm": "TINK-FPE",
-                            "encryption_key_reference": "papis-common-key-1",
-                            "encryption_algorithm_parameters": [
-                                {"keyId": "papis-common-key-1"},
-                                {"strategy": "skip"},
-                            ],
-                        },
-                    }
-                ],
-            },
+            "variables": [
+                {
+                    "short_name": "fnr",
+                    "data_element_path": "fnr",
+                    "pseudonymization": {
+                        "stable_identifier_type": "FREG_SNR",
+                        "stable_identifier_version": "2023-08-31",
+                        "encryption_algorithm": "TINK-FPE",
+                        "encryption_key_reference": "papis-common-key-1",
+                        "encryption_algorithm_parameters": [
+                            {"keyId": "papis-common-key-1"},
+                            {"strategy": "skip"},
+                        ],
+                    },
+                }
+            ],
         },
     }
 
@@ -200,6 +197,6 @@ def test_pseudonymize_dataset(
     response = base._pseudonymize_file(req, timeout=ANY)
     metadata = response.raw_metadata
     assert isinstance(response, PseudoFileResponse)
-    assert metadata.datadoc["datadoc"]["variables"] == expected_json["datadoc_metadata"]["datadoc"]["variables"]  # type: ignore[call-overload, index]
+    assert metadata.datadoc == expected_json["datadoc_metadata"]["variables"]  # type: ignore[call-overload, index]
     assert metadata.logs == expected_json["logs"]
     assert metadata.metrics == expected_json["metrics"]

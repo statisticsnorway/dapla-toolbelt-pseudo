@@ -105,7 +105,6 @@ def test_pseudonymize_sid(
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
     )
-    print(f"RESULT DATADOC: {result.datadoc}")
     assert result.datadoc == expected_metadata_container.model_dump_json(
         exclude_none=True
     )
