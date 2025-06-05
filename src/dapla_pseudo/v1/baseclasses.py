@@ -192,7 +192,7 @@ class _BasePseudonymizer:
         metadata = RawPseudoMetadata(
             logs=payload["logs"],
             metrics=payload["metrics"],
-            datadoc=payload["datadoc_metadata"]["variables"],
+            datadoc=payload["datadoc_metadata"].get("variables", None),
         )
 
         return PseudoFileResponse(

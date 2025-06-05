@@ -13,6 +13,7 @@ from dapla import AuthClient
 from datadoc_model.all_optional.model import DatadocMetadata
 from datadoc_model.all_optional.model import MetadataContainer
 from datadoc_model.all_optional.model import Variable
+from pydantic import ValidationError
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
@@ -75,12 +76,16 @@ class Result:
                     "logs": file_metadata.logs,
                     "metrics": file_metadata.metrics,
                 }
-                for item in file_metadata.datadoc:
-                    print(f"SHOULD LOOK LIKE A VARIABLE: {item}")
 
-                variables = list(
-                    Variable.model_validate(item) for item in file_metadata.datadoc
-                )
+                if file_metadata.datadoc is None:
+                    print(
+                        """[WARNING] 'variables' key not found in datadoc metadata recieved from pseudo-service. This means the metadata is from an outdated datadoc model."""
+                    )
+                    variables = []
+                else:
+                    variables = list(
+                        Variable.model_validate(item) for item in file_metadata.datadoc
+                    )
 
                 self._datadoc = MetadataContainer(
                     document_version="1.0.0",
@@ -214,15 +219,29 @@ class Result:
 
     def _datadoc_from_raw_metadata_fields(
         self,
-        raw_metadata: list[dict[str, Any]],
+        raw_metadata: list[dict[str, Any]] | None,
     ) -> Variable | None:
-        if len(raw_metadata) == 0:
+
+        # This happens if we recieve old datadoc metadata from pseudo-service
+        if raw_metadata is None:
+            print(
+                """[WARNING] 'variables' key not found in datadoc metadata recieved from pseudo-service. This means the metadata is from an outdated datadoc model."""
+            )
+            return None
+        elif len(raw_metadata) == 0:
             return None
         elif len(raw_metadata) > 1:
             print(f"Unexpected length of metadata: {len(raw_metadata)}")
 
-        variable = Variable(**raw_metadata[0])
-        return Variable.model_validate(variable)
+        try:
+            variable = Variable(**raw_metadata[0])
+            return Variable.model_validate(variable)
+        except ValidationError as exc:
+            print(
+                f"""[WARNING] Datadoc 'Variable' validation failed:
+                {exc}"""
+            )
+            return None
 
 
 def aggregate_metrics(metadata: dict[str, dict[str, list[Any]]]) -> dict[str, Any]:

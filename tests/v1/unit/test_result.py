@@ -65,6 +65,82 @@ def test_result_from_polars_to_polars(df_personer: pl.DataFrame) -> None:
     assert isinstance(result.to_polars(), pl.DataFrame)
 
 
+def test_result_old_datadoc_metadata(df_personer: pl.DataFrame) -> None:
+    """Old datadoc metadata is 'supported' in the client.
+
+    Ensure that old metadata doesn't crash the client, but instead
+    returns an empty metadata object.
+    """
+    mocked_metadata = RawPseudoMetadata(
+        field_name="fnr",
+        logs=[],
+        metrics=[{"MAPPED_SID": 3}],
+        datadoc=[
+            {
+                "short_name": "fnr",
+                "data_element_path": "fnr",
+                "data_element_pattern": "fnr*",
+                "stable_identifier_type": "FREG_SNR",
+                "stable_identifier_version": "2023-08-31",
+                "encryption_algorithm": "TINK-FPE",
+                "encryption_key_reference": "papis-common-key-1",
+                "encryption_algorithm_parameters": [
+                    {"keyId": "papis-common-key-1"},
+                    {"strategy": "skip"},
+                ],
+            }
+        ],
+    )
+    result = Result(
+        PseudoFieldResponse(data=df_personer, raw_metadata=[mocked_metadata])
+    )
+    expected_datadoc = {
+        "document_version": "1.0.0",
+        "datadoc": {"document_version": "5.0.1", "variables": []},
+    }
+    assert json.loads(result.datadoc) == expected_datadoc
+
+
+def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
+    """New datadoc metadata is supported in the client.
+
+    Ensure that new metadata is validated correctly by the client
+    without errors.
+    """
+    mocked_metadata = RawPseudoMetadata(
+        field_name="fnr",
+        logs=[],
+        metrics=[{"MAPPED_SID": 3}],
+        datadoc=[
+            {
+                "short_name": "fnr",
+                "data_element_path": "fnr",
+                "pseudonymization": {
+                    "stable_identifier_type": "FREG_SNR",
+                    "stable_identifier_version": "2023-08-31",
+                    "encryption_algorithm": "TINK-FPE",
+                    "encryption_key_reference": "papis-common-key-1",
+                    "encryption_algorithm_parameters": [
+                        {"keyId": "papis-common-key-1"},
+                        {"strategy": "skip"},
+                    ],
+                },
+            }
+        ],
+    )
+    result = Result(
+        PseudoFieldResponse(data=df_personer, raw_metadata=[mocked_metadata])
+    )
+    expected_datadoc = {
+        "document_version": "1.0.0",
+        "datadoc": {
+            "document_version": "5.0.1",
+            "variables": mocked_metadata.datadoc,
+        },
+    }
+    assert json.loads(result.datadoc) == expected_datadoc
+
+
 def test_result_from_polars_to_pandas(df_personer: pl.DataFrame) -> None:
     result = Result(PseudoFieldResponse(data=df_personer, raw_metadata=[]))
     assert isinstance(result.to_pandas(), pd.DataFrame)
