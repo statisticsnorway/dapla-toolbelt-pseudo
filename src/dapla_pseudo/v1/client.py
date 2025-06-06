@@ -125,7 +125,7 @@ class PseudoClient:
         async with RetryClient(
             client_session=aio_session,
             retry_options=ExponentialRetry(
-                attempts=5, start_timeout=0.1, max_timeout=30, factor=2
+                attempts=5, start_timeout=0.1, max_timeout=30, factor=6
             ),
         ) as client:
             results = await asyncio.gather(
