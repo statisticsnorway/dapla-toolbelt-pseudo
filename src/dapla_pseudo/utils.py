@@ -88,11 +88,12 @@ def redact_field(
             {
                 "short_name": request.name.split("/")[-1],
                 "data_element_path": request.name.replace("/", "."),
-                "data_element_pattern": request.pattern,
-                "encryption_algorithm": "REDACT",
-                "encryption_algorithm_parameters": [
-                    request.pseudo_func.kwargs.model_dump(exclude_none=True)
-                ],
+                "pseudonymization": {
+                    "encryption_algorithm": "REDACT",
+                    "encryption_algorithm_parameters": [
+                        request.pseudo_func.kwargs.model_dump(exclude_none=True)
+                    ],
+                },
             }
         ],
     )

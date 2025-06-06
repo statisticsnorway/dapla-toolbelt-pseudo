@@ -79,7 +79,7 @@ class RawPseudoMetadata:
 
     logs: list[str]
     metrics: list[dict[str, t.Any]]
-    datadoc: list[dict[str, t.Any]]
+    datadoc: list[dict[str, t.Any]] | None
     field_name: str | None = None
 
 

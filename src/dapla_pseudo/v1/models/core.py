@@ -93,7 +93,7 @@ class RedactKeywordArgs(PseudoFunctionArgs):
     regex: str | None = None
 
 
-class PseudoFunction(BaseModel):
+class PseudoFunction(BaseModel):  # type: ignore[no-redef]
     """Formal representation of a pseudo function.
 
     Use to build up the string representation expected by pseudo service.

@@ -1,28 +1,28 @@
 {
-  "document_version": "0.0.1",
-  "datadoc": null,
-  "pseudonymization": {
-    "document_version": "0.1.0",
-    "pseudo_dataset": null,
-    "pseudo_variables": [
+  "document_version": "1.0.0",
+  "datadoc": {
+    "document_version": "5.0.1",
+    "variables": [
       {
         "short_name": "fnr",
         "data_element_path": "fnr",
-        "data_element_pattern": "/fnr",
-        "stable_identifier_type": "FREG_SNR",
-        "stable_identifier_version": "2023-08-31",
-        "encryption_algorithm": "TINK-FPE",
-        "encryption_key_reference": "papis-common-key-1",
-        "encryption_algorithm_parameters": [
-          {
-            "keyId": "papis-common-key-1"
-          },
-          {
-            "strategy": "skip"
-          }
-        ],
-        "source_variable": null,
-        "source_variable_datatype": null
+        "pseudonymization": {
+          "stable_identifier_type": "FREG_SNR",
+          "stable_identifier_version": "2023-08-31",
+          "encryption_algorithm": "TINK-FPE",
+          "encryption_key_reference": "papis-common-key-1",
+          "encryption_algorithm_parameters": [
+            {
+              "keyId": "papis-common-key-1"
+            },
+            {
+              "snapshotDate":"2023-08-31"
+            },
+            {
+              "strategy": "skip"
+            }
+          ]
+        }
       }
     ]
   }

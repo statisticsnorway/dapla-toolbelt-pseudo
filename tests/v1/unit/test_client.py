@@ -4,7 +4,6 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-import pytest_asyncio
 import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientResponseError
@@ -26,7 +25,7 @@ pytest_plugins = ("pytest_asyncio",)
 PKG = "dapla_pseudo.v1.client"
 
 
-@pytest_asyncio.fixture()
+@pytest.fixture()
 def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"
@@ -45,7 +44,7 @@ async def test_post_to_field_endpoint_success(
         "data": [1, 2, 3],
         "logs": ["some-log"],
         "metrics": ["some-metric"],
-        "datadoc_metadata": {"pseudo_variables": [{"some_var": "some_arg"}]},
+        "datadoc_metadata": {"variables": [{"some_var": "some_arg"}]},
     }
     mock_response.json.return_value = mock_response_content
 
@@ -67,7 +66,7 @@ async def test_post_to_field_endpoint_success(
     assert resp_data == mock_response_content["data"]
     assert resp_metadata.logs == mock_response_content["logs"]
     assert resp_metadata.metrics == mock_response_content["metrics"]
-    assert resp_metadata.datadoc == mock_response_content["datadoc_metadata"]["pseudo_variables"]  # type: ignore[index]
+    assert resp_metadata.datadoc == mock_response_content["datadoc_metadata"]["variables"]  # type: ignore[index]
 
 
 @pytest.mark.asyncio
