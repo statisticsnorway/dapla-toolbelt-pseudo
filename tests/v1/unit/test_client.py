@@ -4,7 +4,6 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-import pytest_asyncio
 import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientResponseError
@@ -26,7 +25,7 @@ pytest_plugins = ("pytest_asyncio",)
 PKG = "dapla_pseudo.v1.client"
 
 
-@pytest_asyncio.fixture()
+@pytest.fixture()
 def test_client() -> PseudoClient:
     base_url = "https://mocked.dapla-pseudo-service"
     auth_token = "some-auth-token"
