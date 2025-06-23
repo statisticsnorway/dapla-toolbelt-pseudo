@@ -41,7 +41,7 @@ async def test_post_to_field_endpoint_success(
     mock_response.status = 200
 
     mock_response_content = {
-        "data": [1, 2, 3],
+        "data": ["1", "2", "3"],
         "logs": ["some-log"],
         "metrics": ["some-metric"],
         "datadoc_metadata": {"variables": [{"some_var": "some_arg"}]},
@@ -131,7 +131,7 @@ async def test_post_to_field_endpoint_serialization(
         headers={
             "Authorization": "Bearer some-auth-token",
             "Content-Type": "application/json",
-            "X-Correlation-Id": ANY,
+            "X-Correlation-Id": ANY,  # type: ignore[arg-type]
         },
         json=expected_json,
         timeout=TIMEOUT_DEFAULT,
@@ -159,7 +159,7 @@ def test_successful_post_to_sid_endpoint(
         params=None,
         headers={
             "Authorization": "Bearer some-auth-token",
-            "X-Correlation-Id": ANY,
+            "X-Correlation-Id": ANY,  # type: ignore[arg-type]
         },
         json=expected_json,
         stream=True,

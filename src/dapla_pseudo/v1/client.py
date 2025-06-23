@@ -70,7 +70,7 @@ class PseudoClient:
         pseudo_requests: list[
             PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
         ],
-    ) -> list[tuple[str, list[str], RawPseudoMetadata]]:
+    ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
         """Post a request to the Pseudo Service field endpoint.
 
         Args:
@@ -87,12 +87,12 @@ class PseudoClient:
             path: str,
             timeout: int,
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, list[str], RawPseudoMetadata]:
+        ) -> tuple[str, list[str | None], RawPseudoMetadata]:
             if (
                 type(request) is PseudoFieldRequest
                 and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
             ):
-                return redact_field(request)
+                return redact_field(request)  # type: ignore[return-value]
             else:
                 async with client.post(
                     url=f"{self.pseudo_service_url}/{path}",
@@ -106,7 +106,7 @@ class PseudoClient:
                 ) as response:
                     await PseudoClient._handle_response_error(response)
                     response_json = await response.json()
-                    data = response_json["data"]
+                    data: list[str | None] = response_json["data"]
                     metadata = RawPseudoMetadata(
                         field_name=request.name,
                         logs=response_json["logs"],
@@ -143,7 +143,7 @@ class PseudoClient:
         pseudo_requests: list[
             PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
         ],
-    ) -> list[tuple[str, list[str], RawPseudoMetadata]]:
+    ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
         """Make requests to the API in a synchronous manner.
 
         This is needed in case the library is used
@@ -154,12 +154,12 @@ class PseudoClient:
             path: str,
             timeout: int,
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, list[str], RawPseudoMetadata]:
+        ) -> tuple[str, list[str | None], RawPseudoMetadata]:
             if (
                 type(request) is PseudoFieldRequest
                 and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
             ):
-                return redact_field(request)
+                return redact_field(request)  # type: ignore[return-value]
             else:
                 response = requests.post(
                     url=f"{self.pseudo_service_url}/{path}",

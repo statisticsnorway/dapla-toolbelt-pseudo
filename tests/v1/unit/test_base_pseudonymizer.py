@@ -1,6 +1,5 @@
 """This file tests the _BasePseudonymizer class."""
 
-from unittest.mock import ANY
 from unittest.mock import Mock
 
 import polars as pl
@@ -49,8 +48,8 @@ def test_execute_pseudo_operation_field(
     base._execute_pseudo_operation(
         rules=rules,
         timeout=0,
-        custom_keyset=ANY,
-        target_custom_keyset=ANY,
+        custom_keyset=None,
+        target_custom_keyset=None,
         target_rules=rules,
     )
 
