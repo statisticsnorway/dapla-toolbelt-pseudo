@@ -23,7 +23,6 @@ from ulid import ULID
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import redact_field
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
@@ -221,35 +220,6 @@ class PseudoClient:
                 print(response.text)
                 response.raise_for_status()
 
-    def _post_to_file_endpoint(
-        self,
-        path: str,
-        request_spec: FileSpecDecl,
-        data_spec: FileSpecDecl,
-        timeout: int,
-        stream: bool = True,
-    ) -> requests.Response:
-        """POST to a file endpoint in the Pseudo Service.
-
-        Requests to the file endpoint are sent as multi-part requests,
-        where the first part represents the filedata itself, and the second part represents
-        the transformations to apply on that data.
-        """
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/{path}",
-            headers={
-                "Authorization": f"Bearer {self.__auth_token()}",
-                "Accept-Encoding": "gzip",
-                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-            },
-            files={"data": data_spec, "request": request_spec},
-            stream=stream,
-            timeout=timeout,
-        )
-
-        PseudoClient._handle_response_error_sync(response)
-        return response
-
     def _post_to_sid_endpoint(
         self,
         path: str,
@@ -273,25 +243,6 @@ class PseudoClient:
 
         PseudoClient._handle_response_error_sync(response)
         return response
-
-
-def _extract_name(file_handle: t.BinaryIO, input_content_type: Mimetypes) -> str:
-    try:
-        name = file_handle.name
-    except AttributeError:
-        # Fallback to default name
-        name = "unknown"
-
-    if not name.endswith(".json") and input_content_type is Mimetypes.JSON:
-        name = f"{name}.json"  # Pseudo service expects a file extension
-
-    if not name.endswith(".zip") and input_content_type is Mimetypes.ZIP:
-        name = f"{name}.zip"  # Pseudo service expects a file extension
-
-    if "/" in name:
-        name = name.split("/")[-1]  # Pseudo service expects a file name, not a path
-
-    return name
 
 
 def _client() -> PseudoClient:

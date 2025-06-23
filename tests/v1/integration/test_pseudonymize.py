@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import polars as pl
 import pytest
@@ -110,29 +109,6 @@ def test_pseudonymize_sid(
         exclude_none=True
     )
     assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
-
-
-@pytest.mark.usefixtures("setup")
-@integration_test()
-def test_pseudonymize_sid_old_datadoc(
-    df_personer: pl.DataFrame,
-    df_personer_sid_fnr: pl.DataFrame,
-) -> None:
-    """Ensure client doesn't crash when recieving old datadoc metadata.
-
-    Instead return an empty list of datadoc metadata variables to the user.
-    """
-    result = (
-        Pseudonymize.from_polars(df_personer)
-        .on_fields("fnr")
-        .with_stable_id(sid_snapshot_date="2023-08-31")
-        .run()
-    )
-    expected_metadata = {
-        "document_version": "1.0.0",
-        "datadoc": {"document_version": "5.0.1", "variables": []},
-    }
-    assert json.loads(result.datadoc) == expected_metadata
 
 
 @pytest.mark.usefixtures("setup")

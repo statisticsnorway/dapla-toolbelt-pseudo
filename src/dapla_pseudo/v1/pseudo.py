@@ -10,11 +10,8 @@ from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoOperation
-from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
-from dapla_pseudo.v1.models.core import File
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -27,74 +24,32 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame
+    dataset: pl.DataFrame
 
     @staticmethod
-    def from_pandas(
-        dataframe: pd.DataFrame, run_as_file: bool = False
-    ) -> "Pseudonymize._Pseudonymizer":
+    def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a Pandas DataFrame.
 
         Args:
             dataframe: A Pandas DataFrame
-            run_as_file: Force the dataset to be pseudonymized as a single file.
 
         Returns:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
-        dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataset)
-            Pseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Pseudonymize.dataset = pl.from_pandas(dataframe)
+        Pseudonymize.dataset = pl.from_pandas(dataframe)
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
-    def from_polars(
-        dataframe: pl.DataFrame, run_as_file: bool = False
-    ) -> "Pseudonymize._Pseudonymizer":
+    def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a Polars DataFrame.
 
         Args:
             dataframe: A Polars DataFrame
-            run_as_file: Force the dataset to be pseudonymized as a single file.
 
         Returns:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
-            Pseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Pseudonymize.dataset = dataframe
-        return Pseudonymize._Pseudonymizer()
-
-    @staticmethod
-    def from_file(dataset: FileLikeDatasetDecl) -> "Pseudonymize._Pseudonymizer":
-        """Initialize a pseudonymization request from a pandas dataframe read from file.
-
-        Args:
-            dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.
-
-        Returns:
-            _Pseudonymizer: An instance of the _Pseudonymizer class.
-
-        Examples:
-            # Read from bucket
-            from dapla import AuthClient
-            from dapla_pseudo import Pseudonymize
-            bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
-            field_selector = Pseudonymize.from_file(bucket_path)
-
-            # Read from local filesystem
-            from dapla_pseudo import Pseudonymize
-
-            local_path = "some_file.csv"
-            field_selector = Pseudonymize.from_file(local_path))
-        """
-        file_handle, content_type = get_file_data_from_dataset(dataset)
-        Pseudonymize.dataset = File(file_handle, content_type)
+        Pseudonymize.dataset = dataframe
         return Pseudonymize._Pseudonymizer()
 
     class _Pseudonymizer(_BasePseudonymizer):
@@ -152,7 +107,7 @@ class Pseudonymize:
     class _PseudoFuncSelector(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:
             self._fields = fields
-            super().__init__(fields, type(Pseudonymize.dataset))
+            super().__init__(fields)
 
         def with_stable_id(
             self,

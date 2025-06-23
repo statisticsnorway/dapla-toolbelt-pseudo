@@ -10,11 +10,8 @@ from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoOperation
-from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
-from dapla_pseudo.v1.models.core import File
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -27,58 +24,18 @@ class Depseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame
+    dataset: pl.DataFrame
 
     @staticmethod
-    def from_pandas(
-        dataframe: pd.DataFrame, run_as_file: bool = False
-    ) -> "Depseudonymize._Depseudonymizer":
+    def from_pandas(dataframe: pd.DataFrame) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a pandas DataFrame."""
-        dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataset)
-            Depseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Depseudonymize.dataset = dataset
+        Depseudonymize.dataset = pl.from_pandas(dataframe)
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
-    def from_polars(
-        dataframe: pl.DataFrame, run_as_file: bool = False
-    ) -> "Depseudonymize._Depseudonymizer":
+    def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a polars DataFrame."""
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
-            Depseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Depseudonymize.dataset = dataframe
-        return Depseudonymize._Depseudonymizer()
-
-    @staticmethod
-    def from_file(dataset: FileLikeDatasetDecl) -> "Depseudonymize._Depseudonymizer":
-        """Initialize a depseudonymization request from a pandas dataframe read from file.
-
-        Args:
-            dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.
-
-        Returns:
-            _Depseudonymizer: An instance of the _Depseudonymizer class.
-
-        Examples:
-            # Read from bucket
-            from dapla import AuthClient
-            from dapla_pseudo import Depseudonymize
-            bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
-            field_selector = Depseudonymize.from_file(bucket_path)
-
-            # Read from local filesystem
-            from dapla_pseudo import Depseudonymize
-
-            local_path = "some_file.csv"
-            field_selector = Depseudonymize.from_file(local_path))
-        """
-        file_handle, content_type = get_file_data_from_dataset(dataset)
-        Depseudonymize.dataset = File(file_handle, content_type)
+        Depseudonymize.dataset = dataframe
         return Depseudonymize._Depseudonymizer()
 
     class _Depseudonymizer(_BasePseudonymizer):
@@ -129,7 +86,7 @@ class Depseudonymize:
     class _DepseudoFuncSelector(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:
             self._fields = fields
-            super().__init__(fields, type(Depseudonymize.dataset))
+            super().__init__(fields)
 
         def with_stable_id(
             self,
