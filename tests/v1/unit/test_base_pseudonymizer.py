@@ -115,7 +115,7 @@ def test_pseudonymize_field(
         hierarchical=False,
     )
 
-    response = base._pseudonymize_field([sid_req], timeout=ANY)
+    response = base._pseudonymize_field([sid_req], timeout=0)
     metadata = response.raw_metadata[0]
     assert isinstance(response, PseudoFieldResponse)
 

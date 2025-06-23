@@ -17,9 +17,7 @@ from pydantic import ValidationError
 
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
-from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 from dapla_pseudo.v1.supported_file_format import write_from_df
-from dapla_pseudo.v1.supported_file_format import write_from_dicts
 
 
 class Result:
@@ -101,8 +99,6 @@ class Result:
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 return df.to_pandas()
-            case list() as file_data:
-                return pd.DataFrame.from_records(file_data, **kwargs)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
@@ -141,11 +137,6 @@ class Result:
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 write_from_df(df, file_format, file_handle, **kwargs)
-                datadoc_file_handle.write(self.datadoc)
-            case list() as file_data:
-                write_from_dicts(
-                    file_data, SupportedOutputFileFormat(file_format), file_handle
-                )
                 datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
