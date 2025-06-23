@@ -162,45 +162,6 @@ result.to_polars()
 
 ### Pseudonymize
 
-#### Read from file systems
-
-```python
-from dapla_pseudo import Pseudonymize
-from dapla import AuthClient
-
-
-file_path="data/personer.csv"
-
-options = {
-    "dtypes": {"fnr": pl.Utf8, "fornavn": pl.Utf8, "etternavn": pl.Utf8, "kjonn": pl.Categorical, "fodselsdato": pl.Utf8}
-}
-
-
-# Example: Read DataFrame from file
-result_df = (
-    Pseudonymize.from_file(file_path)   # Read the data from file
-    .on_fields("fornavn", "etternavn")  # Select multiple fields to pseudonymize
-    .with_default_encryption()          # Select the pseudonymization algorithm to apply
-    .run()                              # Apply pseudonymization to the selected fields
-    .to_polars(**options)               # Get the result as a Pandas DataFrame
-)
-
-# Example: Read dataframe from GCS bucket
-options = {
-    "dtypes": {"fnr": pl.Utf8, "fornavn": pl.Utf8, "etternavn": pl.Utf8, "kjonn": pl.Categorical, "fodselsdato": pl.Utf8}
-}
-
-gcs_file_path = "gs://ssb-staging-dapla-felles-data-delt/felles/pseudo-examples/andeby_personer.csv"
-
-result_df = (
-    Pseudonymize.from_file(gcs_file_path)  # Read DataFrame from GCS
-    .on_fields("fornavn", "etternavn")     # Select multiple fields to pseudonymize
-    .with_default_encryption()             # Select the pseudonymization algorithm to apply
-    .run()                                 # Apply pseudonymization to the selected fields
-    .to_polars(**options)                  # Get the result as a polars dataframe
-)
-```
-
 #### Pseudonymize using custom keys/keysets
 
 ```python

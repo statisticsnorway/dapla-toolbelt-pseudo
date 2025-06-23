@@ -4,9 +4,6 @@ import pandas as pd
 import polars as pl
 import pytest_cases
 
-from dapla_pseudo.v1.models.core import File
-from dapla_pseudo.v1.models.core import Mimetypes
-
 
 @pytest_cases.fixture()
 def df_personer() -> pl.DataFrame:
@@ -36,13 +33,6 @@ def df_personer_pandas() -> pd.DataFrame:
             "fodselsdato": str,
         },
     )
-
-
-@pytest_cases.fixture()
-def personer_file() -> File:
-    JSON_FILE = "tests/data/personer.json"
-    file_handle = open(JSON_FILE, mode="rb")
-    return File(file_handle, content_type=Mimetypes.JSON)
 
 
 @pytest_cases.fixture()

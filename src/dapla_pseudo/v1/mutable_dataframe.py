@@ -117,7 +117,7 @@ class MutableDataFrame:
         """Get a reference to all the columns that matched pseudo rules."""
         return self.matched_fields
 
-    def update(self, path: str, data: list[str]) -> None:
+    def update(self, path: str, data: list[str | None]) -> None:
         """Update a column with the given data."""
         if self.hierarchical is False:
             assert isinstance(self.dataset, pl.DataFrame)

@@ -9,11 +9,8 @@ import polars as pl
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoOperation
-from dapla_pseudo.types import FileLikeDatasetDecl
-from dapla_pseudo.utils import get_file_data_from_dataset
 from dapla_pseudo.v1.baseclasses import _BasePseudonymizer
 from dapla_pseudo.v1.baseclasses import _BaseRuleConstructor
-from dapla_pseudo.v1.models.core import File
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -26,58 +23,18 @@ class Repseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: File | pl.DataFrame
+    dataset: pl.DataFrame
 
     @staticmethod
-    def from_pandas(
-        dataframe: pd.DataFrame, run_as_file: bool = False
-    ) -> "Repseudonymize._Repseudonymizer":
+    def from_pandas(dataframe: pd.DataFrame) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
-        dataset: pl.DataFrame = pl.from_pandas(dataframe)
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataset)
-            Repseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Repseudonymize.dataset = dataset
+        Repseudonymize.dataset = pl.from_pandas(dataframe)
         return Repseudonymize._Repseudonymizer()
 
     @staticmethod
-    def from_polars(
-        dataframe: pl.DataFrame, run_as_file: bool = False
-    ) -> "Repseudonymize._Repseudonymizer":
+    def from_polars(dataframe: pl.DataFrame) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
-        if run_as_file:
-            file_handle, content_type = get_file_data_from_dataset(dataframe)
-            Repseudonymize.dataset = File(file_handle, content_type)
-        else:
-            Repseudonymize.dataset = dataframe
-        return Repseudonymize._Repseudonymizer()
-
-    @staticmethod
-    def from_file(dataset: FileLikeDatasetDecl) -> "Repseudonymize._Repseudonymizer":
-        """Initialize a pseudonymization request from a pandas dataframe read from file.
-
-        Args:
-            dataset (FileLikeDatasetDecl): Either a path to the file to be read, or a file handle.
-
-        Returns:
-            _Pseudonymizer: An instance of the _Pseudonymizer class.
-
-        Examples:
-            # Read from bucket
-            from dapla import AuthClient
-            from dapla_pseudo import Pseudonymize
-            bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
-            field_selector = Pseudonymize.from_file(bucket_path)
-
-            # Read from local filesystem
-            from dapla_pseudo import Pseudonymize
-
-            local_path = "some_file.csv"
-            field_selector = Pseudonymize.from_file(local_path))
-        """
-        file_handle, content_type = get_file_data_from_dataset(dataset)
-        Repseudonymize.dataset = File(file_handle, content_type)
+        Repseudonymize.dataset = dataframe
         return Repseudonymize._Repseudonymizer()
 
     class _Repseudonymizer(_BasePseudonymizer):
@@ -147,7 +104,7 @@ class Repseudonymize:
     class _RepseudoFuncSelectorSource(_BaseRuleConstructor):
         def __init__(self, fields: list[str]) -> None:
             self.fields = fields
-            super().__init__(fields, type(Repseudonymize.dataset))
+            super().__init__(fields)
 
         def from_stable_id(
             self,
@@ -210,7 +167,7 @@ class Repseudonymize:
     class _RepseudoFuncSelectorTarget(_BaseRuleConstructor):
         def __init__(self, fields: list[str], source_rules: list[PseudoRule]) -> None:
             self.source_rules = source_rules
-            super().__init__(fields, type(Repseudonymize.dataset))
+            super().__init__(fields)
 
         def to_stable_id(
             self,

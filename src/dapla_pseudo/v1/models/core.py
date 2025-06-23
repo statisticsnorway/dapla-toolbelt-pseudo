@@ -1,6 +1,5 @@
 import json
 import typing as t
-from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 
@@ -19,7 +18,6 @@ from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import UnknownCharacterStrategy
 from dapla_pseudo.models import APIModel
-from dapla_pseudo.types import BinaryFileDecl
 
 
 class Mimetypes(str, Enum):
@@ -29,16 +27,6 @@ class Mimetypes(str, Enum):
     """
 
     JSON = "application/json"
-    ZIP = "application/zip"
-    CSV = "text/csv"
-
-
-@dataclass
-class File:
-    """'File' represents a file to be pseudonymized."""
-
-    file_handle: BinaryFileDecl
-    content_type: Mimetypes
 
 
 class PseudoFunctionArgs(BaseModel):

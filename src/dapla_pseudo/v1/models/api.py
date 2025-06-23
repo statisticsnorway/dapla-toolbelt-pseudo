@@ -6,11 +6,8 @@ from dataclasses import dataclass
 import polars as pl
 
 from dapla_pseudo.models import APIModel
-from dapla_pseudo.v1.models.core import Mimetypes
-from dapla_pseudo.v1.models.core import PseudoConfig
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
-from dapla_pseudo.v1.models.core import TargetCompression
 
 
 class PseudoFieldRequest(APIModel):
@@ -45,34 +42,6 @@ class RepseudoFieldRequest(APIModel):
     target_keyset: PseudoKeyset | None = None
 
 
-class PseudoFileRequest(APIModel):
-    """PseudonymizeFileRequest represents a request towards pseudonymize file API endpoints."""
-
-    pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
-
-
-class DepseudoFileRequest(APIModel):
-    """DepseudonymizeFileRequest represents a request towards depseudonymize file API endpoints."""
-
-    pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
-
-
-class RepseudoFileRequest(APIModel):
-    """RepseudonymizeFileRequest represents a request towards repseudonymize file API endpoints."""
-
-    source_pseudo_config: PseudoConfig
-    target_pseudo_config: PseudoConfig
-    target_uri: str | None = None
-    target_content_type: Mimetypes
-    compression: TargetCompression | None = None
-
-
 @dataclass
 class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
@@ -85,18 +54,7 @@ class RawPseudoMetadata:
 
 @dataclass
 class PseudoFieldResponse:
-    """PseudoFileResponse holds the data and metadata from a Pseudo Service field response."""
+    """PseudoFieldResponse holds the data and metadata from a Pseudo Service field response."""
 
     data: pl.DataFrame
     raw_metadata: list[RawPseudoMetadata]
-
-
-@dataclass
-class PseudoFileResponse:
-    """PseudoFileResponse holds the data and metadata from a Pseudo Service file response."""
-
-    data: list[dict[str, t.Any]]
-    raw_metadata: RawPseudoMetadata
-    content_type: Mimetypes
-    file_name: str
-    streamed: bool = True

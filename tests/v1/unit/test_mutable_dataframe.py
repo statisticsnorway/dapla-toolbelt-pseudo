@@ -6,26 +6,6 @@ from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 
-"""
-from dapla_pseudo.v1.mutable_dataframe import _glob_matches
-
-
-def test_rule_matching() -> None:
-    assert _glob_matches("fnr", "**fnr")
-    assert _glob_matches("fnr", "fnr")
-    assert _glob_matches("fnr", "Fnr")
-    assert _glob_matches("fnr", "fnr*")
-    assert _glob_matches("identifier/fnr", "*/fnr")
-    assert _glob_matches("identifier/fnr", "*/{id,*nr}")
-    assert _glob_matches("identifier/fnr", "*/{dnr,fnr}")
-    assert not _glob_matches("some/identifier/fnr", "*/fnr")
-    assert _glob_matches("some/identifier/fnr", "**/fnr")
-    assert _glob_matches("identifier/fnr", "identifier/fnr")
-    assert _glob_matches("person_info/fnr", "**/fnr")
-    assert _glob_matches("person_info/fnr", "**person_info/fnr")
-    assert not _glob_matches("identifier/fnr", "fnr")
-"""
-
 
 def test_match_dataframe_dict_for_repseudo() -> None:
     data = [{"foo": "bar"}]
