@@ -48,7 +48,7 @@ def test_execute_pseudo_operation_field(
     rules = [PseudoRule(name="dummy", pattern="dummy", func=Mock(spec=PseudoFunction))]
     base._execute_pseudo_operation(
         rules=rules,
-        timeout=ANY,
+        timeout=0,
         custom_keyset=ANY,
         target_custom_keyset=ANY,
         target_rules=rules,
