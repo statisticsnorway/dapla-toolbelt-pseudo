@@ -27,14 +27,14 @@ class Result:
     def __init__(
         self,
         pseudo_response: PseudoFieldResponse,
-        pseudo_operation: PseudoOperation,
-        targeted_columns: list[str],
+        pseudo_operation: PseudoOperation | None = None,
+        targeted_columns: list[str] | None = None,
         user_provided_metadata: Datadoc | None = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_data: pl.DataFrame = pseudo_response.data
         self._metadata: dict[str, dict[str, list[Any]]] = {}
-        self._datadoc: MetadataContainer
+        self._datadoc: Datadoc | MetadataContainer
 
         datadoc_fields: list[Variable] = []
         datadoc_paths: list[str | None] = []
@@ -59,9 +59,13 @@ class Result:
                 "metrics": field_metadata.metrics,
             }
 
-        self._datadoc = self._construct_final_metadata(
-            datadoc_fields, pseudo_operation, targeted_columns, user_provided_metadata
-        )
+        if pseudo_operation and targeted_columns:
+            self._datadoc = self._construct_final_metadata(
+                datadoc_fields,
+                pseudo_operation,
+                targeted_columns,
+                user_provided_metadata,
+            )
 
     def _construct_final_metadata(
         self,
@@ -69,13 +73,15 @@ class Result:
         pseudo_operation: PseudoOperation,
         targeted_columns: list[str],
         user_provided_metadata: Datadoc | None,
-    ) -> Datadoc:
+    ) -> Datadoc | MetadataContainer:
         """Construct the final datadoc metadata.
 
         If preexisting metadata is provided then modify that otherwise construct the Datadoc object.
         """
         datadoc_fields_map: dict[str, Variable] = {
-            datadoc_variable.short_name: datadoc_variable
+            (
+                datadoc_variable.short_name if datadoc_variable.short_name else ""
+            ): datadoc_variable
             for datadoc_variable in datadoc_fields
         }
         if user_provided_metadata:
@@ -172,7 +178,7 @@ class Result:
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 write_from_df(df, file_format, file_handle, **kwargs)
-                datadoc_file_handle.write(self.datadoc)
+                datadoc_file_handle.write(self.datadoc_json)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
@@ -202,13 +208,17 @@ class Result:
         return aggregate_metrics(self._metadata)
 
     @property
-    def datadoc(self) -> dict[str, any]:
+    def datadoc(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
             dict: A dictionary representing the datadoc metadata.
         """
-        return self._datadoc.datadoc_model().model_dump()
+        match self._datadoc:
+            case Datadoc():
+                return self._datadoc.datadoc_model().model_dump()
+            case MetadataContainer():
+                return self._datadoc.model_dump()
 
     @property
     def datadoc_json(self) -> str:
@@ -217,7 +227,11 @@ class Result:
         Returns:
             str: A JSON-formattted string representing the datadoc metadata.
         """
-        return self._datadoc.datadoc_model().model_dump_json()
+        match self._datadoc:
+            case Datadoc():
+                return self._datadoc.datadoc_model().model_dump_json()
+            case MetadataContainer():
+                return self._datadoc.model_dump_json()
 
     def _datadoc_from_raw_metadata_fields(
         self,

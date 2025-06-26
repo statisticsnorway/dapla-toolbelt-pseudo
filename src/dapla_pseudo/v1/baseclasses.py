@@ -44,7 +44,7 @@ class _BasePseudonymizer:
         pseudo_operation: PseudoOperation,
         dataset: pl.DataFrame,
         hierarchical: bool,
-        user_provided_metadata: Datadoc,
+        user_provided_metadata: Datadoc | None,
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation

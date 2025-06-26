@@ -114,7 +114,7 @@ class Repseudonymize:
             return result
 
     class _RepseudoFuncSelectorSource(_BaseRuleConstructor):
-        def __init__(self, fields: list[str], metadata: Datadoc) -> None:
+        def __init__(self, fields: list[str], metadata: Datadoc | None) -> None:
             self.fields = fields
             self._metadata = metadata
             super().__init__(fields)
@@ -181,11 +181,16 @@ class Repseudonymize:
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
             """Claim that the selected fields were pseudonymized with a custom, specified Pseudo Function."""
             rules = super()._with_custom_function(function)
-            return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
+            return Repseudonymize._RepseudoFuncSelectorTarget(
+                self.fields, rules, self._metadata
+            )
 
     class _RepseudoFuncSelectorTarget(_BaseRuleConstructor):
         def __init__(
-            self, fields: list[str], source_rules: list[PseudoRule], metadata: Datadoc
+            self,
+            fields: list[str],
+            source_rules: list[PseudoRule],
+            metadata: Datadoc | None,
         ) -> None:
             self.source_rules = source_rules
             self._metadata = metadata
