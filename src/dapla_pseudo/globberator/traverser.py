@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 import msgspec
 import polars as pl
-from dapla.gcs import GCSFileSystem
+from gcsfs import GCSFileSystem
 from wcmatch import glob
 
 from dapla_pseudo.v1.models.core import PseudoRule

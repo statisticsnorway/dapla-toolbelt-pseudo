@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import pandas as pd
 import polars as pl
+from dapla_metadata.datasets.core import Datadoc
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy
@@ -56,26 +57,35 @@ class Pseudonymize:
         """Select one or multiple fields to be pseudonymized."""
 
         rules: ClassVar[list[PseudoRule]] = []
+        metadata: Datadoc | None = None
 
-        def __init__(self, rules: list[PseudoRule] | None = None) -> None:
+        def __init__(
+            self, rules: list[PseudoRule] | None = None, metadata: Datadoc | None = None
+        ) -> None:
             """Initialize the class."""
             if rules is None:
                 Pseudonymize._Pseudonymizer.rules = []
             else:
                 Pseudonymize._Pseudonymizer.rules.extend(rules)
 
+            self.metadata = metadata
+
+        def with_metadata(self, metadata: Datadoc) -> "Pseudonymize._Pseudonymizer":
+            """Specify existing datadoc metadata for the dataset."""
+            return Pseudonymize._Pseudonymizer(self.rules, metadata)
+
         def on_fields(self, *fields: str) -> "Pseudonymize._PseudoFuncSelector":
             """Specify one or multiple fields to be pseudonymized."""
-            return Pseudonymize._PseudoFuncSelector(list(fields))
+            return Pseudonymize._PseudoFuncSelector(list(fields), self.metadata)
 
         def add_rules(
             self, rules: PseudoRule | list[PseudoRule]
         ) -> "Pseudonymize._Pseudonymizer":
             """Add one or more rules to existing pseudonymization rules."""
             if isinstance(rules, list):
-                return Pseudonymize._Pseudonymizer(self.rules + rules)
+                return Pseudonymize._Pseudonymizer(self.rules + rules, self.metadata)
             else:
-                return Pseudonymize._Pseudonymizer([*self.rules, rules])
+                return Pseudonymize._Pseudonymizer([*self.rules, rules], self.metadata)
 
         def run(
             self,
@@ -97,6 +107,7 @@ class Pseudonymize:
                 pseudo_operation=PseudoOperation.PSEUDONYMIZE,
                 dataset=Pseudonymize.dataset,
                 hierarchical=hierarchical,
+                user_provided_metadata=self.metadata,
             )
 
             result = super()._execute_pseudo_operation(
@@ -105,8 +116,9 @@ class Pseudonymize:
             return result
 
     class _PseudoFuncSelector(_BaseRuleConstructor):
-        def __init__(self, fields: list[str]) -> None:
+        def __init__(self, fields: list[str], metadata: Datadoc | None) -> None:
             self._fields = fields
+            self._metadata = metadata
             super().__init__(fields)
 
         def with_stable_id(
@@ -132,7 +144,7 @@ class Pseudonymize:
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key, on_map_failure
             )
-            return Pseudonymize._Pseudonymizer(rules)
+            return Pseudonymize._Pseudonymizer(rules, self._metadata)
 
         def with_default_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -147,7 +159,7 @@ class Pseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_daead_encryption(custom_key)
-            return Pseudonymize._Pseudonymizer(rules)
+            return Pseudonymize._Pseudonymizer(rules, self._metadata)
 
         def with_papis_compatible_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -162,10 +174,10 @@ class Pseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_ff31_encryption(custom_key)
-            return Pseudonymize._Pseudonymizer(rules)
+            return Pseudonymize._Pseudonymizer(rules, self._metadata)
 
         def with_custom_function(
             self, function: PseudoFunction
         ) -> "Pseudonymize._Pseudonymizer":
             rules = super()._with_custom_function(function)
-            return Pseudonymize._Pseudonymizer(rules)
+            return Pseudonymize._Pseudonymizer(rules, self._metadata)

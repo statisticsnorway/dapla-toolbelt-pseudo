@@ -17,7 +17,7 @@ from aiohttp import ClientTimeout
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
-from dapla import AuthClient
+from dapla_auth_client import AuthClient
 from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT

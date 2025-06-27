@@ -9,12 +9,13 @@ import pandas as pd
 import polars as pl
 from cloudpathlib import GSClient
 from cloudpathlib import GSPath
-from dapla import AuthClient
+from dapla_metadata.datasets.core import Datadoc
 from datadoc_model.all_optional.model import DatadocMetadata
 from datadoc_model.all_optional.model import MetadataContainer
 from datadoc_model.all_optional.model import Variable
 from pydantic import ValidationError
 
+from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.supported_file_format import write_from_df
@@ -26,11 +27,14 @@ class Result:
     def __init__(
         self,
         pseudo_response: PseudoFieldResponse,
+        pseudo_operation: PseudoOperation | None = None,
+        targeted_columns: list[str] | None = None,
+        user_provided_metadata: Datadoc | None = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_data: pl.DataFrame = pseudo_response.data
         self._metadata: dict[str, dict[str, list[Any]]] = {}
-        self._datadoc: MetadataContainer
+        self._datadoc: Datadoc | MetadataContainer
 
         datadoc_fields: list[Variable] = []
         datadoc_paths: list[str | None] = []
@@ -55,12 +59,48 @@ class Result:
                 "metrics": field_metadata.metrics,
             }
 
-        self._datadoc = MetadataContainer(
-            datadoc=DatadocMetadata(
-                document_version="5.0.1",
-                variables=datadoc_fields,
-            )
+        self._datadoc = self._construct_final_metadata(
+            datadoc_fields,
+            pseudo_operation,
+            targeted_columns,
+            user_provided_metadata,
         )
+
+    def _construct_final_metadata(
+        self,
+        datadoc_fields: list[Variable],
+        pseudo_operation: PseudoOperation | None,
+        targeted_columns: list[str] | None,
+        user_provided_metadata: Datadoc | None,
+    ) -> Datadoc | MetadataContainer:
+        """Construct the final datadoc metadata.
+
+        If preexisting metadata is provided then modify that otherwise construct the Datadoc object.
+        """
+        datadoc_fields_map: dict[str, Variable] = {
+            (
+                datadoc_variable.short_name if datadoc_variable.short_name else ""
+            ): datadoc_variable
+            for datadoc_variable in datadoc_fields
+        }
+        if user_provided_metadata and targeted_columns and pseudo_operation:
+            for column in targeted_columns:
+                match pseudo_operation:
+                    case PseudoOperation.PSEUDONYMIZE | PseudoOperation.REPSEUDONYMIZE:
+                        user_provided_metadata.add_pseudonymization(
+                            column,
+                            datadoc_fields_map[column].pseudonymization,
+                        )
+                    case PseudoOperation.DEPSEUDONYMIZE:
+                        user_provided_metadata.remove_pseudonymization(column)
+            return user_provided_metadata
+        else:
+            return MetadataContainer(
+                datadoc=DatadocMetadata(
+                    document_version="5.0.1",
+                    variables=datadoc_fields,
+                )
+            )
 
     def to_polars(self, **kwargs: Any) -> pl.DataFrame:
         """Output pseudonymized data as a Polars DataFrame.
@@ -121,7 +161,7 @@ class Result:
 
         datadoc_file_path: Path | GSPath
         if file_path.startswith(GSPath.cloud_prefix):
-            client = GSClient(credentials=AuthClient.fetch_google_credentials())
+            client = GSClient()
             gs_path = GSPath(file_path, client)
 
             file_handle = gs_path.open(mode="wb")
@@ -167,13 +207,30 @@ class Result:
         return aggregate_metrics(self._metadata)
 
     @property
-    def datadoc(self) -> str:
+    def datadoc_model(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary.
+
+        Returns:
+            dict: A dictionary representing the datadoc metadata.
+        """
+        match self._datadoc:
+            case Datadoc():
+                return self._datadoc.datadoc_model().model_dump(exclude_none=True)
+            case MetadataContainer():
+                return self._datadoc.model_dump(exclude_none=True)
+
+    @property
+    def datadoc(self) -> str:
+        """Returns the pseudonymization metadata as a string.
 
         Returns:
             str: A JSON-formattted string representing the datadoc metadata.
         """
-        return self._datadoc.model_dump_json(exclude_none=True)
+        match self._datadoc:
+            case Datadoc():
+                return self._datadoc.datadoc_model().model_dump_json(exclude_none=True)
+            case MetadataContainer():
+                return self._datadoc.model_dump_json(exclude_none=True)
 
     def _datadoc_from_raw_metadata_fields(
         self,

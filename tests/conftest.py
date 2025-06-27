@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import polars as pl
 import pytest_cases
+from dapla_metadata.datasets.core import Datadoc
 
 
 @pytest_cases.fixture()
@@ -18,6 +19,12 @@ def df_personer() -> pl.DataFrame:
             "fodselsdato": pl.String,
         },
     )
+
+
+@pytest_cases.fixture()
+def df_personer_metadata() -> Datadoc:
+    JSON_FILE = "tests/data/personer_metadata.json"
+    return Datadoc(metadata_document_path=JSON_FILE, errors_as_warnings=True)
 
 
 @pytest_cases.fixture()
@@ -157,6 +164,12 @@ def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
             "fodselsdato": pl.String,
         },
     )
+
+
+@pytest_cases.fixture()
+def df_personer_fnr_daead_encrypted_metadata() -> Datadoc:
+    JSON_FILE = "tests/data/personer_pseudonymized_default_encryption_metadata.json"
+    return Datadoc(metadata_document_path=JSON_FILE, errors_as_warnings=True)
 
 
 @pytest_cases.fixture()
