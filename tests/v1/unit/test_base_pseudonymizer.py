@@ -41,7 +41,10 @@ def test_execute_pseudo_operation_field(
     )
     mock_pseudo_field.return_value.raw_metadata = []
     base = _BasePseudonymizer(
-        pseudo_operation=pseudo_op, dataset=dataset, hierarchical=False
+        pseudo_operation=pseudo_op,
+        dataset=dataset,
+        hierarchical=False,
+        user_provided_metadata=None,
     )
 
     rules = [PseudoRule(name="dummy", pattern="dummy", func=Mock(spec=PseudoFunction))]
@@ -112,6 +115,7 @@ def test_pseudonymize_field(
         pseudo_operation=PseudoOperation.PSEUDONYMIZE,
         dataset=df_personer,
         hierarchical=False,
+        user_provided_metadata=None,
     )
 
     response = base._pseudonymize_field([sid_req], timeout=0)

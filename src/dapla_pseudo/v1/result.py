@@ -178,7 +178,7 @@ class Result:
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 write_from_df(df, file_format, file_handle, **kwargs)
-                datadoc_file_handle.write(self.datadoc_json)
+                datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
@@ -208,7 +208,7 @@ class Result:
         return aggregate_metrics(self._metadata)
 
     @property
-    def datadoc(self) -> dict[str, Any]:
+    def datadoc_dict(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
@@ -221,7 +221,7 @@ class Result:
                 return self._datadoc.model_dump()
 
     @property
-    def datadoc_json(self) -> str:
+    def datadoc(self) -> str:
         """Returns the pseudonymization metadata as a string.
 
         Returns:
