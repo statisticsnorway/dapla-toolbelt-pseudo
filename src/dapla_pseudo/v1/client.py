@@ -119,7 +119,7 @@ class PseudoClient:
                     return request.name, data, metadata
 
         aio_session = ClientSession(
-            connector=TCPConnector(limit=200), timeout=ClientTimeout(total=10 * 60)
+            connector=TCPConnector(limit=200), timeout=ClientTimeout(total=60 * 60 * 24)
         )
         async with RetryClient(
             client_session=aio_session,
