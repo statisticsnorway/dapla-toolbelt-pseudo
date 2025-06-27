@@ -28,9 +28,9 @@ def test_repseudonymize_with_metadata(
         .to_papis_compatible_encryption()
         .run()
     )
-    datadoc_variables = result.datadoc_dict["datadoc"]["variables"]
+    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
-        filter(lambda v: v.short_name == "fnr", datadoc_variables), None
+        filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
         expected = {
             "encryption_algorithm": "TINK-FPE",
@@ -62,11 +62,11 @@ def test_depseudonymize_with_metadata(
         .run()
     )
     # The index 0 here corresponds to the variable 'fnr'
-    datadoc_variables = result.datadoc_dict["datadoc"]["variables"]
+    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
-        filter(lambda v: v.short_name == "fnr", datadoc_variables), None
+        filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
-        assert fnr_variable["pseudonymization"] is None
+        assert fnr_variable.get("pseudonymization") is None
     else:
         pytest.fail("Metadata for the 'fnr' variable is missing.")
 
@@ -85,7 +85,7 @@ def test_pseudonymize_with_metadata(
         .with_default_encryption()
         .run()
     )
-    datadoc_variables = result.datadoc_dict["datadoc"]["variables"]
+    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
         filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):

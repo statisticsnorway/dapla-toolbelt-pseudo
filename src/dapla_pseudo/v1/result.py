@@ -59,19 +59,18 @@ class Result:
                 "metrics": field_metadata.metrics,
             }
 
-        if pseudo_operation and targeted_columns:
-            self._datadoc = self._construct_final_metadata(
-                datadoc_fields,
-                pseudo_operation,
-                targeted_columns,
-                user_provided_metadata,
-            )
+        self._datadoc = self._construct_final_metadata(
+            datadoc_fields,
+            pseudo_operation,
+            targeted_columns,
+            user_provided_metadata,
+        )
 
     def _construct_final_metadata(
         self,
         datadoc_fields: list[Variable],
-        pseudo_operation: PseudoOperation,
-        targeted_columns: list[str],
+        pseudo_operation: PseudoOperation | None,
+        targeted_columns: list[str] | None,
         user_provided_metadata: Datadoc | None,
     ) -> Datadoc | MetadataContainer:
         """Construct the final datadoc metadata.
@@ -84,7 +83,7 @@ class Result:
             ): datadoc_variable
             for datadoc_variable in datadoc_fields
         }
-        if user_provided_metadata:
+        if user_provided_metadata and targeted_columns and pseudo_operation:
             for column in targeted_columns:
                 match pseudo_operation:
                     case PseudoOperation.PSEUDONYMIZE | PseudoOperation.REPSEUDONYMIZE:
@@ -208,7 +207,7 @@ class Result:
         return aggregate_metrics(self._metadata)
 
     @property
-    def datadoc_dict(self) -> dict[str, Any]:
+    def datadoc_model(self) -> dict[str, Any]:
         """Returns the pseudonymization metadata as a dictionary.
 
         Returns:
@@ -216,9 +215,9 @@ class Result:
         """
         match self._datadoc:
             case Datadoc():
-                return self._datadoc.datadoc_model().model_dump()
+                return self._datadoc.datadoc_model().model_dump(exclude_none=True)
             case MetadataContainer():
-                return self._datadoc.model_dump()
+                return self._datadoc.model_dump(exclude_none=True)
 
     @property
     def datadoc(self) -> str:
@@ -229,9 +228,9 @@ class Result:
         """
         match self._datadoc:
             case Datadoc():
-                return self._datadoc.datadoc_model().model_dump_json()
+                return self._datadoc.datadoc_model().model_dump_json(exclude_none=True)
             case MetadataContainer():
-                return self._datadoc.model_dump_json()
+                return self._datadoc.model_dump_json(exclude_none=True)
 
     def _datadoc_from_raw_metadata_fields(
         self,
