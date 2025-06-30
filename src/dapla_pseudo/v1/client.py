@@ -124,7 +124,15 @@ class PseudoClient:
         async with RetryClient(
             client_session=aio_session,
             retry_options=ExponentialRetry(
-                attempts=5, start_timeout=0.1, max_timeout=30, factor=6
+                attempts=5,
+                start_timeout=0.1,
+                max_timeout=30,
+                factor=6,
+                statuses={
+                    400,
+                }.union(
+                    set(range(500, 600))
+                ),  # Retry all 5xx errors and 400 Bad Request
             ),
         ) as client:
             results = await asyncio.gather(
