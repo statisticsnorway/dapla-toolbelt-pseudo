@@ -10,6 +10,7 @@ import os
 from datetime import date
 
 import polars as pl
+from dapla_metadata.datasets.core import Datadoc
 
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import MapFailureStrategy
@@ -43,6 +44,7 @@ class _BasePseudonymizer:
         pseudo_operation: PseudoOperation,
         dataset: pl.DataFrame,
         hierarchical: bool,
+        user_provided_metadata: Datadoc | None,
     ) -> None:
         """The constructor of the base class."""
         self._pseudo_operation = pseudo_operation
@@ -51,6 +53,7 @@ class _BasePseudonymizer:
             auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
         )
         self._dataset = MutableDataFrame(dataset, hierarchical)
+        self._user_provided_metadata = user_provided_metadata
 
     def _execute_pseudo_operation(
         self,
@@ -78,7 +81,15 @@ class _BasePseudonymizer:
         )
 
         pseudo_response = self._pseudonymize_field(pseudo_requests, timeout)
-        return Result(pseudo_response=pseudo_response)
+        return Result(
+            pseudo_response=pseudo_response,
+            pseudo_operation=self._pseudo_operation,
+            targeted_columns=[
+                pseudo_rule.pattern
+                for pseudo_rule in (target_rules if target_rules else rules)
+            ],
+            user_provided_metadata=self._user_provided_metadata,
+        )
 
     def _pseudonymize_field(
         self,

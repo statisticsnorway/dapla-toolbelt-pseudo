@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import pandas as pd
 import polars as pl
+from dapla_metadata.datasets.core import Datadoc
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import MapFailureStrategy
@@ -42,17 +43,28 @@ class Depseudonymize:
         """Select one or multiple fields to be pseudonymized."""
 
         rules: ClassVar[list[PseudoRule]] = []
+        metadata: Datadoc | None = None
 
-        def __init__(self, rules: list[PseudoRule] | None = None) -> None:
+        def __init__(
+            self,
+            rules: list[PseudoRule] | None = None,
+            metadata: Datadoc | None = None,
+        ) -> None:
             """Initialize the class."""
             if rules is None:
                 Depseudonymize._Depseudonymizer.rules = []
             else:
                 Depseudonymize._Depseudonymizer.rules.extend(rules)
 
+            self.metadata = metadata
+
+        def with_metadata(self, metadata: Datadoc) -> "Depseudonymize._Depseudonymizer":
+            """Specify existing datadoc metadata for the dataset."""
+            return Depseudonymize._Depseudonymizer(self.rules, metadata)
+
         def on_fields(self, *fields: str) -> "Depseudonymize._DepseudoFuncSelector":
             """Specify one or multiple fields to be depseudonymized."""
-            return Depseudonymize._DepseudoFuncSelector(list(fields))
+            return Depseudonymize._DepseudoFuncSelector(list(fields), self.metadata)
 
         def run(
             self,
@@ -76,6 +88,7 @@ class Depseudonymize:
                 pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
                 dataset=Depseudonymize.dataset,
                 hierarchical=hierarchical,
+                user_provided_metadata=self.metadata,
             )
 
             result = super()._execute_pseudo_operation(
@@ -84,8 +97,9 @@ class Depseudonymize:
             return result
 
     class _DepseudoFuncSelector(_BaseRuleConstructor):
-        def __init__(self, fields: list[str]) -> None:
+        def __init__(self, fields: list[str], metadata: Datadoc | None) -> None:
             self._fields = fields
+            self._metadata = metadata
             super().__init__(fields)
 
         def with_stable_id(
@@ -112,7 +126,7 @@ class Depseudonymize:
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key, on_map_failure
             )
-            return Depseudonymize._Depseudonymizer(rules)
+            return Depseudonymize._Depseudonymizer(rules, self._metadata)
 
         def with_default_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -127,7 +141,7 @@ class Depseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_daead_encryption(custom_key)
-            return Depseudonymize._Depseudonymizer(rules)
+            return Depseudonymize._Depseudonymizer(rules, self._metadata)
 
         def with_papis_compatible_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -142,10 +156,10 @@ class Depseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_ff31_encryption(custom_key)
-            return Depseudonymize._Depseudonymizer(rules)
+            return Depseudonymize._Depseudonymizer(rules, self._metadata)
 
         def with_custom_function(
             self, function: PseudoFunction
         ) -> "Depseudonymize._Depseudonymizer":
             rules = super()._with_custom_function(function)
-            return Depseudonymize._Depseudonymizer(rules)
+            return Depseudonymize._Depseudonymizer(rules, self._metadata)

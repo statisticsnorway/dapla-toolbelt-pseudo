@@ -5,6 +5,7 @@ from datetime import date
 
 import pandas as pd
 import polars as pl
+from dapla_metadata.datasets.core import Datadoc
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import PredefinedKeys
@@ -42,11 +43,13 @@ class Repseudonymize:
 
         source_rules: t.ClassVar[list[PseudoRule]] = []
         target_rules: t.ClassVar[list[PseudoRule]] = []
+        metadata: Datadoc | None = None
 
         def __init__(
             self,
             source_rules: list[PseudoRule] | None = None,
             target_rules: list[PseudoRule] | None = None,
+            metadata: Datadoc | None = None,
         ) -> None:
             """Initialize the class."""
             if source_rules is None or target_rules is None:
@@ -62,11 +65,19 @@ class Repseudonymize:
                 Repseudonymize._Repseudonymizer.source_rules.extend(source_rules)
                 Repseudonymize._Repseudonymizer.target_rules.extend(target_rules)
 
+            self.metadata = metadata
+
         def on_fields(
             self, *fields: str
         ) -> "Repseudonymize._RepseudoFuncSelectorSource":
             """Specify one or multiple fields to be pseudonymized."""
-            return Repseudonymize._RepseudoFuncSelectorSource(list(fields))
+            return Repseudonymize._RepseudoFuncSelectorSource(
+                list(fields), self.metadata
+            )
+
+        def with_metadata(self, metadata: Datadoc) -> "Repseudonymize._Repseudonymizer":
+            """Specify existing datadoc metadata for the dataset."""
+            return Repseudonymize._Repseudonymizer(metadata=metadata)
 
         def run(
             self,
@@ -90,6 +101,7 @@ class Repseudonymize:
                 pseudo_operation=PseudoOperation.REPSEUDONYMIZE,
                 dataset=Repseudonymize.dataset,
                 hierarchical=hierarchical,
+                user_provided_metadata=self.metadata,
             )
 
             result = super()._execute_pseudo_operation(
@@ -102,8 +114,9 @@ class Repseudonymize:
             return result
 
     class _RepseudoFuncSelectorSource(_BaseRuleConstructor):
-        def __init__(self, fields: list[str]) -> None:
+        def __init__(self, fields: list[str], metadata: Datadoc | None) -> None:
             self.fields = fields
+            self._metadata = metadata
             super().__init__(fields)
 
         def from_stable_id(
@@ -125,7 +138,9 @@ class Repseudonymize:
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key
             )
-            return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
+            return Repseudonymize._RepseudoFuncSelectorTarget(
+                self.fields, rules, self._metadata
+            )
 
         def from_default_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -140,7 +155,9 @@ class Repseudonymize:
                 An object with methods to choose how the field should be pseudonymized.
             """
             rules = super()._with_daead_encryption(custom_key)
-            return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
+            return Repseudonymize._RepseudoFuncSelectorTarget(
+                self.fields, rules, self._metadata
+            )
 
         def from_papis_compatible_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -155,18 +172,28 @@ class Repseudonymize:
                 An object with methods to choose how the field should be pseudonymized.
             """
             rules = super()._with_ff31_encryption(custom_key)
-            return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
+            return Repseudonymize._RepseudoFuncSelectorTarget(
+                self.fields, rules, self._metadata
+            )
 
         def from_custom_function(
             self, function: PseudoFunction
         ) -> "Repseudonymize._RepseudoFuncSelectorTarget":
             """Claim that the selected fields were pseudonymized with a custom, specified Pseudo Function."""
             rules = super()._with_custom_function(function)
-            return Repseudonymize._RepseudoFuncSelectorTarget(self.fields, rules)
+            return Repseudonymize._RepseudoFuncSelectorTarget(
+                self.fields, rules, self._metadata
+            )
 
     class _RepseudoFuncSelectorTarget(_BaseRuleConstructor):
-        def __init__(self, fields: list[str], source_rules: list[PseudoRule]) -> None:
+        def __init__(
+            self,
+            fields: list[str],
+            source_rules: list[PseudoRule],
+            metadata: Datadoc | None,
+        ) -> None:
             self.source_rules = source_rules
+            self._metadata = metadata
             super().__init__(fields)
 
         def to_stable_id(
@@ -190,7 +217,9 @@ class Repseudonymize:
             rules = super()._map_to_stable_id_and_pseudonymize(
                 sid_snapshot_date, custom_key
             )
-            return Repseudonymize._Repseudonymizer(self.source_rules, rules)
+            return Repseudonymize._Repseudonymizer(
+                self.source_rules, rules, self._metadata
+            )
 
         def to_default_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -205,7 +234,9 @@ class Repseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_daead_encryption(custom_key)
-            return Repseudonymize._Repseudonymizer(self.source_rules, rules)
+            return Repseudonymize._Repseudonymizer(
+                self.source_rules, rules, self._metadata
+            )
 
         def to_papis_compatible_encryption(
             self, custom_key: PredefinedKeys | str | None = None
@@ -220,10 +251,14 @@ class Repseudonymize:
                 Self: The object configured to be mapped to stable ID
             """
             rules = super()._with_ff31_encryption(custom_key)
-            return Repseudonymize._Repseudonymizer(self.source_rules, rules)
+            return Repseudonymize._Repseudonymizer(
+                self.source_rules, rules, self._metadata
+            )
 
         def to_custom_function(
             self, function: PseudoFunction
         ) -> "Repseudonymize._Repseudonymizer":
             rules = super()._with_custom_function(function)
-            return Repseudonymize._Repseudonymizer(self.source_rules, rules)
+            return Repseudonymize._Repseudonymizer(
+                self.source_rules, rules, self._metadata
+            )

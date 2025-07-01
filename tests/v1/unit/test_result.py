@@ -1,5 +1,4 @@
 import io
-import json
 from pathlib import Path
 from typing import Any
 
@@ -79,7 +78,7 @@ def test_result_old_datadoc_metadata(df_personer: pl.DataFrame) -> None:
         "document_version": "1.0.0",
         "datadoc": {"document_version": "5.0.1", "variables": []},
     }
-    assert json.loads(result.datadoc) == expected_datadoc
+    assert result.datadoc_model == expected_datadoc
 
 
 def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
@@ -119,7 +118,7 @@ def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
             "variables": mocked_metadata.datadoc,
         },
     }
-    assert json.loads(result.datadoc) == expected_datadoc
+    assert result.datadoc_model == expected_datadoc
 
 
 def test_result_from_polars_to_pandas(df_personer: pl.DataFrame) -> None:

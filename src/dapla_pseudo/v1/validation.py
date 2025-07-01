@@ -51,11 +51,9 @@ class Validator:
 
         Examples:
             # Read from bucket
-            from dapla import AuthClient
             from dapla_pseudo import Validator
             bucket_path = "gs://ssb-staging-dapla-felles-data-delt/felles/smoke-tests/fruits/data.parquet"
-            storage_options = {"token": AuthClient.fetch_google_credentials()}
-            field_selector = Validator.from_file(bucket_path, storage_options=storage_options)
+            field_selector = Validator.from_file(bucket_path)
 
             # Read from local filesystem
             from dapla_pseudo import Validator
