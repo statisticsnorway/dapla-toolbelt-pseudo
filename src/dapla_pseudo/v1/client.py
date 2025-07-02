@@ -149,7 +149,7 @@ class PseudoClient:
             return partitioned_field_requests
 
         def merge_responses(
-            responses: list[tuple[str, list[str | None], RawPseudoMetadata]]
+            responses: list[tuple[str, list[str | None], RawPseudoMetadata]],
         ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
             """Merge the response from the Pseudo Service into a single tuple.
 
