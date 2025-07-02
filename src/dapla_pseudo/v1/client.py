@@ -21,14 +21,13 @@ from aiohttp import ClientTimeout
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
-from dapla import AuthClient
+from dapla_auth_client import AuthClient
 from deprecated import deprecated
 from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PseudoFunctionTypes
-from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import redact_field
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
@@ -356,35 +355,6 @@ class PseudoClient:
                 print(response.headers)
                 print(response.text)
                 response.raise_for_status()
-
-    def _post_to_file_endpoint(
-        self,
-        path: str,
-        request_spec: FileSpecDecl,
-        data_spec: FileSpecDecl,
-        timeout: int,
-        stream: bool = True,
-    ) -> requests.Response:
-        """POST to a file endpoint in the Pseudo Service.
-
-        Requests to the file endpoint are sent as multi-part requests,
-        where the first part represents the filedata itself, and the second part represents
-        the transformations to apply on that data.
-        """
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/{path}",
-            headers={
-                "Authorization": f"Bearer {self.__auth_token()}",
-                "Accept-Encoding": "gzip",
-                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-            },
-            files={"data": data_spec, "request": request_spec},
-            stream=stream,
-            timeout=timeout,
-        )
-
-        PseudoClient._handle_response_error_sync(response)
-        return response
 
     def _post_to_sid_endpoint(
         self,
