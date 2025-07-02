@@ -1,11 +1,15 @@
 """Module that implements a client abstraction that makes it easy to communicate with the Dapla Pseudo Service REST API."""
 
 import asyncio
+import copy
 import os
 import typing as t
+from collections import defaultdict
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
+from itertools import zip_longest
 
 import google.auth.transport.requests
 import google.oauth2.id_token
@@ -17,12 +21,14 @@ from aiohttp import ClientTimeout
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
-from dapla_auth_client import AuthClient
+from dapla import AuthClient
+from deprecated import deprecated
 from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
 from dapla_pseudo.constants import Env
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.types import FileSpecDecl
 from dapla_pseudo.utils import redact_field
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
@@ -38,6 +44,8 @@ class PseudoClient:
         self,
         pseudo_service_url: str | None = None,
         auth_token: str | None = None,
+        rows_per_partition: str | None = None,
+        max_total_partitions: str | None = None,
     ) -> None:
         """Use a default url for dapla-pseudo-service if not explicitly set."""
         self.pseudo_service_url = (
@@ -46,6 +54,12 @@ class PseudoClient:
             else pseudo_service_url
         )
         self.static_auth_token = auth_token
+        self.rows_per_partition = (
+            10000 if rows_per_partition is None else int(rows_per_partition)
+        )
+        self.max_total_partitions = (
+            200 if max_total_partitions is None else int(max_total_partitions)
+        )
 
     def __auth_token(self) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
@@ -82,31 +96,135 @@ class PseudoClient:
             list[tuple[str, list[str], RawPseudoMetadata]]: A list of tuple of (field_name, data, metadata)
         """
 
+        def split_requests(
+            field_requests: list[
+                PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+            ],
+        ) -> list[
+            tuple[str, PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]
+        ]:
+            """Split requests into partitions.
+
+            This is done to limit the size of a single request and more evenly distribute the load across the Pseudo Service.
+            """
+
+            def partition_requests(
+                field_request: (
+                    PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+                ),
+                chunk_size: int,
+            ) -> Generator[
+                PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
+                None,
+                None,
+            ]:
+                for i in range(0, len(field_request.values), chunk_size):
+                    new_field_request = copy.deepcopy(field_request)
+                    new_field_request.values = field_request.values[i : i + chunk_size]
+                    yield new_field_request
+
+            partitioned_field_requests: list[
+                tuple[
+                    str,
+                    PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
+                ]
+            ] = []
+            for req in field_requests:
+                n_partitions = min(
+                    self.max_total_partitions // len(field_requests),
+                    len(req.values) // (self.rows_per_partition * len(field_requests)),
+                )
+                # We delegate equal amount of partitions to every field.
+
+                if n_partitions <= 1:  # Do not split if number of rows is less than 10k
+                    partitioned_field_requests.append(
+                        (PseudoClient._generate_new_correlation_id(), req)
+                    )
+                    continue
+
+                correlation_id = PseudoClient._generate_new_correlation_id()
+                partition_size = max(1, len(req.values) // n_partitions)
+                for request in partition_requests(req, partition_size):
+                    partitioned_field_requests.append((correlation_id, request))
+
+            return partitioned_field_requests
+
+        def merge_responses(
+            responses: list[tuple[str, list[str | None], RawPseudoMetadata]]
+        ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
+            """Merge the response from the Pseudo Service into a single tuple.
+
+            The responses are merged such that the first value of tuple, the field name, is unique.
+            The second value, the pseudonymized data, gets concatenated with the other field names.
+            The third value, the metadata - for Datadoc metadata they should always be equal, so we just keep the first one encountered.
+            For logs and metrics, we concatenate the lists/dictionaries of lists.
+            """
+
+            def _merge_metrics(
+                metrics1: list[dict[str, int]], metrics2: list[dict[str, int]]
+            ) -> list[dict[str, int]]:
+                return [
+                    {k: d1.get(k, 0) + d2.get(k, 0) for k in set(d1) | set(d2)}
+                    for d1, d2 in t.cast(
+                        t.Iterable[tuple[dict[str, int], dict[str, int]]],
+                        zip_longest(metrics1, metrics2, fillvalue={}),
+                    )
+                ]
+
+            grouped: dict[str, tuple[list[str | None], RawPseudoMetadata | None]] = (
+                defaultdict(lambda: ([], None))
+            )
+
+            for key, string_list, metadata in responses:
+                grouped[key][0].extend(
+                    string_list
+                )  # Concatenate the pseudonymized values
+                past_metadata = grouped[key][1]
+                if past_metadata is None:
+                    grouped[key] = (
+                        grouped[key][0],
+                        metadata,
+                    )  # Keep first metadata encountered
+                else:
+                    grouped[key] = (
+                        grouped[key][0],
+                        RawPseudoMetadata(
+                            logs=past_metadata.logs + metadata.logs,
+                            metrics=_merge_metrics(
+                                past_metadata.metrics, metadata.metrics
+                            ),
+                            datadoc=past_metadata.datadoc or metadata.datadoc,
+                        ),
+                    )
+
+            return [(k, v[0], v[1]) for k, v in grouped.items()]  # type: ignore[misc]
+
         async def _post(
             client: RetryClient,
             path: str,
             timeout: int,
+            correlation_id: str,
             request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
         ) -> tuple[str, list[str | None], RawPseudoMetadata]:
             if (
                 type(request) is PseudoFieldRequest
                 and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
             ):
-                return redact_field(request)  # type: ignore[return-value]
+                return redact_field(request)
             else:
                 async with client.post(
                     url=f"{self.pseudo_service_url}/{path}",
                     headers={
                         "Authorization": f"Bearer {self.__auth_token()}",
                         "Content-Type": Mimetypes.JSON.value,
-                        "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+                        "X-Correlation-Id": correlation_id,
                     },
                     json={"request": request.model_dump(by_alias=True)},
                     timeout=timeout,
                 ) as response:
                     await PseudoClient._handle_response_error(response)
                     response_json = await response.json()
-                    data: list[str | None] = response_json["data"]
+                    data = response_json["data"]
                     metadata = RawPseudoMetadata(
                         field_name=request.name,
                         logs=response_json["logs"],
@@ -118,6 +236,7 @@ class PseudoClient:
 
                     return request.name, data, metadata
 
+        split_pseudo_requests = split_requests(pseudo_requests)
         aio_session = ClientSession(
             connector=TCPConnector(limit=200), timeout=ClientTimeout(total=60 * 60 * 24)
         )
@@ -137,13 +256,23 @@ class PseudoClient:
         ) as client:
             results = await asyncio.gather(
                 *[
-                    _post(client=client, path=path, timeout=timeout, request=req)
-                    for req in pseudo_requests
+                    _post(
+                        client=client,
+                        path=path,
+                        timeout=timeout,
+                        request=req,
+                        correlation_id=correlation_id,
+                    )
+                    for (correlation_id, req) in split_pseudo_requests
                 ]
             )
 
-        return results
+        return merge_responses(results)
 
+    @deprecated(
+        'Detected possible Jupyter notebook environment, which is not ideal for pseudonymization.\n\
+        Please run Python-file from terminal with "poetry run python <path/to/file.py>".'
+    )
     def post_to_field_endpoint_sync(
         self,
         path: str,
@@ -167,7 +296,7 @@ class PseudoClient:
                 type(request) is PseudoFieldRequest
                 and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
             ):
-                return redact_field(request)  # type: ignore[return-value]
+                return redact_field(request)
             else:
                 response = requests.post(
                     url=f"{self.pseudo_service_url}/{path}",
@@ -191,7 +320,7 @@ class PseudoClient:
 
                 return request.name, data, metadata
 
-        pseudo_results = []
+        pseudo_results: list[tuple[str, list[str | None], RawPseudoMetadata]] = []
         with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(pseudonymize_field_runner, path, timeout, r)
@@ -227,6 +356,35 @@ class PseudoClient:
                 print(response.headers)
                 print(response.text)
                 response.raise_for_status()
+
+    def _post_to_file_endpoint(
+        self,
+        path: str,
+        request_spec: FileSpecDecl,
+        data_spec: FileSpecDecl,
+        timeout: int,
+        stream: bool = True,
+    ) -> requests.Response:
+        """POST to a file endpoint in the Pseudo Service.
+
+        Requests to the file endpoint are sent as multi-part requests,
+        where the first part represents the filedata itself, and the second part represents
+        the transformations to apply on that data.
+        """
+        response = requests.post(
+            url=f"{self.pseudo_service_url}/{path}",
+            headers={
+                "Authorization": f"Bearer {self.__auth_token()}",
+                "Accept-Encoding": "gzip",
+                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+            },
+            files={"data": data_spec, "request": request_spec},
+            stream=stream,
+            timeout=timeout,
+        )
+
+        PseudoClient._handle_response_error_sync(response)
+        return response
 
     def _post_to_sid_endpoint(
         self,

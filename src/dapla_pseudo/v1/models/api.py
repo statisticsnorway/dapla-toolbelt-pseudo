@@ -47,7 +47,7 @@ class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
 
     logs: list[str]
-    metrics: list[dict[str, t.Any]]
+    metrics: list[dict[str, int]]
     datadoc: list[dict[str, t.Any]] | None
     field_name: str | None = None
 
