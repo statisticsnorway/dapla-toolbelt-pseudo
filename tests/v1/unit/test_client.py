@@ -44,7 +44,7 @@ async def test_post_to_field_endpoint_success(
     mock_response_content = {
         "data": ["1", "2", "3"],
         "logs": ["some-log"],
-        "metrics": [{"some-metric": "some-value"}],
+        "metrics": [{"some-metric": 1}],
         "datadoc_metadata": {"variables": [{"some_var": "some_arg"}]},
     }
     mock_response.json.return_value = mock_response_content
@@ -370,7 +370,7 @@ async def test_post_to_field_endpoint_test_splits_multiple_fields() -> None:
                 ["1", "2", "3", "4", "5", "6"],
                 RawPseudoMetadata(
                     logs=["some-log1", "some-log2"],
-                    metrics=[{"some-metric1": 1, "some-metric2": 1}],
+                    metrics=[{"some-metric1": 1}, {"some-metric2": 1}],
                     datadoc=[
                         {"datadoc_metadata": {"variables": [{"magic": "some_arg"}]}}
                     ],

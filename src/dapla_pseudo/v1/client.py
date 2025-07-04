@@ -9,7 +9,6 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import date
-from itertools import zip_longest
 
 import google.auth.transport.requests
 import google.oauth2.id_token
@@ -95,109 +94,6 @@ class PseudoClient:
             list[tuple[str, list[str], RawPseudoMetadata]]: A list of tuple of (field_name, data, metadata)
         """
 
-        def split_requests(
-            field_requests: list[
-                PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
-            ],
-        ) -> list[
-            tuple[str, PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]
-        ]:
-            """Split requests into partitions.
-
-            This is done to limit the size of a single request and more evenly distribute the load across the Pseudo Service.
-            """
-
-            def partition_requests(
-                field_request: (
-                    PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
-                ),
-                chunk_size: int,
-            ) -> Generator[
-                PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-                None,
-                None,
-            ]:
-                for i in range(0, len(field_request.values), chunk_size):
-                    new_field_request = copy.deepcopy(field_request)
-                    new_field_request.values = field_request.values[i : i + chunk_size]
-                    yield new_field_request
-
-            partitioned_field_requests: list[
-                tuple[
-                    str,
-                    PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-                ]
-            ] = []
-            for req in field_requests:
-                n_partitions = min(
-                    self.max_total_partitions // len(field_requests),
-                    len(req.values) // (self.rows_per_partition * len(field_requests)),
-                )
-                # We delegate equal amount of partitions to every field.
-
-                if n_partitions <= 1:  # Do not split if number of rows is less than 10k
-                    partitioned_field_requests.append(
-                        (PseudoClient._generate_new_correlation_id(), req)
-                    )
-                    continue
-
-                correlation_id = PseudoClient._generate_new_correlation_id()
-                partition_size = max(1, len(req.values) // n_partitions)
-                for request in partition_requests(req, partition_size):
-                    partitioned_field_requests.append((correlation_id, request))
-
-            return partitioned_field_requests
-
-        def merge_responses(
-            responses: list[tuple[str, list[str | None], RawPseudoMetadata]],
-        ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
-            """Merge the response from the Pseudo Service into a single tuple.
-
-            The responses are merged such that the first value of tuple, the field name, is unique.
-            The second value, the pseudonymized data, gets concatenated with the other field names.
-            The third value, the metadata - for Datadoc metadata they should always be equal, so we just keep the first one encountered.
-            For logs and metrics, we concatenate the lists/dictionaries of lists.
-            """
-
-            def _merge_metrics(
-                metrics1: list[dict[str, int]], metrics2: list[dict[str, int]]
-            ) -> list[dict[str, int]]:
-                return [
-                    {k: d1.get(k, 0) + d2.get(k, 0) for k in set(d1) | set(d2)}
-                    for d1, d2 in t.cast(
-                        t.Iterable[tuple[dict[str, int], dict[str, int]]],
-                        zip_longest(metrics1, metrics2, fillvalue={}),
-                    )
-                ]
-
-            grouped: dict[str, tuple[list[str | None], RawPseudoMetadata | None]] = (
-                defaultdict(lambda: ([], None))
-            )
-
-            for key, string_list, metadata in responses:
-                grouped[key][0].extend(
-                    string_list
-                )  # Concatenate the pseudonymized values
-                past_metadata = grouped[key][1]
-                if past_metadata is None:
-                    grouped[key] = (
-                        grouped[key][0],
-                        metadata,
-                    )  # Keep first metadata encountered
-                else:
-                    grouped[key] = (
-                        grouped[key][0],
-                        RawPseudoMetadata(
-                            logs=past_metadata.logs + metadata.logs,
-                            metrics=_merge_metrics(
-                                past_metadata.metrics, metadata.metrics
-                            ),
-                            datadoc=past_metadata.datadoc or metadata.datadoc,
-                        ),
-                    )
-
-            return [(k, v[0], v[1]) for k, v in grouped.items()]  # type: ignore[misc]
-
         async def _post(
             client: RetryClient,
             path: str,
@@ -235,7 +131,7 @@ class PseudoClient:
 
                     return request.name, data, metadata
 
-        split_pseudo_requests = split_requests(pseudo_requests)
+        split_pseudo_requests = self._split_requests(pseudo_requests)
         aio_session = ClientSession(
             connector=TCPConnector(limit=200), timeout=ClientTimeout(total=60 * 60 * 24)
         )
@@ -262,11 +158,12 @@ class PseudoClient:
                         request=req,
                         correlation_id=correlation_id,
                     )
-                    for (correlation_id, req) in split_pseudo_requests
+                    for (correlation_id, reqs) in split_pseudo_requests.items()
+                    for req in reqs
                 ]
             )
 
-        return merge_responses(results)
+        return PseudoClient._merge_responses(results)
 
     @deprecated(
         'Detected possible Jupyter notebook environment, which is not ideal for pseudonymization.\n\
@@ -329,6 +226,77 @@ class PseudoClient:
                 pseudo_results.append(future.result())
 
         return pseudo_results
+
+    def _split_requests(
+        self,
+        field_requests: list[
+            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+        ],
+    ) -> dict[
+        str, list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]
+    ]:
+        """Split requests into partitions.
+
+        This is done to limit the size of a single request and more evenly distribute the load across the Pseudo Service.
+        """
+
+        def partition_requests(
+            field_request: (
+                PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+            ),
+            chunk_size: int,
+        ) -> Generator[
+            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
+            None,
+            None,
+        ]:
+            for i in range(0, len(field_request.values), chunk_size):
+                new_field_request = copy.deepcopy(field_request)
+                new_field_request.values = field_request.values[i : i + chunk_size]
+                yield new_field_request
+
+        partitioned_field_requests: dict[
+            str, list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]
+        ] = defaultdict(list)
+        for req in field_requests:
+            n_partitions = min(
+                self.max_total_partitions // len(field_requests),
+                len(req.values) // (self.rows_per_partition * len(field_requests)),
+            )
+            # We delegate equal amount of partitions to every field.
+
+            if n_partitions <= 1:  # Do not split if number of rows is less than 10k
+                partitioned_field_requests[
+                    PseudoClient._generate_new_correlation_id()
+                ].append(req)
+                continue
+
+            correlation_id = PseudoClient._generate_new_correlation_id()
+            partition_size = max(1, len(req.values) // n_partitions)
+            for request in partition_requests(req, partition_size):
+                partitioned_field_requests[correlation_id].append(request)
+
+        return partitioned_field_requests
+
+    @staticmethod
+    def _merge_responses(
+        responses: list[tuple[str, list[str | None], RawPseudoMetadata]],
+    ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
+        """Merge the response from the Pseudo Service into a single tuple.
+
+        The responses are merged such that the first value of tuple, the field name, is unique.
+        The second value, the pseudonymized data, gets concatenated with the other field names.
+        The third value, the metadata - for Datadoc metadata they should always be equal, so we just keep the first one encountered.
+        For logs and metrics, we concatenate the lists/dictionaries of lists.
+        """
+        grouped: dict[str, tuple[list[str | None], RawPseudoMetadata]] = defaultdict(
+            lambda: ([], RawPseudoMetadata(logs=[], metrics=[], datadoc=None))
+        )
+
+        for key, string_list, metadata in responses:
+            grouped[key] = (grouped[key][0] + (string_list), grouped[key][1] + metadata)
+
+        return [(k, v[0], v[1]) for k, v in grouped.items()]
 
     @staticmethod
     def _generate_new_correlation_id() -> str:

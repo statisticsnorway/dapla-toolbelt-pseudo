@@ -101,6 +101,7 @@ def test_pseudonymize_sid(
         .with_stable_id(sid_snapshot_date="2023-08-31")
         .run()
     )
+
     current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_container(
         current_function_name
@@ -117,11 +118,8 @@ def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
     expected_result_fnr_df = pl.DataFrame(
         {"fnr": ["jJuuj0i", "ylc9488", "yeLfkaL", None]}
     )
-    expected_result_df = df_personer.clone().update(expected_result_fnr_df)
 
-    fnr_values = [*df_personer["fnr"].to_list(), None]
-
-    df_personer = df_personer.update(pl.DataFrame({"fnr": fnr_values}))
+    df_personer = pl.DataFrame({"fnr": [*df_personer["fnr"].to_list(), None]})
 
     result = (
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
@@ -134,7 +132,9 @@ def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
     assert result.datadoc == expected_metadata_container.model_dump_json(
         exclude_none=True
     )
-    assert_frame_equal(result.to_polars(), expected_result_df)
+    assert result.metadata["metrics"]["MAPPED_SID"] == 3
+    assert result.metadata["metrics"]["NULL_VALUE"] == 1
+    assert_frame_equal(result.to_polars(), expected_result_fnr_df)
 
 
 @pytest.mark.usefixtures("setup")
