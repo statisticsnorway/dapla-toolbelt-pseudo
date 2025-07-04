@@ -1,6 +1,7 @@
 """This module defines helper classes and API models used to communicate with the Dapla Pseudo Service."""
 
 import typing as t
+from collections import defaultdict
 from dataclasses import dataclass
 
 import polars as pl
@@ -47,9 +48,26 @@ class RawPseudoMetadata:
     """RawPseudoMetadata holds the raw metadata obtained from Pseudo Service."""
 
     logs: list[str]
-    metrics: list[dict[str, t.Any]]
+    metrics: list[dict[str, int]]
     datadoc: list[dict[str, t.Any]] | None
     field_name: str | None = None
+
+    def __add__(self, other: "RawPseudoMetadata | None") -> "RawPseudoMetadata":
+        """Combine two RawPseudoMetadata instances."""
+        if other is None:
+            return self
+        grouped_metrics: dict[str, int] = defaultdict(int)
+        for item in self.metrics + other.metrics:
+            for key, value in item.items():
+                grouped_metrics[key] += value
+        grouped_metrics_unrolled = [{k: v} for k, v in grouped_metrics.items()]
+
+        return RawPseudoMetadata(
+            logs=self.logs + other.logs,
+            metrics=grouped_metrics_unrolled,
+            datadoc=self.datadoc or other.datadoc,
+            field_name=self.field_name,
+        )
 
 
 @dataclass

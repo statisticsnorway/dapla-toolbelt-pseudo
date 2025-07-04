@@ -51,6 +51,8 @@ class _BasePseudonymizer:
         self._pseudo_client: PseudoClient = PseudoClient(
             pseudo_service_url=os.getenv(Env.PSEUDO_SERVICE_URL),
             auth_token=os.getenv(Env.PSEUDO_SERVICE_AUTH_TOKEN),
+            rows_per_partition=os.getenv(Env.PSEUDO_CLIENT_ROWS_PER_PARTITION),
+            max_total_partitions=os.getenv(Env.PSEUDO_CLIENT_MAX_TOTAL_PARTITIONS),
         )
         self._dataset = MutableDataFrame(dataset, hierarchical)
         self._user_provided_metadata = user_provided_metadata

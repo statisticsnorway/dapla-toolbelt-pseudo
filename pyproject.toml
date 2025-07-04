@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dapla-toolbelt-pseudo"
-version = "4.0.1"
+version = "4.1.0"
 description = "Pseudonymization extensions for Dapla"
 authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
 license = "MIT"
@@ -40,6 +40,8 @@ aiohttp = ">=3.10.5"
 aiohttp-retry = ">=2.9.1"
 pytest-asyncio = ">=0.24.0"
 gcsfs = "^2025.5.1"
+deprecated = ">=1.2.18"
+types-deprecated = ">=1.2.15.20250304"
 
 [tool.poetry.group.test.dependencies]
 typeguard = ">=2.13.3"

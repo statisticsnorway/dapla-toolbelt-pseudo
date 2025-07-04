@@ -47,7 +47,7 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
 
 def redact_field(
     request: PseudoFieldRequest,
-) -> tuple[str, list[str], RawPseudoMetadata]:
+) -> tuple[str, list[str | None], RawPseudoMetadata]:
     """Perform the redact operation locally.
 
     This is in order to avoid making unnecessary requests to the API.
@@ -55,7 +55,7 @@ def redact_field(
     kwargs = t.cast(RedactKeywordArgs, request.pseudo_func.kwargs)
     if kwargs.placeholder is None:
         raise ValueError("Placeholder needs to be set for Redact")
-    data = [kwargs.placeholder for _ in request.values]
+    data: list[str | None] = [kwargs.placeholder for _ in request.values]
     # The above operation could be vectorized using something like Polars,
     # however - the redact functionality is used mostly teams that use hierarchical
     # data, i.e. with very small lists. The overhead of
