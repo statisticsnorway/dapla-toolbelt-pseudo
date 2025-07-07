@@ -2,6 +2,7 @@
 
 import asyncio
 import copy
+import io
 import os
 import typing as t
 from collections import defaultdict
@@ -114,7 +115,11 @@ class PseudoClient:
                         "Content-Type": Mimetypes.JSON.value,
                         "X-Correlation-Id": correlation_id,
                     },
-                    json={"request": request.model_dump(by_alias=True)},
+                    data=io.BytesIO(
+                        msgspec.json.encode(
+                            {"request": request.model_dump(by_alias=True)}
+                        )
+                    ),
                     timeout=timeout,
                 ) as response:
                     await PseudoClient._handle_response_error(response)
@@ -168,7 +173,7 @@ class PseudoClient:
 
     @deprecated(
         'Detected possible Jupyter notebook environment, which is not ideal for pseudonymization.\n\
-        Please run Python-file from terminal with "poetry run python <path/to/file.py>".'
+        Please run Python-file from terminal instead with "poetry run python <path/to/file.py>".'
     )
     def post_to_field_endpoint_sync(
         self,
