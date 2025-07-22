@@ -1,6 +1,7 @@
 """Utility functions for Dapla Pseudo."""
 
 import asyncio
+import re
 import typing as t
 from datetime import date
 from pathlib import Path
@@ -52,6 +53,18 @@ def redact_field(
 
     This is in order to avoid making unnecessary requests to the API.
     """
+
+    def _remove_brackets_after_last_slash(text: str) -> str:
+        if "/" not in text:
+            return re.sub(r"\[.*?\]", "", text)  # fallback if no slashes at all
+
+        # Split at the last slash
+        before, after = text.rsplit("/", 1)
+        # Remove bracketed substrings only in the "after" part
+        after_cleaned = re.sub(r"\[.*?\]", "", after)
+        # Recombine and return
+        return f"{before}/{after_cleaned}"
+
     kwargs = t.cast(RedactKeywordArgs, request.pseudo_func.kwargs)
     if kwargs.placeholder is None:
         raise ValueError("Placeholder needs to be set for Redact")
@@ -60,15 +73,15 @@ def redact_field(
     # however - the redact functionality is used mostly teams that use hierarchical
     # data, i.e. with very small lists. The overhead of
     # creating a Polars Series is probably not worth it.
-
+    name_no_indices = _remove_brackets_after_last_slash(request.name)
     metadata = RawPseudoMetadata(
-        field_name=request.name,
+        field_name=name_no_indices,
         logs=[],
         metrics=[],
         datadoc=[
             {
-                "short_name": request.name.split("/")[-1],
-                "data_element_path": request.name.replace("/", "."),
+                "short_name": name_no_indices.split("/")[-1],
+                "data_element_path": name_no_indices.replace("/", "."),
                 "pseudonymization": {
                     "encryption_algorithm": "REDACT",
                     "encryption_algorithm_parameters": [

@@ -168,7 +168,7 @@ class PseudoClient:
 
     @deprecated(
         'Detected possible Jupyter notebook environment, which is not ideal for pseudonymization.\n\
-        Please run Python-file from terminal with "poetry run python <path/to/file.py>".'
+        Please run Python-file from terminal instead with "poetry run python <path/to/file.py>".'
     )
     def post_to_field_endpoint_sync(
         self,
