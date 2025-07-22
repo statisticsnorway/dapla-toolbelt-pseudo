@@ -1,22 +1,44 @@
 {
-    "document_version": "1.0.0",
-    "datadoc": {
-      "document_version": "5.0.1",
-      "variables": [
-        {
-           "short_name": "fnr",
-           "data_element_path": "person_info.fnr",
-           "pseudonymization": {
-             "stable_identifier_type": null,
-             "stable_identifier_version": null,
-             "encryption_algorithm": "REDACT",
-             "encryption_algorithm_parameters": [
-                 {
-                     "placeholder": ":"
-                 }
-             ]
-           }
-       }
+  "document_version": "1.0.0",
+  "datadoc": {
+    "document_version": "5.0.1",
+    "variables": [
+      {
+        "short_name": "fnr",
+        "data_element_path": "person_info[0].fnr",
+        "pseudonymization": {
+          "encryption_algorithm": "REDACT",
+          "encryption_algorithm_parameters": [
+            {
+              "placeholder": ":"
+            }
+          ]
+        }
+      },
+      {
+        "short_name": "fnr",
+        "data_element_path": "person_info[1].fnr",
+        "pseudonymization": {
+          "encryption_algorithm": "REDACT",
+          "encryption_algorithm_parameters": [
+            {
+              "placeholder": ":"
+            }
+          ]
+        }
+      },
+      {
+        "short_name": "fnr",
+        "data_element_path": "person_info[2].fnr",
+        "pseudonymization": {
+          "encryption_algorithm": "REDACT",
+          "encryption_algorithm_parameters": [
+            {
+              "placeholder": ":"
+            }
+          ]
+        }
+      }
     ]
   }
 }

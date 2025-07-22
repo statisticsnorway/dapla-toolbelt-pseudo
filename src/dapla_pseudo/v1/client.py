@@ -2,7 +2,6 @@
 
 import asyncio
 import copy
-import io
 import os
 import typing as t
 from collections import defaultdict
@@ -115,11 +114,7 @@ class PseudoClient:
                         "Content-Type": Mimetypes.JSON.value,
                         "X-Correlation-Id": correlation_id,
                     },
-                    data=io.BytesIO(
-                        msgspec.json.encode(
-                            {"request": request.model_dump(by_alias=True)}
-                        )
-                    ),
+                    json={"request": request.model_dump(by_alias=True)},
                     timeout=timeout,
                 ) as response:
                     await PseudoClient._handle_response_error(response)
