@@ -159,6 +159,8 @@ class PseudoClient:
                     for req in reqs
                 ]
             )
+        await asyncio.sleep(0.1)  # Allow time for sockets to close
+        await aio_session.close()
 
         return PseudoClient._merge_responses(results)
 
