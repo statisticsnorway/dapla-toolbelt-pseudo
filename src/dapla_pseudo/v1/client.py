@@ -6,13 +6,10 @@ import os
 import typing as t
 from collections import defaultdict
 from collections.abc import Generator
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
 from datetime import date
 
 import google.auth.transport.requests
 import google.oauth2.id_token
-import msgspec
 import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientSession
@@ -21,7 +18,6 @@ from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
 from dapla_auth_client import AuthClient
-from deprecated import deprecated
 from ulid import ULID
 
 from dapla_pseudo.constants import TIMEOUT_DEFAULT
@@ -165,68 +161,6 @@ class PseudoClient:
             )
 
         return PseudoClient._merge_responses(results)
-
-    @deprecated(
-        'Detected possible Jupyter notebook environment, which is not ideal for pseudonymization.\n\
-        Please run Python-file from terminal with "poetry run python <path/to/file.py>".'
-    )
-    def post_to_field_endpoint_sync(
-        self,
-        path: str,
-        timeout: int,
-        pseudo_requests: list[
-            PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
-        ],
-    ) -> list[tuple[str, list[str | None], RawPseudoMetadata]]:
-        """Make requests to the API in a synchronous manner.
-
-        This is needed in case the library is used
-        in an environment where a Jupyter environment already exists, e.g. Jupyter Notebook.
-        """
-
-        def pseudonymize_field_runner(
-            path: str,
-            timeout: int,
-            request: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest,
-        ) -> tuple[str, list[str | None], RawPseudoMetadata]:
-            if (
-                type(request) is PseudoFieldRequest
-                and request.pseudo_func.function_type == PseudoFunctionTypes.REDACT
-            ):
-                return redact_field(request)
-            else:
-                response = requests.post(
-                    url=f"{self.pseudo_service_url}/{path}",
-                    headers={
-                        "Authorization": f"Bearer {self.__auth_token()}",
-                        "Content-Type": Mimetypes.JSON.value,
-                        "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-                    },
-                    json={"request": request.model_dump(by_alias=True)},
-                    timeout=timeout,
-                )
-                PseudoClient._handle_response_error_sync(response)
-                payload = msgspec.json.decode(response.content.decode("utf-8"))
-                data = payload["data"]
-                metadata = RawPseudoMetadata(
-                    field_name=request.name,
-                    logs=payload["logs"],
-                    metrics=payload["metrics"],
-                    datadoc=payload["datadoc_metadata"].get("variables", None),
-                )
-
-                return request.name, data, metadata
-
-        pseudo_results: list[tuple[str, list[str | None], RawPseudoMetadata]] = []
-        with ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(pseudonymize_field_runner, path, timeout, r)
-                for r in pseudo_requests
-            ]
-            for future in as_completed(futures):
-                pseudo_results.append(future.result())
-
-        return pseudo_results
 
     def _split_requests(
         self,

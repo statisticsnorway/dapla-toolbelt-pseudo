@@ -7,6 +7,7 @@ and descriptive than the user-friendly methods that are exposed.
 
 import asyncio
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 import polars as pl
@@ -17,9 +18,9 @@ from dapla_pseudo.constants import MapFailureStrategy
 from dapla_pseudo.constants import PredefinedKeys
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
-from dapla_pseudo.utils import asyncio_loop_running
 from dapla_pseudo.utils import build_pseudo_field_request
 from dapla_pseudo.utils import convert_to_date
+from dapla_pseudo.utils import running_asyncio_loop
 from dapla_pseudo.v1.client import PseudoClient
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
 from dapla_pseudo.v1.models.api import PseudoFieldRequest
@@ -110,13 +111,19 @@ class _BasePseudonymizer:
         # Execute the pseudonymization API calls in parallel
 
         raw_metadata_fields: list[RawPseudoMetadata] = []
-
-        if asyncio_loop_running():
-            result = self._pseudo_client.post_to_field_endpoint_sync(
-                path=f"{self._pseudo_operation.value}/field",
-                timeout=timeout,
-                pseudo_requests=pseudo_requests,
-            )
+        if running_asyncio_loop() is not None:
+            with ThreadPoolExecutor(
+                1
+            ) as pool:  # Run new event loop in a second worker thread if an event loop is already running
+                result = pool.submit(
+                    lambda: asyncio.run(
+                        self._pseudo_client.post_to_field_endpoint(
+                            path=f"{self._pseudo_operation.value}/field",
+                            timeout=timeout,
+                            pseudo_requests=pseudo_requests,
+                        )
+                    )
+                ).result()
         else:
             result = asyncio.run(
                 self._pseudo_client.post_to_field_endpoint(
