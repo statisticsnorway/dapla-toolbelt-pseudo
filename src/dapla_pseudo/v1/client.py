@@ -130,7 +130,7 @@ class PseudoClient:
         split_pseudo_requests = self._split_requests(pseudo_requests)
         aio_session = ClientSession(
             connector=TCPConnector(limit=200, force_close=True),
-            timeout=ClientTimeout(total=60 * 60 * 10),
+            timeout=ClientTimeout(total=TIMEOUT_DEFAULT),
         )
         async with RetryClient(
             client_session=aio_session,
