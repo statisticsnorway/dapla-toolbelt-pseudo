@@ -95,16 +95,16 @@ def redact_field(
     return request.name, data, metadata
 
 
-def asyncio_loop_running() -> bool:
-    """Determins whether asyncio has a running event loop."""
+def running_asyncio_loop() -> asyncio.AbstractEventLoop | None:
+    """Returns the asyncio event loop if it exists."""
     try:
         loop = asyncio.get_running_loop()
         if loop.is_running():
-            return True
+            return loop
         else:
-            return False
+            return None
     except RuntimeError:
-        return False
+        return None
 
 
 def convert_to_date(sid_snapshot_date: date | str | None = None) -> date | None:
