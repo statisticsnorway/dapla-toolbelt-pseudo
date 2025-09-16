@@ -11,9 +11,11 @@ from datetime import date
 import google.auth.transport.requests
 import google.oauth2.id_token
 import requests
+from aiohttp import ClientPayloadError
 from aiohttp import ClientResponse
 from aiohttp import ClientSession
 from aiohttp import ClientTimeout
+from aiohttp import ServerDisconnectedError
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
@@ -129,7 +131,7 @@ class PseudoClient:
 
         split_pseudo_requests = self._split_requests(pseudo_requests)
         aio_session = ClientSession(
-            connector=TCPConnector(limit=200, force_close=True),
+            connector=TCPConnector(limit=100, enable_cleanup_closed=True),
             timeout=ClientTimeout(total=TIMEOUT_DEFAULT),
         )
         async with RetryClient(
@@ -139,11 +141,15 @@ class PseudoClient:
                 start_timeout=0.1,
                 max_timeout=30,
                 factor=6,
-                statuses={
-                    400,
-                }.union(
+                statuses={400, 429}.union(
                     set(range(500, 600))
                 ),  # Retry all 5xx errors and 400 Bad Request
+                exceptions={
+                    ClientPayloadError,
+                    ServerDisconnectedError,
+                    asyncio.TimeoutError,
+                    OSError,
+                },
             ),
         ) as client:
             results = await asyncio.gather(
@@ -159,7 +165,7 @@ class PseudoClient:
                     for req in reqs
                 ]
             )
-        await asyncio.sleep(0.1)  # Allow time for sockets to close
+        await asyncio.sleep(0.5)  # Allow time for sockets to close
         await aio_session.close()
 
         return PseudoClient._merge_responses(results)
