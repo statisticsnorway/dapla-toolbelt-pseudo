@@ -67,24 +67,28 @@ def test_match_nested_dataframe_dict() -> None:
     df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
     df.match_rules(rules, None)
     matched_fields = df.get_matched_fields()
-    assert len(matched_fields) == 2
+    assert len(matched_fields) == 4
 
-    matched_path_1 = "identifiers/fnr"
-    matched_path_2 = "fnr"
+    matched_path_1 = "identifiers[0]/fnr"
+    matched_path_2 = "identifiers[1]/fnr"
+    matched_path_3 = "identifiers[2]/fnr"
+    matched_path_4 = "fnr"
 
-    assert matched_fields[matched_path_1].path == "identifiers/fnr"
-    assert matched_fields[matched_path_2].path == "fnr"
-    assert matched_fields[matched_path_1].col["name"] == "fnr"  # type: ignore
-    assert matched_fields[matched_path_1].col["values"] == [  # type: ignore
-        "11854898347",
-        "06097048531",
-        "02812289295",
-    ]
+    assert matched_fields[matched_path_1].path == "identifiers[0]/fnr"
+    assert matched_fields[matched_path_2].path == "identifiers[1]/fnr"
+    assert matched_fields[matched_path_3].path == "identifiers[2]/fnr"
+    assert matched_fields[matched_path_4].path == "fnr"
+
+    assert matched_fields[matched_path_1].indexer == ["identifiers", 0, "fnr"]
+    assert matched_fields[matched_path_1].col == ["11854898347"]
+    assert matched_fields[matched_path_4].indexer == ["fnr"]
+    assert matched_fields[matched_path_4].col == [None, None, "02812289295"]
+
     # Test updating the columns in the MutableDataFrame
-    df.update("identifiers/fnr", ["#", "#", "#"])
+    df.update("identifiers[0]/fnr", ["#"])
     df.update("fnr", ["#", "#", "#"])
+
     modified_df = df.to_polars()
-    print(modified_df)
     # Check that the original dataframe_dict has been changed
     assert modified_df["fnr"][0] == "#"
     assert modified_df["identifiers"][0]["fnr"] == "#"
@@ -116,21 +120,22 @@ def test_traverse_list_of_struct() -> None:
     # We get two matched_fields instead of one
     assert len(matched_fields) == 2
 
-    path_1 = "identifiers[0]/value"
+    path_1 = "identifiers[0][0]/value"
     match_1 = matched_fields[path_1]
-    assert isinstance(match_1.col, dict)
-    assert match_1.path == "identifiers[0]/value"
-    assert match_1.col["name"] == "value"
-    assert match_1.col["values"] == ["11854898347"]
+    assert isinstance(match_1.col, list)
+    assert match_1.path == "identifiers[0][0]/value"
+    assert match_1.col == ["11854898347"]
 
-    path_2 = "identifiers[1]/value"
+    path_2 = "identifiers[1][0]/value"
     match_2 = matched_fields[path_2]
-    assert isinstance(match_2.col, dict)
-    assert match_2.path == "identifiers[1]/value"
-    assert match_2.col["name"] == "value"
-    assert match_2.col["values"] == ["06097048531"]
-    # Ideally, we should get just one, with the following valued
-    # assert matched_fields[0].col["values"] == ["11854898347", "06097048531"]
+    assert isinstance(match_2.col, list)
+    assert match_2.path == "identifiers[1][0]/value"
+    assert match_2.col == ["06097048531"]
+
+    df.update("identifiers[0][0]/value", ["#"])
+
+    modified_df = df.to_polars()
+    assert modified_df["identifiers"][0][0]["value"] == "#"
 
 
 def test_traverse_list_inner() -> None:
@@ -158,16 +163,19 @@ def test_traverse_list_inner() -> None:
     print(f"Match field metrics: {df.matched_fields_metrics}")
     assert len(matched_fields) == 2
 
-    path_1 = "identifiers[0]/values"
+    path_1 = "identifiers[0][0]/values"
     match_1 = matched_fields[path_1]
-    assert isinstance(match_1.col, dict)
+    assert isinstance(match_1.col, list)
     assert match_1.path == path_1
-    assert match_1.col["name"] == ""
-    assert match_1.col["values"] == ["11854898347", "99600884572"]
+    assert match_1.col == ["11854898347", "99600884572"]
 
-    path_2 = "identifiers[1]/values"
+    path_2 = "identifiers[1][0]/values"
     match_2 = matched_fields[path_2]
-    assert isinstance(match_2.col, dict)
+    assert isinstance(match_2.col, list)
     assert match_2.path == path_2
-    assert match_2.col["name"] == ""
-    assert match_2.col["values"] == ["06097048531", "59900946537"]
+    assert match_2.col == ["06097048531", "59900946537"]
+
+    df.update("identifiers[0][0]/values", ["#", "#"])
+
+    modified_df = df.to_polars()
+    assert modified_df["identifiers"][0][0]["values"] == ["#", "#"]

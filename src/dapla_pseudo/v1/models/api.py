@@ -20,7 +20,7 @@ class PseudoFieldRequest(APIModel):
     pseudo_func: PseudoFunction
     name: str
     pattern: str
-    values: list[str | int | None]  # 'int' is necessary to run redact on integers
+    values: list[str | int | None]
     keyset: PseudoKeyset | None = None
 
 

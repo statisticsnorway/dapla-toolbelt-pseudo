@@ -1,10 +1,6 @@
 [
     {
-        "person_info": {
-            "fnr": null,
-            "fornavn": null,
-            "etternavn": null
-            },
+        "person_info": null,
         "kjonn": "M",
         "fodselsdato": "020995"
     },

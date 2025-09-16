@@ -95,7 +95,7 @@ def write_from_dicts(
         case SupportedOutputFileFormat.PARQUET:
             df = pl.DataFrame(data)
             # type hints lying
-            df.write_parquet(file_like)  # type: ignore[arg-type]
+            df.write_parquet(file_like)
         case SupportedOutputFileFormat.CSV:
             df = pl.DataFrame(data)
             df.write_csv(file_like)
@@ -123,4 +123,4 @@ def write_from_df(
         case SupportedOutputFileFormat.XML:
             df.to_pandas().to_xml(file_like, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
-            df.write_parquet(file_like, **kwargs)  # type: ignore[arg-type]
+            df.write_parquet(file_like, **kwargs)
