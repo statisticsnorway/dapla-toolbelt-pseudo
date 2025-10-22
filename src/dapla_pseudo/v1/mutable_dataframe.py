@@ -176,19 +176,19 @@ def _search_nested_path(
     ) -> Generator[FieldMatch, None, None]:
         if not remaining_keys:
             rule, target_rules = rules
+            wrap_in_list = isinstance(current, list) is False
             yield FieldMatch(
                 path="/".join(curr_path),
                 pattern=rule.pattern,
                 indexer=indexer,
-                col=current,  # type: ignore[arg-type]
-                wrapped_list=False,
+                col=([current] if wrap_in_list else current),
+                wrapped_list=wrap_in_list,
                 func=rule.func,
                 target_func=target_rules.func if target_rules else None,
             )
             return
 
         key = remaining_keys[0]
-
         if isinstance(current, dict):
             if key in current:
                 yield from _search(
@@ -204,16 +204,14 @@ def _search_nested_path(
                 if isinstance(item, dict):
                     if len(remaining_keys) == 1 and key in item:
                         rule, target_rules = rules
+
+                        wrap_in_list = isinstance(item[key], list) is False
                         yield FieldMatch(
                             path=f"{'/'.join(curr_path)}[{idx}]/{key}",
                             pattern=rule.pattern,
                             indexer=[*indexer, idx, key],
-                            col=(
-                                item[key]
-                                if isinstance(item[key], list)
-                                else [item[key]]
-                            ),
-                            wrapped_list=False if isinstance(item[key], list) else True,
+                            col=([item[key]] if wrap_in_list else item[key]),
+                            wrapped_list=wrap_in_list,
                             func=rule.func,
                             target_func=target_rules.func if target_rules else None,
                         )

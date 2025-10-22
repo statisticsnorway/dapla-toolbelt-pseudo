@@ -152,6 +152,22 @@ def df_personer_hierarchical_inner_list_pseudonymized() -> pl.DataFrame:
 
 
 @pytest_cases.fixture()
+def df_personer_hierarchical_complex() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_complex.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
+def df_personer_hierarchical_complex_pseudonymized() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_hierarchical_complex_pseudonymized.json"
+    return pl.read_json(
+        JSON_FILE,
+    )
+
+
+@pytest_cases.fixture()
 def df_personer_fnr_daead_encrypted() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_default_encryption.json"
     return pl.read_json(
