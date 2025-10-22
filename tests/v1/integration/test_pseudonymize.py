@@ -2,7 +2,6 @@ import asyncio
 
 import polars as pl
 import pytest
-from polars.datatypes import Array
 from polars.testing import assert_frame_equal
 from tests.v1.integration.utils import get_calling_function_name
 from tests.v1.integration.utils import get_expected_datadoc_metadata_container
@@ -10,8 +9,6 @@ from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
 from dapla_pseudo.v1.result import Result
-
-f = Array()
 
 
 @pytest.mark.usefixtures("setup")

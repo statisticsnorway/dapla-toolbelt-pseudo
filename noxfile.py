@@ -199,7 +199,7 @@ def typeguard(session: Session) -> None:
     session.install(".")
     session.install("pytest", "pytest_cases", "pytest_mock", "typeguard", "pygments")
     session.run(
-        "pytest", f"--typeguard-packages={package}", "-n", "auto", *session.posargs
+        "pytest", "-n", "auto", f"--typeguard-packages={package}", *session.posargs
     )
 
 

@@ -162,12 +162,15 @@ def _search_nested_path(
     keys = path.strip("/").split("/")
 
     def _search(
-        current_tree: dict[str, Any] | list[Any],
+        current_tree: dict[str, Any] | list[Any] | str | None,
         remaining_keys: list[str],
         rules: tuple[PseudoRule, PseudoRule | None],
         indexer: list[str | int],
         curr_path: list[str],
     ) -> Generator[FieldMatch, None, None]:
+        if current_tree is None:
+            return
+
         if not remaining_keys:  # Base case: No more keys to process, reached leaf node
             rule, target_rules = rules
 
