@@ -169,6 +169,8 @@ def tests(session: Session) -> None:
             "--parallel",
             "-m",
             "pytest",
+            "-n",
+            "auto",
             "-o",
             "pythonpath=",
             *session.posargs,
@@ -196,7 +198,9 @@ def typeguard(session: Session) -> None:
     """Runtime type checking using Typeguard."""
     session.install(".")
     session.install("pytest", "pytest_cases", "pytest_mock", "typeguard", "pygments")
-    session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
+    session.run(
+        "pytest", f"--typeguard-packages={package}", "-n", "auto", *session.posargs
+    )
 
 
 @session(python=python_versions)

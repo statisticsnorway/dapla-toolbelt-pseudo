@@ -1,5 +1,4 @@
 import re
-from collections import Counter
 from collections.abc import Generator
 from typing import Any
 
@@ -35,7 +34,7 @@ class FieldMatch:
         col: list[Any],
         wrapped_list: bool,
         func: PseudoFunction,  # "source func" if repseudo
-        target_func: PseudoFunction | None,  # "target_func" if repseudo
+        target_func: PseudoFunction | None,  # "target_func" if repseudo, else None
     ) -> None:
         """Initialize the class."""
         self.path = path
@@ -56,10 +55,7 @@ class FieldMatch:
 
 
 class MutableDataFrame:
-    """A DataFrame that can change values in-place.
-
-    If the DataFrame is hierarchical
-    """
+    """A DataFrame that can change values in-place."""
 
     def __init__(self, dataframe: pl.DataFrame, hierarchical: bool) -> None:
         """Initialize the class."""
@@ -90,7 +86,6 @@ class MutableDataFrame:
                 )
             }
         else:
-            counter: Counter[str] = Counter()
             assert isinstance(self.dataset, pl.DataFrame)
             self.dataset = self.dataset.to_dict(as_series=False)
             assert isinstance(self.dataset, dict)
@@ -107,11 +102,6 @@ class MutableDataFrame:
                 for match in matches:
                     self.matched_fields[match.path] = match
 
-            # The Counter contains unique field names. A count > 1 means that the traverse
-            # was not able to group all values with a given path. This will be the case for
-            # list of dicts.
-            self.matched_fields_metrics = dict(counter)
-
     def get_matched_fields(self) -> dict[str, FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
         return self.matched_fields
@@ -123,10 +113,14 @@ class MutableDataFrame:
             self.dataset = self.dataset.with_columns(pl.Series(data).alias(path))
         elif (field_match := self.matched_fields.get(path)) is not None:
             assert isinstance(self.dataset, dict)
-            tmp = self.dataset
+            tree = self.dataset
+            leaf_key = field_match.indexer[-1]  # Either a dict key or a list index
+
             for idx in field_match.indexer[:-1]:
-                tmp = tmp[idx]  # type: ignore[index]
-            tmp[field_match.indexer[-1]] = data if field_match.wrapped_list is False else data[0]  # type: ignore[index]
+                tree = tree[idx]  # type: ignore[index]
+            tree[leaf_key] = (  # type: ignore[index]
+                data if field_match.wrapped_list is False else data[0]
+            )
 
     def to_polars(self) -> pl.DataFrame:
         """Convert to Polars DataFrame."""
@@ -168,20 +162,26 @@ def _search_nested_path(
     keys = path.strip("/").split("/")
 
     def _search(
-        current: dict[str, Any] | list[Any],
+        current_tree: dict[str, Any] | list[Any],
         remaining_keys: list[str],
         rules: tuple[PseudoRule, PseudoRule | None],
         indexer: list[str | int],
         curr_path: list[str],
     ) -> Generator[FieldMatch, None, None]:
-        if not remaining_keys:
+        if not remaining_keys:  # Base case: No more keys to process, reached leaf node
             rule, target_rules = rules
-            wrap_in_list = isinstance(current, list) is False
+
+            # If the current value is not a list, we need to wrap it in a list
+            # in order to send it to pseudo-service.
+
+            # We record whether the value was a wrapped list primitive or an
+            # actual list value so we can unwrap it later when updating the data.
+            wrap_in_list = isinstance(current_tree, list) is False
             yield FieldMatch(
                 path="/".join(curr_path),
                 pattern=rule.pattern,
                 indexer=indexer,
-                col=([current] if wrap_in_list else current),
+                col=([current_tree] if wrap_in_list else current_tree),  # type: ignore[arg-type]
                 wrapped_list=wrap_in_list,
                 func=rule.func,
                 target_func=target_rules.func if target_rules else None,
@@ -189,47 +189,24 @@ def _search_nested_path(
             return
 
         key = remaining_keys[0]
-        if isinstance(current, dict):
-            if key in current:
+        if isinstance(current_tree, dict):  # Recursive case: Traverse dictionary
+            if key in current_tree:
                 yield from _search(
-                    current[key],
+                    current_tree[key],
                     remaining_keys[1:],
                     rules,
                     [*indexer, key],
                     [*curr_path, key],
                 )
 
-        elif isinstance(current, list):
-            for idx, item in enumerate(current):
-                if isinstance(item, dict):
-                    if len(remaining_keys) == 1 and key in item:
-                        rule, target_rules = rules
-
-                        wrap_in_list = isinstance(item[key], list) is False
-                        yield FieldMatch(
-                            path=f"{'/'.join(curr_path)}[{idx}]/{key}",
-                            pattern=rule.pattern,
-                            indexer=[*indexer, idx, key],
-                            col=([item[key]] if wrap_in_list else item[key]),
-                            wrapped_list=wrap_in_list,
-                            func=rule.func,
-                            target_func=target_rules.func if target_rules else None,
-                        )
-                    else:
-                        yield from _search(
-                            item,
-                            remaining_keys,
-                            rules,
-                            [*indexer, idx],
-                            [*curr_path[:-1], f"{curr_path[-1]}[{idx}]"],
-                        )
-                elif isinstance(item, list):
-                    yield from _search(
-                        item,
-                        remaining_keys,
-                        rules,
-                        [*indexer, idx],
-                        [*curr_path[:-1], f"{curr_path[-1]}[{idx}]"],
-                    )
+        elif isinstance(current_tree, list):  # Recursive case: Traverse list
+            for idx, item in enumerate(current_tree):
+                yield from _search(
+                    item,
+                    remaining_keys,
+                    rules,
+                    [*indexer, idx],
+                    [*curr_path[:-1], f"{curr_path[-1]}[{idx}]"],
+                )
 
     yield from _search(data, keys, rules, [], [])
