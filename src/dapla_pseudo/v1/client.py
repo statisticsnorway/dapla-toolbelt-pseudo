@@ -122,7 +122,7 @@ class PseudoClient:
                 async with client.post(
                     url=f"{self.pseudo_service_url}/{path}",
                     headers={
-                        "Authorization": f"Bearer {self.__auth_token()}",
+                        "Authorization": f"Bearer {await self.__auth_token()}",
                         "Content-Type": Mimetypes.JSON.value,
                         "X-Correlation-Id": correlation_id,
                     },
