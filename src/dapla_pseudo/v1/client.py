@@ -57,14 +57,24 @@ class PseudoClient:
             200 if max_total_partitions is None else int(max_total_partitions)
         )
 
-    def __auth_token(self) -> str:
+    def __auth_token(self, current_attempt: int = 0) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
             audience = os.environ["PSEUDO_SERVICE_URL"]
             auth_req = google.auth.transport.requests.Request()  # type: ignore[no-untyped-call]
-            token = t.cast(
-                str,
-                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
-            )
+
+            # Retry logic for fetching token - transiently fails in Cloud Run.
+            max_token_fetch_attempts = 3
+            try:
+                token = t.cast(
+                    str,
+                    google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
+                )
+            except google.auth.exceptions.DefaultCredentialsError as e:
+                if current_attempt < max_token_fetch_attempts - 1:
+                    return self.__auth_token(current_attempt + 1)
+                else:
+                    raise e
+
             return token
         else:
             return (
@@ -72,6 +82,15 @@ class PseudoClient:
                 if self.static_auth_token is None
                 else str(self.static_auth_token)
             )
+
+    @staticmethod
+    async def is_json_parseable(response: ClientResponse) -> bool:
+        """Check if response content is JSON parseable."""
+        try:
+            await response.json()
+            return True
+        except Exception:
+            return False
 
     async def post_to_field_endpoint(
         self,
@@ -150,6 +169,7 @@ class PseudoClient:
                     asyncio.TimeoutError,
                     OSError,
                 },
+                evaluate_response_callback=PseudoClient.is_json_parseable,
             ),
         ) as client:
             results = await asyncio.gather(
