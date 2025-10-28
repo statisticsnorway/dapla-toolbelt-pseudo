@@ -294,7 +294,7 @@ class PseudoClient:
             params={"snapshot": str(sid_snapshot_date)} if sid_snapshot_date else None,
             # Do not set content-type, as this will cause the json to serialize incorrectly
             headers={
-                "Authorization": f"Bearer {self.__auth_token()}",
+                "Authorization": f"Bearer {await self.__auth_token()}",
                 "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
             },
             json=request,
