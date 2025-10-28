@@ -57,14 +57,28 @@ class PseudoClient:
             200 if max_total_partitions is None else int(max_total_partitions)
         )
 
-    def __auth_token(self) -> str:
+    async def __auth_token(self) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
             audience = os.environ["PSEUDO_SERVICE_URL"]
             auth_req = google.auth.transport.requests.Request()  # type: ignore[no-untyped-call]
-            token = t.cast(
-                str,
-                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
-            )
+
+            # Retry logic for fetching token - sometimes transiently fails in Cloud Run.
+            max_token_fetch_attempts = 3
+            for n_attempt in range(max_token_fetch_attempts):
+                try:
+                    token = t.cast(
+                        str,
+                        google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
+                    )
+                except google.auth.exceptions.DefaultCredentialsError as e:
+                    if n_attempt < max_token_fetch_attempts - 1:
+                        await asyncio.sleep(1)
+                        continue
+                    else:
+                        raise e
+                else:
+                    break
+
             return token
         else:
             return (
