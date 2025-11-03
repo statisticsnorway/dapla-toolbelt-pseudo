@@ -84,7 +84,7 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["dapla_pseudo", "tests"]
+source = ["dapla_pseudo"]
 relative_files = true
 
 [tool.coverage.report]
