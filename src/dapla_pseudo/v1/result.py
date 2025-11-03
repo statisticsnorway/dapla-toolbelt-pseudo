@@ -162,7 +162,7 @@ class Result:
         datadoc_file_path: Path | GSPath
         if file_path.startswith(GSPath.cloud_prefix):
             client = GSClient()
-            gs_path = GSPath(file_path, client)
+            gs_path = GSPath(cloud_path=file_path, client=client)
 
             file_handle = gs_path.open(mode="wb")
 

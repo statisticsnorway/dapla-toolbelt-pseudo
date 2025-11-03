@@ -80,26 +80,24 @@ def test_build_pseudo_field_request() -> None:
         ),
     ]
     requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
-    assert requests == [
-        PseudoFieldRequest(
-            pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.REDACT,
-                kwargs=RedactKeywordArgs(placeholder="#"),
-            ),
-            name="foo",
-            pattern="**/foo",
-            values=["bar", "bad"],
+    assert requests[0] == PseudoFieldRequest(
+        pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder="#"),
         ),
-        PseudoFieldRequest(
-            pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.REDACT,
-                kwargs=RedactKeywordArgs(placeholder="#"),
-            ),
-            name="struct/foo",
-            pattern="**/foo",
-            values=["baz", None],
+        name="foo",
+        pattern="**/foo",
+        values=["bar", "bad"],
+    )
+    assert requests[1] == PseudoFieldRequest(
+        pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder="#"),
         ),
-    ]
+        name="struct[0]/foo",
+        pattern="**/foo",
+        values=["baz"],
+    )
 
 
 def test_build_repseudo_field_request() -> None:
@@ -128,31 +126,29 @@ def test_build_repseudo_field_request() -> None:
         PseudoOperation.REPSEUDONYMIZE, df, source_rules, target_rules=target_rules
     )
 
-    assert requests == [
-        RepseudoFieldRequest(
-            source_pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.DAEAD,
-                kwargs=DaeadKeywordArgs(key_id="old-key"),
-            ),
-            target_pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.DAEAD,
-                kwargs=DaeadKeywordArgs(key_id="new-key"),
-            ),
-            name="foo",
-            pattern="**/foo",
-            values=["bar", "bad"],
+    assert requests[0] == RepseudoFieldRequest(
+        source_pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=DaeadKeywordArgs(key_id="old-key"),
         ),
-        RepseudoFieldRequest(
-            source_pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.DAEAD,
-                kwargs=DaeadKeywordArgs(key_id="old-key"),
-            ),
-            target_pseudo_func=PseudoFunction(
-                function_type=PseudoFunctionTypes.DAEAD,
-                kwargs=DaeadKeywordArgs(key_id="new-key"),
-            ),
-            name="struct/foo",
-            pattern="**/foo",
-            values=["baz", None],
+        target_pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=DaeadKeywordArgs(key_id="new-key"),
         ),
-    ]
+        name="foo",
+        pattern="**/foo",
+        values=["bar", "bad"],
+    )
+    assert requests[1] == RepseudoFieldRequest(
+        source_pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=DaeadKeywordArgs(key_id="old-key"),
+        ),
+        target_pseudo_func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD,
+            kwargs=DaeadKeywordArgs(key_id="new-key"),
+        ),
+        name="struct[0]/foo",
+        pattern="**/foo",
+        values=["baz"],
+    )

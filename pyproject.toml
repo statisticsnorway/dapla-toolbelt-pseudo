@@ -26,7 +26,7 @@ python-ulid = ">=2.2.0"
 cryptography = ">41.0.0"
 dapla-auth-client = ">=1.0.1"
 fsspec = ">=2023.5.0"
-polars = ">=1.0.0, <1.2"
+polars = ">=1.31.0"
 pygments = ">2.15.0"
 click = ">=8.0.1"
 ssb-datadoc-model = "^7.0.2"
@@ -73,7 +73,7 @@ nbstripout = ">=0.6.1"
 ipython = ">=8.11.0"
 jupyterlab = ">=4.0.0"
 google-auth = ">= 2.25.2"
-
+pytest-xdist = { extras = ["psutil"], version = ">=3.8.0"}
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -84,7 +84,7 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["dapla_pseudo", "tests"]
+source = ["dapla_pseudo"]
 relative_files = true
 
 [tool.coverage.report]
