@@ -5,6 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 import polars as pl
+from pydantic import ConfigDict
 
 from dapla_pseudo.models import APIModel
 from dapla_pseudo.v1.models.core import PseudoFunction
@@ -14,15 +15,19 @@ from dapla_pseudo.v1.models.core import PseudoKeyset
 class PseudoFieldRequest(APIModel):
     """Model of the pseudo field request sent to the service."""
 
+    model_config = ConfigDict(hide_input_in_errors=True)
+
     pseudo_func: PseudoFunction
     name: str
     pattern: str
-    values: list[str | int | None]  # 'int' is necessary to run redact on integers
+    values: list[str | int | None]
     keyset: PseudoKeyset | None = None
 
 
 class DepseudoFieldRequest(APIModel):
     """Model of the depseudo field request sent to the service."""
+
+    model_config = ConfigDict(hide_input_in_errors=True)
 
     pseudo_func: PseudoFunction
     name: str
@@ -33,6 +38,8 @@ class DepseudoFieldRequest(APIModel):
 
 class RepseudoFieldRequest(APIModel):
     """Model of the repseudo field request sent to the service."""
+
+    model_config = ConfigDict(hide_input_in_errors=True)
 
     source_pseudo_func: PseudoFunction
     target_pseudo_func: PseudoFunction | None

@@ -155,7 +155,7 @@ jobs:
 
       - name: Create coverage report
         run: |
-          nox --session=coverage -- xml
+          nox --session=coverage -- xml --omit="tests/*"
 
       # Need to fix coverage source paths for SonarCloud scanning in GitHub actions.
       # Replace root path with /github/workspace (mounted in docker container).

@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-TIMEOUT_DEFAULT: int = 10 * 60  # seconds
+TIMEOUT_DEFAULT: int = 60 * 60 * 10  # seconds
 
 
 class Env(str, Enum):

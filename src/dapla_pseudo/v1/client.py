@@ -11,9 +11,11 @@ from datetime import date
 import google.auth.transport.requests
 import google.oauth2.id_token
 import requests
+from aiohttp import ClientPayloadError
 from aiohttp import ClientResponse
 from aiohttp import ClientSession
 from aiohttp import ClientTimeout
+from aiohttp import ServerDisconnectedError
 from aiohttp import TCPConnector
 from aiohttp_retry import ExponentialRetry
 from aiohttp_retry import RetryClient
@@ -55,14 +57,24 @@ class PseudoClient:
             200 if max_total_partitions is None else int(max_total_partitions)
         )
 
-    def __auth_token(self) -> str:
+    def __auth_token(self, current_attempt: int = 0) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
             audience = os.environ["PSEUDO_SERVICE_URL"]
             auth_req = google.auth.transport.requests.Request()  # type: ignore[no-untyped-call]
-            token = t.cast(
-                str,
-                google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
-            )
+
+            # Retry logic for fetching token - transiently fails in Cloud Run.
+            max_token_fetch_attempts = 3
+            try:
+                token = t.cast(
+                    str,
+                    google.oauth2.id_token.fetch_id_token(auth_req, audience),  # type: ignore[no-untyped-call]
+                )
+            except google.auth.exceptions.DefaultCredentialsError as e:
+                if current_attempt < max_token_fetch_attempts - 1:
+                    return self.__auth_token(current_attempt + 1)
+                else:
+                    raise e
+
             return token
         else:
             return (
@@ -70,6 +82,15 @@ class PseudoClient:
                 if self.static_auth_token is None
                 else str(self.static_auth_token)
             )
+
+    @staticmethod
+    async def is_json_parseable(response: ClientResponse) -> bool:
+        """Check if response content is JSON parseable."""
+        try:
+            await response.json()
+            return True
+        except Exception:
+            return False
 
     async def post_to_field_endpoint(
         self,
@@ -129,8 +150,8 @@ class PseudoClient:
 
         split_pseudo_requests = self._split_requests(pseudo_requests)
         aio_session = ClientSession(
-            connector=TCPConnector(limit=200, force_close=True),
-            timeout=ClientTimeout(total=60 * 60 * 24),
+            connector=TCPConnector(limit=100, enable_cleanup_closed=True),
+            timeout=ClientTimeout(total=TIMEOUT_DEFAULT),
         )
         async with RetryClient(
             client_session=aio_session,
@@ -139,11 +160,16 @@ class PseudoClient:
                 start_timeout=0.1,
                 max_timeout=30,
                 factor=6,
-                statuses={
-                    400,
-                }.union(
+                statuses={400, 429}.union(
                     set(range(500, 600))
                 ),  # Retry all 5xx errors and 400 Bad Request
+                exceptions={
+                    ClientPayloadError,
+                    ServerDisconnectedError,
+                    asyncio.TimeoutError,
+                    OSError,
+                },
+                evaluate_response_callback=PseudoClient.is_json_parseable,
             ),
         ) as client:
             results = await asyncio.gather(
@@ -159,7 +185,7 @@ class PseudoClient:
                     for req in reqs
                 ]
             )
-        await asyncio.sleep(0.1)  # Allow time for sockets to close
+        await asyncio.sleep(0.5)  # Allow time for sockets to close
         await aio_session.close()
 
         return PseudoClient._merge_responses(results)
