@@ -30,7 +30,7 @@ polars = ">=1.0.0, <1.2"
 pygments = ">2.15.0"
 click = ">=8.0.1"
 ssb-datadoc-model = "^7.0.2"
-dapla-toolbelt-metadata = "^0.8.5"
+dapla-toolbelt-metadata = "<1.0.0"
 cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
 pyarrow = ">=14.0.2"
 orjson = ">=3.10.1"
