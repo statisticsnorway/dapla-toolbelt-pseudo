@@ -15,7 +15,7 @@ classifiers = ["Development Status :: 4 - Beta"]
 Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.13" # This needs to be pinned in sync with SciPy.
+python = ">=3.10,<4.0"
 pydantic = ">=2.0"
 numpy = ">=1.26.4"
 pyhumps = ">=3.8.0"
