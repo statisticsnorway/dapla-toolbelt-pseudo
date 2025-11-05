@@ -1,23 +1,23 @@
 {
-    "document_version": "1.0.0",
-    "datadoc": {
-      "document_version": "5.0.1",
-      "variables": [
-        {
-           "short_name": "values",
-           "data_element_path": "identifiers.values",
-           "pseudonymization": {
-             "stable_identifier_type": null,
-             "stable_identifier_version": null,
-             "encryption_algorithm": "TINK-DAEAD",
-             "encryption_key_reference": "ssb-common-key-1",
-             "encryption_algorithm_parameters": [
-                 {
-                     "keyId": "ssb-common-key-1"
-                 }
-             ]
-           }
-       }
+  "document_version": "1.0.0",
+  "datadoc": {
+    "document_version": "6.1.0",
+    "variables": [
+      {
+        "short_name": "values",
+        "data_element_path": "identifiers.values",
+        "pseudonymization": {
+          "stable_identifier_type": null,
+          "stable_identifier_version": null,
+          "encryption_algorithm": "TINK-DAEAD",
+          "encryption_key_reference": "ssb-common-key-1",
+          "encryption_algorithm_parameters": [
+            {
+              "keyId": "ssb-common-key-1"
+            }
+          ]
+        }
+      }
     ]
   }
 }

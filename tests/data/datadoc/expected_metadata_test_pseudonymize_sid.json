@@ -1,7 +1,7 @@
 {
   "document_version": "1.0.0",
   "datadoc": {
-    "document_version": "5.0.1",
+    "document_version": "6.1.0",
     "variables": [
       {
         "short_name": "fnr",
@@ -16,7 +16,7 @@
               "keyId": "papis-common-key-1"
             },
             {
-              "snapshotDate":"2023-08-31"
+              "snapshotDate": "2023-08-31"
             },
             {
               "strategy": "skip"

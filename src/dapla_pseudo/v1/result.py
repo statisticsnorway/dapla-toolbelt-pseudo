@@ -97,7 +97,7 @@ class Result:
         else:
             return MetadataContainer(
                 datadoc=DatadocMetadata(
-                    document_version="5.0.1",
+                    document_version="6.1.0",
                     variables=datadoc_fields,
                 )
             )

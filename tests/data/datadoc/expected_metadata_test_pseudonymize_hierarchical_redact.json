@@ -1,7 +1,7 @@
 {
   "document_version": "1.0.0",
   "datadoc": {
-    "document_version": "5.0.1",
+    "document_version": "6.1.0",
     "variables": [
       {
         "short_name": "fnr",
