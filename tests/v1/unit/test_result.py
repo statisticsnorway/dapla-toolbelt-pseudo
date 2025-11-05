@@ -76,7 +76,7 @@ def test_result_old_datadoc_metadata(df_personer: pl.DataFrame) -> None:
     )
     expected_datadoc = {
         "document_version": "1.0.0",
-        "datadoc": {"document_version": "5.0.1", "variables": []},
+        "datadoc": {"document_version": "6.1.0", "variables": []},
     }
     assert result.datadoc_model == expected_datadoc
 
@@ -114,7 +114,7 @@ def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
     expected_datadoc = {
         "document_version": "1.0.0",
         "datadoc": {
-            "document_version": "5.0.1",
+            "document_version": "6.1.0",
             "variables": mocked_metadata.datadoc,
         },
     }

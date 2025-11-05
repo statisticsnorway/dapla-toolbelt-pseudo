@@ -86,18 +86,24 @@ class Result:
         if user_provided_metadata and targeted_columns and pseudo_operation:
             for column in targeted_columns:
                 match pseudo_operation:
-                    case PseudoOperation.PSEUDONYMIZE | PseudoOperation.REPSEUDONYMIZE:
+                    case PseudoOperation.PSEUDONYMIZE:
                         user_provided_metadata.add_pseudonymization(
                             column,
                             datadoc_fields_map[column].pseudonymization,
                         )
                     case PseudoOperation.DEPSEUDONYMIZE:
                         user_provided_metadata.remove_pseudonymization(column)
+                    case PseudoOperation.REPSEUDONYMIZE:
+                        user_provided_metadata.remove_pseudonymization(column)
+                        user_provided_metadata.add_pseudonymization(
+                            column,
+                            datadoc_fields_map[column].pseudonymization,
+                        )
             return user_provided_metadata
         else:
             return MetadataContainer(
                 datadoc=DatadocMetadata(
-                    document_version="5.0.1",
+                    document_version="6.1.0",
                     variables=datadoc_fields,
                 )
             )

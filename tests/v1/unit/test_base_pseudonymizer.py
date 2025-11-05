@@ -84,7 +84,7 @@ def test_pseudonymize_field(
             {
                 "datadoc_metadata": {
                     "datadoc": {
-                        "document_version": "5.0.1",
+                        "document_version": "6.1.0",
                         "variables": [
                             {
                                 "short_name": "fnr",
