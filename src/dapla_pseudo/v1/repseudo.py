@@ -25,17 +25,20 @@ class Repseudonymize:
     """
 
     dataset: pl.DataFrame
+    schema: pd.Series | pl.Schema
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a pandas DataFrame."""
         Repseudonymize.dataset = pl.from_pandas(dataframe)
+        Repseudonymize.schema = dataframe.dtypes
         return Repseudonymize._Repseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
         Repseudonymize.dataset = dataframe
+        Repseudonymize.schema = dataframe.schema
         return Repseudonymize._Repseudonymizer()
 
     class _Repseudonymizer(_BasePseudonymizer):
@@ -110,6 +113,7 @@ class Repseudonymize:
                 custom_keyset=source_custom_keyset,
                 target_custom_keyset=target_custom_keyset,
                 timeout=timeout,
+                schema=Repseudonymize.schema,
             )
             return result
 
