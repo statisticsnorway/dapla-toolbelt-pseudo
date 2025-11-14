@@ -1,0 +1,16 @@
+[
+    {
+        "fnr": "11854898347",
+        "number": 1,
+        "floater": 1.0,
+        "date_pseudonymized": "2023-10-27T10:30:00",
+        "boolean": true
+    },
+    {
+        "fnr": "11852228347",
+        "number": 10,
+        "floater": -1.0,
+        "date_pseudonymized": "2013-10-27T10:30:00",
+        "boolean": false
+    }
+]

@@ -30,11 +30,13 @@ class Result:
         pseudo_operation: PseudoOperation | None = None,
         targeted_columns: list[str] | None = None,
         user_provided_metadata: Datadoc | None = None,
+        schema: pd.Series | pl.Schema | None = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
         self._pseudo_data: pl.DataFrame = pseudo_response.data
         self._metadata: dict[str, dict[str, list[Any]]] = {}
         self._datadoc: Datadoc | MetadataContainer
+        self._schema = schema
 
         datadoc_fields: list[Variable] = []
         datadoc_paths: list[str | None] = []
@@ -144,7 +146,13 @@ class Result:
         """
         match self._pseudo_data:
             case pl.DataFrame() as df:
-                return df.to_pandas()
+                pandas_df = df.to_pandas()
+                if isinstance(
+                    self._schema, pd.Series
+                ):  # Apply original schema if available
+                    pandas_df = pandas_df.astype(self._schema)
+
+                return pandas_df
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 

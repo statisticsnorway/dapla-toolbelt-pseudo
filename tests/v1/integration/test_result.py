@@ -138,3 +138,20 @@ def test_pseudonymize_input_output_funcs(
         case "polars":
             df_polars = result.to_polars()
             pl_assert_frame_equal(df_polars, df_personer_fnr_daead_encrypted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_pseudonymize_with_arrow_dtypes(
+    pandas_diverse_datatypes: pd.DataFrame,
+) -> None:
+    """This test ensures that datatypes are retained when converting internally to and from Pandas."""
+    result = (
+        Pseudonymize.from_pandas(pandas_diverse_datatypes)
+        .on_fields("fnr")
+        .with_default_encryption()
+        .run()
+    )
+
+    df_result = result.to_pandas()
+    assert df_result.dtypes.equals(pandas_diverse_datatypes.dtypes)

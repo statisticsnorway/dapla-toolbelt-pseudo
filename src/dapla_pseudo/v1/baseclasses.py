@@ -10,6 +10,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
+import pandas as pd
 import polars as pl
 from dapla_metadata.datasets.core import Datadoc
 
@@ -65,6 +66,7 @@ class _BasePseudonymizer:
         custom_keyset: PseudoKeyset | str | None = None,
         target_custom_keyset: PseudoKeyset | str | None = None,  # used in repseudo
         target_rules: list[PseudoRule] | None = None,  # used in repseudo
+        schema: pd.Series | pl.Schema | None = None,
     ) -> Result:
         if self._dataset is None:
             raise ValueError("No dataset has been provided.")
@@ -92,6 +94,7 @@ class _BasePseudonymizer:
                 for pseudo_rule in (target_rules if target_rules else rules)
             ],
             user_provided_metadata=self._user_provided_metadata,
+            schema=schema,
         )
 
     def _pseudonymize_field(

@@ -26,17 +26,20 @@ class Depseudonymize:
     """
 
     dataset: pl.DataFrame
+    schema: pd.Series | pl.Schema
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a pandas DataFrame."""
         Depseudonymize.dataset = pl.from_pandas(dataframe)
+        Depseudonymize.schema = dataframe.dtypes
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
     def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a polars DataFrame."""
         Depseudonymize.dataset = dataframe
+        Depseudonymize.schema = dataframe.schema
         return Depseudonymize._Depseudonymizer()
 
     class _Depseudonymizer(_BasePseudonymizer):
@@ -92,7 +95,7 @@ class Depseudonymize:
             )
 
             result = super()._execute_pseudo_operation(
-                self.rules, timeout, custom_keyset
+                self.rules, timeout, custom_keyset, schema=Depseudonymize.schema
             )
             return result
 
