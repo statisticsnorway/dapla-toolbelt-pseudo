@@ -26,6 +26,7 @@ class Pseudonymize:
     """
 
     dataset: pl.DataFrame
+    schema: pd.Series | pl.Schema
 
     @staticmethod
     def from_pandas(dataframe: pd.DataFrame) -> "Pseudonymize._Pseudonymizer":
@@ -38,6 +39,7 @@ class Pseudonymize:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
         Pseudonymize.dataset = pl.from_pandas(dataframe)
+        Pseudonymize.schema = dataframe.dtypes
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
@@ -51,6 +53,7 @@ class Pseudonymize:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
         Pseudonymize.dataset = dataframe
+        Pseudonymize.schema = dataframe.schema
         return Pseudonymize._Pseudonymizer()
 
     class _Pseudonymizer(_BasePseudonymizer):
@@ -60,7 +63,9 @@ class Pseudonymize:
         metadata: Datadoc | None = None
 
         def __init__(
-            self, rules: list[PseudoRule] | None = None, metadata: Datadoc | None = None
+            self,
+            rules: list[PseudoRule] | None = None,
+            metadata: Datadoc | None = None,
         ) -> None:
             """Initialize the class."""
             if rules is None:
@@ -109,14 +114,17 @@ class Pseudonymize:
                 hierarchical=hierarchical,
                 user_provided_metadata=self.metadata,
             )
-
             result = super()._execute_pseudo_operation(
-                self.rules, timeout, custom_keyset
+                self.rules, timeout, custom_keyset, schema=Pseudonymize.schema
             )
             return result
 
     class _PseudoFuncSelector(_BaseRuleConstructor):
-        def __init__(self, fields: list[str], metadata: Datadoc | None) -> None:
+        def __init__(
+            self,
+            fields: list[str],
+            metadata: Datadoc | None,
+        ) -> None:
             self._fields = fields
             self._metadata = metadata
             super().__init__(fields)

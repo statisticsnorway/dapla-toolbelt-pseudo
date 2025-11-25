@@ -279,6 +279,22 @@ def df_personer_sid_fnr() -> pl.DataFrame:
 
 
 @pytest_cases.fixture()
+def pandas_diverse_datatypes() -> pd.DataFrame:
+    JSON_FILE = "tests/data/diverse_datatypes.json"
+    return pd.read_json(
+        JSON_FILE,
+        dtype={
+            "string_field": "string[pyarrow]",
+            "int_field": "Int64[pyarrow]",
+            "float_field": "Float64[pyarrow]",
+            "date_pseudonymized": "datetime64[s]",
+            "bool_field": "boolean[pyarrow]",
+        },
+        dtype_backend="pyarrow",
+    )
+
+
+@pytest_cases.fixture()
 def single_field_response() -> MagicMock:
     mock_response = MagicMock()
     mock_response.status_code = 200
