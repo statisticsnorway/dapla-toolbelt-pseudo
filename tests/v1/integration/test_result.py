@@ -28,7 +28,7 @@ def test_repseudonymize_with_metadata(
         .to_papis_compatible_encryption()
         .run()
     )
-    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
+    datadoc_variables: dict[str, t.Any] = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
         filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
@@ -62,7 +62,7 @@ def test_depseudonymize_with_metadata(
         .run()
     )
     # The index 0 here corresponds to the variable 'fnr'
-    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
+    datadoc_variables: dict[str, t.Any] = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
         filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
@@ -85,7 +85,7 @@ def test_pseudonymize_with_metadata(
         .with_default_encryption()
         .run()
     )
-    datadoc_variables = result.datadoc_model["datadoc"]["variables"]
+    datadoc_variables: dict[str, t.Any] = result.datadoc_model["datadoc"]["variables"]
     if fnr_variable := next(
         filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
