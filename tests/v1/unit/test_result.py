@@ -74,11 +74,7 @@ def test_result_old_datadoc_metadata(df_personer: pl.DataFrame) -> None:
     result = Result(
         PseudoFieldResponse(data=df_personer, raw_metadata=[mocked_metadata])
     )
-    expected_datadoc = {
-        "document_version": "1.0.0",
-        "datadoc": {"document_version": "6.1.0", "variables": []},
-    }
-    assert result.datadoc_model == expected_datadoc
+    assert result.datadoc_model == []
 
 
 def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
@@ -111,13 +107,7 @@ def test_result_datadoc_metadata(df_personer: pl.DataFrame) -> None:
     result = Result(
         PseudoFieldResponse(data=df_personer, raw_metadata=[mocked_metadata])
     )
-    expected_datadoc = {
-        "document_version": "1.0.0",
-        "datadoc": {
-            "document_version": "6.1.0",
-            "variables": mocked_metadata.datadoc,
-        },
-    }
+    expected_datadoc = mocked_metadata.datadoc
     assert result.datadoc_model == expected_datadoc
 
 

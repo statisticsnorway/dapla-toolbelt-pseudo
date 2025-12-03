@@ -1,26 +1,20 @@
-{
-  "document_version": "1.0.0",
-  "datadoc": {
-    "document_version": "6.1.0",
-    "variables": [
-      {
-        "short_name": "fnr",
-        "data_element_path": "fnr",
-        "pseudonymization": {
-          "stable_identifier_type": null,
-          "stable_identifier_version": null,
-          "encryption_algorithm": "TINK-FPE",
-          "encryption_key_reference": "papis-common-key-1",
-          "encryption_algorithm_parameters": [
-            {
-              "keyId": "papis-common-key-1"
-            },
-            {
-              "strategy": "skip"
-            }
-          ]
+[
+  {
+    "short_name": "fnr",
+    "data_element_path": "fnr",
+    "pseudonymization": {
+      "stable_identifier_type": null,
+      "stable_identifier_version": null,
+      "encryption_algorithm": "TINK-FPE",
+      "encryption_key_reference": "papis-common-key-1",
+      "encryption_algorithm_parameters": [
+        {
+          "keyId": "papis-common-key-1"
+        },
+        {
+          "strategy": "skip"
         }
-      }
-    ]
+      ]
+    }
   }
-}
+]
