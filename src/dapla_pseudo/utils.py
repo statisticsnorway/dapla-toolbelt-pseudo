@@ -1,11 +1,13 @@
 """Utility functions for Dapla Pseudo."""
 
 import asyncio
+import json
 import re
 import typing as t
 from datetime import date
 from pathlib import Path
 
+from datadoc_model.all_optional.model import Variable
 from pydantic import ValidationError
 
 from dapla_pseudo.constants import PseudoOperation
@@ -20,6 +22,13 @@ from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
+
+
+def encode_datadoc_variables(variables: list[Variable]) -> str:
+    """Encore datadoc variables to a fromatted json list."""
+    return json.dumps(
+        [v.model_dump_json(exclude_none=True, indent=2) for v in variables], indent=2
+    )
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.Any:

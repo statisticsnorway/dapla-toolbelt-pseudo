@@ -4,10 +4,11 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 from tests.v1.integration.utils import get_calling_function_name
-from tests.v1.integration.utils import get_expected_datadoc_metadata_container
+from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
+from dapla_pseudo.utils import encode_datadoc_variables
 from dapla_pseudo.v1.result import Result
 
 
@@ -24,13 +25,11 @@ def test_pseudonymize_default_encryption(
         .run()
     )
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
 
 
@@ -47,13 +46,11 @@ def test_pseudonymize_papis_compatible_encryption(
         .run()
     )
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_fnr_ff31_encrypted)
 
 
@@ -73,13 +70,11 @@ def test_pseudonymize_default_encryption_null(
         .run()
     )
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
 
 
@@ -97,12 +92,10 @@ def test_pseudonymize_sid(
     )
 
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
 
 
@@ -119,13 +112,11 @@ def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
         Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
     )
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert result.metadata["metrics"]["MAPPED_SID"] == 3
     assert result.metadata["metrics"]["NULL_VALUE"] == 1
     assert_frame_equal(result.to_polars(), expected_result_fnr_df)
@@ -149,11 +140,9 @@ def test_pseudonymize_default_encryption_synchronous(
 
     result = asyncio.run(async_wrapper())
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)

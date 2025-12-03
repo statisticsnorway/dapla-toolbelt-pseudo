@@ -2,11 +2,12 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 from tests.v1.integration.utils import get_calling_function_name
-from tests.v1.integration.utils import get_expected_datadoc_metadata_container
+from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
 from dapla_pseudo.constants import PseudoFunctionTypes
+from dapla_pseudo.utils import encode_datadoc_variables
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
@@ -34,13 +35,11 @@ def test_pseudonymize_hierarchical(
     )
 
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_pseudonymized)
 
 
@@ -65,13 +64,11 @@ def test_pseudonymize_hierarchical_null(
     )
 
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_null_pseudonymized)
 
 
@@ -97,13 +94,11 @@ def test_pseudonymize_hierarchical_redact(
     )
 
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_redacted)
 
 
@@ -128,13 +123,11 @@ def test_pseudonymize_hierarchical_inner_list(
     )
 
     current_function_name = get_calling_function_name()
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
         current_function_name
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(
         result.to_polars(), df_personer_hierarchical_inner_list_pseudonymized
     )

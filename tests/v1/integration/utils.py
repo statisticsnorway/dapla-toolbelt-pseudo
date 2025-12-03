@@ -3,7 +3,7 @@ import json
 import os
 
 import pytest
-from datadoc_model.all_optional.model import MetadataContainer
+from datadoc_model.all_optional.model import Variable
 
 
 def integration_test() -> pytest.MarkDecorator:
@@ -15,16 +15,16 @@ def integration_test() -> pytest.MarkDecorator:
     )
 
 
-def get_expected_datadoc_metadata_container(
+def get_expected_datadoc_metadata_variables(
     calling_function_name: str,
-) -> MetadataContainer:
+) -> list[Variable]:
     """Helper function that returns the expected MetadataContainer for a given calling function."""
     expected_metadata_json_file = (
         f"tests/data/datadoc/expected_metadata_{calling_function_name}.json"
     )
     with open(expected_metadata_json_file) as json_file:
         expected_datadoc_json = json.load(json_file)
-    return MetadataContainer(**expected_datadoc_json)
+    return [Variable(**v) for v in expected_datadoc_json]
 
 
 def get_calling_function_name() -> str:

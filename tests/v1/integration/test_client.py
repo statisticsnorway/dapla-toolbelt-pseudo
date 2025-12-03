@@ -3,10 +3,11 @@ import os
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
-from tests.v1.integration.utils import get_expected_datadoc_metadata_container
+from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Pseudonymize
+from dapla_pseudo.utils import encode_datadoc_variables
 
 
 @pytest.mark.usefixtures("setup")
@@ -22,11 +23,9 @@ def test_pseudonymize_default_encryption_multiple_partitions(
         .with_default_encryption()
         .run()
     )
-    expected_metadata_container = get_expected_datadoc_metadata_container(
+    expected_metadata_variables = get_expected_datadoc_metadata_variables(
         "test_pseudonymize_default_encryption"
     )
 
-    assert result.datadoc == expected_metadata_container.model_dump_json(
-        exclude_none=True
-    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_variables)
     assert_frame_equal(result.to_polars(), df_personer_fnr_daead_encrypted)
