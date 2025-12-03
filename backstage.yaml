@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dapla-toolbelt-pseudo
+  title: Dapla Toolbelt Pseudo
+  description: |
+    A python client for doing pseudonymisation operations on data
+  tags:
+    - python
+    - encryption
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-toolbelt-pseudo
+spec:
+  type: library
+  owner: dapla-stat-developers
+  lifecycle: production
