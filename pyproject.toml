@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dapla-toolbelt-pseudo"
-version = "4.4.0"
+version = "4.4.1"
 description = "Pseudonymization extensions for Dapla"
 authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
 license = "MIT"
@@ -15,7 +15,7 @@ classifiers = ["Development Status :: 4 - Beta"]
 Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 pydantic = ">=2.0"
 numpy = ">=1.26.4"
 pyhumps = ">=3.8.0"
@@ -24,7 +24,7 @@ pandas-stubs = ">=1.5.3.230304"
 puremagic = ">=1.15"
 python-ulid = ">=2.2.0"
 cryptography = ">41.0.0"
-dapla-auth-client = ">=1.0.1"
+dapla-auth-client = ">=1.2.1"
 fsspec = ">=2023.5.0"
 polars = ">=1.31.0"
 pygments = ">2.15.0"
