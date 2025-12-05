@@ -28,3 +28,12 @@ def test_validate_not_valid(df_personer: pl.DataFrame) -> None:
     )
     pl_result = result.to_polars()
     assert sorted(pl_result["fnr"].to_list()) == sorted(expected_result)
+
+
+@pytest.mark.usefixtures("setup")
+@pytest.mark.parametrize("invalid_input", ["", "abc", None])
+@integration_test()
+def test_validate_invalid_input(invalid_input: str | None) -> None:
+    df_invalid = pl.DataFrame({"fnr": [invalid_input]})
+    with pytest.raises(ValueError):
+        Validator.from_polars(df_invalid).on_field("fnr").validate_map_to_stable_id()
