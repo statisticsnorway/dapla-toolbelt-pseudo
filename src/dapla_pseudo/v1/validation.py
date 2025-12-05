@@ -110,6 +110,8 @@ class Validator:
             Returns:
                 Result: Containing a result dataframe with associated metadata.
             """
+            Validator._ensure_field_valid(self._field, self._dataframe)
+
             response: requests.Response = _client()._post_to_sid_endpoint(
                 "sid/lookup/batch",
                 self._dataframe[self._field].to_list(),
@@ -141,4 +143,41 @@ class Validator:
                         )
                     ],
                 )
+            )
+
+    @staticmethod
+    def _ensure_field_valid(field: str, dataframe: pl.DataFrame) -> None:
+        """Ensure that all values are numeric and valid.
+
+        This is necessary for SID mapping.
+
+        Args:
+            field (str): The identifier field.
+            dataframe (pl.DataFrame): The dataframe to validate.
+
+        Raises:
+            ValueError: If the field does not exist in the dataframe.
+        """
+        if field not in dataframe.columns:
+            raise ValueError(f"Field '{field}' does not exist in the dataframe.")
+
+        if dataframe.select(pl.col(field)).to_series().has_nulls():
+            raise ValueError(
+                f"Field '{field}' contains None/NaN values which are invalid for SID mapping."
+            )
+
+        allowed_pattern = r"^\d+$"  # only numeric
+        invalid_entries = (
+            dataframe.select(
+                pl.col(field).str.contains(allowed_pattern).alias("is_valid"),
+                pl.col(field),
+            )
+            .filter(~pl.col("is_valid"))
+            .select(pl.col(field))
+        )
+
+        if not invalid_entries.is_empty():
+            invalid_values = invalid_entries.select(pl.col(field)).to_series().to_list()
+            raise ValueError(
+                f"Field '{field}' contains non-numeric values which are invalid for SID mapping: {invalid_values}"
             )
