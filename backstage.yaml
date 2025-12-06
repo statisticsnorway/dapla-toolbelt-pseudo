@@ -15,4 +15,4 @@ spec:
   owner: dapla-stat-developers
   lifecycle: production
   dependsOn:
-    - component: dapla-toolbelt-metadata
+    - "component:dapla-toolbelt-metadata"
