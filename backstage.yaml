@@ -15,4 +15,5 @@ spec:
   owner: dapla-stat-developers
   lifecycle: production
   dependsOn:
+    - "component:pseudo-service"
     - "component:dapla-toolbelt-metadata"
