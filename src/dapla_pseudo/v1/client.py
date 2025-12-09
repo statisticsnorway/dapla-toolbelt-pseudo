@@ -160,7 +160,7 @@ class PseudoClient:
                 start_timeout=0.1,
                 max_timeout=30,
                 factor=6,
-                statuses={400, 429}.union(
+                statuses={400, 401, 429}.union(
                     set(range(500, 600))
                 ),  # Retry all 5xx errors and 400 Bad Request
                 exceptions={
