@@ -1021,20 +1021,20 @@ types-requests = ">=2.28.11"
 
 [[package]]
 name = "dapla-toolbelt-metadata"
-version = "0.10.2"
+version = "0.10.5"
 description = "Dapla Toolbelt Metadata"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "dapla_toolbelt_metadata-0.10.2-py3-none-any.whl", hash = "sha256:812c1957efb6e6c34066764c9062f222b2334139738334d067023ba74951684a"},
-    {file = "dapla_toolbelt_metadata-0.10.2.tar.gz", hash = "sha256:d05a94ad7c85d1dd03ed93c90c7017b7f096ccb96aa4d04681cf863a4ad4be32"},
+    {file = "dapla_toolbelt_metadata-0.10.5-py3-none-any.whl", hash = "sha256:500a63ff125ba94a7eeb85cc60a0786dc02ac4b68520c2a0bfd8c6b3f9a77607"},
+    {file = "dapla_toolbelt_metadata-0.10.5.tar.gz", hash = "sha256:53f5c557c44c94f801aa584f3bb6a2eb042bf55a092fa8bab723793e5112d651"},
 ]
 
 [package.dependencies]
 arrow = ">=1.3.0"
 beautifulsoup4 = ">=4.12.3"
-dapla-auth-client = ">=1.2.0"
+dapla-auth-client = {version = ">=1.2.1", markers = "python_version > \"3.10\""}
 gcsfs = ">=2023.1.0"
 google-auth = ">=2.38.0"
 lxml = ">=5.3.1"
@@ -1047,7 +1047,7 @@ python-dotenv = ">=1.0.1"
 pytz = ">=2025.2"
 requests = ">=2.31.0"
 ruamel-yaml = ">=0.18.10"
-ssb-datadoc-model = ">=8.0.0,<9.0.0"
+ssb-datadoc-model = "8.0.0"
 ssb-klass-python = ">=1.0.1"
 typing-extensions = ">=4.12.2"
 universal-pathlib = ">=0.3.0"
@@ -6152,4 +6152,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "4f2feb914bfb82756f6c75ad30efa12083692bb8adc53e3ec0fff1bfa18ac71b"
+content-hash = "cddc22efbcd697f126c622560a881272b6e22b0fc919fd2b4004ef803f68e46b"
