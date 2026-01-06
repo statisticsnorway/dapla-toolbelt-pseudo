@@ -237,7 +237,7 @@ class Result:
 
     @property
     def datadoc(self) -> str:
-        """Returns the pseudonymization metadata as a string.
+        """Returns the pseudonymization metadata as a formatted json string.
 
         Returns:
             str: A JSON-formattted string representing the datadoc metadata.
@@ -245,12 +245,17 @@ class Result:
         Raises:
             ValueError: If list of a variables is malformed.
         """
+        indentation = 2
         match self._datadoc:
             case Datadoc():
-                return self._datadoc.datadoc_model().model_dump_json(exclude_none=True)
+                return self._datadoc.datadoc_model().model_dump_json(
+                    exclude_none=True, indent=indentation
+                )
             case list():
                 if all(isinstance(v, Variable) for v in self._datadoc):
-                    return encode_datadoc_variables(self._datadoc)
+                    return encode_datadoc_variables(
+                        variables=self._datadoc, indent=indentation
+                    )
                 else:
                     raise ValueError(
                         "Unexpected datatype found for 'self._datadoc' property"

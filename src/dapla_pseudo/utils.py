@@ -24,9 +24,11 @@ from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
 
-def encode_datadoc_variables(variables: list[Variable]) -> str:
+def encode_datadoc_variables(variables: list[Variable], indent: int = 2) -> str:
     """Encore datadoc variables to a fromatted json list."""
-    return json.dumps([v.model_dump(exclude_none=True) for v in variables], indent=2)
+    return json.dumps(
+        [v.model_dump(exclude_none=True) for v in variables], indent=indent
+    )
 
 
 def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.Any:

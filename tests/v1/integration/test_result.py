@@ -200,3 +200,37 @@ def test_pseudonymize_serialized_datadoc_variables(
     assert json.loads(result.datadoc) == json.loads(
         encode_datadoc_variables(expected_metadata_container)
     )
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_datadoc_variables_string_formatting(
+    df_personer: pl.DataFrame,
+) -> None:
+    result = (
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_default_encryption()
+        .run()
+    )
+    expected_variable_metadata = json.dumps(json.loads(result.datadoc), indent=2)
+    # Ensure json string has correct indentation level
+    assert expected_variable_metadata == result.datadoc
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_datadoc_model_string_formatting(
+    df_personer_metadata: Datadoc,
+    df_personer: pl.DataFrame,
+) -> None:
+    result = (
+        Pseudonymize.from_polars(df_personer)
+        .with_metadata(df_personer_metadata)
+        .on_fields("fnr")
+        .with_default_encryption()
+        .run()
+    )
+    expected_datadoc_metadata = json.dumps(json.loads(result.datadoc), indent=2)
+    # Ensure json string has correct indentation level
+    assert expected_datadoc_metadata == result.datadoc
