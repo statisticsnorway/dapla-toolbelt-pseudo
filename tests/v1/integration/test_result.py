@@ -101,6 +101,18 @@ def test_pseudonymize_with_metadata(
     if fnr_variable := next(
         filter(lambda v: v["short_name"] == "fnr", datadoc_variables), None
     ):
+        if fnr_variable_from_datadoc := next(
+            filter(
+                lambda v: v["short_name"] == "fnr",
+                json.loads(result.datadoc)["datadoc"]["variables"],
+            ),
+            None,
+        ):
+            assert (
+                fnr_variable["pseudonymization"]
+                == fnr_variable_from_datadoc["pseudonymization"]
+            )
+
         expected = {
             "encryption_algorithm": "TINK-DAEAD",
             "encryption_key_reference": "ssb-common-key-1",
