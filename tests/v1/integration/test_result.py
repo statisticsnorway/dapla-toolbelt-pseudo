@@ -1,3 +1,4 @@
+import json
 import typing as t
 
 import pandas as pd
@@ -6,11 +7,13 @@ import pytest
 from dapla_metadata.datasets.core import Datadoc
 from pandas.testing import assert_frame_equal as pd_assert_frame_equal
 from polars.testing import assert_frame_equal as pl_assert_frame_equal
+from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Depseudonymize
 from dapla_pseudo import Pseudonymize
 from dapla_pseudo import Repseudonymize
+from dapla_pseudo.utils import encode_datadoc_variables
 
 
 @pytest.mark.usefixtures("setup")
@@ -164,3 +167,24 @@ def test_pseudonymize_with_arrow_dtypes(
 
     df_result = result.to_pandas()
     assert df_result.dtypes.equals(pandas_diverse_datatypes.dtypes)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_pseudonymize_serialized_datadoc_variables(
+    df_personer: pl.DataFrame,
+) -> None:
+    result = (
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_default_encryption()
+        .run()
+    )
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
+        "test_pseudonymize_default_encryption"
+    )
+
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
+    assert json.loads(result.datadoc) == json.loads(
+        encode_datadoc_variables(expected_metadata_container)
+    )
