@@ -62,14 +62,6 @@ dapla\_pseudo.v1 package
 ========================
 
 
-dapla\_pseudo.v1.api\_models module
------------------------------------
-
-.. automodule:: dapla_pseudo.v1.api_models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 dapla\_pseudo.v1.client module
 ------------------------------
 
@@ -94,13 +86,6 @@ dapla\_pseudo.v1.pseudo module
    :undoc-members:
    :show-inheritance:
 
-dapla\_pseudo.v1.pseudo\_commons module
----------------------------------------
-
-.. automodule:: dapla_pseudo.v1.pseudo_commons
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 dapla\_pseudo.v1.result module
 ------------------------------

@@ -57,6 +57,7 @@ doc = [
     "sphinx-autobuild>=2025.8.25; python_version >= '3.11'",
     "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.11'",
     "sphinx-click>=6.1.0; python_version >= '3.11'",
+    "dapla-toolbelt-pseudo @ file:///${PROJECT_ROOT}"
 ]
 test = ["typeguard>=2.13.3"]
 dev = [
