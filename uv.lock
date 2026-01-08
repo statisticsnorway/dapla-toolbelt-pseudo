@@ -862,6 +862,7 @@ doc = [
 ]
 lint = [
     { name = "black", extra = ["jupyter"] },
+    { name = "darglint" },
     { name = "pre-commit" },
     { name = "pre-commit-hooks" },
     { name = "pydoclint" },
@@ -942,6 +943,7 @@ doc = [
 ]
 lint = [
     { name = "black", extras = ["jupyter"], specifier = ">=25.11.0" },
+    { name = "darglint", specifier = ">=1.8.1" },
     { name = "pre-commit", specifier = ">=4.4.0" },
     { name = "pre-commit-hooks", specifier = ">=6.0.0" },
     { name = "pydoclint", specifier = ">=0.8.3" },
