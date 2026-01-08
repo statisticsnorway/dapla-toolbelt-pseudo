@@ -21,51 +21,55 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { python: "3.11"}
-          - { python: "3.12"}
-          - { python: "3.13"}
+          - { python: "3.11" }
+          - { python: "3.12" }
+          - { python: "3.13" }
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    - id: "auth"
-      name: "Authenticate to Google Cloud"
-      uses: "google-github-actions/auth@v2.1.3"
-      with:
-        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ secrets.INTEGRATION_TEST_SA_EMAIL }}
-        token_format: "access_token"
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v2'
-      with:
-        version: '>= 363.0.0'
-    - name: Generate, mask, and output Google ID token as a secret
-      id: get-id-token
-      env:
-        PRIVILEGED_SERVICE_ACCOUNT: ${{ secrets.INTEGRATION_TEST_PRIV_SA_EMAIL }}
-      run: |
-        # REQUIRED TO KEEP GH ACTIONS FOR LOGGING THE ID TOKEN
-        # SEE: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
-        pseudo_service_auth_token="$(gcloud auth print-identity-token --impersonate-service-account=$PRIVILEGED_SERVICE_ACCOUNT --audiences=$PSEUDO_SERVICE_URL --include-email)"
-        echo "::add-mask::$pseudo_service_auth_token"
-        echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
-    - name: Setup python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python }}
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v2.1.3"
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.INTEGRATION_TEST_SA_EMAIL }}
+          token_format: "access_token"
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          version: ">= 363.0.0"
+      - name: Generate, mask, and output Google ID token as a secret
+        id: get-id-token
+        env:
+          PRIVILEGED_SERVICE_ACCOUNT: ${{ secrets.INTEGRATION_TEST_PRIV_SA_EMAIL }}
+        run: |
+          # REQUIRED TO KEEP GH ACTIONS FOR LOGGING THE ID TOKEN
+          # SEE: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
+          pseudo_service_auth_token="$(gcloud auth print-identity-token --impersonate-service-account=$PRIVILEGED_SERVICE_ACCOUNT --audiences=$PSEUDO_SERVICE_URL --include-email)"
+          echo "::add-mask::$pseudo_service_auth_token"
+          echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
 
-    - name: Install Poetry
-      run: |
-        pipx install --pip-args "-c ${{ github.workspace }}/.github/workflows/constraints.txt" poetry
-        pipx inject poetry poetry-plugin-export
-        poetry --version
+      - name: Get uv version from constraints
+        id: uv-version
+        shell: pwsh
+        run: |
+          $UV_VERSION = (Get-Content .github/workflows/constraints.txt | Where-Object { $_ -match '^uv==' } | ForEach-Object { ($_ -split '==')[1] })
+          echo "version=$UV_VERSION" >> $env:GITHUB_OUTPUT
 
-    - name: Install Nox
-      run: |
-        pipx install --pip-args "-c ${{ github.workspace }}/.github/workflows/constraints.txt" nox
-        pipx inject --pip-args "-c ${{ github.workspace }}/.github/workflows/constraints.txt" nox nox-poetry
-        nox --version
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          version: "${{ steps.uv-version.outputs.version }}"
+          python-version: "${{ matrix.python }}"
 
-    - name: Integration test
-      env:
-        PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
-      run: nox --python=${{ matrix.python }} --session tests -- tests/v1/integration
+      - name: Integration test
+        env:
+          PSEUDO_SERVICE_AUTH_TOKEN: ${{ steps.get-id-token.outputs.PSEUDO_SERVICE_AUTH_TOKEN }}
+        run: |
+          uvx --constraints "${{ github.workspace }}/.github/workflows/constraints.txt" \
+            nox --python="${{ matrix.python }}" --session tests -- tests/v1/integration

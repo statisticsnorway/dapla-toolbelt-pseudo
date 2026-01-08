@@ -34,9 +34,7 @@ Request features on the [Issue Tracker].
 
 You need Python 3.10+ and the following tools:
 
-- [Poetry]
-- [Nox]
-- [nox-poetry]
+- [uv]
 
 Install [pipx]:
 
@@ -45,17 +43,10 @@ python -m pip install --user pipx
 python -m pipx ensurepath
 ```
 
-Install [Poetry]:
+Install [Uv]:
 
 ```console
-pipx install poetry
-```
-
-Install [Nox] and [nox-poetry]:
-
-```console
-pipx install nox
-pipx inject nox nox-poetry
+pipx install uv
 ```
 
 Install the pre-commit hooks
@@ -67,14 +58,14 @@ nox --session=pre-commit -- install
 Install the package with development requirements:
 
 ```console
-poetry install
+uv sync
 ```
 
 You can now run an interactive Python session, or your app:
 
 ```console
-poetry run python
-poetry run dapla-toolbelt-pseudo
+uv run python
+uv run dapla-toolbelt-pseudo
 ```
 
 ## How to test the project
@@ -131,9 +122,8 @@ This will allow a chance to talk it over with the owners and validate your appro
 [documentation]: https://statisticsnorway.github.io/dapla-toolbelt-pseudo
 [issue tracker]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/issues
 [pipx]: https://pipx.pypa.io/
-[poetry]: https://python-poetry.org/
+[uv]: https://docs.astral.sh/uv/
 [nox]: https://nox.thea.codes/
-[nox-poetry]: https://nox-poetry.readthedocs.io/
 [pytest]: https://pytest.readthedocs.io/
 [pull request]: https://github.com/statisticsnorway/dapla-toolbelt-pseudo/pulls
 
