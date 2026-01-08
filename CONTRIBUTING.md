@@ -73,20 +73,20 @@ uv run dapla-toolbelt-pseudo
 Run the full test suite:
 
 ```console
-nox
+uvx nox
 ```
 
 List the available Nox sessions:
 
 ```console
-nox --list-sessions
+uvx nox --list-sessions
 ```
 
 You can also run a specific Nox session.
 For example, invoke the unit test suite like this:
 
 ```console
-nox --session=tests
+uvx nox --session=tests
 ```
 
 Unit tests are located in the _tests_ directory,
@@ -94,7 +94,7 @@ and are written using the [pytest] testing framework.
 
 Integration tests are located in _tests/integration_,
 and require the `@integration_test` decorator and `setup` fixture for environment-specific configurations.
-To run the tests locally, the user must either be part of the `pseudo-service-admin-t@ssb.no` group or included in the [admin list](https://github.com/statisticsnorway/platform-dev/blob/43b8620bc3628d5f30a6598755a05078a4a715c9/flux/staging-bip-app/dapla/dapla-pseudo-service/dapla-pseudo-service.yaml#L245) for the service in staging.
+To run the tests locally, the user must be part of the `pseudo-service-admin-t@ssb.no` group.
 
 ## How to submit changes
 
