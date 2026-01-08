@@ -1,78 +1,109 @@
-[tool.poetry]
+[project]
 name = "dapla-toolbelt-pseudo"
 version = "6.0.1"
 description = "Pseudonymization extensions for Dapla"
-authors = ["Dapla Developers <dapla-platform-developers@ssb.no>"]
-license = "MIT"
+authors = [{ name = "Dapla Developers", email = "dapla-platform-developers@ssb.no" }]
+requires-python = ">=3.11,<4.0"
 readme = "README.md"
-homepage = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
-repository = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
-documentation = "https://statisticsnorway.github.io/dapla-toolbelt-pseudo"
-packages = [{ include = "dapla_pseudo", from = "src" }]
+license = "MIT"
 classifiers = ["Development Status :: 4 - Beta"]
+dependencies = [
+    "pydantic>=2.12",
+    "numpy>=1.26.4",
+    "pyhumps>=3.8.0",
+    "types-requests>=2.28.11",
+    "pandas-stubs>=1.5.3.230304",
+    "puremagic>=1.15",
+    "python-ulid>=2.2.0",
+    "cryptography>41.0.0",
+    "dapla-auth-client>=1.2.1",
+    "fsspec>=2023.5.0",
+    "polars>=1.31.0",
+    "pygments>2.15.0",
+    "click>=8.0.1",
+    "dapla-toolbelt-metadata>=0.10.5,<1.0.0",
+    "cloudpathlib[gs]>=0.17.0",
+    "pyarrow>=14.0.2",
+    "orjson>=3.10.1",
+    "wcmatch>=8.5.1",
+    "msgspec>=0.18.6",
+    "aiohttp>=3.10.5",
+    "aiohttp-retry>=2.9.1",
+    "pytest-asyncio>=0.24.0",
+    "gcsfs>=2025.5.1,<2026",
+    "deprecated>=1.2.18",
+    "types-deprecated>=1.2.15.20250304",
+]
 
-[tool.poetry.urls]
+[project.urls]
+Homepage = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
+Repository = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo"
+Documentation = "https://statisticsnorway.github.io/dapla-toolbelt-pseudo"
 Changelog = "https://github.com/statisticsnorway/dapla-toolbelt-pseudo/releases"
 
-[tool.poetry.dependencies]
-python = ">=3.11,<4.0"
-pydantic = ">=2.0"
-numpy = ">=1.26.4"
-pyhumps = ">=3.8.0"
-types-requests = ">=2.28.11"
-pandas-stubs = ">=1.5.3.230304"
-puremagic = ">=1.15"
-python-ulid = ">=2.2.0"
-cryptography = ">41.0.0"
-dapla-auth-client = ">=1.2.1"
-fsspec = ">=2023.5.0"
-polars = ">=1.31.0"
-pygments = ">2.15.0"
-click = ">=8.0.1"
-dapla-toolbelt-metadata = ">=0.10.5,<1.0.0"
-cloudpathlib = { extras = ["gs"], version = ">=0.17.0" }
-pyarrow = ">=14.0.2"
-orjson = ">=3.10.1"
-wcmatch = ">=8.5.1"
-msgspec = ">=0.18.6"
-aiohttp = ">=3.10.5"
-aiohttp-retry = ">=2.9.1"
-pytest-asyncio = ">=0.24.0"
-gcsfs = "^2025.5.1"
-deprecated = ">=1.2.18"
-types-deprecated = ">=1.2.15.20250304"
+[dependency-groups]
+lint = [
+    "black[jupyter]>=25.11.0",
+    "pre-commit>=4.4.0",
+    "pre-commit-hooks>=6.0.0",
+    "pydoclint>=0.8.3",
+    "ruff>=0.14.5",
+    "darglint>=1.8.1"
+]
+doc = [
+    "furo>=2025.9.25; python_version >= '3.11'",
+    "myst-parser>=4.0.1; python_version >= '3.11'",
+    "sphinx>=8.2.3; python_version >= '3.11'",
+    "sphinx-autobuild>=2025.8.25; python_version >= '3.11'",
+    "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.11'",
+    "sphinx-click>=6.1.0; python_version >= '3.11'",
+    "dapla-toolbelt-pseudo @ file:///${PROJECT_ROOT}"
+]
+test = ["typeguard>=2.13.3"]
+dev = [
+    "pydantic>=2.12",
+    "pytest-cases>=3.8.5",
+    "pytest-mock>=3.14",
+    "pygments>=2.10.0",
+    "black[jupyter]>=23.1.0",
+    "coverage[toml]>=6.2",
+    "darglint>=1.8.1",
+    "furo>=2021.11.12",
+    "mypy>=0.930",
+    "pre-commit>=2.16.0",
+    "pre-commit-hooks>=4.1.0",
+    "ruff>=0.3.1",
+    "pytest>=6.2.5",
+    "sphinx>=6.2.1",
+    "sphinx-autobuild>=2021.3.14",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "sphinx-click>=3.0.2",
+    "typeguard>=2.13.3",
+    "xdoctest[colors]>=0.15.10",
+    "myst-parser>=0.16.1",
+    "ipykernel>=6.0.0",
+    "mock>=4.0.3",
+    "pandas-stubs>=1.5.3.230304",
+    "nbstripout>=0.6.1",
+    "ipython>=8.11.0",
+    "jupyterlab>=4.0.0",
+    "google-auth>= 2.25.2",
+    "pytest-xdist[psutil]>=3.8.0",
+    "dapla-toolbelt-pseudo @ file:///${PROJECT_ROOT}"
+]
 
-[tool.poetry.group.test.dependencies]
-typeguard = ">=2.13.3"
+[tool.hatch.build.targets.sdist]
+include = ["src/dapla_pseudo"]
 
-[tool.poetry.group.dev.dependencies]
-pytest-cases = ">=3.8.5"
-pytest-mock = ">=3.14"
-pygments = ">=2.10.0"
-black = { extras = ["jupyter"], version = ">=23.1.0" }
-coverage = { extras = ["toml"], version = ">=6.2" }
-darglint = ">=1.8.1"
-furo = ">=2021.11.12"
-mypy = ">=0.930"
-pre-commit = ">=2.16.0"
-pre-commit-hooks = ">=4.1.0"
-ruff = ">=0.3.1"
-pytest = ">=6.2.5"
-sphinx = ">=6.2.1"
-sphinx-autobuild = ">=2021.3.14"
-sphinx-autodoc-typehints = ">=1.24.0"
-sphinx-click = ">=3.0.2"
-typeguard = ">=2.13.3"
-xdoctest = { extras = ["colors"], version = ">=0.15.10" }
-myst-parser = { version = ">=0.16.1" }
-ipykernel = ">=6.0.0"
-mock = ">=4.0.3"
-pandas-stubs = ">=1.5.3.230304"
-nbstripout = ">=0.6.1"
-ipython = ">=8.11.0"
-jupyterlab = ">=4.0.0"
-google-auth = ">= 2.25.2"
-pytest-xdist = { extras = ["psutil"], version = ">=3.8.0"}
+[tool.hatch.build.targets.wheel]
+include = ["src/dapla_pseudo"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/dapla_pseudo" = "dapla_pseudo"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -186,7 +217,3 @@ classmethod-decorators = ["classmethod", "validator", "root_validator", "pydanti
     "D102",
     "D103",
 ]
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"

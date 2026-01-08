@@ -14,11 +14,15 @@ from dapla_pseudo.v1 import pseudonymize
 (which would always resolve to the v1 implementation)
 """
 
+from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version
 
 # Avoid having to define the version multiple places.
 # Ref: https://github.com/python-poetry/poetry/issues/144#issuecomment-1488038660
-__version__ = version("dapla_toolbelt_pseudo")
+try:
+    __version__ = version("dapla_toolbelt_pseudo")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 from dapla_pseudo.globberator.traverser import SchemaTraverser
 from dapla_pseudo.v1.client import PseudoClient
