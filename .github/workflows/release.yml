@@ -44,8 +44,7 @@ jobs:
         if: steps.check-parent-commit.outputs.sha
         uses: salsify/action-detect-and-tag-new-version@v2.0.3
         with:
-          version-command: |
-            uv version --short
+          version-command: uv version --short
 
       - name: Bump version for developmental release
         if: (!steps.check-version.outputs.tag)
