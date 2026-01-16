@@ -152,9 +152,9 @@ def _search_nested_path(
     """Search in the hierarchical data structure for the data at a given path.
 
     Args:
-        data (dict[str, Any] | list[Any]): The hierarchical data structure to search.
-        path (str): The path to search for in the data structure.
-        rules (tuple[PseudoRule, PseudoRule  |  None]): The pseudo rules for the path.
+        data: The hierarchical data structure to search.
+        path: The path to search for in the data structure.
+        rules: The pseudo rules for the path.
 
     Yields:
         Generator[FieldMatch, None, None]: A generator yielding FieldMatch objects.

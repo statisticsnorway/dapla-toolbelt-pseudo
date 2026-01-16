@@ -92,10 +92,10 @@ class Repseudonymize:
             """Pseudonymize the dataset.
 
             Args:
-                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
-                source_custom_keyset (PseudoKeyset, optional): The source pseudonymization keyset to use. Defaults to None.
-                target_custom_keyset (PseudoKeyset, optional): The target pseudonymization keyset to use. Defaults to None.
-                timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
+                hierarchical: Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
+                source_custom_keyset: The source pseudonymization keyset to use. Defaults to None.
+                target_custom_keyset: The target pseudonymization keyset to use. Defaults to None.
+                timeout: The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
@@ -131,9 +131,9 @@ class Repseudonymize:
             """Claim that the selected fields were mapped to Stable ID, then pseudonymized with PAPIS-compatible encryption.
 
             Args:
-                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version that was used.
+                sid_snapshot_date: Date representing SID-catalogue version that was used.
                     Latest if unspecified. Format: YYYY-MM-DD
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:
@@ -152,7 +152,7 @@ class Repseudonymize:
             """Claim that the selected fields were pseudonymized with default encryption.
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:
@@ -169,7 +169,7 @@ class Repseudonymize:
             """Claim that the selected fields were pseudonymized with PAPIS-compatible encryption.
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:
@@ -210,9 +210,9 @@ class Repseudonymize:
             In other words, this is a compound operation that both: 1) maps FNR to stable ID 2) then encrypts the Stable IDs.
 
             Args:
-                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                sid_snapshot_date: Date representing SID-catalogue version to use.
                     Latest if unspecified. Format: YYYY-MM-DD
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:
@@ -231,7 +231,7 @@ class Repseudonymize:
             """Pseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (ssb-common-key-1)
 
             Returns:
@@ -248,7 +248,7 @@ class Repseudonymize:
             """Pseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:

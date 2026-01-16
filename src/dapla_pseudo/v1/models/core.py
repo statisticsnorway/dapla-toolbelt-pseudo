@@ -46,9 +46,9 @@ class PseudoFunctionArgs(BaseModel):
 class MapSidKeywordArgs(PseudoFunctionArgs):
     """Representation of kwargs for the 'map-sid' function.
 
-    Parameters:
+    Attributes:
         key_id: The key to be used for pseudonomization.
-        snapshot_date (date): The timestamp for the version of the SID catalogue.
+        snapshot_date: The timestamp for the version of the SID catalogue.
             If not specified, will choose the latest version.
             The format is: YYYY-MM-DD, e.g. 2021-05-21
         strategy: defines how encryption/decryption should handle non-alphabet characters
@@ -172,7 +172,7 @@ class PseudoRule(APIModel):
     Lists of PseudoRules are processed by the dapla-pseudo-service in the order they are defined, and only the first
     matching rule will be applied (thus: rule ordering is important).
 
-    Parameters:
+    Attributes:
         pattern: Glob expression, such as: ``/**/{field1, field2, *navn}``
         func: A transformation function, such as ``tink-daead(<keyname>), redact(<replacementstring>) or fpe-anychar(<keyname>)``
         path: If hierarchical, ``/path/to/thing``, else None
