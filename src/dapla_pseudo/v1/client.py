@@ -103,8 +103,8 @@ class PseudoClient:
         """Post a request to the Pseudo Service field endpoint.
 
         Args:
-            path (str): Full URL to the endpoint
-            timeout (int): Request timeout
+            path: Full URL to the endpoint
+            timeout: Request timeout
             pseudo_requests: Pseudo requests
 
         Returns:
