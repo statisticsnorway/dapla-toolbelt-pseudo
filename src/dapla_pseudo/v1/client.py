@@ -287,29 +287,72 @@ class PseudoClient:
                 print(response.text)
                 response.raise_for_status()
 
-    def _post_to_sid_endpoint(
+    async def _post_to_sid_endpoint(
         self,
         path: str,
         values: list[str],
         sid_snapshot_date: date | None = None,
-        stream: bool = True,
-    ) -> requests.Response:
-        request: dict[str, t.Collection[str]] = {"fnrList": values}
-        response = requests.post(
-            url=f"{self.pseudo_service_url}/{path}",
-            params={"snapshot": str(sid_snapshot_date)} if sid_snapshot_date else None,
-            # Do not set content-type, as this will cause the json to serialize incorrectly
-            headers={
-                "Authorization": f"Bearer {self.__auth_token()}",
-                "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
-            },
-            json=request,
-            stream=stream,
-            timeout=TIMEOUT_DEFAULT,  # seconds
-        )
+    ) -> tuple[list[str], str | None]:
+        """Post SID lookup in batches concurrently and merge responses.
 
-        PseudoClient._handle_response_error_sync(response)
-        return response
+        Returns:
+            tuple[list[str], str | None]: (missing_values, datasetExtractionSnapshotTime)
+        """
+        total_rows = len(values)
+        batch_size = self.rows_per_partition
+
+        # Do not split if total rows is less than batch size (default 10k)
+        if total_rows <= batch_size:
+            batches = [values]
+        else:
+            batches = [
+                values[i : i + batch_size] for i in range(0, total_rows, batch_size)
+            ]
+
+        async with ClientSession(
+            connector=TCPConnector(limit=100, enable_cleanup_closed=True),
+            timeout=ClientTimeout(total=TIMEOUT_DEFAULT),
+        ) as session:
+
+            async def _post_batch(
+                batch: list[str],
+                path: str,
+            ) -> dict[str, list[str] | str]:
+                resp_cm = await session.post(
+                    url=f"{self.pseudo_service_url}/{path}",
+                    params=(
+                        {"snapshot": str(sid_snapshot_date)}
+                        if sid_snapshot_date
+                        else None
+                    ),
+                    # Do not set content-type, as this will cause the json to serialize incorrectly
+                    headers={
+                        "Authorization": f"Bearer {self.__auth_token()}",
+                        "X-Correlation-Id": PseudoClient._generate_new_correlation_id(),
+                    },
+                    json={"fnrList": batch},
+                )
+                async with resp_cm as response:
+                    await PseudoClient._handle_response_error(response)
+                    payload = await response.json()
+                    return t.cast(
+                        dict[str, list[str] | str],
+                        (
+                            payload[0]
+                            if isinstance(payload, list) and payload
+                            else payload
+                        ),
+                    )
+
+            results = await asyncio.gather(*[_post_batch(b, path) for b in batches])
+
+        # Merge results
+        all_missing = [m for r in results for m in r.get("missing", [])]
+        raw_snapshot = (
+            results[0].get("datasetExtractionSnapshotTime") if results else None
+        )
+        snapshot_time = t.cast(str | None, raw_snapshot)
+        return all_missing, snapshot_time
 
 
 def _client() -> PseudoClient:
