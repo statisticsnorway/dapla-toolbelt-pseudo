@@ -38,8 +38,8 @@ class Validator:
         """Initialize a validation request from a pandas dataframe read from file.
 
         Args:
-            file_path_str (str): The path to the file to be read.
-            kwargs (dict): Additional keyword arguments to be passed to the file reader.
+            file_path_str: The path to the file to be read.
+            **kwargs: Additional keyword arguments to be passed to the file reader.
 
         Raises:
             FileNotFoundError: If no file is found at the specified local path.
@@ -102,7 +102,7 @@ class Validator:
             """Checks if all the selected fields can be mapped to a stable ID.
 
             Args:
-                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                sid_snapshot_date: Date representing SID-catalogue version to use.
                     Latest if unspecified. Format: YYYY-MM-DD
 
             Returns:
@@ -151,8 +151,8 @@ class Validator:
         This is necessary for SID mapping.
 
         Args:
-            field (str): The identifier field.
-            dataframe (pl.DataFrame): The dataframe to validate.
+            field: The identifier field.
+            dataframe: The dataframe to validate.
 
         Raises:
             ValueError: If the field does not exist in the dataframe.

@@ -78,11 +78,11 @@ class Depseudonymize:
             """Depseudonymize the dataset.
 
             Args:
-                hierarchical (bool): Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
-                custom_keyset (PseudoKeyset | str, optional): The depseudonymization keyset to use.
+                hierarchical: Whether the dataset is hierarchical or not. Needs PseudoRules with concrete paths. Defaults to False.
+                custom_keyset: The depseudonymization keyset to use.
                     This can either be a PseudoKeyset, a JSON-string matching the fields of PseudoKeyset,
                     or a string matching one of the keys in `dapla_pseudo.constants.PredefinedKeys`. the Defaults to None.
-                timeout (int): The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
+                timeout: The timeout in seconds for the API call. Defaults to TIMEOUT_DEFAULT.
 
             Returns:
                 Result: The depseudonymized dataset and the associated metadata.
@@ -117,11 +117,11 @@ class Depseudonymize:
             2) Then map decrypted stable-id to fnr and return original fnr.
 
             Args:
-                sid_snapshot_date (Optional[str | date], optional): Date representing SID-catalogue version to use.
+                sid_snapshot_date: Date representing SID-catalogue version to use.
                     Latest if unspecified. Format: YYYY-MM-DD
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
-                on_map_failure (Optional[MapFailureStrategy], optional): defines how to handle mapping failures
+                on_map_failure: defines how to handle mapping failures
 
             Returns:
                 Self: The object configured to be mapped to fnr
@@ -137,7 +137,7 @@ class Depseudonymize:
             """Depseudonymize the selected fields with the default encryption algorithm (DAEAD).
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (ssb-common-key-1)
 
             Returns:
@@ -152,7 +152,7 @@ class Depseudonymize:
             """Depseudonymize the selected fields with a PAPIS-compatible encryption algorithm (FF31).
 
             Args:
-                custom_key (Optional[PredefinedKeys | str], optional): Override the key to use for pseudonymization.
+                custom_key: Override the key to use for pseudonymization.
                     Must be one of the keys defined in PredefinedKeys. If not defined, uses the default key for this function (papis-common-key-1)
 
             Returns:

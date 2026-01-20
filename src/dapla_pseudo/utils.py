@@ -39,12 +39,19 @@ def find_multipart_obj(obj_name: str, multipart_files_tuple: set[t.Any]) -> t.An
     This method searches a tuple of such file-tuples ((file-tuple1),...,(file-tupleN))
     It returns the fileobj for the first matching file-tuple with a specified filename.
 
-    Example:
-    Given the multipart_files_tuple:
-    multipart_tuple = (('filename1', fileobj1, 'application/json'), ('filename2', fileobj2, 'application/json'))
+    Args:
+        obj_name: The name of the object
+        multipart_files_tuple: The multipart tuple
 
-    then
-    find_multipart_obj("filename2", multipart_tuple) -> fileobj
+    Returns:
+        The fileobject associated with the matched tuple
+
+    Example:
+        ```
+        multipart_tuple = (('filename1', fileobj1, 'application/json'), ('filename2', fileobj2, 'application/json'))
+
+        find_multipart_obj("filename2", multipart_tuple) -> fileobj2
+        ```
     """
     try:
         matching_item = next(

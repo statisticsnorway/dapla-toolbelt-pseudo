@@ -154,13 +154,12 @@ class Result:
         """Write pseudonymized data to a file, with the metadata being written to the same folder.
 
         Args:
-            file_path (str): The path to the file to be written. If writing to a bucket, use the "gs://" prefix.
+            file_path: The path to the file to be written. If writing to a bucket, use the "gs://" prefix.
             **kwargs: Additional keyword arguments to be passed the Polars writer function *if* the input data is a DataFrame.
                 The specific writer function depends on the format of the output file, e.g. `write_csv()` for CSV files.
 
         Raises:
-            ValueError: If the result is not of type Polars DataFrame.
-            ValueError: If the output file format does not match the input file format.
+            ValueError: If the result is not of type Polars DataFrame or if the output file format does not match the input file format.
 
         """
         file_format = get_file_format_from_file_name(file_path)
