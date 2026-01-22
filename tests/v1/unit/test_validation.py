@@ -1,5 +1,5 @@
 from datetime import date
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -17,26 +17,20 @@ TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
 @pytest_cases.fixture()
-def sid_lookup_missing_response() -> MagicMock:
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b'[{"missing": ["20859374701","01234567890"], "datasetExtractionSnapshotTime": "2023-08-31"}]'
-    return mock_response
+def sid_lookup_missing_response() -> tuple[list[str], str]:
+    return (["20859374701", "01234567890"], "2023-08-31")
 
 
 @pytest_cases.fixture()
-def sid_lookup_empty_response() -> MagicMock:
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b'[{"datasetExtractionSnapshotTime": "2023-08-31"}]'
-    return mock_response
+def sid_lookup_empty_response() -> tuple[list[str], str]:
+    return ([], "2023-08-31")
 
 
-@patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint")
+@patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint", new_callable=AsyncMock)
 def test_validate_with_full_response(
-    patched_post_to_sid_endpoint: Mock,
+    patched_post_to_sid_endpoint: AsyncMock,
     df_personer: pl.DataFrame,
-    sid_lookup_missing_response: MagicMock,
+    sid_lookup_missing_response: tuple[list[str], str],
 ) -> None:
     field_name = "fnr"
 
@@ -50,21 +44,20 @@ def test_validate_with_full_response(
     validation_df = validation_result.to_pandas()
     validation_metadata = validation_result.metadata_details
 
-    patched_post_to_sid_endpoint.assert_called_once_with(
-        "sid/lookup/batch",
-        ["11854898347", "01839899544", "16910599481"],
-        None,
-        stream=True,
+    patched_post_to_sid_endpoint.assert_awaited_once_with(
+        path="sid/lookup/batch",
+        values=["11854898347", "01839899544", "16910599481"],
+        sid_snapshot_date=None,
     )
     assert validation_df[field_name].tolist() == ["20859374701", "01234567890"]
     assert validation_metadata[field_name]["logs"] == ["SID snapshot time 2023-08-31"]
 
 
-@patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint")
+@patch("dapla_pseudo.v1.PseudoClient._post_to_sid_endpoint", new_callable=AsyncMock)
 def test_validate_with_empty_response(
-    patched_post_to_sid_endpoint: Mock,
+    patched_post_to_sid_endpoint: AsyncMock,
     df_personer: pl.DataFrame,
-    sid_lookup_empty_response: MagicMock,
+    sid_lookup_empty_response: tuple[list[str], str],
 ) -> None:
     field_name = "fnr"
 
@@ -79,10 +72,9 @@ def test_validate_with_empty_response(
     validation_metadata = validation_result.metadata_details
 
     patched_post_to_sid_endpoint.assert_called_once_with(
-        "sid/lookup/batch",
-        ["11854898347", "01839899544", "16910599481"],
-        date(2023, 8, 31),
-        stream=True,
+        path="sid/lookup/batch",
+        values=["11854898347", "01839899544", "16910599481"],
+        sid_snapshot_date=date(2023, 8, 31),
     )
     assert validation_df[field_name].tolist() == []
     assert validation_metadata[field_name]["logs"] == ["SID snapshot time 2023-08-31"]

@@ -4,7 +4,6 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-import requests
 from aiohttp import ClientResponse
 from aiohttp import ClientResponseError
 from aiohttp import RequestInfo
@@ -392,30 +391,31 @@ async def test_post_to_field_endpoint_test_splits_multiple_fields() -> None:
         assert results == expected_data
 
 
-@patch("requests.post")
-def test_successful_post_to_sid_endpoint(
-    mock_post: Mock, test_client: PseudoClient
-) -> None:
-    mock_response = Mock(spec=requests.Response)
-    mock_response.status_code = 200
-    mock_response.raise_for_status.return_value = None
+@pytest.mark.asyncio
+async def test_successful_post_to_sid_endpoint(test_client: PseudoClient) -> None:
+    payload = [
+        {
+            "missing": ["magic", "sorcery"],
+            "datasetExtractionSnapshotTime": "2024-01-01T00:00:00Z",
+        }
+    ]
 
-    mock_post.return_value = mock_response
-    response = test_client._post_to_sid_endpoint(
-        path="test_path",
-        values=["value1", "value2"],
-    )
+    with patch("aiohttp.ClientSession.post", new_callable=AsyncMock) as mock_post:
+        mock_response = AsyncMock()
+        mock_response.__aenter__.return_value = mock_response
+        mock_response.json.return_value = payload
+        mock_post.return_value = mock_response
 
-    expected_json = {"fnrList": ["value1", "value2"]}
-    assert response == mock_response
-    mock_post.assert_called_once_with(
-        url="https://mocked.dapla-pseudo-service/test_path",
-        params=None,
-        headers={
-            "Authorization": "Bearer some-auth-token",
-            "X-Correlation-Id": ANY,
-        },
-        json=expected_json,
-        stream=True,
-        timeout=TIMEOUT_DEFAULT,
-    )
+        missing, snapshot_time = await test_client._post_to_sid_endpoint(
+            path="test_path",
+            values=["value1", "value2"],
+            sid_snapshot_date=None,
+        )
+
+        assert missing == ["magic", "sorcery"]
+        assert snapshot_time == "2024-01-01T00:00:00Z"
+
+        mock_post.assert_called_once()
+        _args, kwargs = mock_post.call_args
+        assert kwargs["json"] == {"fnrList": ["value1", "value2"]}
+        assert "X-Correlation-Id" in kwargs["headers"]

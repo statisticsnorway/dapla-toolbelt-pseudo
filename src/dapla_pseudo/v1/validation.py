@@ -1,14 +1,12 @@
 """Builder for submitting a validation request."""
 
-import json
-from collections.abc import Sequence
+import asyncio
 from datetime import date
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import polars as pl
-import requests
 
 from dapla_pseudo.utils import convert_to_date
 from dapla_pseudo.utils import get_file_format_from_file_name
@@ -98,7 +96,7 @@ class Validator:
             self._dataframe: pl.DataFrame = dataframe
             self._field: str = field
 
-        def validate_map_to_stable_id(
+        async def _validate_map_to_stable_id_async(
             self, sid_snapshot_date: str | date | None = None
         ) -> Result:
             """Checks if all the selected fields can be mapped to a stable ID.
@@ -112,31 +110,26 @@ class Validator:
             """
             Validator._ensure_field_valid(self._field, self._dataframe)
 
-            response: requests.Response = _client()._post_to_sid_endpoint(
-                "sid/lookup/batch",
-                self._dataframe[self._field].to_list(),
-                convert_to_date(sid_snapshot_date),
-                stream=True,
-            )
-            # The response content is received as a buffered byte stream from the server.
-            # We decode the content using UTF-8, which gives us a List[Dict[str]] structure.
-            result_json = json.loads(response.content.decode("utf-8"))[0]
-            result: Sequence[str] = []
-            metadata: list[str] = []
-            if "missing" in result_json:
-                result = result_json["missing"]
-            if "datasetExtractionSnapshotTime" in result_json:
-                extraction_time = result_json["datasetExtractionSnapshotTime"]
-                metadata = [f"SID snapshot time {extraction_time}"]
+            client = _client()
+            all_values = self._dataframe[self._field].to_list()
+            snapshot = convert_to_date(sid_snapshot_date)
 
-            result_df = pl.Series(self._field, result).to_frame()
-            # TODO - make the Validator fit the Result() class better
+            missing, extraction_time = await client._post_to_sid_endpoint(
+                path="sid/lookup/batch",
+                values=all_values,
+                sid_snapshot_date=snapshot,
+            )
+
+            result_df = pl.Series(self._field, missing).to_frame()
+            metadata_logs: list[str] = (
+                [f"SID snapshot time {extraction_time}"] if extraction_time else []
+            )
             return Result(
                 PseudoFieldResponse(
                     data=result_df,
                     raw_metadata=[
                         RawPseudoMetadata(
-                            logs=metadata,
+                            logs=metadata_logs,
                             metrics=[],
                             datadoc=[],
                             field_name=self._field,
@@ -144,6 +137,12 @@ class Validator:
                     ],
                 )
             )
+
+        def validate_map_to_stable_id(
+            self, sid_snapshot_date: str | date | None = None
+        ) -> Result:
+            """Validate mapping to SID (sync wrapper around the async batched version)."""
+            return asyncio.run(self._validate_map_to_stable_id_async(sid_snapshot_date))
 
     @staticmethod
     def _ensure_field_valid(field: str, dataframe: pl.DataFrame) -> None:
