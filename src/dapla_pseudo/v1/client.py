@@ -295,6 +295,11 @@ class PseudoClient:
     ) -> tuple[list[str], str | None]:
         """Post SID lookup in batches concurrently and merge responses.
 
+        Args:
+            path: Endpoint path to append to the base pseudo_service_url
+            values: List of FNR to look up in the SID-catalogue.
+            sid_snapshot_date: Date representing SID-catalogue version to use. Latest if unspecified. Format: YYYY-MM-DD
+
         Returns:
             tuple[list[str], str | None]: (missing_values, datasetExtractionSnapshotTime)
         """
