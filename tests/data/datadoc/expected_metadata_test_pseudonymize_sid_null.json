@@ -4,7 +4,7 @@
     "data_element_path": "fnr",
     "pseudonymization": {
       "stable_identifier_type": "FREG_SNR",
-      "stable_identifier_version": "2023-08-31",
+      "stable_identifier_version": "2026-01-21",
       "encryption_algorithm": "TINK-FPE",
       "encryption_key_reference": "papis-common-key-1",
       "encryption_algorithm_parameters": [
