@@ -87,7 +87,7 @@ def test_pseudonymize_sid(
     result = (
         Pseudonymize.from_polars(df_personer)
         .on_fields("fnr")
-        .with_stable_id(sid_snapshot_date="2023-08-31")
+        .with_stable_id(sid_snapshot_date="2026-01-21")
         .run()
     )
 
