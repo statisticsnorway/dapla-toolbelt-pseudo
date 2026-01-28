@@ -7,7 +7,6 @@
 
 [![Documentation](https://github.com/statisticsnorway/dapla-toolbelt-pseudo/actions/workflows/docs.yml/badge.svg)][documentation]
 [![Tests](https://github.com/statisticsnorway/dapla-toolbelt-pseudo/actions/workflows/tests.yml/badge.svg)][tests]
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=statisticsnorway_dapla-toolbelt-pseudo&metric=coverage)][sonarcov]
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=statisticsnorway_dapla-toolbelt-pseudo&metric=alert_status)][sonarquality]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]

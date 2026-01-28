@@ -163,31 +163,14 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     install_with_uv(session, only_groups=["dev"])
-    try:
-        session.run(
-            "coverage",
-            "run",
-            "--parallel",
-            "-m",
-            "pytest",
-            "-o",
-            "pythonpath=",
-            *session.posargs,
-        )
-    finally:
-        if session.interactive:
-            session.notify("coverage", posargs=[])
-
-
-@session(python=python_versions[2])
-def coverage(session: Session) -> None:
-    """Produce the coverage report."""
-    args = session.posargs or ["report", "--skip-empty"]
-    install_with_uv(session, only_groups=["dev"])
-    if not session.posargs and any(Path().glob(".coverage.*")):
-        session.run("coverage", "combine")
-
-    session.run("coverage", *args)
+    session.run(
+        "pytest",
+        "-n",
+        "auto",
+        "-o",
+        "pythonpath=",
+        *session.posargs,
+    )
 
 
 @session(python=python_versions[2])

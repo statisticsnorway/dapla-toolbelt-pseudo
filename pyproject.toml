@@ -63,7 +63,6 @@ dev = [
     "pydantic>=2.12",
     "pytest-cases>=3.8.5",
     "pytest-mock>=3.14",
-    "coverage[toml]>=6.2",
     "sphinx>=6.2.1",
     "ipykernel>=6.0.0",
     "mock>=4.0.3",
@@ -75,7 +74,6 @@ dev = [
     "pytest-xdist[psutil]>=3.8.0",
     {include-group = "lint"},
     {include-group = "doc"},
-    "coverage[toml]>=7.11.3",
     "deptry>=0.24.0",
     "mypy>=1.18.2",
     "pygments>=2.19.0",
@@ -99,19 +97,6 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-
-[tool.coverage.paths]
-source = ["src", "*/site-packages"]
-tests = ["tests", "*/tests"]
-
-[tool.coverage.run]
-branch = true
-source = ["dapla_pseudo"]
-relative_files = true
-
-[tool.coverage.report]
-show_missing = true
-fail_under = 50
 
 [tool.mypy]
 strict = true
