@@ -10,6 +10,7 @@ from pathlib import Path
 from datadoc_model.all_optional.model import Variable
 from pydantic import ValidationError
 
+from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.constants import PseudoOperation
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.v1.models.api import DepseudoFieldRequest
@@ -17,9 +18,11 @@ from dapla_pseudo.v1.models.api import PseudoFieldRequest
 from dapla_pseudo.v1.models.api import RawPseudoMetadata
 from dapla_pseudo.v1.models.api import RepseudoFieldRequest
 from dapla_pseudo.v1.models.core import KeyWrapper
+from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
+from dapla_pseudo.v1.mutable_dataframe import FieldMatch
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
@@ -165,50 +168,135 @@ def build_pseudo_field_request(
         []
     )
     req: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+
+    grouped_matches = _group_matched_fields_for_requests(
+        mutable_df=mutable_df,
+        matched_fields=matched_fields,
+    )
+
     match pseudo_operation:
         case PseudoOperation.PSEUDONYMIZE:
-            for field in matched_fields.values():
+            for request_name, fields in grouped_matches:
+                representative = fields[0]
+                values = [value for field in fields for value in field.get_value()]
                 try:
                     req = PseudoFieldRequest(
-                        pseudo_func=field.func,
-                        name=field.path,
-                        pattern=field.pattern,
-                        values=field.get_value(),
+                        pseudo_func=representative.func,
+                        name=request_name,
+                        pattern=representative.pattern,
+                        values=values,
                         keyset=KeyWrapper(custom_keyset).keyset,
                     )
                     requests.append(req)
                 except ValidationError as e:
-                    raise Exception(f"Path or column: {field.path}") from e
+                    raise Exception(f"Path or column: {request_name}") from e
         case PseudoOperation.DEPSEUDONYMIZE:
-            for field in matched_fields.values():
+            for request_name, fields in grouped_matches:
+                representative = fields[0]
+                values = [value for field in fields for value in field.get_value()]
                 try:
                     req = DepseudoFieldRequest(
-                        pseudo_func=field.func,
-                        name=field.path,
-                        pattern=field.pattern,
-                        values=field.get_value(),
+                        pseudo_func=representative.func,
+                        name=request_name,
+                        pattern=representative.pattern,
+                        values=values,
                         keyset=KeyWrapper(custom_keyset).keyset,
                     )
                     requests.append(req)
                 except ValidationError as e:
-                    raise Exception(f"Path or column: {field.path}") from e
+                    raise Exception(f"Path or column: {request_name}") from e
 
         case PseudoOperation.REPSEUDONYMIZE:
             if target_rules is not None:
-                for field in matched_fields.values():
+                for request_name, fields in grouped_matches:
+                    representative = fields[0]
+                    values = [value for field in fields for value in field.get_value()]
                     try:
                         req = RepseudoFieldRequest(
-                            source_pseudo_func=field.func,
-                            target_pseudo_func=field.target_func,
-                            name=field.path,
-                            pattern=field.pattern,
-                            values=field.get_value(),
+                            source_pseudo_func=representative.func,
+                            target_pseudo_func=representative.target_func,
+                            name=request_name,
+                            pattern=representative.pattern,
+                            values=values,
                             source_keyset=KeyWrapper(custom_keyset).keyset,
                             target_keyset=KeyWrapper(target_custom_keyset).keyset,
                         )
                         requests.append(req)
                     except ValidationError as e:
-                        raise Exception(f"Path or column: {field.path}") from e
+                        raise Exception(f"Path or column: {request_name}") from e
             else:
                 raise ValueError("Found no target rules")
     return requests
+
+
+def _group_matched_fields_for_requests(
+    mutable_df: MutableDataFrame,
+    matched_fields: dict[str, FieldMatch],
+) -> list[tuple[str, list[FieldMatch]]]:
+    """Group matched fields into request-sized buckets.
+
+    What we are trying to accomplish:
+    - Avoid sending one tiny request per matched hierarchical leaf.
+
+    Why:
+    - Hierarchical traversal can produce many paths like
+      ``identifiers[0]/foo``, ``identifiers[1]/foo``, etc.
+    - Sending each as a separate HTTP call creates a lot of overhead.
+
+    How:
+    - In hierarchical mode, non-REDACT fields are batched when they share:
+      normalized request path (without list indices), pattern, and pseudo function(s).
+    - REDACT is intentionally *not* batched to preserve current metadata behavior.
+    - For batched groups, we register a slice map in ``MutableDataFrame`` so one
+      response can be split back into the original concrete leaf paths.
+    """
+    grouped: dict[tuple[str, str, str, str | None], list[FieldMatch]] = {}
+
+    # 1) Bucket fields by "compatible request" identity.
+    for field in matched_fields.values():
+        should_batch = _should_batch_field(mutable_df, field)
+        request_name = _remove_array_indices(field.path) if should_batch else field.path
+        target_func = str(field.target_func) if field.target_func else None
+        group_key = (request_name, field.pattern, str(field.func), target_func)
+        grouped.setdefault(group_key, []).append(field)
+
+    grouped_matches: list[tuple[str, list[FieldMatch]]] = []
+
+    # 2) For groups with multiple members, register scatter metadata.
+    for _, fields in grouped.items():
+        representative = fields[0]
+        request_name = _remove_array_indices(representative.path)
+        should_register_batch = _should_batch_field(mutable_df, representative) and (
+            len(fields) > 1
+        )
+
+        if should_register_batch:
+            mutable_df.map_batch_to_leaf_slices(
+                request_name,
+                [(field.path, len(field.get_value())) for field in fields],
+            )
+            grouped_matches.append((request_name, fields))
+        else:
+            grouped_matches.append((representative.path, fields))
+
+    return grouped_matches
+
+
+def _should_batch_field(mutable_df: MutableDataFrame, field: FieldMatch) -> bool:
+    """Return True when this field can safely participate in hierarchical batching."""
+    if not mutable_df.hierarchical:
+        return False
+
+    # REDACT is kept at leaf-level granularity to preserve existing metadata output.
+    if _is_redact_function(field.func) or _is_redact_function(field.target_func):
+        return False
+
+    return True
+
+
+def _is_redact_function(func: PseudoFunction | None) -> bool:
+    return func is not None and func.function_type == PseudoFunctionTypes.REDACT
+
+
+def _remove_array_indices(path: str) -> str:
+    return re.sub(r"\[\d+]", "", path)

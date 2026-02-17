@@ -61,6 +61,7 @@ class MutableDataFrame:
         """Initialize the class."""
         self.dataset: pl.DataFrame | dict[str, Any] = dataframe
         self.matched_fields: dict[str, FieldMatch] = {}
+        self.batched_fields: dict[str, list[tuple[str, int, int]]] = {}
         self.matched_fields_metrics: dict[str, int] | None = None
         self.hierarchical: bool = hierarchical
         self.schema = dataframe.schema
@@ -69,6 +70,7 @@ class MutableDataFrame:
         self, rules: list[PseudoRule], target_rules: list[PseudoRule] | None
     ) -> None:
         """Create references to all the columns that matches the given pseudo rules."""
+        self.batched_fields = {}
         if self.hierarchical is False:
             assert isinstance(self.dataset, pl.DataFrame)
             self.matched_fields = {
@@ -102,6 +104,40 @@ class MutableDataFrame:
                 for match in matches:
                     self.matched_fields[match.path] = match
 
+    def map_batch_to_leaf_slices(
+        self, batch_name: str, segments: list[tuple[str, int]]
+    ) -> None:
+        """Store how a batched response maps back to concrete leaf paths.
+
+        A hierarchical batch request flattens values from multiple concrete paths
+        into one list that is sent to the pseudo service. Example:
+
+        - ``person_info[0]/fnr`` contributes 1 value
+        - ``person_info[1]/fnr`` contributes 2 values
+        - ``person_info[2]/fnr`` contributes 1 value
+
+        This method converts that to slice boundaries for the batched request name
+        (e.g. ``person_info/fnr``):
+
+        - ``person_info[0]/fnr`` -> ``[0:1]``
+        - ``person_info[1]/fnr`` -> ``[1:3]``
+        - ``person_info[2]/fnr`` -> ``[3:4]``
+
+        Later, ``update(batch_name, data)`` uses these slices to split one flat
+        response list into the right chunks and write each chunk back to the
+        correct leaf path.
+        """
+        if len(segments) <= 1:
+            return
+
+        offset = 0
+        indexed_segments: list[tuple[str, int, int]] = []
+        for path, length in segments:
+            indexed_segments.append((path, offset, offset + length))
+            offset += length
+
+        self.batched_fields[batch_name] = indexed_segments
+
     def get_matched_fields(self) -> dict[str, FieldMatch]:
         """Get a reference to all the columns that matched pseudo rules."""
         return self.matched_fields
@@ -111,6 +147,9 @@ class MutableDataFrame:
         if self.hierarchical is False:
             assert isinstance(self.dataset, pl.DataFrame)
             self.dataset = self.dataset.with_columns(pl.Series(data).alias(path))
+        elif (batched_segments := self.batched_fields.get(path)) is not None:
+            for leaf_path, start, end in batched_segments:
+                self.update(leaf_path, data[start:end])
         elif (field_match := self.matched_fields.get(path)) is not None:
             assert isinstance(self.dataset, dict)
             tree = self.dataset

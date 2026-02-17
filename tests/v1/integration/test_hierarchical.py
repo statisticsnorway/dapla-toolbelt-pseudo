@@ -156,3 +156,75 @@ def test_pseudonymize_hierarchical_complex(
     assert_frame_equal(
         result.to_polars(), df_personer_hierarchical_complex_pseudonymized
     )
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_daead(
+    df_personer_hierarchical: pl.DataFrame,
+    df_personer_hierarchical_pseudonymized: pl.DataFrame,
+) -> None:
+    """Verify hierarchical non-REDACT behavior is grouped into one logical field result.
+
+    This test asserts real end-to-end behavior without patching internals. For the
+    chosen fixture there are three leaf paths under ``person_info/fnr``. If requests
+    are batched, the result metadata is aggregated under a single field key.
+    """
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    result = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(rule)
+        .run(hierarchical=True)
+    )
+
+    datadoc_model = result.datadoc_model
+    assert isinstance(datadoc_model, list)
+    assert len(datadoc_model) == 1
+    assert datadoc_model[0]["data_element_path"] == "person_info.fnr"
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical_pseudonymized)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_redact_not_grouped(
+    df_personer_hierarchical: pl.DataFrame,
+    df_personer_hierarchical_redacted: pl.DataFrame,
+) -> None:
+    """Verify hierarchical REDACT keeps per-leaf field granularity.
+
+    This also uses real behavior only. REDACT is intentionally not grouped, so the
+    metadata details should keep one key per concrete matched leaf path.
+    """
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder=":"),
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    result = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(rule)
+        .run(hierarchical=True)
+    )
+
+    datadoc_model = result.datadoc_model
+    assert isinstance(datadoc_model, list)
+    assert len(datadoc_model) == 3
+    assert {entry["data_element_path"] for entry in datadoc_model} == {
+        "person_info[0].fnr",
+        "person_info[1].fnr",
+        "person_info[2].fnr",
+    }
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical_redacted)
