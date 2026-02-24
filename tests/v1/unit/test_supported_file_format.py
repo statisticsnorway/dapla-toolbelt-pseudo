@@ -53,8 +53,8 @@ def test_write_from_df(
     tmp_path: Path, df_personer: pl.DataFrame, file_format: str
 ) -> None:
     supported_format = SupportedOutputFileFormat(file_format)
-    file_handle = open(f"{tmp_path}/test.{file_format}", mode="wb")
-    write_from_df(df_personer, supported_format, file_handle)
+    file_path = f"{tmp_path}/test.{file_format}"
+    write_from_df(df_personer, supported_format, file_path)
 
 
 @pytest.mark.parametrize("file_format", ["json", "csv", "parquet", "xml"])
