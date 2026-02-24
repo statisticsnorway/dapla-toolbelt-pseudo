@@ -28,7 +28,7 @@ Pseudonymize, repseudonymize and depseudonymize data on Dapla.
 
 ## Features
 
-Other examples can also be viewed through notebook files for [pseudo](tests/pseudo_examples.ipynb) and [depseudo](tests/depseudo_examples.ipynb)
+Other examples can also be viewed through notebook files for [pseudo](tests/pseudo_examples.ipynb) and [depseudo](tests/depseudo_examples.ipynb).
 
 ### Pseudonymize
 
@@ -100,6 +100,8 @@ Note that you may also use a Pandas DataFrame as an input or output, by exchangi
 and `to_polars` with `to_pandas`. However, Pandas is much less performant, so take special care especially if your
 dataset is large.
 
+`from_polars(...)` accepts both `pl.DataFrame` and `pl.LazyFrame`.
+
 Example:
 
 ```python
@@ -112,6 +114,33 @@ df_pandas = (
     .to_pandas()                                   # Get the result as a polars dataframe
 )
 ```
+
+### Polars LazyFrame on GCS
+
+You can use `from_polars(...)` with lazy inputs, for example scanning from GCS and writing the pseudonymized output back to GCS.
+
+```python
+import os
+import polars as pl
+from dapla_pseudo import Pseudonymize
+
+bucket = os.environ["BUCKET_NAME"]
+input_path = f"gs://{bucket}/pseudo-lazy-demo/input.parquet"
+output_path = f"gs://{bucket}/pseudo-lazy-demo/output.parquet"
+
+lazy_df = pl.scan_parquet(input_path)
+
+result = (
+    Pseudonymize.from_polars(lazy_df)
+    .on_fields("person_id")
+    .with_default_encryption()
+    .run()
+)
+
+# Writes both data and datadoc metadata (__DOC.json)
+result.to_file(output_path)
+```
+
 
 
 ### Validate SID mapping
