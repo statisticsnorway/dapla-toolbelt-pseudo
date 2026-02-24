@@ -81,5 +81,5 @@ class RawPseudoMetadata:
 class PseudoFieldResponse:
     """PseudoFieldResponse holds the data and metadata from a Pseudo Service field response."""
 
-    data: pl.DataFrame
+    data: pl.DataFrame | pl.LazyFrame
     raw_metadata: list[RawPseudoMetadata]

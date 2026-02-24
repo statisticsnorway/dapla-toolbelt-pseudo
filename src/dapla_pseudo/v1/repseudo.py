@@ -24,7 +24,7 @@ class Repseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: pl.DataFrame
+    dataset: pl.DataFrame | pl.LazyFrame
     schema: pd.Series | pl.Schema
 
     @staticmethod
@@ -39,6 +39,22 @@ class Repseudonymize:
         """Initialize a pseudonymization request from a polars DataFrame."""
         Repseudonymize.dataset = dataframe
         Repseudonymize.schema = dataframe.schema
+        return Repseudonymize._Repseudonymizer()
+
+    @staticmethod
+    def from_polars_lazy(
+        lazyframe: pl.LazyFrame,
+    ) -> "Repseudonymize._Repseudonymizer":
+        """Initialize a pseudonymization request from a polars LazyFrame.
+
+        Args:
+            lazyframe: A Polars LazyFrame.
+
+        Returns:
+            _Repseudonymizer: An instance of the _Repseudonymizer class.
+        """
+        Repseudonymize.dataset = lazyframe
+        Repseudonymize.schema = Repseudonymize.dataset.collect_schema()
         return Repseudonymize._Repseudonymizer()
 
     class _Repseudonymizer(_BasePseudonymizer):
@@ -99,7 +115,15 @@ class Repseudonymize:
 
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
+
+            Raises:
+                ValueError: If hierarchical is True and input dataset is a Polars LazyFrame.
             """
+            if hierarchical and isinstance(Repseudonymize.dataset, pl.LazyFrame):
+                raise ValueError(
+                    "Hierarchical datasets are not supported for Polars LazyFrames."
+                )
+
             super().__init__(
                 pseudo_operation=PseudoOperation.REPSEUDONYMIZE,
                 dataset=Repseudonymize.dataset,

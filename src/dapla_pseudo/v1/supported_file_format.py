@@ -111,16 +111,36 @@ def write_from_dicts(
 def write_from_df(
     df: pl.DataFrame,
     supported_format: SupportedOutputFileFormat,
-    file_like: BufferedWriter,
+    file_path: str,
     **kwargs: Any,
 ) -> None:
     """Writes to a file with a supported file format from a Dataframe."""
     match supported_format:
         case SupportedOutputFileFormat.CSV:
-            df.write_csv(file=file_like, **kwargs)
+            df.write_csv(file_path, **kwargs)
         case SupportedOutputFileFormat.JSON:
-            df.write_json(file=file_like, **kwargs)
+            df.write_json(file_path, **kwargs)
         case SupportedOutputFileFormat.XML:
-            df.to_pandas().to_xml(file_like, **kwargs)
+            df.to_pandas().to_xml(file_path, **kwargs)
         case SupportedOutputFileFormat.PARQUET:
-            df.write_parquet(file_like, **kwargs)
+            df.write_parquet(file_path, **kwargs)
+
+
+def write_from_lazy_df(
+    ldf: pl.LazyFrame,
+    supported_format: SupportedOutputFileFormat,
+    file_path: str,
+    **kwargs: Any,
+) -> None:
+    """Writes to a file with a supported file format from a Dataframe."""
+    match supported_format:
+        case SupportedOutputFileFormat.CSV:
+            ldf.sink_csv(file_path, **kwargs)
+        case SupportedOutputFileFormat.JSON:
+            ldf.sink_ndjson(file_path, **kwargs)
+        case SupportedOutputFileFormat.XML:
+            raise ValueError(
+                "Unsupported output file format for LazyFrame: XML. Use a DataFrame instead."
+            )
+        case SupportedOutputFileFormat.PARQUET:
+            ldf.sink_parquet(file_path, **kwargs)

@@ -44,7 +44,7 @@ class _BasePseudonymizer:
     def __init__(
         self,
         pseudo_operation: PseudoOperation,
-        dataset: pl.DataFrame,
+        dataset: pl.DataFrame | pl.LazyFrame,
         hierarchical: bool,
         user_provided_metadata: Datadoc | None,
     ) -> None:
