@@ -87,7 +87,7 @@ def test_pseudonymize_sid(
     result = (
         Pseudonymize.from_polars(df_personer)
         .on_fields("fnr")
-        .with_stable_id(sid_snapshot_date="2026-01-21")
+        .with_stable_id(sid_snapshot_date="2026-01-31")
         .run()
     )
 
@@ -163,7 +163,7 @@ def test_pseudonymize_default_encryption_lazyframe(
     )
 
     result = (
-        Pseudonymize.from_polars_lazy(df_personer.lazy())
+        Pseudonymize.from_polars(df_personer.lazy())
         .on_fields("fnr")
         .with_default_encryption()
         .run()
@@ -182,10 +182,10 @@ def test_pseudonymize_hierarchical_not_supported_for_lazyframe(
 ) -> None:
     with pytest.raises(
         ValueError,
-        match="Hierarchical datasets are not supported for Polars LazyFrames.",
+        match=r"Hierarchical datasets are not supported for Polars LazyFrames\.",
     ):
         (
-            Pseudonymize.from_polars_lazy(df_personer.lazy())
+            Pseudonymize.from_polars(df_personer.lazy())
             .on_fields("fnr")
             .with_default_encryption()
             .run(hierarchical=True)

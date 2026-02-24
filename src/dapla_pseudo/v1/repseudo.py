@@ -35,26 +35,16 @@ class Repseudonymize:
         return Repseudonymize._Repseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Repseudonymize._Repseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame | pl.LazyFrame,
+    ) -> "Repseudonymize._Repseudonymizer":
         """Initialize a pseudonymization request from a polars DataFrame."""
         Repseudonymize.dataset = dataframe
-        Repseudonymize.schema = dataframe.schema
-        return Repseudonymize._Repseudonymizer()
-
-    @staticmethod
-    def from_polars_lazy(
-        lazyframe: pl.LazyFrame,
-    ) -> "Repseudonymize._Repseudonymizer":
-        """Initialize a pseudonymization request from a polars LazyFrame.
-
-        Args:
-            lazyframe: A Polars LazyFrame.
-
-        Returns:
-            _Repseudonymizer: An instance of the _Repseudonymizer class.
-        """
-        Repseudonymize.dataset = lazyframe
-        Repseudonymize.schema = Repseudonymize.dataset.collect_schema()
+        Repseudonymize.schema = (
+            dataframe.schema
+            if type(dataframe) is pl.DataFrame
+            else dataframe.collect_schema()
+        )
         return Repseudonymize._Repseudonymizer()
 
     class _Repseudonymizer(_BasePseudonymizer):

@@ -36,26 +36,16 @@ class Depseudonymize:
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame | pl.LazyFrame,
+    ) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a polars DataFrame."""
         Depseudonymize.dataset = dataframe
-        Depseudonymize.schema = dataframe.schema
-        return Depseudonymize._Depseudonymizer()
-
-    @staticmethod
-    def from_polars_lazy(
-        lazyframe: pl.LazyFrame,
-    ) -> "Depseudonymize._Depseudonymizer":
-        """Initialize a depseudonymization request from a polars LazyFrame.
-
-        Args:
-            lazyframe: A Polars LazyFrame.
-
-        Returns:
-            _Depseudonymizer: An instance of the _Depseudonymizer class.
-        """
-        Depseudonymize.dataset = lazyframe
-        Depseudonymize.schema = Depseudonymize.dataset.collect_schema()
+        Depseudonymize.schema = (
+            dataframe.schema
+            if type(dataframe) is pl.DataFrame
+            else dataframe.collect_schema()
+        )
         return Depseudonymize._Depseudonymizer()
 
     class _Depseudonymizer(_BasePseudonymizer):

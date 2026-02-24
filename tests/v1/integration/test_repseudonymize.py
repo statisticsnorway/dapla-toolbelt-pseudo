@@ -80,7 +80,7 @@ def test_repseudonymize_from_default_encryption_to_fpe_lazyframe(
     )
 
     result = (
-        Repseudonymize.from_polars_lazy(df_personer_fnr_daead_encrypted.lazy())
+        Repseudonymize.from_polars(df_personer_fnr_daead_encrypted.lazy())
         .on_fields("fnr")
         .from_default_encryption()
         .to_papis_compatible_encryption()
@@ -100,10 +100,10 @@ def test_repseudonymize_hierarchical_not_supported_for_lazyframe(
 ) -> None:
     with pytest.raises(
         ValueError,
-        match="Hierarchical datasets are not supported for Polars LazyFrames.",
+        match=r"Hierarchical datasets are not supported for Polars LazyFrames\.",
     ):
         (
-            Repseudonymize.from_polars_lazy(df_personer_fnr_daead_encrypted.lazy())
+            Repseudonymize.from_polars(df_personer_fnr_daead_encrypted.lazy())
             .on_fields("fnr")
             .from_default_encryption()
             .to_papis_compatible_encryption()

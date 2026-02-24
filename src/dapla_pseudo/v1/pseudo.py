@@ -43,7 +43,9 @@ class Pseudonymize:
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame | pl.LazyFrame,
+    ) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a Polars DataFrame.
 
         Args:
@@ -53,21 +55,11 @@ class Pseudonymize:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
         Pseudonymize.dataset = dataframe
-        Pseudonymize.schema = dataframe.schema
-        return Pseudonymize._Pseudonymizer()
-
-    @staticmethod
-    def from_polars_lazy(lazyframe: pl.LazyFrame) -> "Pseudonymize._Pseudonymizer":
-        """Initialize a pseudonymization request from a Polars LazyFrame.
-
-        Args:
-            lazyframe: A Polars LazyFrame
-
-        Returns:
-            _Pseudonymizer: An instance of the _Pseudonymizer class.
-        """
-        Pseudonymize.dataset = lazyframe
-        Pseudonymize.schema = Pseudonymize.dataset.collect_schema()
+        Pseudonymize.schema = (
+            dataframe.schema
+            if type(dataframe) is pl.DataFrame
+            else dataframe.collect_schema()
+        )
         return Pseudonymize._Pseudonymizer()
 
     class _Pseudonymizer(_BasePseudonymizer):
