@@ -67,7 +67,7 @@ def main() -> None:
         .with_default_encryption()
         .run()
     )
-    _ = result.metadata
+    _ = result.to_polars_lazy()
 
     is_sampling = False
     sampler_thread.join(timeout=1)
