@@ -40,7 +40,7 @@ def _build_wide_input_parquet(
     pl.DataFrame(data).write_parquet(str(file_path))
 
 
-def _run_case_peak_rss_bytes(file_path: Path, fields: list[str]) -> float:
+def _run_case_rss_increase_bytes(file_path: Path, fields: list[str]) -> float:
     completed_process = subprocess.run(
         [
             sys.executable,
@@ -60,13 +60,13 @@ def _run_case_peak_rss_bytes(file_path: Path, fields: list[str]) -> float:
         line for line in completed_process.stdout.splitlines() if line.strip()
     ]
     payload = json.loads(stdout_lines[-1])
-    return float(payload["peak_rss_bytes"])
+    return float(payload["rss_increase_bytes"])
 
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
 def test_lazy_projection_memory_regression() -> None:
-    rows = _env_int("LAZY_REGRESSION_ROWS", 1_500)
+    rows = _env_int("LAZY_REGRESSION_ROWS", 1_000)
     wide_columns = _env_int("LAZY_REGRESSION_WIDE_COLUMNS", 20)
     payload_chars = _env_int("LAZY_REGRESSION_PAYLOAD_CHARS", 2_048)
     rounds = _env_int("LAZY_REGRESSION_ROUNDS", 1)
@@ -88,22 +88,22 @@ def test_lazy_projection_memory_regression() -> None:
         ]
 
         few_field_samples = [
-            _run_case_peak_rss_bytes(file_path, few_target_fields)
+            _run_case_rss_increase_bytes(file_path, few_target_fields)
             for _ in range(rounds)
         ]
         many_field_samples = [
-            _run_case_peak_rss_bytes(file_path, many_target_fields)
+            _run_case_rss_increase_bytes(file_path, many_target_fields)
             for _ in range(rounds)
         ]
 
-        few_peak_rss_bytes = statistics.median(few_field_samples)
-        many_peak_rss_bytes = statistics.median(many_field_samples)
+        few_rss_increase_bytes = statistics.median(few_field_samples)
+        many_rss_increase_bytes = statistics.median(many_field_samples)
 
         # Regression guard: targeting many wide columns should require noticeably
         # more memory than targeting a single narrow column.
-        memory_ratio = many_peak_rss_bytes / few_peak_rss_bytes
+        memory_ratio = many_rss_increase_bytes / few_rss_increase_bytes
         assert memory_ratio >= expected_minimum_memory_ratio, (
-            "Expected higher peak RSS when pseudonymizing many target columns, "
+            "Expected higher RSS increase when pseudonymizing many target columns, "
             f"but got ratio={memory_ratio:.2f} "
-            f"(few={few_peak_rss_bytes:.0f} bytes, many={many_peak_rss_bytes:.0f} bytes)."
+            f"(few={few_rss_increase_bytes:.0f} bytes, many={many_rss_increase_bytes:.0f} bytes)."
         )
