@@ -89,6 +89,7 @@ def test_match_nested_dataframe_dict() -> None:
     df.update("fnr", ["#", "#", "#"])
 
     modified_df = df.to_polars()
+    assert isinstance(modified_df, pl.DataFrame)
     # Check that the original dataframe_dict has been changed
     assert modified_df["fnr"][0] == "#"
     assert modified_df["identifiers"][0]["fnr"] == "#"
@@ -135,6 +136,7 @@ def test_traverse_list_of_struct() -> None:
     df.update("identifiers[0][0]/value", ["#"])
 
     modified_df = df.to_polars()
+    assert isinstance(modified_df, pl.DataFrame)
     assert modified_df["identifiers"][0][0]["value"] == "#"
 
 
@@ -178,4 +180,5 @@ def test_traverse_list_inner() -> None:
     df.update("identifiers[0][0]/values", ["#", "#"])
 
     modified_df = df.to_polars()
+    assert isinstance(modified_df, pl.DataFrame)
     assert modified_df["identifiers"][0][0]["values"] == ["#", "#"]
