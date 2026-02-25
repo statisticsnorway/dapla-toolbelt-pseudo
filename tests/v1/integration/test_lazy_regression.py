@@ -58,7 +58,8 @@ def _run_case_rss_increase_bytes(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
-def test_lazy_projection_memory_regression() -> None:
+def test_lazy_vs_eager_memory_regression() -> None:
+    """This test checks that the memory usage of pseudonymization with a LazyFrame input is significantly lower than with a DataFrame input."""
     rows = int(os.getenv("LAZY_REGRESSION_ROWS", "1000"))
     wide_columns = int(os.getenv("LAZY_REGRESSION_WIDE_COLUMNS", "20"))
     payload_chars = int(os.getenv("LAZY_REGRESSION_PAYLOAD_CHARS", "2048"))
