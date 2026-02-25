@@ -1,6 +1,5 @@
 import json
 import os
-import statistics
 import subprocess
 import sys
 import tempfile
@@ -9,20 +8,6 @@ from pathlib import Path
 import polars as pl
 import pytest
 from tests.v1.integration.utils import integration_test
-
-
-def _env_int(name: str, default: int) -> int:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return int(value)
-
-
-def _env_float(name: str, default: float) -> float:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return float(value)
 
 
 def _build_wide_input_parquet(
@@ -66,11 +51,10 @@ def _run_case_rss_increase_bytes(file_path: Path, fields: list[str]) -> float:
 @pytest.mark.usefixtures("setup")
 @integration_test()
 def test_lazy_projection_memory_regression() -> None:
-    rows = _env_int("LAZY_REGRESSION_ROWS", 1_000)
-    wide_columns = _env_int("LAZY_REGRESSION_WIDE_COLUMNS", 20)
-    payload_chars = _env_int("LAZY_REGRESSION_PAYLOAD_CHARS", 2_048)
-    rounds = _env_int("LAZY_REGRESSION_ROUNDS", 1)
-    expected_minimum_memory_ratio = _env_float("LAZY_REGRESSION_MIN_RATIO", 2.0)
+    rows = int(os.getenv("LAZY_REGRESSION_ROWS", "1000"))
+    wide_columns = int(os.getenv("LAZY_REGRESSION_WIDE_COLUMNS", "20"))
+    payload_chars = int(os.getenv("LAZY_REGRESSION_PAYLOAD_CHARS", "2048"))
+    expected_minimum_memory_ratio = float(os.getenv("LAZY_REGRESSION_MIN_RATIO", "2.0"))
 
     with tempfile.TemporaryDirectory() as temp_dir:
         file_path = Path(temp_dir) / "lazy_regression_input.parquet"
@@ -87,17 +71,12 @@ def test_lazy_projection_memory_regression() -> None:
             *[f"blob_{idx}" for idx in range(wide_columns)],
         ]
 
-        few_field_samples = [
-            _run_case_rss_increase_bytes(file_path, few_target_fields)
-            for _ in range(rounds)
-        ]
-        many_field_samples = [
-            _run_case_rss_increase_bytes(file_path, many_target_fields)
-            for _ in range(rounds)
-        ]
-
-        few_rss_increase_bytes = statistics.median(few_field_samples)
-        many_rss_increase_bytes = statistics.median(many_field_samples)
+        few_rss_increase_bytes = _run_case_rss_increase_bytes(
+            file_path, few_target_fields
+        )
+        many_rss_increase_bytes = _run_case_rss_increase_bytes(
+            file_path, many_target_fields
+        )
 
         # Regression guard: targeting many wide columns should require noticeably
         # more memory than targeting a single narrow column.
