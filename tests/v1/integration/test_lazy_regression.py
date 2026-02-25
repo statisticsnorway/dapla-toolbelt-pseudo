@@ -61,7 +61,7 @@ def _run_case_rss_increase_bytes(
 def test_lazy_vs_eager_memory_regression() -> None:
     """This test checks that the memory usage of pseudonymization with a LazyFrame input is significantly lower than with a DataFrame input."""
     rows = int(os.getenv("LAZY_REGRESSION_ROWS", "1000"))
-    wide_columns = int(os.getenv("LAZY_REGRESSION_WIDE_COLUMNS", "20"))
+    wide_columns = int(os.getenv("LAZY_REGRESSION_WIDE_COLUMNS", "100"))
     payload_chars = int(os.getenv("LAZY_REGRESSION_PAYLOAD_CHARS", "2048"))
     expected_minimum_memory_ratio = float(os.getenv("LAZY_REGRESSION_MIN_RATIO", "2.0"))
 
