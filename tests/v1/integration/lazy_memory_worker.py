@@ -42,7 +42,11 @@ def _current_rss_bytes() -> float:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-path", required=True)
-    parser.add_argument("--fields", nargs="+", required=True)
+    parser.add_argument(
+        "--input-type",
+        required=True,
+        choices=["dataframe", "lazyframe"],
+    )
     args = parser.parse_args()
 
     baseline_rss_bytes = _current_rss_bytes()
@@ -60,14 +64,18 @@ def main() -> None:
     sampler_thread = threading.Thread(target=sample_rss, daemon=True)
     sampler_thread.start()
 
-    lazy_df = pl.scan_parquet(args.input_path)
-    result = (
-        Pseudonymize.from_polars(lazy_df)
-        .on_fields(*args.fields)
+    polars_input: pl.DataFrame | pl.LazyFrame
+    if args.input_type == "dataframe":
+        polars_input = pl.read_parquet(args.input_path)
+    else:
+        polars_input = pl.scan_parquet(args.input_path)
+
+    _ = (
+        Pseudonymize.from_polars(polars_input)
+        .on_fields("person_id")
         .with_default_encryption()
         .run()
     )
-    _ = result.to_polars_lazy()
 
     is_sampling = False
     sampler_thread.join(timeout=1)

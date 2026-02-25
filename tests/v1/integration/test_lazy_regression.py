@@ -18,14 +18,22 @@ def _build_wide_input_parquet(
     payload_chars: int,
 ) -> None:
     payload = "x" * payload_chars
+    blob_columns = {
+        f"blob_{idx}": [f"{idx}_{row}_{payload}" for row in range(rows)]
+        for idx in range(wide_columns)
+    }
     data = {
         "person_id": [f"id_{idx:09d}" for idx in range(rows)],
-        **{f"blob_{idx}": [payload] * rows for idx in range(wide_columns)},
+        **blob_columns,
     }
     pl.DataFrame(data).write_parquet(str(file_path))
 
 
-def _run_case_rss_increase_bytes(file_path: Path, fields: list[str]) -> float:
+def _run_case_rss_increase_bytes(
+    file_path: Path,
+    *,
+    input_type: str,
+) -> float:
     completed_process = subprocess.run(
         [
             sys.executable,
@@ -33,8 +41,8 @@ def _run_case_rss_increase_bytes(file_path: Path, fields: list[str]) -> float:
             "tests.v1.integration.lazy_memory_worker",
             "--input-path",
             str(file_path),
-            "--fields",
-            *fields,
+            "--input-type",
+            input_type,
         ],
         capture_output=True,
         text=True,
@@ -65,24 +73,23 @@ def test_lazy_projection_memory_regression() -> None:
             payload_chars=payload_chars,
         )
 
-        few_target_fields = ["person_id"]
-        many_target_fields = [
-            "person_id",
-            *[f"blob_{idx}" for idx in range(wide_columns)],
-        ]
-
-        few_rss_increase_bytes = _run_case_rss_increase_bytes(
-            file_path, few_target_fields
+        dataframe_rss_increase_bytes = _run_case_rss_increase_bytes(
+            file_path,
+            input_type="dataframe",
         )
-        many_rss_increase_bytes = _run_case_rss_increase_bytes(
-            file_path, many_target_fields
+        lazyframe_rss_increase_bytes = _run_case_rss_increase_bytes(
+            file_path,
+            input_type="lazyframe",
         )
 
-        # Regression guard: targeting many wide columns should require noticeably
-        # more memory than targeting a single narrow column.
-        memory_ratio = many_rss_increase_bytes / few_rss_increase_bytes
+        # Regression guard: eager DataFrame input should increase RSS more than
+        # LazyFrame input for the same pseudonymization field.
+        memory_ratio = dataframe_rss_increase_bytes / lazyframe_rss_increase_bytes
         assert memory_ratio >= expected_minimum_memory_ratio, (
-            "Expected higher RSS increase when pseudonymizing many target columns, "
+            "Expected higher RSS increase for DataFrame input than LazyFrame input, "
             f"but got ratio={memory_ratio:.2f} "
-            f"(few={few_rss_increase_bytes:.0f} bytes, many={many_rss_increase_bytes:.0f} bytes)."
+            "("
+            f"dataframe={dataframe_rss_increase_bytes:.0f} bytes, "
+            f"lazyframe={lazyframe_rss_increase_bytes:.0f} bytes"
+            ")."
         )
