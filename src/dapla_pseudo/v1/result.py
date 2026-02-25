@@ -1,5 +1,6 @@
 """Common API models for builder packages."""
 
+import warnings
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -124,10 +125,39 @@ class Result:
                     df = df.drop("__index_level_0__")
                 return df
             case pl.LazyFrame() as ldf:
+                warnings.warn(
+                    "The 'to_polars()' method collects the entire LazyFrame into memory.\
+                    Consider using the 'to_file()' method to write the LazyFrame directly to a file, or 'to_polars_lazy()' to return a LazyFrame.",
+                    UserWarning,
+                    stacklevel=2,
+                )
                 df = ldf.collect()
                 if "__index_level_0__" in df.columns:
                     df = df.drop("__index_level_0__")
                 return df
+            case _ as invalid_pseudo_data:
+                raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
+
+    def to_polars_lazy(self, **kwargs: Any) -> pl.LazyFrame:
+        """Output pseudonymized data as a Polars LazyFrame.
+
+        Args:
+            **kwargs: Additional keyword arguments to be passed the Polars "from_dicts" function *if* the input data is from a file.
+
+        Raises:
+            ValueError: If the result is not of type Polars LazyFrame.
+
+        Returns:
+            pl.LazyFrame: A Polars LazyFrame containing the pseudonymized data.
+        """
+        match self._pseudo_data:
+            case pl.DataFrame():
+                raise ValueError(
+                    "The 'to_polars_lazy()' method cannot only return a LazyFrame if the input is a LazyFrame.\
+                    Consider using the 'to_polars()' method instead."
+                )
+            case pl.LazyFrame() as ldf:
+                return ldf
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
 
@@ -154,6 +184,12 @@ class Result:
 
                 return pandas_df
             case pl.LazyFrame() as ldf:
+                warnings.warn(
+                    "The 'to_pandas()' method collects the entire LazyFrame into memory.\
+                    Consider using the 'to_file()' method to write the LazyFrame directly to a file instead.",
+                    UserWarning,
+                    stacklevel=2,
+                )
                 pandas_df = ldf.collect().to_pandas()
                 if isinstance(
                     self._schema, pd.Series
