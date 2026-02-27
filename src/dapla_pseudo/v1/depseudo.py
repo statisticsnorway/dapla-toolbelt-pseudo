@@ -25,7 +25,7 @@ class Depseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: pl.DataFrame
+    dataset: pl.DataFrame | pl.LazyFrame
     schema: pd.Series | pl.Schema
 
     @staticmethod
@@ -36,10 +36,16 @@ class Depseudonymize:
         return Depseudonymize._Depseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Depseudonymize._Depseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame | pl.LazyFrame,
+    ) -> "Depseudonymize._Depseudonymizer":
         """Initialize a depseudonymization request from a polars DataFrame."""
         Depseudonymize.dataset = dataframe
-        Depseudonymize.schema = dataframe.schema
+        Depseudonymize.schema = (
+            dataframe.schema
+            if type(dataframe) is pl.DataFrame
+            else dataframe.collect_schema()
+        )
         return Depseudonymize._Depseudonymizer()
 
     class _Depseudonymizer(_BasePseudonymizer):
@@ -86,7 +92,15 @@ class Depseudonymize:
 
             Returns:
                 Result: The depseudonymized dataset and the associated metadata.
+
+            Raises:
+                ValueError: If hierarchical is True and input dataset is a Polars LazyFrame.
             """
+            if hierarchical and isinstance(Depseudonymize.dataset, pl.LazyFrame):
+                raise ValueError(
+                    "Hierarchical datasets are not supported for Polars LazyFrames."
+                )
+
             super().__init__(
                 pseudo_operation=PseudoOperation.DEPSEUDONYMIZE,
                 dataset=Depseudonymize.dataset,

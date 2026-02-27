@@ -1,5 +1,6 @@
 """Common API models for builder packages."""
 
+import warnings
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ from dapla_pseudo.utils import encode_datadoc_variables
 from dapla_pseudo.utils import get_file_format_from_file_name
 from dapla_pseudo.v1.models.api import PseudoFieldResponse
 from dapla_pseudo.v1.supported_file_format import write_from_df
+from dapla_pseudo.v1.supported_file_format import write_from_lazy_df
 
 
 class Result:
@@ -32,7 +34,7 @@ class Result:
         schema: pd.Series | pl.Schema | None = None,
     ) -> None:
         """Initialise a PseudonymizationResult."""
-        self._pseudo_data: pl.DataFrame = pseudo_response.data
+        self._pseudo_data: pl.DataFrame | pl.LazyFrame = pseudo_response.data
         self._metadata: dict[str, dict[str, list[Any]]] = {}
         self._datadoc: Datadoc | list[Variable]
         self._schema = schema
@@ -122,6 +124,40 @@ class Result:
                 if "__index_level_0__" in df.columns:
                     df = df.drop("__index_level_0__")
                 return df
+            case pl.LazyFrame() as ldf:
+                warnings.warn(
+                    "The 'to_polars()' method collects the entire LazyFrame into memory.\
+                    Consider using the 'to_file()' method to write the LazyFrame directly to a file, or 'to_polars_lazy()' to return a LazyFrame.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                df = ldf.collect()
+                if "__index_level_0__" in df.columns:
+                    df = df.drop("__index_level_0__")
+                return df
+            case _ as invalid_pseudo_data:
+                raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
+
+    def to_polars_lazy(self, **kwargs: Any) -> pl.LazyFrame:
+        """Output pseudonymized data as a Polars LazyFrame.
+
+        Args:
+            **kwargs: Additional keyword arguments to be passed the Polars "from_dicts" function *if* the input data is from a file.
+
+        Raises:
+            ValueError: If the result is not of type Polars LazyFrame.
+
+        Returns:
+            pl.LazyFrame: A Polars LazyFrame containing the pseudonymized data.
+        """
+        match self._pseudo_data:
+            case pl.DataFrame():
+                raise ValueError(
+                    "The 'to_polars_lazy()' method cannot only return a LazyFrame if the input is a LazyFrame.\
+                    Consider using the 'to_polars()' method instead."
+                )
+            case pl.LazyFrame() as ldf:
+                return ldf
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid file type: {type(invalid_pseudo_data)}")
 
@@ -141,6 +177,20 @@ class Result:
         match self._pseudo_data:
             case pl.DataFrame() as df:
                 pandas_df = df.to_pandas()
+                if isinstance(
+                    self._schema, pd.Series
+                ):  # Apply original schema if available
+                    pandas_df = pandas_df.astype(self._schema)
+
+                return pandas_df
+            case pl.LazyFrame() as ldf:
+                warnings.warn(
+                    "The 'to_pandas()' method collects the entire LazyFrame into memory.\
+                    Consider using the 'to_file()' method to write the LazyFrame directly to a file instead.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                pandas_df = ldf.collect().to_pandas()
                 if isinstance(
                     self._schema, pd.Series
                 ):  # Apply original schema if available
@@ -169,26 +219,24 @@ class Result:
         datadoc_file_path: Path | GSPath
         if file_path.startswith(GSPath.cloud_prefix):
             client = GSClient()
-            gs_path = GSPath(cloud_path=file_path, client=client)
+            cloud_path = GSPath(cloud_path=file_path, client=client)
 
-            file_handle = gs_path.open(mode="wb")
-
-            datadoc_file_path = gs_path.parent.joinpath(Path(datadoc_file_name))
+            datadoc_file_path = cloud_path.parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
         else:
-            file_handle = Path(file_path).open(mode="wb")
-
             datadoc_file_path = Path(file_path).parent.joinpath(Path(datadoc_file_name))
             datadoc_file_handle = datadoc_file_path.open(mode="w")
 
         match self._pseudo_data:
             case pl.DataFrame() as df:
-                write_from_df(df, file_format, file_handle, **kwargs)
+                write_from_df(df, file_format, file_path, **kwargs)
+                datadoc_file_handle.write(self.datadoc)
+            case pl.LazyFrame() as ldf:
+                write_from_lazy_df(ldf, file_format, file_path, **kwargs)
                 datadoc_file_handle.write(self.datadoc)
             case _ as invalid_pseudo_data:
                 raise ValueError(f"Invalid response type: {type(invalid_pseudo_data)}")
 
-        file_handle.close()
         datadoc_file_handle.close()
 
     @property

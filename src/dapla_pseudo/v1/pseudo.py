@@ -25,7 +25,7 @@ class Pseudonymize:
     This class should not be instantiated, only the static methods should be used.
     """
 
-    dataset: pl.DataFrame
+    dataset: pl.DataFrame | pl.LazyFrame
     schema: pd.Series | pl.Schema
 
     @staticmethod
@@ -43,7 +43,9 @@ class Pseudonymize:
         return Pseudonymize._Pseudonymizer()
 
     @staticmethod
-    def from_polars(dataframe: pl.DataFrame) -> "Pseudonymize._Pseudonymizer":
+    def from_polars(
+        dataframe: pl.DataFrame | pl.LazyFrame,
+    ) -> "Pseudonymize._Pseudonymizer":
         """Initialize a pseudonymization request from a Polars DataFrame.
 
         Args:
@@ -53,7 +55,11 @@ class Pseudonymize:
             _Pseudonymizer: An instance of the _Pseudonymizer class.
         """
         Pseudonymize.dataset = dataframe
-        Pseudonymize.schema = dataframe.schema
+        Pseudonymize.schema = (
+            dataframe.schema
+            if type(dataframe) is pl.DataFrame
+            else dataframe.collect_schema()
+        )
         return Pseudonymize._Pseudonymizer()
 
     class _Pseudonymizer(_BasePseudonymizer):
@@ -107,7 +113,15 @@ class Pseudonymize:
 
             Returns:
                 Result: The pseudonymized dataset and the associated metadata.
+
+            Raises:
+                ValueError: If hierarchical is True and input dataset is a Polars LazyFrame.
             """
+            if hierarchical and type(Pseudonymize.dataset) is pl.LazyFrame:
+                raise ValueError(
+                    "Hierarchical datasets are not supported for Polars LazyFrames."
+                )
+
             super().__init__(
                 pseudo_operation=PseudoOperation.PSEUDONYMIZE,
                 dataset=Pseudonymize.dataset,

@@ -57,14 +57,20 @@ class FieldMatch:
 class MutableDataFrame:
     """A DataFrame that can change values in-place."""
 
-    def __init__(self, dataframe: pl.DataFrame, hierarchical: bool) -> None:
+    def __init__(
+        self, dataframe: pl.DataFrame | pl.LazyFrame, hierarchical: bool
+    ) -> None:
         """Initialize the class."""
-        self.dataset: pl.DataFrame | dict[str, Any] = dataframe
+        self.dataset: pl.DataFrame | dict[str, Any] | pl.LazyFrame = dataframe
         self.matched_fields: dict[str, FieldMatch] = {}
         self.batched_fields: dict[str, list[tuple[str, int, int]]] = {}
         self.matched_fields_metrics: dict[str, int] | None = None
         self.hierarchical: bool = hierarchical
-        self.schema = dataframe.schema
+        self.schema = (
+            dataframe.schema
+            if isinstance(dataframe, pl.DataFrame)
+            else dataframe.collect_schema()
+        )
 
     def match_rules(
         self, rules: list[PseudoRule], target_rules: list[PseudoRule] | None
@@ -72,13 +78,24 @@ class MutableDataFrame:
         """Create references to all the columns that matches the given pseudo rules."""
         self.batched_fields = {}
         if self.hierarchical is False:
-            assert isinstance(self.dataset, pl.DataFrame)
+            assert isinstance(self.dataset, pl.DataFrame) or isinstance(
+                self.dataset, pl.LazyFrame
+            )
+
+            def extract_column_data(
+                pattern: str, dataset: pl.DataFrame | pl.LazyFrame
+            ) -> list[Any]:
+                if isinstance(dataset, pl.DataFrame):
+                    return list(dataset.get_column(pattern))
+                elif isinstance(dataset, pl.LazyFrame):
+                    return list(dataset.select(pattern).collect().to_series())
+
             self.matched_fields = {
                 str(i): FieldMatch(
                     path=rule.pattern,
                     pattern=rule.pattern,
                     indexer=[],
-                    col=list(self.dataset.get_column(rule.pattern)),
+                    col=extract_column_data(rule.pattern, self.dataset),
                     wrapped_list=False,
                     func=rule.func,
                     target_func=target_rule.func if target_rule else None,
@@ -145,7 +162,9 @@ class MutableDataFrame:
     def update(self, path: str, data: list[str | None]) -> None:
         """Update a column with the given data."""
         if self.hierarchical is False:
-            assert isinstance(self.dataset, pl.DataFrame)
+            assert isinstance(self.dataset, pl.DataFrame) or isinstance(
+                self.dataset, pl.LazyFrame
+            )
             self.dataset = self.dataset.with_columns(pl.Series(data).alias(path))
         elif (batched_segments := self.batched_fields.get(path)) is not None:
             for leaf_path, start, end in batched_segments:
@@ -161,10 +180,12 @@ class MutableDataFrame:
                 data if field_match.wrapped_list is False else data[0]
             )
 
-    def to_polars(self) -> pl.DataFrame:
+    def to_polars(self) -> pl.DataFrame | pl.LazyFrame:
         """Convert to Polars DataFrame."""
         if self.hierarchical is False:
-            assert isinstance(self.dataset, pl.DataFrame)
+            assert isinstance(self.dataset, pl.DataFrame) or isinstance(
+                self.dataset, pl.LazyFrame
+            )
             return self.dataset
         else:
             assert isinstance(self.dataset, dict)
