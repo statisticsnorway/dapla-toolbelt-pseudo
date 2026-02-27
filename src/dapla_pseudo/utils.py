@@ -314,9 +314,8 @@ def _group_hierarchical_fields_for_requests(
     for _, fields in grouped.items():
         representative = fields[0]
         request_name = _remove_array_indices(representative.path)
-        should_register_batch = len(fields) > 1
 
-        if should_register_batch:
+        if len(fields) > 1:
             mutable_df.map_batch_to_leaf_slices(
                 request_name,
                 [(field.path, len(field.get_value())) for field in fields],
