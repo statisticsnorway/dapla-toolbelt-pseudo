@@ -194,15 +194,11 @@ def test_hierarchical_request_batching_daead(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
-def test_hierarchical_request_batching_redact_not_grouped(
+def test_hierarchical_request_batching_redact(
     df_personer_hierarchical: pl.DataFrame,
     df_personer_hierarchical_redacted: pl.DataFrame,
 ) -> None:
-    """Verify hierarchical REDACT keeps per-leaf field granularity.
-
-    This also uses real behavior only. REDACT is intentionally not grouped, so the
-    metadata details should keep one key per concrete matched leaf path.
-    """
+    """Verify hierarchical REDACT requests are grouped like other functions."""
     rule = PseudoRule(
         name="my-rule",
         func=PseudoFunction(
@@ -221,10 +217,6 @@ def test_hierarchical_request_batching_redact_not_grouped(
 
     datadoc_model = result.datadoc_model
     assert isinstance(datadoc_model, list)
-    assert len(datadoc_model) == 3
-    assert {entry["data_element_path"] for entry in datadoc_model} == {
-        "person_info[0].fnr",
-        "person_info[1].fnr",
-        "person_info[2].fnr",
-    }
+    assert len(datadoc_model) == 1
+    assert datadoc_model[0]["data_element_path"] == "person_info.fnr"
     assert_frame_equal(result.to_polars(), df_personer_hierarchical_redacted)
