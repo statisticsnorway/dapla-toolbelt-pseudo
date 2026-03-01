@@ -26,16 +26,16 @@ jobs:
           - { python: "3.13" }
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - id: "auth"
         name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v2.1.3"
+        uses: "google-github-actions/auth@v3.0.0"
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.INTEGRATION_TEST_SA_EMAIL }}
           token_format: "access_token"
       - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v2"
+        uses: "google-github-actions/setup-gcloud@v3"
         with:
           version: ">= 363.0.0"
       - name: Generate, mask, and output Google ID token as a secret
@@ -49,7 +49,7 @@ jobs:
           echo "::add-mask::$pseudo_service_auth_token"
           echo "PSEUDO_SERVICE_AUTH_TOKEN=$pseudo_service_auth_token" >> "$GITHUB_OUTPUT"
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
