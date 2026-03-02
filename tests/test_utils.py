@@ -176,5 +176,7 @@ def test_build_pseudo_field_request_hierarchical_batching() -> None:
     # Ensure batched responses can be scattered back to concrete paths.
     df.update("struct/foo", ["#", "#"])
     modified_df = df.to_polars()
-    assert modified_df["struct"][0]["foo"] == "#"
-    assert modified_df["struct"][1]["foo"] == "#"
+    assert isinstance(modified_df, pl.DataFrame)
+    struct_values = modified_df.get_column("struct").to_list()
+    assert struct_values[0]["foo"] == "#"
+    assert struct_values[1]["foo"] == "#"
