@@ -70,18 +70,6 @@ def redact_field(
 
     This is in order to avoid making unnecessary requests to the API.
     """
-
-    def _remove_brackets_after_last_slash(text: str) -> str:
-        if "/" not in text:
-            return re.sub(r"\[.*?\]", "", text)  # fallback if no slashes at all
-
-        # Split at the last slash
-        before, after = text.rsplit("/", 1)
-        # Remove bracketed substrings only in the "after" part
-        after_cleaned = re.sub(r"\[.*?\]", "", after)
-        # Recombine and return
-        return f"{before}/{after_cleaned}"
-
     kwargs = t.cast(RedactKeywordArgs, request.pseudo_func.kwargs)
     if kwargs.placeholder is None:
         raise ValueError("Placeholder needs to be set for Redact")
@@ -90,7 +78,7 @@ def redact_field(
     # however - the redact functionality is used mostly teams that use hierarchical
     # data, i.e. with very small lists. The overhead of
     # creating a Polars Series is probably not worth it.
-    name_no_indices = _remove_brackets_after_last_slash(request.name)
+    name_no_indices = _remove_array_indices(request.name)
     metadata = RawPseudoMetadata(
         field_name=name_no_indices,
         logs=[],

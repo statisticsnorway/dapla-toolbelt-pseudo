@@ -164,12 +164,7 @@ def test_hierarchical_request_batching_daead(
     df_personer_hierarchical: pl.DataFrame,
     df_personer_hierarchical_pseudonymized: pl.DataFrame,
 ) -> None:
-    """Verify hierarchical non-REDACT behavior is grouped into one logical field result.
-
-    This test asserts real end-to-end behavior without patching internals. For the
-    chosen fixture there are three leaf paths under ``person_info/fnr``. If requests
-    are batched, the result metadata is aggregated under a single field key.
-    """
+    """Verify hierarchical behavior is grouped into one logical field result."""
     rule = PseudoRule(
         name="my-rule",
         func=PseudoFunction(
