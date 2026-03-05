@@ -180,7 +180,7 @@ def _build_tabular_field_requests(
     return [
         _build_single_field_request(
             pseudo_operation=pseudo_operation,
-            request_name=field.path,
+            field_path=field.path,
             representative=field,
             values=field.get_value(),
             custom_keyset=custom_keyset,
@@ -206,20 +206,20 @@ def _build_hierarchical_field_requests(
     return [
         _build_single_field_request(
             pseudo_operation=pseudo_operation,
-            request_name=request_name,
+            field_path=field_path,
             representative=fields[0],
             values=[value for field in fields for value in field.get_value()],
             custom_keyset=custom_keyset,
             target_custom_keyset=target_custom_keyset,
             target_rules=target_rules,
         )
-        for request_name, fields in grouped_matches
+        for field_path, fields in grouped_matches
     ]
 
 
 def _build_single_field_request(
     pseudo_operation: PseudoOperation,
-    request_name: str,
+    field_path: str,
     representative: FieldMatch,
     values: list[str | int | None],
     custom_keyset: PseudoKeyset | str | None,
@@ -233,7 +233,7 @@ def _build_single_field_request(
             case PseudoOperation.PSEUDONYMIZE:
                 req = PseudoFieldRequest(
                     pseudo_func=representative.func,
-                    name=request_name,
+                    name=field_path,
                     pattern=representative.pattern,
                     values=values,
                     keyset=KeyWrapper(custom_keyset).keyset,
@@ -241,7 +241,7 @@ def _build_single_field_request(
             case PseudoOperation.DEPSEUDONYMIZE:
                 req = DepseudoFieldRequest(
                     pseudo_func=representative.func,
-                    name=request_name,
+                    name=field_path,
                     pattern=representative.pattern,
                     values=values,
                     keyset=KeyWrapper(custom_keyset).keyset,
@@ -253,14 +253,14 @@ def _build_single_field_request(
                 req = RepseudoFieldRequest(
                     source_pseudo_func=representative.func,
                     target_pseudo_func=representative.target_func,
-                    name=request_name,
+                    name=field_path,
                     pattern=representative.pattern,
                     values=values,
                     source_keyset=KeyWrapper(custom_keyset).keyset,
                     target_keyset=KeyWrapper(target_custom_keyset).keyset,
                 )
     except ValidationError as e:
-        raise Exception(f"Path or column: {request_name}") from e
+        raise Exception(f"Path or column: {field_path}") from e
 
     return req
 
@@ -280,7 +280,7 @@ def _group_hierarchical_fields_for_requests(
     request contains all values from all matching leaf paths.
 
     Two paths share a request only when all of these match:
-    - normalized request name (array indices removed)
+    - normalized request path (array indices removed)
     - pattern
     - source pseudo function
     - target pseudo function (for repseudonymize)
@@ -290,9 +290,9 @@ def _group_hierarchical_fields_for_requests(
 
     # Group paths that can share one API request.
     for field in matched_fields.values():
-        request_name = _remove_array_indices(field.path)
+        field_path = _remove_array_indices(field.path)
         target_func = str(field.target_func) if field.target_func else None
-        group_key = (request_name, field.pattern, str(field.func), target_func)
+        group_key = (field_path, field.pattern, str(field.func), target_func)
         grouped.setdefault(group_key, []).append(field)
 
     grouped_matches: list[tuple[str, list[FieldMatch]]] = []
@@ -301,14 +301,14 @@ def _group_hierarchical_fields_for_requests(
     # written back to the original leaf paths.
     for _, fields in grouped.items():
         representative = fields[0]
-        request_name = _remove_array_indices(representative.path)
+        field_path = _remove_array_indices(representative.path)
 
         if len(fields) > 1:
             mutable_df.map_batch_to_leaf_slices(
-                request_name,
+                field_path,
                 [(field.path, len(field.get_value())) for field in fields],
             )
-            grouped_matches.append((request_name, fields))
+            grouped_matches.append((field_path, fields))
         else:
             grouped_matches.append((representative.path, fields))
 
