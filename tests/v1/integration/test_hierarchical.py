@@ -5,10 +5,13 @@ from tests.v1.integration.utils import get_calling_function_name
 from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
+from dapla_pseudo import Depseudonymize
 from dapla_pseudo import Pseudonymize
+from dapla_pseudo import Repseudonymize
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.utils import encode_datadoc_variables
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
+from dapla_pseudo.v1.models.core import FF31KeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
@@ -156,3 +159,138 @@ def test_pseudonymize_hierarchical_complex(
     assert_frame_equal(
         result.to_polars(), df_personer_hierarchical_complex_pseudonymized
     )
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_daead(
+    df_personer_hierarchical: pl.DataFrame,
+    df_personer_hierarchical_pseudonymized: pl.DataFrame,
+) -> None:
+    """Verify hierarchical behavior is grouped into one logical field result."""
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    result = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(rule)
+        .run(hierarchical=True)
+    )
+
+    datadoc_model = result.datadoc_model
+    assert isinstance(datadoc_model, list)
+    assert len(datadoc_model) == 1
+    assert datadoc_model[0]["data_element_path"] == "person_info.fnr"
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical_pseudonymized)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_redact(
+    df_personer_hierarchical: pl.DataFrame,
+    df_personer_hierarchical_redacted: pl.DataFrame,
+) -> None:
+    """Verify hierarchical REDACT requests are grouped like other functions."""
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.REDACT,
+            kwargs=RedactKeywordArgs(placeholder=":"),
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    result = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(rule)
+        .run(hierarchical=True)
+    )
+
+    datadoc_model = result.datadoc_model
+    assert isinstance(datadoc_model, list)
+    assert len(datadoc_model) == 1
+    assert datadoc_model[0]["data_element_path"] == "person_info.fnr"
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical_redacted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_depseudo_daead(
+    df_personer_hierarchical: pl.DataFrame,
+) -> None:
+    """Verify depseudonymize handles hierarchical batched requests."""
+    rule = PseudoRule(
+        name="my-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    encrypted_df = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(rule)
+        .run(hierarchical=True)
+        .to_polars()
+    )
+
+    Depseudonymize.from_polars(encrypted_df)
+    result = Depseudonymize._Depseudonymizer([rule]).run(hierarchical=True)
+
+    assert_frame_equal(result.to_polars(), df_personer_hierarchical)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_hierarchical_request_batching_repseudo_daead_to_ff31(
+    df_personer_hierarchical: pl.DataFrame,
+) -> None:
+    """Verify repseudonymize behavior is grouped into one logical field result."""
+    source_rule = PseudoRule(
+        name="source-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.DAEAD, kwargs=DaeadKeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+    target_rule = PseudoRule(
+        name="target-rule",
+        func=PseudoFunction(
+            function_type=PseudoFunctionTypes.FF31, kwargs=FF31KeywordArgs()
+        ),
+        pattern="**/person_info/fnr",
+        path="person_info/fnr",
+    )
+
+    source_df = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(source_rule)
+        .run(hierarchical=True)
+        .to_polars()
+    )
+    expected_target_df = (
+        Pseudonymize.from_polars(df_personer_hierarchical)
+        .add_rules(target_rule)
+        .run(hierarchical=True)
+        .to_polars()
+    )
+
+    Repseudonymize.from_polars(source_df)
+    result = Repseudonymize._Repseudonymizer([source_rule], [target_rule]).run(
+        hierarchical=True
+    )
+
+    datadoc_model = result.datadoc_model
+    assert isinstance(datadoc_model, list)
+    assert len(datadoc_model) == 1
+    assert datadoc_model[0]["data_element_path"] == "person_info.fnr"
+    assert_frame_equal(result.to_polars(), expected_target_df)

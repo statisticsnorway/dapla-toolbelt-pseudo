@@ -152,3 +152,31 @@ def test_build_repseudo_field_request() -> None:
         pattern="**/foo",
         values=["baz"],
     )
+
+
+def test_build_pseudo_field_request_hierarchical_batching() -> None:
+    data = [
+        {"struct": {"foo": "baz"}},
+        {"struct": {"foo": "qux"}},
+    ]
+    df = MutableDataFrame(pl.DataFrame(data), hierarchical=True)
+    rules = [
+        PseudoRule.from_json(
+            '{"name":"my-rule","pattern":"**/foo","path":"struct/foo","func":"daead(keyId=ssb-common-key-1)"}'
+        )
+    ]
+
+    requests = build_pseudo_field_request(PseudoOperation.PSEUDONYMIZE, df, rules)
+
+    assert len(requests) == 1
+    assert requests[0].name == "struct/foo"
+    assert requests[0].pattern == "**/foo"
+    assert requests[0].values == ["baz", "qux"]
+
+    # Ensure batched responses can be scattered back to concrete paths.
+    df.update("struct/foo", ["#", "#"])
+    modified_df = df.to_polars()
+    assert isinstance(modified_df, pl.DataFrame)
+    struct_values = modified_df.get_column("struct").to_list()
+    assert struct_values[0]["foo"] == "#"
+    assert struct_values[1]["foo"] == "#"

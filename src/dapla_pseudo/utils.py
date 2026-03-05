@@ -20,6 +20,7 @@ from dapla_pseudo.v1.models.core import KeyWrapper
 from dapla_pseudo.v1.models.core import PseudoKeyset
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.models.core import RedactKeywordArgs
+from dapla_pseudo.v1.mutable_dataframe import FieldMatch
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
 from dapla_pseudo.v1.supported_file_format import SupportedOutputFileFormat
 
@@ -69,18 +70,6 @@ def redact_field(
 
     This is in order to avoid making unnecessary requests to the API.
     """
-
-    def _remove_brackets_after_last_slash(text: str) -> str:
-        if "/" not in text:
-            return re.sub(r"\[.*?\]", "", text)  # fallback if no slashes at all
-
-        # Split at the last slash
-        before, after = text.rsplit("/", 1)
-        # Remove bracketed substrings only in the "after" part
-        after_cleaned = re.sub(r"\[.*?\]", "", after)
-        # Recombine and return
-        return f"{before}/{after_cleaned}"
-
     kwargs = t.cast(RedactKeywordArgs, request.pseudo_func.kwargs)
     if kwargs.placeholder is None:
         raise ValueError("Placeholder needs to be set for Redact")
@@ -89,7 +78,7 @@ def redact_field(
     # however - the redact functionality is used mostly teams that use hierarchical
     # data, i.e. with very small lists. The overhead of
     # creating a Polars Series is probably not worth it.
-    name_no_indices = _remove_brackets_after_last_slash(request.name)
+    name_no_indices = _remove_array_indices(request.name)
     metadata = RawPseudoMetadata(
         field_name=name_no_indices,
         logs=[],
@@ -161,54 +150,170 @@ def build_pseudo_field_request(
     """Builds a FieldRequest object."""
     mutable_df.match_rules(rules, target_rules)
     matched_fields = mutable_df.get_matched_fields()
-    requests: list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest] = (
-        []
-    )
-    req: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
-    match pseudo_operation:
-        case PseudoOperation.PSEUDONYMIZE:
-            for field in matched_fields.values():
-                try:
-                    req = PseudoFieldRequest(
-                        pseudo_func=field.func,
-                        name=field.path,
-                        pattern=field.pattern,
-                        values=field.get_value(),
-                        keyset=KeyWrapper(custom_keyset).keyset,
-                    )
-                    requests.append(req)
-                except ValidationError as e:
-                    raise Exception(f"Path or column: {field.path}") from e
-        case PseudoOperation.DEPSEUDONYMIZE:
-            for field in matched_fields.values():
-                try:
-                    req = DepseudoFieldRequest(
-                        pseudo_func=field.func,
-                        name=field.path,
-                        pattern=field.pattern,
-                        values=field.get_value(),
-                        keyset=KeyWrapper(custom_keyset).keyset,
-                    )
-                    requests.append(req)
-                except ValidationError as e:
-                    raise Exception(f"Path or column: {field.path}") from e
+    if mutable_df.hierarchical:
+        return _build_hierarchical_field_requests(
+            pseudo_operation=pseudo_operation,
+            mutable_df=mutable_df,
+            matched_fields=matched_fields,
+            custom_keyset=custom_keyset,
+            target_custom_keyset=target_custom_keyset,
+            target_rules=target_rules,
+        )
 
-        case PseudoOperation.REPSEUDONYMIZE:
-            if target_rules is not None:
-                for field in matched_fields.values():
-                    try:
-                        req = RepseudoFieldRequest(
-                            source_pseudo_func=field.func,
-                            target_pseudo_func=field.target_func,
-                            name=field.path,
-                            pattern=field.pattern,
-                            values=field.get_value(),
-                            source_keyset=KeyWrapper(custom_keyset).keyset,
-                            target_keyset=KeyWrapper(target_custom_keyset).keyset,
-                        )
-                        requests.append(req)
-                    except ValidationError as e:
-                        raise Exception(f"Path or column: {field.path}") from e
-            else:
-                raise ValueError("Found no target rules")
-    return requests
+    else:
+        return _build_tabular_field_requests(
+            pseudo_operation=pseudo_operation,
+            matched_fields=matched_fields,
+            custom_keyset=custom_keyset,
+            target_custom_keyset=target_custom_keyset,
+            target_rules=target_rules,
+        )
+
+
+def _build_tabular_field_requests(
+    pseudo_operation: PseudoOperation,
+    matched_fields: dict[str, FieldMatch],
+    custom_keyset: PseudoKeyset | str | None,
+    target_custom_keyset: PseudoKeyset | str | None,
+    target_rules: list[PseudoRule] | None,
+) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
+    return [
+        _build_single_field_request(
+            pseudo_operation=pseudo_operation,
+            field_path=field.path,
+            representative=field,
+            values=field.get_value(),
+            custom_keyset=custom_keyset,
+            target_custom_keyset=target_custom_keyset,
+            target_rules=target_rules,
+        )
+        for field in matched_fields.values()
+    ]
+
+
+def _build_hierarchical_field_requests(
+    pseudo_operation: PseudoOperation,
+    mutable_df: MutableDataFrame,
+    matched_fields: dict[str, FieldMatch],
+    custom_keyset: PseudoKeyset | str | None,
+    target_custom_keyset: PseudoKeyset | str | None,
+    target_rules: list[PseudoRule] | None,
+) -> list[PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest]:
+    grouped_matches = _group_hierarchical_fields_for_requests(
+        mutable_df=mutable_df,
+        matched_fields=matched_fields,
+    )
+    return [
+        _build_single_field_request(
+            pseudo_operation=pseudo_operation,
+            field_path=field_path,
+            representative=fields[0],
+            values=[value for field in fields for value in field.get_value()],
+            custom_keyset=custom_keyset,
+            target_custom_keyset=target_custom_keyset,
+            target_rules=target_rules,
+        )
+        for field_path, fields in grouped_matches
+    ]
+
+
+def _build_single_field_request(
+    pseudo_operation: PseudoOperation,
+    field_path: str,
+    representative: FieldMatch,
+    values: list[str | int | None],
+    custom_keyset: PseudoKeyset | str | None,
+    target_custom_keyset: PseudoKeyset | str | None,
+    target_rules: list[PseudoRule] | None,
+) -> PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest:
+    req: PseudoFieldRequest | DepseudoFieldRequest | RepseudoFieldRequest
+
+    try:
+        match pseudo_operation:
+            case PseudoOperation.PSEUDONYMIZE:
+                req = PseudoFieldRequest(
+                    pseudo_func=representative.func,
+                    name=field_path,
+                    pattern=representative.pattern,
+                    values=values,
+                    keyset=KeyWrapper(custom_keyset).keyset,
+                )
+            case PseudoOperation.DEPSEUDONYMIZE:
+                req = DepseudoFieldRequest(
+                    pseudo_func=representative.func,
+                    name=field_path,
+                    pattern=representative.pattern,
+                    values=values,
+                    keyset=KeyWrapper(custom_keyset).keyset,
+                )
+            case PseudoOperation.REPSEUDONYMIZE:
+                if target_rules is None:
+                    raise ValueError("Found no target rules")
+
+                req = RepseudoFieldRequest(
+                    source_pseudo_func=representative.func,
+                    target_pseudo_func=representative.target_func,
+                    name=field_path,
+                    pattern=representative.pattern,
+                    values=values,
+                    source_keyset=KeyWrapper(custom_keyset).keyset,
+                    target_keyset=KeyWrapper(target_custom_keyset).keyset,
+                )
+    except ValidationError as e:
+        raise Exception(f"Path or column: {field_path}") from e
+
+    return req
+
+
+def _group_hierarchical_fields_for_requests(
+    mutable_df: MutableDataFrame,
+    matched_fields: dict[str, FieldMatch],
+) -> list[tuple[str, list[FieldMatch]]]:
+    """Group hierarchical field matches into pseudo-service requests.
+
+    Example input paths:
+    - ``person_info[0]/fnr``
+    - ``person_info[1]/fnr``
+    - ``person_info[2]/fnr``
+
+    These are grouped into one request named ``person_info/fnr``. The grouped
+    request contains all values from all matching leaf paths.
+
+    Two paths share a request only when all of these match:
+    - normalized request path (array indices removed)
+    - pattern
+    - source pseudo function
+    - target pseudo function (for repseudonymize)
+
+    """
+    grouped: dict[tuple[str, str, str, str | None], list[FieldMatch]] = {}
+
+    # Group paths that can share one API request.
+    for field in matched_fields.values():
+        field_path = _remove_array_indices(field.path)
+        target_func = str(field.target_func) if field.target_func else None
+        group_key = (field_path, field.pattern, str(field.func), target_func)
+        grouped.setdefault(group_key, []).append(field)
+
+    grouped_matches: list[tuple[str, list[FieldMatch]]] = []
+
+    # If a group is batched, store slice boundaries so one response list can be
+    # written back to the original leaf paths.
+    for _, fields in grouped.items():
+        representative = fields[0]
+        field_path = _remove_array_indices(representative.path)
+
+        if len(fields) > 1:
+            mutable_df.map_batch_to_leaf_slices(
+                field_path,
+                [(field.path, len(field.get_value())) for field in fields],
+            )
+            grouped_matches.append((field_path, fields))
+        else:
+            grouped_matches.append((representative.path, fields))
+
+    return grouped_matches
+
+
+def _remove_array_indices(path: str) -> str:
+    return re.sub(r"\[\d+]", "", path)
