@@ -12,6 +12,9 @@
           "keyId": "papis-common-key-1"
         },
         {
+          "snapshotDate": "2026-02-28"
+        },
+        {
           "strategy": "skip"
         }
       ]

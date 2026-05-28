@@ -109,7 +109,10 @@ def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
     df_personer = pl.DataFrame({"fnr": [*df_personer["fnr"].to_list(), None]})
 
     result = (
-        Pseudonymize.from_polars(df_personer).on_fields("fnr").with_stable_id().run()
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_stable_id(sid_snapshot_date="2026-02-28")
+        .run()
     )
     current_function_name = get_calling_function_name()
     expected_metadata_container = get_expected_datadoc_metadata_variables(
