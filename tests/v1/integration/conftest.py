@@ -7,8 +7,8 @@ import pytest_cases
 
 @pytest_cases.fixture()
 def setup() -> Generator[None, None, None]:
-    os.environ["PSEUDO_SERVICE_URL"] = "http://localhost:10210"
-    #os.environ["PSEUDO_SERVICE_URL"] = "https://pseudo-service.test.ssb.no"
+    #os.environ["PSEUDO_SERVICE_URL"] = "http://localhost:10210"
+    os.environ["PSEUDO_SERVICE_URL"] = "https://pseudo-service.test.ssb.no"
     # Setup step that runs when integration test are ran on local machine
     # This will not run in GH actions since GITHUB_ACTIONS is set to `true` per default
     # https://docs.github.com/en/actions/learn-github-actions/variables
