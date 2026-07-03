@@ -17,7 +17,7 @@ jobs:
       contents: read
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
 
       - name: Run Labeler
         uses: crazy-max/ghaction-github-labeler@v5.0.0  # Use this version until https://github.com/crazy-max/ghaction-github-labeler/issues/221 is fixed
