@@ -34,10 +34,9 @@ def test_depseudonymize_list_column_default_encryption(
         .on_fields("fnr", "friends")
         .with_default_encryption()
         .run()
-        .to_polars()
     )
-
-    assert_frame_equal(result, df_personer_with_list_column)
+    assert result.datadoc == "[]"
+    assert_frame_equal(result.to_polars(), df_personer_with_list_column)
 
 
 @pytest.mark.usefixtures("setup")
