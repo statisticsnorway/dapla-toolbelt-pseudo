@@ -1,0 +1,26 @@
+[
+  {
+    "fnr": "KsJu12NHdoZ",
+    "fornavn": "Donald",
+    "etternavn": "Duck",
+    "friends": null,
+    "kjonn": "M",
+    "fodselsdato": "020995"
+  },
+  {
+    "fnr": "QqaTeUtXvjk",
+    "fornavn": "Mikke",
+    "etternavn": "Mus",
+    "friends": ["KsJu12NHdoZ", "rAHb6rOyFtA", null],
+    "kjonn": "M",
+    "fodselsdato": "060970"
+  },
+  {
+    "fnr": "rAHb6rOyFtA",
+    "fornavn": "Anton",
+    "etternavn": "Duck",
+    "friends": [],
+    "kjonn": "M",
+    "fodselsdato": "180999"
+  }
+]

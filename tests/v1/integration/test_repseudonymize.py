@@ -25,6 +25,24 @@ def test_repseudonymize_from_default_encryption_to_fpe(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
+def test_repseudonymize_list_columns_from_default_encryption_to_fpe(
+    df_personer_with_list_column_fnr_ff31_encrypted: pl.DataFrame,
+    df_personer_with_list_column_fnr_daead_encrypted: pl.DataFrame,
+) -> None:
+    result = (
+        Repseudonymize.from_polars(df_personer_with_list_column_fnr_daead_encrypted)
+        .on_fields("fnr", "friends")
+        .from_default_encryption()
+        .to_papis_compatible_encryption()
+        .run()
+        .to_polars()
+    )
+    print(df_personer_with_list_column_fnr_ff31_encrypted)
+    assert_frame_equal(result, df_personer_with_list_column_fnr_ff31_encrypted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
 def test_repseudonymize_change_keys(
     df_personer_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer_daead_encrypted_ssb_common_key_1: pl.DataFrame,
