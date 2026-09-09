@@ -1,10 +1,75 @@
 import polars as pl
+from polars.testing import assert_frame_equal
 
 from dapla_pseudo.constants import PseudoFunctionTypes
 from dapla_pseudo.v1.models.core import DaeadKeywordArgs
 from dapla_pseudo.v1.models.core import PseudoFunction
 from dapla_pseudo.v1.models.core import PseudoRule
 from dapla_pseudo.v1.mutable_dataframe import MutableDataFrame
+
+
+def test_update_list_column() -> None:
+    df = pl.DataFrame(
+        {
+            "parent": ["Mike", "Anna", "Sonny", "Miranda"],
+            "kids": [
+                ["Danna", "Mike"],
+                [],
+                ["Daniel", "Preston", "Lena"],
+                None,
+            ],
+        }
+    )
+    pseudonymized_data = [
+        "DannaPseudo",
+        "MikePseudo",
+        "DanielPseudo",
+        "PrestonPseudo",
+        "LenaPseudo",
+        None,
+    ]
+    expected_df = pl.DataFrame(
+        {
+            "parent": ["Mike", "Anna", "Sonny", "Miranda"],
+            "kids": [
+                ["DannaPseudo", "MikePseudo"],
+                [],
+                ["DanielPseudo", "PrestonPseudo", "LenaPseudo"],
+                None,
+            ],
+        }
+    )
+
+    mutable_df = MutableDataFrame(df, hierarchical=False)
+    rules = [
+        PseudoRule(
+            pattern="kids",
+            func=PseudoFunction(
+                function_type=PseudoFunctionTypes.DAEAD,
+                kwargs=DaeadKeywordArgs(),
+            ),
+        )
+    ]
+
+    mutable_df.match_rules(rules, None)
+    assert mutable_df.list_columns_item_sizes == {"kids": [2, 0, 3, None]}
+
+    matched_field = mutable_df.matched_fields.get("0")
+    assert matched_field is not None
+    assert matched_field.path == "kids"
+    assert matched_field.col == [
+        "Danna",
+        "Mike",
+        None,
+        "Daniel",
+        "Preston",
+        "Lena",
+        None,
+    ]
+
+    mutable_df.update("kids", pseudonymized_data)
+    assert isinstance(mutable_df.dataset, pl.DataFrame)
+    assert_frame_equal(mutable_df.dataset, expected_df)
 
 
 def test_match_dataframe_dict_for_repseudo() -> None:

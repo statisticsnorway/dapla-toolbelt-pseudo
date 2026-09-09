@@ -22,6 +22,22 @@ def df_personer() -> pl.DataFrame:
 
 
 @pytest_cases.fixture()
+def df_personer_with_list_column() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_with_list_column.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "friends": pl.List(pl.String),
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest_cases.fixture()
 def df_personer_metadata() -> Datadoc:
     JSON_FILE = "tests/data/personer_metadata.json"
     return Datadoc(metadata_document_path=JSON_FILE, errors_as_warnings=True)
@@ -189,6 +205,24 @@ def df_personer_fnr_daead_encrypted_metadata() -> Datadoc:
 
 
 @pytest_cases.fixture()
+def df_personer_with_list_column_fnr_daead_encrypted() -> pl.DataFrame:
+    JSON_FILE = (
+        "tests/data/personer_with_list_column_pseudonymized_default_encryption.json"
+    )
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "friends": pl.List(pl.String),
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest_cases.fixture()
 def df_personer_fnr_ff31_encrypted() -> pl.DataFrame:
     JSON_FILE = "tests/data/personer_pseudonymized_papis_compatible_encryption.json"
     return pl.read_json(
@@ -197,6 +231,22 @@ def df_personer_fnr_ff31_encrypted() -> pl.DataFrame:
             "fnr": pl.String,
             "fornavn": pl.String,
             "etternavn": pl.String,
+            "kjonn": pl.String,
+            "fodselsdato": pl.String,
+        },
+    )
+
+
+@pytest_cases.fixture()
+def df_personer_with_list_column_fnr_ff31_encrypted() -> pl.DataFrame:
+    JSON_FILE = "tests/data/personer_with_list_column_pseudonymized_papis_compatible_encryption.json"
+    return pl.read_json(
+        JSON_FILE,
+        schema={
+            "fnr": pl.String,
+            "fornavn": pl.String,
+            "etternavn": pl.String,
+            "friends": pl.List(pl.String),
             "kjonn": pl.String,
             "fodselsdato": pl.String,
         },

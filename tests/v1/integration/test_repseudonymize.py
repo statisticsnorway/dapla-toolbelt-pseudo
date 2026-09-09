@@ -1,9 +1,12 @@
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
+from tests.v1.integration.utils import get_calling_function_name
+from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
 from tests.v1.integration.utils import integration_test
 
 from dapla_pseudo import Repseudonymize
+from dapla_pseudo.utils import encode_datadoc_variables
 
 
 @pytest.mark.usefixtures("setup")
@@ -21,6 +24,29 @@ def test_repseudonymize_from_default_encryption_to_fpe(
         .to_polars()
     )
     assert_frame_equal(result, df_personer_fnr_ff31_encrypted)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_repseudonymize_list_columns_from_default_encryption_to_fpe(
+    df_personer_with_list_column_fnr_ff31_encrypted: pl.DataFrame,
+    df_personer_with_list_column_fnr_daead_encrypted: pl.DataFrame,
+) -> None:
+    result = (
+        Repseudonymize.from_polars(df_personer_with_list_column_fnr_daead_encrypted)
+        .on_fields("fnr", "friends")
+        .from_default_encryption()
+        .to_papis_compatible_encryption()
+        .run()
+    )
+    current_function_name = get_calling_function_name()
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
+        current_function_name
+    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
+    assert_frame_equal(
+        result.to_polars(), df_personer_with_list_column_fnr_ff31_encrypted
+    )
 
 
 @pytest.mark.usefixtures("setup")

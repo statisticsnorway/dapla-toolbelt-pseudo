@@ -25,6 +25,22 @@ def test_depseudonymize_default_encryption(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
+def test_depseudonymize_list_column_default_encryption(
+    df_personer_with_list_column: pl.DataFrame,
+    df_personer_with_list_column_fnr_daead_encrypted: pl.DataFrame,
+) -> None:
+    result = (
+        Depseudonymize.from_polars(df_personer_with_list_column_fnr_daead_encrypted)
+        .on_fields("fnr", "friends")
+        .with_default_encryption()
+        .run()
+    )
+    assert result.datadoc == "[]"
+    assert_frame_equal(result.to_polars(), df_personer_with_list_column)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
 def test_depseudonymize_sid(
     df_personer_pseudo_stable_id_daead_encrypted_ssb_common_key_2: pl.DataFrame,
     df_personer: pl.DataFrame,

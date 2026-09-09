@@ -35,6 +35,29 @@ def test_pseudonymize_default_encryption(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
+def test_pseudonymize_list_column_default_encryption(
+    df_personer_with_list_column: pl.DataFrame,
+    df_personer_with_list_column_fnr_daead_encrypted: pl.DataFrame,
+) -> None:
+    result = (
+        Pseudonymize.from_polars(df_personer_with_list_column)
+        .on_fields("fnr", "friends")
+        .with_default_encryption()
+        .run()
+    )
+    current_function_name = get_calling_function_name()
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
+        current_function_name
+    )
+
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
+    assert_frame_equal(
+        result.to_polars(), df_personer_with_list_column_fnr_daead_encrypted
+    )
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
 def test_pseudonymize_papis_compatible_encryption(
     df_personer: pl.DataFrame,
     df_personer_fnr_ff31_encrypted: pl.DataFrame,

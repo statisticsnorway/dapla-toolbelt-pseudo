@@ -1,0 +1,26 @@
+[
+  {
+    "fnr": "11854898347",
+    "fornavn": "Donald",
+    "etternavn": "Duck",
+    "friends": null,
+    "kjonn": "M",
+    "fodselsdato": "020995"
+  },
+  {
+    "fnr": "01839899544",
+    "fornavn": "Mikke",
+    "etternavn": "Mus",
+    "friends": ["11854898347", "16910599481", null],
+    "kjonn": "M",
+    "fodselsdato": "060970"
+  },
+  {
+    "fnr": "16910599481",
+    "fornavn": "Anton",
+    "etternavn": "Duck",
+    "friends": [],
+    "kjonn": "M",
+    "fodselsdato": "180999"
+  }
+]

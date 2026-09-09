@@ -1,5 +1,6 @@
 import re
 from collections.abc import Generator
+from itertools import islice
 from typing import Any
 
 import polars as pl
@@ -65,6 +66,7 @@ class MutableDataFrame:
         self.matched_fields: dict[str, FieldMatch] = {}
         self.batched_fields: dict[str, list[tuple[str, int, int]]] = {}
         self.matched_fields_metrics: dict[str, int] | None = None
+        self.list_columns_item_sizes: dict[str, list[int | None]] = {}
         self.hierarchical: bool = hierarchical
         self.schema = (
             dataframe.schema
@@ -82,13 +84,22 @@ class MutableDataFrame:
                 self.dataset, pl.LazyFrame
             )
 
+            def flatten_list_column(name: str, column: pl.Series) -> list[Any]:
+                self.list_columns_item_sizes[name] = column.list.len().to_list()
+                return column.explode().to_list()
+
             def extract_column_data(
                 pattern: str, dataset: pl.DataFrame | pl.LazyFrame
             ) -> list[Any]:
                 if isinstance(dataset, pl.DataFrame):
-                    return list(dataset.get_column(pattern))
+                    column = dataset.get_column(pattern)
                 elif isinstance(dataset, pl.LazyFrame):
-                    return list(dataset.select(pattern).collect().to_series())
+                    column = dataset.select(pattern).collect().to_series()
+
+                if column.dtype == pl.List:
+                    return flatten_list_column(pattern, column)
+                else:
+                    return list(column)
 
             self.matched_fields = {
                 str(i): FieldMatch(
@@ -161,11 +172,25 @@ class MutableDataFrame:
 
     def update(self, path: str, data: list[str | None]) -> None:
         """Update a column with the given data."""
+
+        def rebuild_list_column(
+            item_sizes: list[int | None], flat_data: list[Any]
+        ) -> list[Any]:
+            values = iter(flat_data)
+            return [
+                next(values) if size is None else list(islice(values, size))
+                for size in item_sizes
+            ]
+
         if self.hierarchical is False:
             assert isinstance(self.dataset, pl.DataFrame) or isinstance(
                 self.dataset, pl.LazyFrame
             )
-            self.dataset = self.dataset.with_columns(pl.Series(data).alias(path))
+            item_sizes = self.list_columns_item_sizes.get(path)
+            column = (
+                data if item_sizes is None else rebuild_list_column(item_sizes, data)
+            )
+            self.dataset = self.dataset.with_columns(pl.Series(column).alias(path))
         elif (batched_segments := self.batched_fields.get(path)) is not None:
             for leaf_path, start, end in batched_segments:
                 self.update(leaf_path, data[start:end])
