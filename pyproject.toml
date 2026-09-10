@@ -50,12 +50,12 @@ lint = [
     "ruff>=0.14.5"
 ]
 doc = [
-    "furo>=2025.9.25; python_version >= '3.11'",
-    "myst-parser>=4.0.1; python_version >= '3.11'",
-    "sphinx>=8.2.3; python_version >= '3.11'",
-    "sphinx-autobuild>=2025.8.25; python_version >= '3.11'",
-    "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.11'",
-    "sphinx-click>=6.1.0; python_version >= '3.11'",
+    "furo>=2025.9.25; python_version >= '3.12'",
+    "myst-parser>=4.0.1; python_version >= '3.12'",
+    "sphinx>=8.2.3; python_version >= '3.12'",
+    "sphinx-autobuild>=2025.8.25; python_version >= '3.12'",
+    "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.12'",
+    "sphinx-click>=6.1.0; python_version >= '3.12'",
     "dapla-toolbelt-pseudo @ file:///${PROJECT_ROOT}"
 ]
 test = ["typeguard>=2.13.3"]
