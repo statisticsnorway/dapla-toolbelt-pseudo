@@ -1,9 +1,9 @@
 [project]
 name = "dapla-toolbelt-pseudo"
-version = "6.3.0"
+version = "6.3.1"
 description = "Pseudonymization extensions for Dapla"
 authors = [{ name = "Dapla Developers", email = "dapla-platform-developers@ssb.no" }]
-requires-python = ">=3.11,<4.0"
+requires-python = ">=3.12,<4.0"
 readme = "README.md"
 license = "MIT"
 classifiers = ["Development Status :: 4 - Beta"]
@@ -21,7 +21,7 @@ dependencies = [
     "polars>=1.31.0",
     "pygments>2.15.0",
     "click>=8.0.1",
-    "dapla-toolbelt-metadata>=0.10.5,<1.0.0",
+    "dapla-toolbelt-metadata>=0.19.0,<1.0.0",
     "cloudpathlib[gs]>=0.17.0",
     "pyarrow>=14.0.2",
     "orjson>=3.10.1",
@@ -50,12 +50,12 @@ lint = [
     "ruff>=0.14.5"
 ]
 doc = [
-    "furo>=2025.9.25; python_version >= '3.11'",
-    "myst-parser>=4.0.1; python_version >= '3.11'",
-    "sphinx>=8.2.3; python_version >= '3.11'",
-    "sphinx-autobuild>=2025.8.25; python_version >= '3.11'",
-    "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.11'",
-    "sphinx-click>=6.1.0; python_version >= '3.11'",
+    "furo>=2025.9.25; python_version >= '3.12'",
+    "myst-parser>=4.0.1; python_version >= '3.12'",
+    "sphinx>=8.2.3; python_version >= '3.12'",
+    "sphinx-autobuild>=2025.8.25; python_version >= '3.12'",
+    "sphinx-autodoc-typehints>=3.5.2; python_version >= '3.12'",
+    "sphinx-click>=6.1.0; python_version >= '3.12'",
     "dapla-toolbelt-pseudo @ file:///${PROJECT_ROOT}"
 ]
 test = ["typeguard>=2.13.3"]
