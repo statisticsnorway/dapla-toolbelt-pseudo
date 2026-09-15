@@ -60,7 +60,7 @@ class PseudoClient:
     def __auth_token(self, current_attempt: int = 0) -> str:
         if os.environ.get("DAPLA_REGION") == "CLOUD_RUN":
             audience = os.environ["PSEUDO_SERVICE_URL"]
-            auth_req = google.auth.transport.requests.Request()  # type: ignore[no-untyped-call]
+            auth_req = google.auth.transport.requests.Request()
 
             # Retry logic for fetching token - transiently fails in Cloud Run.
             max_token_fetch_attempts = 3
