@@ -21,6 +21,11 @@
           uv
           xz
           zlib
+          stdenv.cc.cc.lib
+        ];
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+          pkgs.zlib
+          pkgs.stdenv.cc.cc.lib
         ];
       };
     });
