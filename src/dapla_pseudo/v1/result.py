@@ -328,10 +328,8 @@ class Result:
             variable = Variable(**raw_metadata[0])
             return Variable.model_validate(variable)
         except ValidationError as exc:
-            print(
-                f"""[WARNING] Datadoc 'Variable' validation failed:
-                {exc}"""
-            )
+            print(f"""[WARNING] Datadoc 'Variable' validation failed:
+                {exc}""")
             return None
 
 

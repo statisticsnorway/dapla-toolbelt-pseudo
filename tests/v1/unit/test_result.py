@@ -18,14 +18,12 @@ def test_result_index_level(tmp_path: Path) -> None:
     # removing the column "__index_level_0__"
 
     df = pd.read_csv(
-        io.StringIO(
-            """
+        io.StringIO("""
             a	b
             1	4
             2	5
             3	6
-        """
-        ),
+        """),
         sep="\t",
     )
 
