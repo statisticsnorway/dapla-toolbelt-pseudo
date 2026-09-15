@@ -148,3 +148,7 @@ private/
 .history/
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Direnv
+.envrc
+.direnv/
