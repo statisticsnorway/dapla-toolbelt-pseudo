@@ -74,10 +74,8 @@ class SchemaTraverser:
                             inner_type.to_schema(), rules, path, separator
                         )
                     elif inner_type == pl.List or inner_type == pl.Array:
-                        raise ValueError(
-                            f"Nested type: {dtype} could not be parsed.\
-                            Nested types within nested types are not supported"
-                        )
+                        raise ValueError(f"Nested type: {dtype} could not be parsed.\
+                            Nested types within nested types are not supported")
                     else:  # If not nested type, match on rule
                         if (
                             rule := SchemaTraverser._match_rule(path, rules)
