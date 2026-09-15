@@ -60,7 +60,6 @@ doc = [
 ]
 test = ["typeguard>=2.13.3"]
 dev = [
-    "austin-dist>=3.6.0",
     "pydantic>=2.12",
     "pytest-cases>=3.8.5",
     "pytest-mock>=3.14",
