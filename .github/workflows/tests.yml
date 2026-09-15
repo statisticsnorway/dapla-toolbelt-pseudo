@@ -7,8 +7,8 @@ on:
       - master
   pull_request:
 
-env:
-  INTEGRATION_TESTS: FALSE
+permissions:
+  contents: "read"
 
 jobs:
   tests:
