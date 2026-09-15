@@ -1,6 +1,6 @@
 {
   description = "Provide development environment for dapla-toolbelt";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
 
   outputs = {nixpkgs, ...}: let
     systems = [
@@ -21,6 +21,11 @@
           uv
           xz
           zlib
+          stdenv.cc.cc.lib
+        ];
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+          pkgs.zlib
+          pkgs.stdenv.cc.cc.lib
         ];
       };
     });

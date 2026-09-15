@@ -406,7 +406,7 @@ dp.write_pandas(df, "gs://bucket/test.parquet", file_format="parquet") # The met
 
 ## Requirements
 
-- Python >= 3.11
+- Python >= 3.12
 - Dependencies can be found in `pyproject.toml`
 
 ## Installation
