@@ -14,14 +14,14 @@ from nox import Session
 package = "dapla_pseudo"
 python_versions = ["3.12", "3.13", "3.14"]
 nox.needs_version = ">= 2025.2.9"
-nox.options.sessions = (
+nox.options.sessions = [
     "pre-commit",
     "mypy",
     "tests",
     "typeguard",
     "xdoctest",
     "docs-build",
-)
+]
 nox.options.default_venv_backend = "uv"
 session = nox.session
 
