@@ -1,0 +1,89 @@
+name: Dependabot Slack Report
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send high and critical Dependabot vulnerabilities to Slack
+        uses: actions/github-script@v8
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const alerts = await github.paginate(
+              github.rest.dependabot.listAlertsForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "open",
+                severity: "high,critical",
+                per_page: 100,
+              },
+            );
+
+            if (alerts.length === 0) {
+              console.log("No high/critical Dependabot alerts.");
+              return;
+            }
+
+            const critical = alerts.filter(
+              (alert) => alert.security_advisory?.severity === "critical",
+            );
+            const high = alerts.filter(
+              (alert) => alert.security_advisory?.severity === "high",
+            );
+
+            const formatAlert = (alert) => {
+              const dependency = alert.dependency;
+              const advisory = alert.security_advisory;
+              const fixed = advisory.first_patched_version?.identifier ?? "not available";
+              return `* <${alert.html_url}|${dependency.package.name}> (${dependency.package.ecosystem})\n${dependency.manifest_path}, vulnerable ${dependency.vulnerable_version_range}, fixed in ${fixed}`;
+            };
+
+            const blocks = [
+              {
+                type: "header",
+                text: { type: "plain_text", text: "Dependabot vulnerabilities" },
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `*${context.repo.owner}/${context.repo.repo}*`,
+                },
+              },
+            ];
+
+            for (const [severity, severityAlerts] of [["CRITICAL", critical], ["HIGH", high]]) {
+              if (severityAlerts.length > 0) {
+                blocks.push({
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: `*${severity} (${severityAlerts.length})*\n${severityAlerts.map(formatAlert).join("\n")}`,
+                  },
+                });
+              }
+            }
+
+            const response = await fetch(process.env.SLACK_WEBHOOK, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ blocks }),
+            });
+
+            if (!response.ok) {
+              throw new Error(
+                `Slack returned ${response.status}: ${await response.text()}`,
+              );
+            }
