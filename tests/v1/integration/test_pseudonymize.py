@@ -124,6 +124,27 @@ def test_pseudonymize_sid(
 
 @pytest.mark.usefixtures("setup")
 @integration_test()
+def test_pseudonymize_sid_with_invalid_snapshot_date(
+    df_personer: pl.DataFrame,
+    df_personer_sid_fnr: pl.DataFrame,
+) -> None:
+    result = (
+        Pseudonymize.from_polars(df_personer)
+        .on_fields("fnr")
+        .with_stable_id(sid_snapshot_date="1990-01-01")
+        .run()
+    )
+
+    current_function_name = get_calling_function_name()
+    expected_metadata_container = get_expected_datadoc_metadata_variables(
+        current_function_name
+    )
+    assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
+    assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
 def test_pseudonymize_sid_null(df_personer: pl.DataFrame) -> None:
     expected_result_fnr_df = pl.DataFrame(
         {"fnr": ["jJuuj0i", "ylc9488", "yeLfkaL", None]}
