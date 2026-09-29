@@ -1,8 +1,8 @@
 import asyncio
 
-from aiohttp import ClientResponseError
 import polars as pl
 import pytest
+from aiohttp import ClientResponseError
 from polars.testing import assert_frame_equal
 from tests.v1.integration.utils import get_calling_function_name
 from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
