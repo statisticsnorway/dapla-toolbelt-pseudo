@@ -13,6 +13,7 @@ import google.oauth2.id_token
 import requests
 from aiohttp import ClientPayloadError
 from aiohttp import ClientResponse
+from aiohttp import ClientResponseError
 from aiohttp import ClientSession
 from aiohttp import ClientTimeout
 from aiohttp import ServerDisconnectedError
@@ -160,7 +161,7 @@ class PseudoClient:
                 start_timeout=0.1,
                 max_timeout=30,
                 factor=6,
-                statuses={400, 401, 429}.union(
+                statuses={401, 429}.union(
                     set(range(500, 600))
                 ),  # Retry all 5xx errors and 400 Bad Request
                 exceptions={
@@ -274,6 +275,15 @@ class PseudoClient:
             case _:
                 print(response.headers)
                 print(await response.text())
+                response_body = await response.json()
+                if isinstance(response_body, dict) and response_body.get("message"):
+                    raise ClientResponseError(
+                        response.request_info,
+                        response.history,
+                        status=response.status,
+                        message=response_body["message"],
+                        headers=response.headers,
+                    )
                 response.raise_for_status()
 
     @staticmethod

@@ -2,6 +2,7 @@ import asyncio
 
 import polars as pl
 import pytest
+from aiohttp import ClientResponseError
 from polars.testing import assert_frame_equal
 from tests.v1.integration.utils import get_calling_function_name
 from tests.v1.integration.utils import get_expected_datadoc_metadata_variables
@@ -120,6 +121,23 @@ def test_pseudonymize_sid(
     )
     assert result.datadoc == encode_datadoc_variables(expected_metadata_container)
     assert_frame_equal(result.to_polars(), df_personer_sid_fnr)
+
+
+@pytest.mark.usefixtures("setup")
+@integration_test()
+def test_pseudonymize_sid_with_invalid_snapshot_date(
+    df_personer: pl.DataFrame,
+) -> None:
+    with pytest.raises(ClientResponseError) as error:
+        (
+            Pseudonymize.from_polars(df_personer)
+            .on_fields("fnr")
+            .with_stable_id(sid_snapshot_date="1990-01-01")
+            .run()
+        )
+
+    assert error.value.status == 400
+    assert "sid" in error.value.message.lower()
 
 
 @pytest.mark.usefixtures("setup")
