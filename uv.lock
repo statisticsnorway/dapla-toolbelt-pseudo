@@ -701,12 +701,11 @@ wheels = [
 
 [[package]]
 name = "dapla-toolbelt-pseudo"
-version = "6.3.1"
+version = "6.3.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
     { name = "aiohttp-retry" },
-    { name = "click" },
     { name = "cloudpathlib", extra = ["gs"] },
     { name = "cryptography" },
     { name = "dapla-auth-client" },
@@ -714,17 +713,16 @@ dependencies = [
     { name = "deprecated" },
     { name = "fsspec" },
     { name = "gcsfs" },
+    { name = "google-auth" },
     { name = "msgspec" },
     { name = "numpy" },
     { name = "orjson" },
-    { name = "pandas-stubs" },
     { name = "polars" },
     { name = "puremagic" },
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "pygments" },
     { name = "pyhumps" },
-    { name = "pytest-asyncio" },
     { name = "python-ulid" },
     { name = "types-deprecated" },
     { name = "types-requests" },
@@ -737,7 +735,6 @@ dev = [
     { name = "dapla-toolbelt-pseudo" },
     { name = "deptry" },
     { name = "furo" },
-    { name = "google-auth" },
     { name = "ipykernel" },
     { name = "ipython" },
     { name = "jupyterlab" },
@@ -752,7 +749,7 @@ dev = [
     { name = "pydoclint" },
     { name = "pygments" },
     { name = "pytest" },
-    { name = "pytest-cases" },
+    { name = "pytest-asyncio" },
     { name = "pytest-mock" },
     { name = "pytest-xdist", extra = ["psutil"] },
     { name = "ruff" },
@@ -787,7 +784,6 @@ test = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.10.5" },
     { name = "aiohttp-retry", specifier = ">=2.9.1" },
-    { name = "click", specifier = ">=8.0.1" },
     { name = "cloudpathlib", extras = ["gs"], specifier = ">=0.17.0" },
     { name = "cryptography", specifier = ">41.0.0" },
     { name = "dapla-auth-client", specifier = ">=1.2.1" },
@@ -795,17 +791,16 @@ requires-dist = [
     { name = "deprecated", specifier = ">=1.2.18" },
     { name = "fsspec", specifier = ">=2023.5.0" },
     { name = "gcsfs", specifier = ">=2025.5.1" },
+    { name = "google-auth", specifier = ">=2.25.2" },
     { name = "msgspec", specifier = ">=0.18.6" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "orjson", specifier = ">=3.10.1" },
-    { name = "pandas-stubs", specifier = ">=1.5.3.230304" },
     { name = "polars", specifier = ">=1.31.0" },
     { name = "puremagic", specifier = ">=1.15" },
     { name = "pyarrow", specifier = ">=14.0.2" },
     { name = "pydantic", specifier = ">=2.12" },
     { name = "pygments", specifier = ">2.15.0" },
     { name = "pyhumps", specifier = ">=3.8.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "python-ulid", specifier = ">=2.2.0" },
     { name = "types-deprecated", specifier = ">=1.2.15.20250304" },
     { name = "types-requests", specifier = ">=2.28.11" },
@@ -818,7 +813,6 @@ dev = [
     { name = "dapla-toolbelt-pseudo", directory = "." },
     { name = "deptry", specifier = ">=0.24.0" },
     { name = "furo", marker = "python_full_version >= '3.12'", specifier = ">=2025.9.25" },
-    { name = "google-auth", specifier = ">=2.25.2" },
     { name = "ipykernel", specifier = ">=6.0.0" },
     { name = "ipython", specifier = ">=8.11.0" },
     { name = "jupyterlab", specifier = ">=4.0.0" },
@@ -833,7 +827,7 @@ dev = [
     { name = "pydoclint", specifier = ">=0.8.3" },
     { name = "pygments", specifier = ">=2.19.0" },
     { name = "pytest", specifier = ">=9.0.0,<9.1" },
-    { name = "pytest-cases", specifier = ">=3.8.5" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-mock", specifier = ">=3.14" },
     { name = "pytest-xdist", extras = ["psutil"], specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.14.5" },
@@ -882,18 +876,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/86/b5/ed3e65c63c68a6634e3ba04bd10255c8e46ec16ebed7d1c79e4816d8a760/debugpy-1.8.17-cp314-cp314-win32.whl", hash = "sha256:5c59b74aa5630f3a5194467100c3b3d1c77898f9ab27e3f7dc5d40fc2f122670", size = 5277203, upload-time = "2025-09-17T16:34:06.65Z" },
     { url = "https://files.pythonhosted.org/packages/b0/26/394276b71c7538445f29e792f589ab7379ae70fd26ff5577dfde71158e96/debugpy-1.8.17-cp314-cp314-win_amd64.whl", hash = "sha256:893cba7bb0f55161de4365584b025f7064e1f88913551bcd23be3260b231429c", size = 5318493, upload-time = "2025-09-17T16:34:08.483Z" },
     { url = "https://files.pythonhosted.org/packages/b0/d0/89247ec250369fc76db477720a26b2fce7ba079ff1380e4ab4529d2fe233/debugpy-1.8.17-py2.py3-none-any.whl", hash = "sha256:60c7dca6571efe660ccb7a9508d73ca14b8796c4ed484c2002abba714226cfef", size = 5283210, upload-time = "2025-09-17T16:34:25.835Z" },
-]
-
-[[package]]
-name = "decopatch"
-version = "1.4.10"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "makefun" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/90/4c/8ca1f193428cbc4d63d0f07db9b8bd96be2db8ee5deefa93e7e8a28f2812/decopatch-1.4.10.tar.gz", hash = "sha256:957f49c93f4150182c23f8fb51d13bb3213e0f17a79e09c8cca7057598b55720", size = 69538, upload-time = "2022-03-01T08:57:21.79Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/fa/8e4a51e1afda8d4bd73d784bfe4a60cfdeeced9bea419eff5c271180377e/decopatch-1.4.10-py2.py3-none-any.whl", hash = "sha256:e151f7f93de2b1b3fd3f3272dcc7cefd1a69f68ec1c2d8e288ecd9deb36dc5f7", size = 18015, upload-time = "2022-03-01T08:57:20.676Z" },
 ]
 
 [[package]]
@@ -1968,15 +1950,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/ca/77123e4d77df3cb1e968ade7b1f808f5d3a5c1c96b18a33895397de292c1/lxml-6.1.0-cp314-cp314t-win32.whl", hash = "sha256:00750d63ef0031a05331b9223463b1c7c02b9004cef2346a5b2877f0f9494dd2", size = 3897377, upload-time = "2026-04-18T04:32:07.656Z" },
     { url = "https://files.pythonhosted.org/packages/64/ce/3554833989d074267c063209bae8b09815e5656456a2d332b947806b05ff/lxml-6.1.0-cp314-cp314t-win_amd64.whl", hash = "sha256:80410c3a7e3c617af04de17caa9f9f20adaa817093293d69eae7d7d0522836f5", size = 4392701, upload-time = "2026-04-18T04:32:12.113Z" },
     { url = "https://files.pythonhosted.org/packages/2b/a0/9b916c68c0e57752c07f8f64b30138d9d4059dbeb27b90274dedbea128ff/lxml-6.1.0-cp314-cp314t-win_arm64.whl", hash = "sha256:26dd9f57ee3bd41e7d35b4c98a2ffd89ed11591649f421f0ec19f67d50ec67ac", size = 3817120, upload-time = "2026-04-18T04:32:15.803Z" },
-]
-
-[[package]]
-name = "makefun"
-version = "1.16.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7b/cf/6780ab8bc3b84a1cce3e4400aed3d64b6db7d5e227a2f75b6ded5674701a/makefun-1.16.0.tar.gz", hash = "sha256:e14601831570bff1f6d7e68828bcd30d2f5856f24bad5de0ccb22921ceebc947", size = 73565, upload-time = "2025-05-09T15:00:42.313Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/c0/4bc973defd1270b89ccaae04cef0d5fa3ea85b59b108ad2c08aeea9afb76/makefun-1.16.0-py2.py3-none-any.whl", hash = "sha256:43baa4c3e7ae2b17de9ceac20b669e9a67ceeadff31581007cca20a07bbe42c4", size = 22923, upload-time = "2025-05-09T15:00:41.042Z" },
 ]
 
 [[package]]
@@ -3153,21 +3126,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/43/7c/d36d04db312ecf4298932ef77e6e4a9e8ad017906e24e34f0b0c361a2473/pytest_asyncio-1.4.0.tar.gz", hash = "sha256:c6c0d2259945122819f171a32ecea2c349ead889ee28176caaf492143424be42", size = 58514, upload-time = "2026-05-26T09:56:04.083Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/03/e2/08a497ef684b88559c9cc5f4ad53a37e7b99e727094a86d6ea32536d5d3c/pytest_asyncio-1.4.0-py3-none-any.whl", hash = "sha256:933ca923a23075a87fb7070c0ec272a6848489824d887c85c812670932835aa1", size = 16930, upload-time = "2026-05-26T09:56:02.576Z" },
-]
-
-[[package]]
-name = "pytest-cases"
-version = "3.10.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "decopatch" },
-    { name = "makefun" },
-    { name = "packaging" },
-    { name = "pytest" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/a2/c7abc3b606125cf3732e8e613092b0e2549365e824b5f37972125c22806b/pytest_cases-3.10.1.tar.gz", hash = "sha256:451f9e3ecd5d2d81a4362c10c441126f5b3d1ae3a7efaf59f60b1fb930df2d69", size = 1095867, upload-time = "2026-03-02T23:05:33.824Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/f2/7a29fb0571562034b05c38dceabba48dcc622be5d6c5448db80779e55de7/pytest_cases-3.10.1-py2.py3-none-any.whl", hash = "sha256:0deb8a85b6132e44adbc1cfc57897c6a624ec23f48ab445a43c7d56a6b9315a4", size = 108870, upload-time = "2026-03-02T23:05:32.663Z" },
 ]
 
 [[package]]

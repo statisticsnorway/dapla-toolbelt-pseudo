@@ -1,22 +1,18 @@
 """This module defines constants that are referenced throughout the codebase."""
 
 from enum import Enum
+from enum import StrEnum
 
 TIMEOUT_DEFAULT: int = 60 * 60 * 10  # seconds
 
 
-class Env(str, Enum):
+class Env(StrEnum):
     """Environment variable keys."""
 
     PSEUDO_SERVICE_URL = "PSEUDO_SERVICE_URL"
     PSEUDO_SERVICE_AUTH_TOKEN = "PSEUDO_SERVICE_AUTH_TOKEN"  # S105
     PSEUDO_CLIENT_ROWS_PER_PARTITION = "PSEUDO_CLIENT_ROWS_PER_PARTITION"
     PSEUDO_CLIENT_MAX_TOTAL_PARTITIONS = "PSEUDO_CLIENT_MAX_TOTAL_PARTITIONS"
-
-    def __str__(self) -> str:
-        """Use value for string representation."""
-        return str(self.value)
-
 
 class PseudoOperation(str, Enum):
     """Pseudo operation."""
