@@ -127,7 +127,6 @@ def test_pseudonymize_sid(
 @integration_test()
 def test_pseudonymize_sid_with_invalid_snapshot_date(
     df_personer: pl.DataFrame,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
     with pytest.raises(ClientResponseError) as error:
         (
@@ -138,7 +137,7 @@ def test_pseudonymize_sid_with_invalid_snapshot_date(
         )
 
     assert error.value.status == 400
-    assert "sid" in capsys.readouterr().out.lower()
+    assert "sid" in error.value.message.lower()
 
 
 @pytest.mark.usefixtures("setup")
