@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pandas as pd
 import polars as pl
 import pytest
-import pytest_cases
 
 from dapla_pseudo.exceptions import NoFileExtensionError
 from dapla_pseudo.utils import convert_to_date
@@ -16,12 +15,12 @@ PKG = "dapla_pseudo.v1.validation"
 TEST_FILE_PATH = "tests/v1/unit/test_files"
 
 
-@pytest_cases.fixture()
+@pytest.fixture()
 def sid_lookup_missing_response() -> tuple[list[str], str]:
     return (["20859374701", "01234567890"], "2023-08-31")
 
 
-@pytest_cases.fixture()
+@pytest.fixture()
 def sid_lookup_empty_response() -> tuple[list[str], str]:
     return ([], "2023-08-31")
 

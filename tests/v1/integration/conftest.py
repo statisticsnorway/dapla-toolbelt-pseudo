@@ -2,10 +2,10 @@ import os
 import subprocess
 from collections.abc import Generator
 
-import pytest_cases
+import pytest
 
 
-@pytest_cases.fixture()
+@pytest.fixture()
 def setup() -> Generator[None, None, None]:
     os.environ["PSEUDO_SERVICE_URL"] = "https://pseudo-service.test.ssb.no"
     # Setup step that runs when integration test are ran on local machine

@@ -1,6 +1,6 @@
 [project]
 name = "dapla-toolbelt-pseudo"
-version = "6.3.1"
+version = "6.3.2"
 description = "Pseudonymization extensions for Dapla"
 authors = [{ name = "Dapla Developers", email = "dapla-platform-developers@ssb.no" }]
 requires-python = ">=3.12,<4.0"
@@ -12,15 +12,14 @@ dependencies = [
     "numpy>=1.26.4",
     "pyhumps>=3.8.0",
     "types-requests>=2.28.11",
-    "pandas-stubs>=1.5.3.230304",
     "puremagic>=1.15",
     "python-ulid>=2.2.0",
     "cryptography>41.0.0",
     "dapla-auth-client>=1.2.1",
+    "google-auth>=2.25.2",
     "fsspec>=2023.5.0",
     "polars>=1.31.0",
     "pygments>2.15.0",
-    "click>=8.0.1",
     "dapla-toolbelt-metadata>=0.19.0,<1.0.0",
     "cloudpathlib[gs]>=0.17.0",
     "pyarrow>=14.0.2",
@@ -29,7 +28,6 @@ dependencies = [
     "msgspec>=0.18.6",
     "aiohttp>=3.10.5",
     "aiohttp-retry>=2.9.1",
-    "pytest-asyncio>=0.24.0",
     "gcsfs>=2025.5.1",
     "deprecated>=1.2.18",
     "types-deprecated>=1.2.15.20250304",
@@ -61,7 +59,6 @@ doc = [
 test = ["typeguard>=2.13.3"]
 dev = [
     "pydantic>=2.12",
-    "pytest-cases>=3.8.5",
     "pytest-mock>=3.14",
     "sphinx>=6.2.1",
     "ipykernel>=6.0.0",
@@ -70,7 +67,7 @@ dev = [
     "nbstripout>=0.6.1",
     "ipython>=8.11.0",
     "jupyterlab>=4.0.0",
-    "google-auth>= 2.25.2",
+    "pytest-asyncio>=0.24.0",
     "pytest-xdist[psutil]>=3.8.0",
     {include-group = "lint"},
     {include-group = "doc"},
@@ -120,7 +117,6 @@ module = [
     'puremagic',
     'google.*',
     'google.oauth2',
-    'pytest_cases',
     'pytest_mock'
 ]
 ignore_missing_imports = true

@@ -3,8 +3,7 @@
 from unittest.mock import Mock
 
 import polars as pl
-import pytest_cases
-from pytest_cases import fixture_ref
+import pytest
 from pytest_mock import MockerFixture
 
 from dapla_pseudo.constants import PseudoOperation
@@ -18,23 +17,22 @@ from dapla_pseudo.v1.models.core import PseudoRule
 PKG = "dapla_pseudo.v1.baseclasses"
 
 
-@pytest_cases.parametrize(
-    "dataset",
-    [
-        fixture_ref("df_personer"),
-        fixture_ref("df_personer_hierarchical"),
-    ],
+@pytest.mark.parametrize(
+    "dataset_fixture",
+    ["df_personer", "df_personer_hierarchical"],
 )
-@pytest_cases.parametrize(
+@pytest.mark.parametrize(
     "pseudo_op",
     PseudoOperation.__members__.values(),  # list of all possible PseudoOperations
 )
 def test_execute_pseudo_operation_field(
     pseudo_op: PseudoOperation,
-    dataset: pl.DataFrame,
+    dataset_fixture: str,
     mocker: MockerFixture,
+    request: pytest.FixtureRequest,
 ) -> None:
     """Purpose: Ensure that supported dataset types are handled and actually perform pseudonymization."""
+    dataset = request.getfixturevalue(dataset_fixture)
     mocker.patch(f"{PKG}.build_pseudo_field_request", return_value=Mock())
     mock_pseudo_field = mocker.patch(
         f"{PKG}._BasePseudonymizer._pseudonymize_field", return_value=Mock()
