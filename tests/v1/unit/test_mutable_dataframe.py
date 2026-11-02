@@ -60,7 +60,6 @@ def test_update_list_column() -> None:
     assert matched_field.col == [
         "Danna",
         "Mike",
-        None,
         "Daniel",
         "Preston",
         "Lena",
@@ -70,6 +69,35 @@ def test_update_list_column() -> None:
     mutable_df.update("kids", pseudonymized_data)
     assert isinstance(mutable_df.dataset, pl.DataFrame)
     assert_frame_equal(mutable_df.dataset, expected_df)
+
+
+def test_update_list_column_leading_empty_list() -> None:
+    """An empty list must not shift pseudonymized values into the wrong row.
+
+    Flattening must not add a placeholder for the empty list, since rebuilding
+    reads zero values back for it. Otherwise ["a"] would come back as [None].
+    """
+    df = pl.DataFrame({"kids": [[], ["a"]]})
+    mutable_df = MutableDataFrame(df, hierarchical=False)
+    mutable_df.match_rules(
+        [
+            PseudoRule(
+                pattern="kids",
+                func=PseudoFunction(
+                    function_type=PseudoFunctionTypes.DAEAD,
+                    kwargs=DaeadKeywordArgs(),
+                ),
+            )
+        ],
+        None,
+    )
+    matched_field = mutable_df.matched_fields.get("0")
+    assert matched_field is not None
+    assert matched_field.col == ["a"]
+
+    mutable_df.update("kids", ["aPseudo"])
+    assert isinstance(mutable_df.dataset, pl.DataFrame)
+    assert_frame_equal(mutable_df.dataset, pl.DataFrame({"kids": [[], ["aPseudo"]]}))
 
 
 def test_match_dataframe_dict_for_repseudo() -> None:
