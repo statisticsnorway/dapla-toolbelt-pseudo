@@ -86,7 +86,7 @@ class MutableDataFrame:
 
             def flatten_list_column(name: str, column: pl.Series) -> list[Any]:
                 self.list_columns_item_sizes[name] = column.list.len().to_list()
-                return column.explode().to_list()
+                return column.explode(empty_as_null=True).to_list()
 
             def extract_column_data(
                 pattern: str, dataset: pl.DataFrame | pl.LazyFrame
