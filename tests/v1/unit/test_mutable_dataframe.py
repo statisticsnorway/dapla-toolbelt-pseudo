@@ -72,6 +72,11 @@ def test_update_list_column() -> None:
 
 
 def test_update_list_column_leading_empty_list() -> None:
+    """An empty list must not shift pseudonymized values into the wrong row.
+
+    Flattening must not add a placeholder for the empty list, since rebuilding
+    reads zero values back for it. Otherwise ["a"] would come back as [None].
+    """
     df = pl.DataFrame({"kids": [[], ["a"]]})
     mutable_df = MutableDataFrame(df, hierarchical=False)
     mutable_df.match_rules(
