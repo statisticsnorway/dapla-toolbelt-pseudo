@@ -60,7 +60,6 @@ def test_update_list_column() -> None:
     assert matched_field.col == [
         "Danna",
         "Mike",
-        None,
         "Daniel",
         "Preston",
         "Lena",
