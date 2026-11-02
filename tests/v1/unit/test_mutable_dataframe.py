@@ -71,6 +71,30 @@ def test_update_list_column() -> None:
     assert_frame_equal(mutable_df.dataset, expected_df)
 
 
+def test_update_list_column_leading_empty_list() -> None:
+    df = pl.DataFrame({"kids": [[], ["a"]]})
+    mutable_df = MutableDataFrame(df, hierarchical=False)
+    mutable_df.match_rules(
+        [
+            PseudoRule(
+                pattern="kids",
+                func=PseudoFunction(
+                    function_type=PseudoFunctionTypes.DAEAD,
+                    kwargs=DaeadKeywordArgs(),
+                ),
+            )
+        ],
+        None,
+    )
+    matched_field = mutable_df.matched_fields.get("0")
+    assert matched_field is not None
+    assert matched_field.col == ["a"]
+
+    mutable_df.update("kids", ["aPseudo"])
+    assert isinstance(mutable_df.dataset, pl.DataFrame)
+    assert_frame_equal(mutable_df.dataset, pl.DataFrame({"kids": [[], ["aPseudo"]]}))
+
+
 def test_match_dataframe_dict_for_repseudo() -> None:
     data = [{"foo": "bar"}]
     source_rules = [
