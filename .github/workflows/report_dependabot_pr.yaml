@@ -10,39 +10,6 @@ permissions:
 
 jobs:
   report:
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Send Dependabot pull request to Slack
-        if: steps.metadata.outputs.package-ecosystem != 'github_actions'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          REPOSITORY: ${{ github.repository }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-        with:
-          script: |
-            const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                blocks: [{
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: `*${process.env.REPOSITORY}*:\n<${process.env.PR_URL}|${process.env.PR_TITLE}>`,
-                  },
-                }],
-              }),
-            });
-
-            if (!response.ok) {
-              throw new Error(`Slack returned ${response.status}: ${await response.text()}`);
-            }
+    uses: statisticsnorway/dapla-stat-system/.github/workflows/report_dependabot_pr.yaml@main
+    secrets:
+      slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
