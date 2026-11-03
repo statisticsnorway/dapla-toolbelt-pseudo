@@ -1,7 +1,7 @@
 name: Report Dependabot pull request
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 permissions:
@@ -37,7 +37,7 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: `*${process.env.REPOSITORY}*:\n<${process.env.PR_URL}|${process.env.PR_TITLE}>`,
+                    text: `*${process.env.REPOSITORY}*:\n<${process.env.PR_URL}|${process.env.PR_TITLE}>`, 
                   },
                 }],
               }),
