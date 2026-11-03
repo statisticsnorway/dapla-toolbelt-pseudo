@@ -874,7 +874,7 @@ wheels = [
 
 [[package]]
 name = "dapla-toolbelt-pseudo"
-version = "6.3.3"
+version = "7.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
